@@ -1,0 +1,20 @@
+# Godot 4: Import-Cache und lokale Editor-Daten (inkl. export_credentials.cfg)
+.godot/
+/android/
+
+# Build-Ausgaben (iOS-Export / Xcode-Projekt)
+exports/
+build/
+
+# Signierung und Geheimnisse – niemals committen
+*.mobileprovision
+*.p12
+*.cer
+*.certSigningRequest
+.env
+.env.*
+
+# System / temporär
+.DS_Store
+*.tmp
+*.log
