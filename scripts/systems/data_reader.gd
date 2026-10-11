@@ -5,6 +5,7 @@ extends RefCounted
 ## damit alle Probleme einer Datei auf einmal sichtbar sind.
 
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
+const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
 var errors: PackedStringArray = []
 
@@ -56,12 +57,12 @@ func int_field(entry: Dictionary, field: String, where: String, required: bool, 
 	return int(value)
 
 
-## Optionales "effects"-Objekt, nur Schlüssel aus PlayerStats.KEYS mit ganzen Zahlen.
-func effects_field(entry: Dictionary, where: String) -> Dictionary:
+## Optionales Effekte-Objekt, nur Schlüssel aus PlayerStats.KEYS mit ganzen Zahlen.
+func effects_field(entry: Dictionary, where: String, field: String = "effects") -> Dictionary:
 	var result := {}
-	var effects: Variant = entry.get("effects", {})
+	var effects: Variant = entry.get(field, {})
 	if typeof(effects) != TYPE_DICTIONARY:
-		errors.append("%s: 'effects' muss ein Objekt sein." % where)
+		errors.append("%s: '%s' muss ein Objekt sein." % [where, field])
 		return result
 	for key in effects:
 		if key not in PlayerStatsScript.KEYS:
@@ -71,6 +72,27 @@ func effects_field(entry: Dictionary, where: String) -> Dictionary:
 		else:
 			result[key] = int(effects[key])
 	return result
+
+
+## Zeitpunkt {day >= 1, hour 0–23, minute 0–59 (optional)} als kanonische Minuten,
+## oder -1 mit Fehler.
+func time_point_field(entry: Dictionary, field: String, where: String) -> int:
+	var point: Variant = entry.get(field)
+	if typeof(point) != TYPE_DICTIONARY:
+		errors.append("%s: '%s' fehlt oder ist kein Objekt." % [where, field])
+		return -1
+	var context := "%s (%s)" % [where, field]
+	var error_count := errors.size()
+	var day := int_field(point, "day", context, true)
+	var hour := int_field(point, "hour", context, true)
+	var minute := int_field(point, "minute", context, false)
+	if errors.size() != error_count:
+		return -1
+	if day < 1 or hour < 0 or hour >= TimeSystemScript.HOURS_PER_DAY \
+			or minute < 0 or minute >= TimeSystemScript.MINUTES_PER_HOUR:
+		errors.append("%s: '%s' ungültig (day ab 1, hour 0–23, minute 0–59)." % [where, field])
+		return -1
+	return TimeSystemScript.at(day, hour, minute)
 
 
 ## Prüft die Regel "category ist Pflicht, wenn money_cents gesetzt ist".

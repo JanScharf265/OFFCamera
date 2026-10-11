@@ -86,7 +86,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> EventDefini
 	definition.title = reader.string_field(entry, "title", where, true)
 	definition.text = reader.string_field(entry, "text", where, true)
 	definition.priority = reader.int_field(entry, "priority", where, false)
-	definition.due_minutes = _parse_trigger(reader, entry.get("trigger"), where)
+	definition.due_minutes = reader.time_point_field(entry, "trigger", where)
 
 	var options: Variant = entry.get("options")
 	if typeof(options) != TYPE_ARRAY or options.is_empty():
@@ -102,20 +102,6 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> EventDefini
 			definition.options.append(option)
 
 	return definition if reader.errors.size() == error_count else null
-
-
-func _parse_trigger(reader: DataReaderScript, trigger: Variant, where: String) -> int:
-	if typeof(trigger) != TYPE_DICTIONARY:
-		reader.errors.append("%s: 'trigger' fehlt oder ist kein Objekt." % where)
-		return 0
-	var day := reader.int_field(trigger, "day", where + " (trigger)", true)
-	var hour := reader.int_field(trigger, "hour", where + " (trigger)", true)
-	var minute := reader.int_field(trigger, "minute", where + " (trigger)", false)
-	if day < 1 or hour < 0 or hour >= TimeSystemScript.HOURS_PER_DAY \
-			or minute < 0 or minute >= TimeSystemScript.MINUTES_PER_HOUR:
-		reader.errors.append("%s: 'trigger' ungültig (day ab 1, hour 0–23, minute 0–59)." % where)
-		return 0
-	return TimeSystemScript.at(day, hour, minute)
 
 
 func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> EventOptionScript:

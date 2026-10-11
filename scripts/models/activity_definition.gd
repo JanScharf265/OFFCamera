@@ -7,6 +7,8 @@ extends RefCounted
 var id: String
 var display_name: String
 var description: String
+## ID des Ortes, an dem die Aktivität stattfindet.
+var location: String
 var duration_minutes: int
 ## Einnahme > 0, Ausgabe < 0, 0 = keine Buchung.
 var money_cents: int

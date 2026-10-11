@@ -64,6 +64,15 @@ func get_definition(id: String) -> ActivityDefinitionScript:
 	return _by_id.get(id)
 
 
+## IDs aller Aktivitäten an einem Ort, in der Reihenfolge der Datei.
+func get_ids_at(location_id: String) -> PackedStringArray:
+	var result := PackedStringArray()
+	for id in _ids:
+		if _by_id[id].location == location_id:
+			result.append(id)
+	return result
+
+
 ## IDs in der Reihenfolge der Datei.
 func get_ids() -> PackedStringArray:
 	return _ids.duplicate()
@@ -85,6 +94,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> ActivityDef
 	definition.id = id
 	definition.display_name = reader.string_field(entry, "display_name", where, true)
 	definition.description = reader.string_field(entry, "description", where, false)
+	definition.location = reader.string_field(entry, "location", where, true)
 	definition.category = reader.string_field(entry, "category", where, false)
 	definition.duration_minutes = reader.int_field(entry, "duration_minutes", where, true)
 	definition.money_cents = reader.int_field(entry, "money_cents", where, false)
