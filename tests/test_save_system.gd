@@ -1,32 +1,28 @@
 extends "res://tests/base_test.gd"
 
+const Helpers := preload("res://tests/helpers.gd")
 const GameStateScript := preload("res://scripts/core/game_state.gd")
-const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
-const EventCatalogScript := preload("res://scripts/systems/event_catalog.gd")
+const GameDataScript := preload("res://scripts/core/game_data.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
 const PATH := "user://test_savegame.json"
 
-var _activities: ActivityCatalogScript
-var _events: EventCatalogScript
+var _data: GameDataScript
 
 
 func _init() -> void:
 	SaveSystemScript.delete_save(PATH)
-	_activities = ActivityCatalogScript.new()
-	_activities.load_file()
-	_events = EventCatalogScript.new()
-	_events.load_file()
+	_data = Helpers.game_data()
 
 
 func _new_game() -> GameStateScript:
-	return GameStateScript.new(_activities, _events)
+	return GameStateScript.new(_data)
 
 
 func _load() -> Dictionary:
-	return SaveSystemScript.load_game(_activities, _events, PATH)
+	return SaveSystemScript.load_game(_data, PATH)
 
 
 func _write(text: String, path: String = PATH) -> void:
@@ -38,9 +34,11 @@ func _write(text: String, path: String = PATH) -> void:
 ## Spielt bis nach dem ersten Ereignis (20:00) und entscheidet "accept".
 func _played_game() -> GameStateScript:
 	var game := _new_game()
-	game.activities.start("stream_short")  # 08 -> 10, +25 €
-	game.activities.start("eat_out")       # 10 -> 11, -15 €
-	game.time.advance(9 * 60)              # 11 -> 20, Ereignis fällig
+	game.locations.travel("studio")        # 08:00 -> 08:20
+	game.activities.start("stream_short")  # -> 10:20, +25 €
+	game.locations.travel("cafe_harbor")   # -> 10:40
+	game.activities.start("eat_out")       # -> 11:40, -15 €
+	game.time.advance(TimeSystemScript.at(1, 20) - game.time.get_minutes())  # Termin 14:00 verpasst, Ereignis fällig
 	game.events.resolve("first_brand_request", "accept")  # +30 €
 	return game
 
@@ -66,6 +64,9 @@ func test_round_trip_restores_everything() -> void:
 	assert_eq(loaded.ledger.recalculate_balance(), loaded.ledger.get_balance())
 	assert_eq(loaded.ledger.to_dict(), original.ledger.to_dict())
 	assert_eq(loaded.stats.to_dict(), original.stats.to_dict())
+	assert_eq(loaded.locations.get_current(), "cafe_harbor")
+	assert_eq(loaded.appointments.is_missed("camera_meeting"), true)
+	assert_eq(loaded.appointments.to_dict(), original.appointments.to_dict())
 	assert_eq(loaded.events.is_resolved("first_brand_request"), true)
 	assert_eq(loaded.events.has_pending(), false)
 	assert_eq(result["from_backup"], false)
@@ -162,6 +163,11 @@ func test_invalid_values_are_rejected() -> void:
 		"next_number": func(d: Dictionary) -> void: d["game"]["ledger"]["next_number"] = 1,
 		"pending": func(d: Dictionary) -> void: d["game"]["events"]["pending"] = ["unknown_but_not_triggered"],
 		"missing_ledger": func(d: Dictionary) -> void: d["game"].erase("ledger"),
+		"missing_location": func(d: Dictionary) -> void: d["game"].erase("location"),
+		"location_type": func(d: Dictionary) -> void: d["game"]["location"]["current"] = 5,
+		"missing_appointments": func(d: Dictionary) -> void: d["game"].erase("appointments"),
+		"appointment_both": func(d: Dictionary) -> void: d["game"]["appointments"]["attended"] = ["camera_meeting"],
+		"appointment_since": func(d: Dictionary) -> void: d["game"]["appointments"]["since_minutes"] = -1,
 	}
 	for name in cases:
 		var data := {"version": SaveSystemScript.SAVE_VERSION, "game": _played_game().to_dict()}
@@ -182,3 +188,65 @@ func test_delete_save_removes_all_files() -> void:
 	SaveSystemScript.delete_save(PATH)
 	assert_eq(SaveSystemScript.has_save(PATH), false)
 	assert_eq(FileAccess.file_exists(PATH + ".bak"), false)
+
+
+## Spielstand im Format von Version 1 (Phase 1): ohne Ort und Termine.
+func _version_1_text(minutes: int) -> String:
+	var game := _new_game().to_dict()
+	game.erase("location")
+	game.erase("appointments")
+	game["time"]["minutes"] = minutes
+	return JSON.stringify({"version": 1, "game": game})
+
+
+func test_save_file_has_version_2_with_location_and_appointments() -> void:
+	SaveSystemScript.save(_new_game(), PATH)
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	assert_eq(int(data["version"]), 2)
+	assert_eq(data["game"]["location"], {"current": "home"})
+	assert_eq(int(data["game"]["appointments"]["since_minutes"]), TimeSystemScript.at(1, 8))
+
+
+func test_version_1_is_migrated_to_home_without_penalties() -> void:
+	_write(_version_1_text(TimeSystemScript.at(1, 15)))  # nach dem Termin um 14:00
+	var result := _load()
+	var loaded: GameStateScript = result["game"]
+	assert_true(loaded != null, "Migration fehlgeschlagen: %s" % result["error"])
+	if loaded == null:
+		return
+	assert_eq(loaded.locations.get_current(), "home")
+	assert_eq(loaded.time.format_clock(), "15:00")
+	# Der Termin von 14:00 lag vor dem Laden: entfällt ohne Strafe.
+	assert_eq(loaded.appointments.is_open("camera_meeting"), false)
+	var mood := loaded.stats.mood
+	loaded.activities.start("rest")
+	assert_eq(loaded.appointments.is_missed("camera_meeting"), false)
+	assert_eq(loaded.stats.mood, mood + 3)
+	# Spätere Termine gelten normal.
+	assert_eq(loaded.appointments.is_open("gym_trial"), true)
+
+
+func test_migrated_save_is_written_as_version_2() -> void:
+	_write(_version_1_text(TimeSystemScript.at(1, 9)))
+	var loaded: GameStateScript = _load()["game"]
+	SaveSystemScript.save(loaded, PATH)
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	assert_eq(int(data["version"]), SaveSystemScript.SAVE_VERSION)
+	assert_eq(loaded.appointments.is_open("camera_meeting"), true)
+
+
+func test_version_1_without_time_is_rejected() -> void:
+	_write(JSON.stringify({"version": 1, "game": {"ledger": {}}}))
+	var result := _load()
+	assert_true(result["game"] == null, "kaputter v1-Stand darf nicht laden")
+	assert_true("umgewandelt" in result["error"], result["error"])
+
+
+func test_unknown_location_falls_back_to_home() -> void:
+	var data := {"version": SaveSystemScript.SAVE_VERSION, "game": _new_game().to_dict()}
+	data["game"]["location"]["current"] = "abgerissen"
+	_write(JSON.stringify(data))
+	var loaded: GameStateScript = _load()["game"]
+	assert_true(loaded != null, "unbekannter Ort sollte nicht abbrechen")
+	if loaded != null:
+		assert_eq(loaded.locations.get_current(), "home")

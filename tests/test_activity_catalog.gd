@@ -4,14 +4,15 @@ const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.g
 
 
 func _valid(id: String = "rest") -> Dictionary:
-	return {"id": id, "display_name": "Ausruhen", "duration_minutes": 60, "effects": {"energy": 15}}
+	return {"id": id, "display_name": "Ausruhen", "location": "home", "duration_minutes": 60, "effects": {"energy": 15}}
 
 
 func test_real_data_file_loads_without_errors() -> void:
 	var catalog := ActivityCatalogScript.new()
 	var ok := catalog.load_file()
 	assert_true(ok, "Fehler: %s" % "; ".join(catalog.errors))
-	assert_eq(catalog.get_ids(), PackedStringArray(["stream_short", "rest", "eat_out"]))
+	assert_eq(catalog.get_ids(), PackedStringArray(["stream_short", "rest", "sleep", "eat_out", "coffee", "training", "plan_week"]))
+	assert_eq(catalog.get_ids_at("cafe_harbor"), PackedStringArray(["eat_out", "coffee"]))
 
 
 func test_json_numbers_become_ints() -> void:
@@ -44,15 +45,16 @@ func test_duplicate_ids_are_rejected() -> void:
 func test_invalid_fields_are_all_reported() -> void:
 	var catalog := ActivityCatalogScript.new()
 	var data := [
-		{"id": "Bad-ID", "display_name": "x", "duration_minutes": 10},
-		{"id": "no_name", "duration_minutes": 10},
-		{"id": "zero_duration", "display_name": "x", "duration_minutes": 0},
-		{"id": "fraction", "display_name": "x", "duration_minutes": 1.5},
-		{"id": "money_no_category", "display_name": "x", "duration_minutes": 10, "money_cents": -100},
-		{"id": "bad_effect", "display_name": "x", "duration_minutes": 10, "effects": {"health": 5}},
+		{"id": "Bad-ID", "display_name": "x", "location": "home", "duration_minutes": 10},
+		{"id": "no_name", "location": "home", "duration_minutes": 10},
+		{"id": "zero_duration", "display_name": "x", "location": "home", "duration_minutes": 0},
+		{"id": "fraction", "display_name": "x", "location": "home", "duration_minutes": 1.5},
+		{"id": "money_no_category", "display_name": "x", "location": "home", "duration_minutes": 10, "money_cents": -100},
+		{"id": "bad_effect", "display_name": "x", "location": "home", "duration_minutes": 10, "effects": {"health": 5}},
+		{"id": "no_location", "display_name": "x", "duration_minutes": 10},
 	]
 	assert_eq(catalog.load_data(data), false)
-	assert_eq(catalog.errors.size(), 6, "; ".join(catalog.errors))
+	assert_eq(catalog.errors.size(), 7, "; ".join(catalog.errors))
 
 
 func test_one_error_loads_nothing() -> void:
@@ -66,3 +68,15 @@ func test_unknown_id_returns_null() -> void:
 	var catalog := ActivityCatalogScript.new()
 	catalog.load_data([_valid("rest")])
 	assert_true(catalog.get_definition("fly") == null)
+
+
+func test_new_activities_have_expected_values() -> void:
+	var catalog := ActivityCatalogScript.new()
+	catalog.load_file()
+	var sleep := catalog.get_definition("sleep")
+	assert_eq(sleep.duration_minutes, 480)
+	assert_eq(sleep.get_effect("energy"), 60)
+	assert_eq(sleep.location, "home")
+	assert_eq(catalog.get_definition("coffee").location, "cafe_harbor")
+	assert_eq(catalog.get_definition("training").location, "gym")
+	assert_eq(catalog.get_definition("plan_week").location, "office")

@@ -28,3 +28,26 @@ Ein Spielstand, lokal unter `user://savegame.json`, als lesbares JSON mit Versio
 Atomar über `.tmp` + Umbenennen, der vorherige Stand bleibt als `.bak`. Kein Cloud-Sync.
 JSON statt Godot-Ressourcen, weil es lesbar, robust gegen Code-Änderungen und leicht zu prüfen ist.
 Mehrere Spielstände sind (noch) nicht vorgesehen.
+
+## 007 – Karte und Reisezeit
+Kartenpositionen sind 0–1; die Karte steht für 8 km × 8 km (`LocationSystem.MAP_SIZE_KM`).
+Entfernung = Luftlinie, gerundet auf 100 m; danach wird nur mit ganzen Zahlen gerechnet, damit
+Reisezeiten auf jedem Gerät identisch sind. Fahrten kosten (noch) kein Geld und keine Energie.
+Fahren ist jederzeit möglich, auch zu geschlossenen Orten; Aktivitäten dort sind dann gesperrt.
+
+## 008 – Öffnungszeiten
+Volle Stunden, `open < close ≤ 24`, keine Öffnung über Mitternacht. Eine Aktivität muss im Öffnungsfenster
+beginnen und bis Ladenschluss enden. Orte ohne `opening_hours` sind immer geöffnet.
+
+## 009 – Termine
+Wahrnehmen nur vor Ort, frühestens 1 h vor Beginn, spätestens zum Beginn; wer früher da ist, wartet bis
+zum Beginn. Nach Beginn gilt ein Termin beim nächsten Zeitfortschritt als verpasst (Strafe genau einmal,
+gespeichert). Jeder Termin braucht in den Daten einen negativen `missed_effects.mood`.
+Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslaufen → Warnung, zweiter Tipp
+führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
+Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
+
+## 010 – Migration Version 1 → 2
+Ein Spielstand aus Phase 1 beginnt in der Wohnung; `since_minutes` = gespeicherte Spielzeit.
+Ein gespeicherter Ort, den es in den Daten nicht mehr gibt, fällt auf die Wohnung zurück statt den
+Spielstand abzulehnen.

@@ -7,7 +7,7 @@ extends RefCounted
 ##   id, title, description (optional), location (Orts-ID),
 ##   start {day, hour, minute?}, duration_minutes (> 0),
 ##   money_cents/category/effects (optional, beim Wahrnehmen),
-##   missed_effects (optional, beim Verpassen)
+##   missed_effects (Pflicht, mit negativem "mood": verpasst kostet Stimmung)
 
 const AppointmentDefinitionScript := preload("res://scripts/models/appointment_definition.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -95,6 +95,8 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> Appointment
 
 	if definition.duration_minutes <= 0 and DataReaderScript.is_whole_number(entry.get("duration_minutes")):
 		reader.errors.append("%s: 'duration_minutes' muss größer als 0 sein." % where)
+	if reader.errors.size() == error_count and definition.missed_effects.get("mood", 0) >= 0:
+		reader.errors.append("%s: 'missed_effects' braucht einen negativen Wert für 'mood' (verpasst kostet Stimmung)." % where)
 	reader.check_money_category(definition.money_cents, definition.category, where)
 
 	return definition if reader.errors.size() == error_count else null
