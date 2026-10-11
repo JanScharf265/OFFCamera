@@ -3,6 +3,7 @@
 ## Unveröffentlicht – Phase 1
 - TimeSystem: kanonische Spielzeit in Minuten, Tageswechsel, Wochentage (Ticket 1)
 - Eigener Test-Runner, Tests vom iOS-Export ausgeschlossen
+- LedgerSystem: Buchungen in Cent, Kontostand nur über Buchungen, Schutz vor Doppelbuchung und Überziehung (Ticket 2)
 
 ## 0.0.1 – Phase 0
 - Godot-4-Grundprojekt (Hochformat, GL Compatibility, 720×1280)

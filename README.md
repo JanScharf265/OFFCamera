@@ -91,7 +91,8 @@ Am Ende steht `N bestanden, M fehlgeschlagen`. ERROR-Zeilen direkt nach
 ```
 project.godot        Projektkonfiguration (Hochformat, GL-Compatibility-Renderer)
 scenes/app/          App-Szenen (aktuell: Startbildschirm)
-scripts/systems/     Spielsysteme (Zeit, später Ledger, Events, …)
+scripts/systems/     Spielsysteme (Zeit, Ledger, später Events, …)
+scripts/models/      Datenmodelle (z. B. Buchung)
 scripts/ui/          UI-Skripte (zeigen nur an, keine Spielregeln)
 tests/               Tests + Runner (nicht im iOS-Export)
 docs/                Roadmap, Architektur, Entscheidungen

@@ -17,8 +17,8 @@ Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und 
 Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, Energie, Stimmung),
 2–4 Aktivitäten, zentrales TimeSystem, zentrales Ledger, ein Ereignis, Speichern/Laden, Fehler- und Leerzustände.
 
-- [ ] Ticket 1: TimeSystem + Test-Runner (Code fertig, Testlauf auf dem Mac ausstehend)
-- [ ] Ticket 2: LedgerSystem
+- [x] Ticket 1: TimeSystem + Test-Runner (12/12 Tests grün auf dem Mac)
+- [ ] Ticket 2: LedgerSystem (Code fertig, Testlauf auf dem Mac ausstehend)
 - [ ] Ticket 3: GameState + ActivitySystem (Aktivitäten als Daten)
 - [ ] Ticket 4: Hauptmenü + HUD (danach iPhone-Test)
 - [ ] Ticket 5: EventSystem (ein Ereignis, genau einmal)
