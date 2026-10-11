@@ -17,7 +17,7 @@ Kein App Store, kein Android, offline spielbar.
 
 | Tool | Version |
 | --- | --- |
-| Godot | 4.5.1.stable |
+| Godot | 4.7.2.stable |
 | Xcode | 27.0 (27A266a) |
 | macOS | _bitte eintragen_ |
 | Test-iPhone | _Modell + iOS-Version eintragen_ |

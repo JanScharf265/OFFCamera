@@ -5,8 +5,9 @@ Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und 
 ## Phase 0 – Projektgrundlage und iPhone-Export ← aktuell
 - [x] Godot-Projekt, `.gitignore`, README, Roadmap, Architektur-Notizen
 - [x] Minimaler Startbildschirm
-- [x] Projekt öffnet in Godot ohne Fehler, Startszene läuft (Godot 4.5.1, Mac)
-- [ ] iOS-Exportvorlagen + Export-Preset
+- [x] Projekt öffnet in Godot ohne Fehler, Startszene läuft (Godot 4.7.2, Mac)
+- [x] iOS-Exportvorlagen (4.7.2)
+- [ ] iOS-Export-Preset
 - [ ] Export nach Xcode, Build erfolgreich
 - [ ] App startet auf dem iPhone
 - [ ] Commit markiert funktionierenden Ausgangsstand, Versionen im README eingetragen
