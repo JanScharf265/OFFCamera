@@ -1,6 +1,6 @@
 # Changelog
 
-## Unveröffentlicht – Grafik-Ticket G1
+## Unveröffentlicht – Grafik-Ticket G1 (iPhone-Abnahme ok, 11.10.2026)
 - Isometrische Stadtkarte im Stil eines Städtebauspiels: Straßen, Promenade, Strand, Meer, Bäume, Füllbebauung
 - Eigene Gebäude für Wohnung, Studio, Café am Hafen, Fitnessstudio und Büro, mit antippbaren Namensschildern
 - Wippende Standortmarkierung, Route zum ausgewählten Ort, Taxi fährt beim Reisen zum Ziel

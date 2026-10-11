@@ -64,7 +64,7 @@ Abnahme auf dem iPhone:
 - [x] Spielstand aus Phase 1 lässt sich fortsetzen (Ort Wohnung, gleiche Zeit/Geld/Buchungen)
 - [x] Karte und Listen per Touch scrollbar, nichts verdeckt
 
-## Grafik-Ticket G1 – Isometrische Stadtansicht ← in Abnahme
+## Grafik-Ticket G1 – Isometrische Stadtansicht ✅ (11.10.2026)
 Auf Wunsch des Game Directors vor Phase 3: Stadtkarte im Stil eines Städtebauspiels
 (isometrisch, schräg von oben) mit Meer, Straßen und erkennbaren Gebäuden für die fünf Orte,
 Standortmarkierung und Fahrzeug beim Reisen. Nur Darstellung – Spiellogik und Tests bleiben unverändert.
@@ -78,11 +78,12 @@ Grafiken aus frei nutzbaren (CC0) Asset-Paketen, später austauschbar.
 - [x] Wischen auf der Karte verschiebt nur die Karte (520 px hoch); Seite scrollt außerhalb
 - [x] Automatische Tests (137/137 grün, Godot 4.7.2 headless); Spiellogik unverändert
 - [x] Screenshots aus einem Fensterlauf auf dem Mac geprüft (Karte, Route, Fahrt, Strand)
-- [ ] Im Editor durchgespielt (Wischen mit der Maus, Tippen auf Gebäude/Schilder)
-- [ ] iPhone-Abnahme: Wischen flüssig, Tippen trifft, Seite scrollt außerhalb der Karte, Notch/Home-Balken frei
+- [x] Im Editor durchgespielt (Wischen mit der Maus, Tippen auf Gebäude/Schilder)
+- [x] iPhone-Abnahme: Wischen flüssig, Tippen trifft, Seite scrollt außerhalb der Karte, Notch/Home-Balken frei
+
+## Phase 3 – Streamer-/Creator-Karriere ← als Nächstes
 
 ## Spätere Phasen
-3. Streamer-/Creator-Karriere
 4. Fiktionales Unternehmen und zweiter Standort
 5. Finanzen, Fristen, Behördenereignisse
 6. Save/Load-Stabilisierung und Migration
