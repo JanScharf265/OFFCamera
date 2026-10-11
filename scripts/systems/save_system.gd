@@ -14,11 +14,10 @@ extends RefCounted
 ## Spielstände aus einer neueren Version werden abgelehnt.
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
-const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
-const EventCatalogScript := preload("res://scripts/systems/event_catalog.gd")
+const GameDataScript := preload("res://scripts/core/game_data.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const DEFAULT_PATH := "user://savegame.json"
 
 
@@ -48,18 +47,17 @@ static func has_save(path: String = DEFAULT_PATH) -> bool:
 
 ## Ergebnis: {"game": GameState oder null, "error": String, "from_backup": bool}
 ## game == null und error == "" bedeutet: Es gibt keinen Spielstand.
-static func load_game(activity_catalog: ActivityCatalogScript, event_catalog: EventCatalogScript,
-		path: String = DEFAULT_PATH) -> Dictionary:
+static func load_game(game_data: GameDataScript, path: String = DEFAULT_PATH) -> Dictionary:
 	var main_error := ""
 	if FileAccess.file_exists(path):
-		var main := _load_file(path, activity_catalog, event_catalog)
+		var main := _load_file(path, game_data)
 		if main["game"] != null:
 			return main
 		main_error = main["error"]
 
 	var backup_path := path + ".bak"
 	if FileAccess.file_exists(backup_path):
-		var backup := _load_file(backup_path, activity_catalog, event_catalog)
+		var backup := _load_file(backup_path, game_data)
 		if backup["game"] != null:
 			backup["from_backup"] = true
 			backup["error"] = main_error
@@ -77,8 +75,7 @@ static func delete_save(path: String = DEFAULT_PATH) -> void:
 			DirAccess.remove_absolute(file_path)
 
 
-static func _load_file(path: String, activity_catalog: ActivityCatalogScript,
-		event_catalog: EventCatalogScript) -> Dictionary:
+static func _load_file(path: String, game_data: GameDataScript) -> Dictionary:
 	var failed := func(message: String) -> Dictionary:
 		return {"game": null, "error": message, "from_backup": false}
 
@@ -97,17 +94,38 @@ static func _load_file(path: String, activity_catalog: ActivityCatalogScript,
 		return failed.call("Der Spielstand hat keine gültige Versionsnummer.")
 	if int(version) > SAVE_VERSION:
 		return failed.call("Der Spielstand stammt aus einer neueren Spielversion (%d) und kann nicht geladen werden." % int(version))
-	data = _migrate(data, int(version))
-
 	if typeof(data.get("game")) != TYPE_DICTIONARY:
 		return failed.call("Der Spielstand enthält keine Spieldaten.")
-	var game := GameStateScript.new(activity_catalog, event_catalog)
+	var migration_error := _migrate(data, int(version))
+	if not migration_error.is_empty():
+		return failed.call("Der Spielstand konnte nicht umgewandelt werden: %s" % migration_error)
+
+	var game := GameStateScript.new(game_data)
 	var error := game.restore(data["game"])
 	if not error.is_empty():
 		return failed.call("Der Spielstand ist ungültig: %s" % error)
 	return {"game": game, "error": "", "from_backup": false}
 
 
-## Hebt ältere Formate schrittweise auf SAVE_VERSION an. Version 1 ist aktuell.
-static func _migrate(data: Dictionary, _version: int) -> Dictionary:
-	return data
+## Hebt ältere Formate schrittweise auf SAVE_VERSION an (ändert `data` direkt).
+## "" = ok, sonst Fehlertext.
+static func _migrate(data: Dictionary, version: int) -> String:
+	if version < 2:
+		var error := _migrate_1_to_2(data["game"])
+		if not error.is_empty():
+			return error
+	data["version"] = SAVE_VERSION
+	return ""
+
+
+## Version 2 (Phase 2): Ort und Termine kommen dazu. Ein alter Spielstand beginnt
+## in der Wohnung; Termine, die vor dem Ladezeitpunkt lagen, entfallen ohne Strafe.
+static func _migrate_1_to_2(game: Dictionary) -> String:
+	var time: Variant = game.get("time")
+	if typeof(time) != TYPE_DICTIONARY or not DataReaderScript.is_whole_number(time.get("minutes")):
+		return "Zeit fehlt."
+	game["location"] = {"current": GameDataScript.START_LOCATION}
+	game["appointments"] = {"since_minutes": int(time["minutes"]), "attended": [], "missed": []}
+	if not game.has("events"):
+		game["events"] = {}
+	return ""

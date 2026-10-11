@@ -8,8 +8,7 @@ extends Control
 ## Hintergrund geht oder geschlossen wird (iOS kann eine App jederzeit beenden).
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
-const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
-const EventCatalogScript := preload("res://scripts/systems/event_catalog.gd")
+const GameDataScript := preload("res://scripts/core/game_data.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
 const MainMenuScript := preload("res://scripts/ui/main_menu.gd")
 const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
@@ -21,8 +20,7 @@ var save_path := SaveSystemScript.DEFAULT_PATH
 ## Laufende Sitzung oder null, solange kein Spiel gestartet/geladen wurde.
 var game: GameStateScript
 
-var _catalog: ActivityCatalogScript
-var _event_catalog: EventCatalogScript
+var _data: GameDataScript
 var _safe_area: MarginContainer
 var _screen: Control
 
@@ -41,15 +39,9 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_update_safe_area)
 	_update_safe_area()
 
-	_catalog = ActivityCatalogScript.new()
-	_event_catalog = EventCatalogScript.new()
-	var errors := PackedStringArray()
-	if not _catalog.load_file():
-		errors.append_array(_catalog.errors)
-	if not _event_catalog.load_file():
-		errors.append_array(_event_catalog.errors)
-	if not errors.is_empty():
-		_show_error("Die Spieldaten konnten nicht geladen werden:\n\n" + "\n".join(errors))
+	_data = GameDataScript.new()
+	if not _data.load_all():
+		_show_error("Die Spieldaten konnten nicht geladen werden:\n\n" + "\n".join(_data.errors))
 		return
 	show_main_menu()
 
@@ -72,7 +64,7 @@ func show_main_menu(message: String = "") -> void:
 
 
 func start_new_game() -> void:
-	game = GameStateScript.new(_catalog, _event_catalog)
+	game = GameStateScript.new(_data)
 	_save_game()
 	show_game()
 
@@ -80,7 +72,7 @@ func start_new_game() -> void:
 ## Setzt die Sitzung im Speicher fort oder lädt den Spielstand.
 func continue_game() -> void:
 	if game == null:
-		var result := SaveSystemScript.load_game(_catalog, _event_catalog, save_path)
+		var result := SaveSystemScript.load_game(_data, save_path)
 		if result["game"] == null:
 			var reason: String = result["error"]
 			show_main_menu(reason if not reason.is_empty() else "Es gibt noch keinen Spielstand.")

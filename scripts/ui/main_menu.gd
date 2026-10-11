@@ -30,7 +30,7 @@ func _ready() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
 
-	var subtitle := UiStyle.label("Prototyp · Phase 1", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+	var subtitle := UiStyle.label("Prototyp · Phase 2", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(subtitle)
 

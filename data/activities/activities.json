@@ -3,6 +3,7 @@
 		"id": "stream_short",
 		"display_name": "Kurzer Stream",
 		"description": "Zwei Stunden live. Kostet Energie, bringt etwas Geld und Laune.",
+		"location": "studio",
 		"duration_minutes": 120,
 		"money_cents": 2500,
 		"category": "creator",
@@ -12,16 +13,52 @@
 		"id": "rest",
 		"display_name": "Ausruhen",
 		"description": "Eine Stunde abschalten.",
+		"location": "home",
 		"duration_minutes": 60,
 		"effects": { "energy": 15, "mood": 3 }
+	},
+	{
+		"id": "sleep",
+		"display_name": "Schlafen",
+		"description": "Acht Stunden Schlaf.",
+		"location": "home",
+		"duration_minutes": 480,
+		"effects": { "energy": 60 }
 	},
 	{
 		"id": "eat_out",
 		"display_name": "Essen gehen",
 		"description": "Eine Stunde essen gehen.",
+		"location": "cafe_harbor",
 		"duration_minutes": 60,
 		"money_cents": -1500,
 		"category": "food",
 		"effects": { "energy": 10, "mood": 5 }
+	},
+	{
+		"id": "coffee",
+		"display_name": "Kaffee",
+		"description": "Ein Café con leche mit Blick aufs Meer.",
+		"location": "cafe_harbor",
+		"duration_minutes": 30,
+		"money_cents": -350,
+		"category": "food",
+		"effects": { "energy": 10, "mood": 3 }
+	},
+	{
+		"id": "training",
+		"display_name": "Training",
+		"description": "Anderthalb Stunden Kraft und Ausdauer.",
+		"location": "gym",
+		"duration_minutes": 90,
+		"effects": { "energy": -15, "mood": 10 }
+	},
+	{
+		"id": "plan_week",
+		"display_name": "Woche planen",
+		"description": "Termine sortieren, Ideen sammeln, Prioritäten setzen.",
+		"location": "office",
+		"duration_minutes": 60,
+		"effects": { "energy": -5, "mood": 6 }
 	}
 ]

@@ -14,6 +14,12 @@ static func signed_money(cents: int) -> String:
 	return "+" + text if cents > 0 else text
 
 
+## Entfernung in 100-m-Schritten, z. B. 36 -> "3,6 km".
+@warning_ignore("integer_division")
+static func km(tenths: int) -> String:
+	return "%d,%d km" % [tenths / 10, tenths % 10]
+
+
 ## z. B. "2 h · Energie -20 · Stimmung +5 · +25,00 €"
 static func summary(definition: ActivityDefinitionScript) -> String:
 	var parts := PackedStringArray([TimeSystemScript.format_duration(definition.duration_minutes)])

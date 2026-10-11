@@ -1,0 +1,32 @@
+[
+	{
+		"id": "camera_meeting",
+		"title": "Treffen mit der Kamerafrau",
+		"description": "Ihr besprecht Licht und Bildausschnitt für deine Streams.",
+		"location": "studio",
+		"start": { "day": 1, "hour": 14 },
+		"duration_minutes": 60,
+		"effects": { "mood": 5 },
+		"missed_effects": { "mood": -10 }
+	},
+	{
+		"id": "gym_trial",
+		"title": "Probetraining",
+		"description": "Eine Trainerin zeigt dir die Geräte.",
+		"location": "gym",
+		"start": { "day": 2, "hour": 9 },
+		"duration_minutes": 60,
+		"effects": { "energy": -10, "mood": 8 },
+		"missed_effects": { "mood": -8 }
+	},
+	{
+		"id": "week_meeting",
+		"title": "Wochenbesprechung",
+		"description": "Kurzer Abgleich mit deiner Assistenz: Was steht diese Woche an?",
+		"location": "office",
+		"start": { "day": 3, "hour": 10 },
+		"duration_minutes": 60,
+		"effects": { "mood": 3 },
+		"missed_effects": { "mood": -10 }
+	}
+]

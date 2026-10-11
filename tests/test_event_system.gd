@@ -1,18 +1,18 @@
 extends "res://tests/base_test.gd"
 
+const Helpers := preload("res://tests/helpers.gd")
 const GameStateScript := preload("res://scripts/core/game_state.gd")
-const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 const EventCatalogScript := preload("res://scripts/systems/event_catalog.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
 
-## Neues Spiel (Tag 1, 08:00) mit den angegebenen Ereignissen.
+## Neues Spiel (Tag 1, 08:00) mit den angegebenen Ereignissen und ohne Termine
+## (verpasste Termine würden sonst die Stimmung ändern).
 func _new_game(events: Array) -> GameStateScript:
-	var activities := ActivityCatalogScript.new()
-	activities.load_file()
-	var catalog := EventCatalogScript.new()
-	assert_true(catalog.load_data(events), "Testdaten ungültig: %s" % "; ".join(catalog.errors))
-	return GameStateScript.new(activities, catalog)
+	var data := Helpers.game_data()
+	data.appointments.load_data([])
+	assert_true(data.events.load_data(events), "Testdaten ungültig: %s" % "; ".join(data.events.errors))
+	return GameStateScript.new(data)
 
 
 func _event(id: String, hour: int, priority: int = 0, options: Array = []) -> Dictionary:
@@ -123,13 +123,13 @@ func test_option_without_effects_changes_nothing() -> void:
 
 func test_event_due_during_activity_is_triggered() -> void:
 	var game := _new_game([_event("evt", 9)])
-	assert_eq(game.activities.start("stream_short"), "")  # 08:00 -> 10:00
+	assert_eq(game.activities.start("sleep"), "")  # 08:00 -> 16:00
 	assert_eq(game.events.get_next_pending().id, "evt")
 
 
 func test_game_without_event_catalog_has_no_events() -> void:
-	var activities := ActivityCatalogScript.new()
-	activities.load_file()
-	var game := GameStateScript.new(activities)
+	var data := Helpers.game_data()
+	data.events.load_data([])
+	var game := GameStateScript.new(data)
 	game.time.advance(3 * TimeSystemScript.MINUTES_PER_DAY)
 	assert_eq(game.events.has_pending(), false)

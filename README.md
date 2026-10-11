@@ -5,7 +5,8 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 1: Spielbares Grundgerüst – Code fertig, iPhone-Abnahme ausstehend** (siehe [`docs/ROADMAP.md`](docs/ROADMAP.md))
+**Phase 2: Alltag und Marbella – Code fertig, 127/127 automatische Tests grün; Editor- und iPhone-Abnahme ausstehend.**
+Phase 1: Code fertig, iPhone-Abnahme ausstehend. (Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).)
 
 | Was | Status |
 | --- | --- |
@@ -97,12 +98,14 @@ Einstellungen → Spielstand löschen.
 ```
 project.godot        Projektkonfiguration (Hochformat, GL-Compatibility-Renderer)
 scenes/app/          Hauptszene app.tscn
-scripts/core/        GameState (eine Spielsitzung)
-scripts/systems/     Spielsysteme (Zeit, Ledger, Aktivitäten, Ereignisse, Datenprüfung)
-scripts/models/      Datenmodelle (Buchung, Spielerwerte, Aktivität, Ereignis)
-data/activities/     Aktivitäten als JSON
+scripts/core/        GameState (eine Spielsitzung), GameData (alle Datenkataloge)
+scripts/systems/     Spielsysteme (Zeit, Ledger, Orte, Aktivitäten, Ereignisse, Termine, Speichern, Datenprüfung)
+scripts/models/      Datenmodelle (Buchung, Spielerwerte, Ort, Aktivität, Ereignis, Termin)
+data/locations/      Orte als JSON (Kartenposition, Öffnungszeiten)
+data/activities/     Aktivitäten als JSON (je an einen Ort gebunden)
 data/events/         Ereignisse als JSON
-scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht (zeigen nur an, keine Spielregeln)
+data/appointments/   Feste Termine als JSON
+scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht, Stadtkarte (zeigen nur an, keine Spielregeln)
 tests/               Tests + Runner (nicht im iOS-Export)
 docs/                Roadmap, Architektur, Entscheidungen
 ```

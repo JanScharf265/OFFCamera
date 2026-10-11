@@ -1,7 +1,8 @@
 class_name ActivitySystem
 extends RefCounted
 
-## Prüft und führt Aktivitäten aus. Ändert nichts selbst, sondern nutzt die
+## Prüft und führt Aktivitäten aus. Eine Aktivität geht nur an ihrem Ort und
+## nur, wenn der Ort für die ganze Dauer geöffnet ist. Ändert nichts selbst, sondern nutzt die
 ## zuständigen Systeme: Geld -> LedgerSystem, Werte -> PlayerStats, Zeit -> TimeSystem.
 ##
 ## start() ist alles-oder-nichts: Erst werden alle Bedingungen geprüft, dann
@@ -15,6 +16,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
+const LocationSystemScript := preload("res://scripts/systems/location_system.gd")
 
 signal activity_completed(activity_id: String)
 
@@ -22,13 +24,15 @@ var _time: TimeSystemScript
 var _ledger: LedgerSystemScript
 var _stats: PlayerStatsScript
 var _catalog: ActivityCatalogScript
+var _locations: LocationSystemScript
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
-		catalog: ActivityCatalogScript) -> void:
+		locations: LocationSystemScript, catalog: ActivityCatalogScript) -> void:
 	_time = time
 	_ledger = ledger
 	_stats = stats
+	_locations = locations
 	_catalog = catalog
 
 
@@ -43,6 +47,13 @@ func check(activity_id: String) -> String:
 		return "Unbekannte Aktivität: %s" % activity_id
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
+	if definition.location != _locations.get_current():
+		var location := _locations.get_catalog().get_definition(definition.location)
+		return "Nur vor Ort möglich: %s." % (location.display_name if location != null else definition.location)
+	var closed_reason := _locations.check_open_during(definition.location, _time.get_minutes(),
+			definition.duration_minutes)
+	if not closed_reason.is_empty():
+		return closed_reason
 	var energy_change := definition.get_effect("energy")
 	if energy_change < 0 and _stats.energy + energy_change < 0:
 		return "Zu wenig Energie (benötigt %d)." % -energy_change

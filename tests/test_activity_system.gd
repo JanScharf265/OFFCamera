@@ -1,15 +1,21 @@
 extends "res://tests/base_test.gd"
 
+const Helpers := preload("res://tests/helpers.gd")
 const GameStateScript := preload("res://scripts/core/game_state.gd")
-const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 
 
 func _new_game() -> GameStateScript:
-	var catalog := ActivityCatalogScript.new()
-	catalog.load_file()
-	return GameStateScript.new(catalog)
+	return Helpers.new_game()
+
+
+## Neues Spiel, bereits an `location_id` (Fahrzeit vergeht dabei).
+func _game_at(location_id: String) -> GameStateScript:
+	var game := _new_game()
+	if location_id != game.locations.get_current():
+		assert_eq(game.locations.travel(location_id), "", "Fahrt nach %s" % location_id)
+	return game
 
 
 func test_new_game_has_start_values() -> void:
@@ -19,31 +25,34 @@ func test_new_game_has_start_values() -> void:
 	assert_eq(game.ledger.get_balance(), 50000)
 	assert_eq(game.stats.energy, 80)
 	assert_eq(game.stats.mood, 60)
+	assert_eq(game.locations.get_current(), "home")
 
 
 func test_stream_changes_time_stats_and_money_exactly() -> void:
-	var game := _new_game()
+	var game := _game_at("studio")  # 08:00 -> 08:20
 	assert_eq(game.activities.start("stream_short"), "")
-	assert_eq(game.time.format_clock(), "10:00")
+	assert_eq(game.time.format_clock(), "10:20")
 	assert_eq(game.stats.energy, 60)
 	assert_eq(game.stats.mood, 65)
 	assert_eq(game.ledger.get_balance(), 52500)
 
 
 func test_income_is_in_ledger_with_reference_and_start_time() -> void:
-	var game := _new_game()
+	var game := _game_at("studio")
 	game.activities.start("stream_short")
 	var entries := game.ledger.get_entries()
 	assert_eq(entries.size(), 1)
+	if entries.size() != 1:
+		return
 	assert_eq(entries[0].amount_cents, 2500)
 	assert_eq(entries[0].category, "creator")
 	assert_eq(entries[0].source, "activity")
 	assert_eq(entries[0].reference, "stream_short")
-	assert_eq(entries[0].time_minutes, TimeSystemScript.at(1, 8))
+	assert_eq(entries[0].time_minutes, TimeSystemScript.at(1, 8, 20))
 
 
 func test_expense_is_in_ledger() -> void:
-	var game := _new_game()
+	var game := _game_at("cafe_harbor")
 	assert_eq(game.activities.start("eat_out"), "")
 	assert_eq(game.ledger.get_balance(), 48500)
 	assert_eq(game.ledger.get_entries_by_category("food").size(), 1)
@@ -63,22 +72,72 @@ func test_energy_is_capped_at_100() -> void:
 	assert_eq(game.stats.energy, 100)
 
 
-func test_too_little_energy_is_rejected_without_any_change() -> void:
+func test_sleep_takes_8_hours_and_gives_60_energy() -> void:
 	var game := _new_game()
+	game.stats.apply({"energy": -70})  # 80 -> 10
+	assert_eq(game.activities.start("sleep"), "")
+	assert_eq(game.time.format_clock(), "16:00")
+	assert_eq(game.stats.energy, 70)
+
+
+func test_coffee_costs_money_at_the_harbor() -> void:
+	var game := _game_at("cafe_harbor")  # 08:20
+	assert_eq(game.activities.start("coffee"), "")
+	assert_eq(game.time.format_clock(), "08:50")
+	assert_eq(game.ledger.get_balance(), 50000 - 350)
+	assert_eq(game.stats.energy, 90)
+
+
+func test_training_and_week_planning() -> void:
+	var game := _game_at("gym")  # 08:15
+	assert_eq(game.activities.start("training"), "")
+	assert_eq(game.time.format_clock(), "09:45")
+	assert_eq(game.stats.energy, 65)
+	assert_eq(game.stats.mood, 70)
+	assert_eq(game.locations.travel("office"), "")  # 25 min -> 10:10
+	assert_eq(game.activities.start("plan_week"), "")
+	assert_eq(game.time.format_clock(), "11:10")
+
+
+func test_activity_elsewhere_is_rejected_without_any_change() -> void:
+	var game := _new_game()
+	assert_eq(game.activities.check("stream_short"), "Nur vor Ort möglich: Studio.")
+	assert_eq(game.activities.start("stream_short"), "Nur vor Ort möglich: Studio.")
+	assert_eq(game.time.format_clock(), "08:00")
+	assert_eq(game.ledger.get_entries().size(), 0)
+
+
+func test_closed_location_blocks_activity() -> void:
+	var game := _game_at("office")  # 08:20, Büro 08–18
+	game.time.advance(TimeSystemScript.at(1, 18) - game.time.get_minutes())  # 18:00
+	assert_eq(game.activities.start("plan_week"), "Büro ist geschlossen (geöffnet 08:00–18:00).")
+	assert_eq(game.time.format_clock(), "18:00")
+
+
+func test_activity_must_end_before_closing() -> void:
+	var game := _game_at("office")
+	game.time.advance(TimeSystemScript.at(1, 17, 30) - game.time.get_minutes())  # 17:30
+	assert_eq(game.activities.check("plan_week"), "Büro schließt vorher (geöffnet 08:00–18:00).")
+	game.time.advance(TimeSystemScript.at(2, 8) - game.time.get_minutes())  # nächster Morgen
+	assert_eq(game.activities.check("plan_week"), "")
+
+
+func test_too_little_energy_is_rejected_without_any_change() -> void:
+	var game := _game_at("studio")
 	game.stats.apply({"energy": -70})  # 80 -> 10
 	var reason := game.activities.start("stream_short")
 	assert_eq(reason, "Zu wenig Energie (benötigt 20).")
-	assert_eq(game.time.format_clock(), "08:00")
+	assert_eq(game.time.format_clock(), "08:20")
 	assert_eq(game.stats.energy, 10)
 	assert_eq(game.ledger.get_entries().size(), 0)
 
 
 func test_not_enough_money_is_rejected_without_any_change() -> void:
-	var game := _new_game()
+	var game := _game_at("cafe_harbor")
 	game.ledger.post(-49000, "test", "Ausgabe für Test", "test")  # 500 € -> 10 €
 	var reason := game.activities.start("eat_out")
 	assert_eq(reason, "Nicht genug Geld (kostet 15,00 €).")
-	assert_eq(game.time.format_clock(), "08:00")
+	assert_eq(game.time.format_clock(), "08:20")
 	assert_eq(game.stats.energy, 80)
 	assert_eq(game.ledger.get_balance(), 1000)
 
@@ -90,10 +149,10 @@ func test_unknown_activity_is_rejected() -> void:
 
 
 func test_check_does_not_change_anything() -> void:
-	var game := _new_game()
+	var game := _game_at("cafe_harbor")
 	assert_eq(game.activities.check("eat_out"), "")
 	assert_eq(game.ledger.get_balance(), 50000)
-	assert_eq(game.time.format_clock(), "08:00")
+	assert_eq(game.time.format_clock(), "08:20")
 
 
 func test_activity_completed_fires_once() -> void:
@@ -112,7 +171,7 @@ func test_activity_started_during_time_advance_is_rejected() -> void:
 	var nested := []
 	var on_advanced := func(_from: int, _to: int) -> void: nested.append(game.activities.start("rest"))
 	game.time.time_advanced.connect(on_advanced)
-	game.activities.start("eat_out")
+	game.activities.start("rest")
 	assert_eq(nested, ["Gerade läuft bereits ein Zeitfortschritt."])
 	assert_eq(game.time.format_clock(), "09:00")
 	game.time.time_advanced.disconnect(on_advanced)

@@ -1,0 +1,36 @@
+[
+	{
+		"id": "home",
+		"display_name": "Wohnung",
+		"description": "Deine kleine Wohnung in der Altstadt.",
+		"map_position": [0.25, 0.35]
+	},
+	{
+		"id": "studio",
+		"display_name": "Studio",
+		"description": "Ein gemieteter Raum mit Licht, Kamera und schnellem Internet.",
+		"map_position": [0.7, 0.3],
+		"opening_hours": { "open": 7, "close": 24 }
+	},
+	{
+		"id": "cafe_harbor",
+		"display_name": "Café am Hafen",
+		"description": "Kaffee, Tapas und Blick auf die Boote.",
+		"map_position": [0.55, 0.78],
+		"opening_hours": { "open": 7, "close": 20 }
+	},
+	{
+		"id": "gym",
+		"display_name": "Fitnessstudio",
+		"description": "Geräte, Kurse und ein Spiegel für jedes Selfie.",
+		"map_position": [0.15, 0.7],
+		"opening_hours": { "open": 6, "close": 22 }
+	},
+	{
+		"id": "office",
+		"display_name": "Büro",
+		"description": "Ein Schreibtisch in einem Coworking-Space.",
+		"map_position": [0.8, 0.6],
+		"opening_hours": { "open": 8, "close": 18 }
+	}
+]

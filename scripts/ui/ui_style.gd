@@ -75,6 +75,11 @@ static func card() -> PanelContainer:
 	return result
 
 
+## Abgerundeter Hintergrund in einer Farbe (z. B. für Karten-Pins).
+static func flat_box(color: Color, padding: int = 12) -> StyleBoxFlat:
+	return _box(color, padding)
+
+
 static func _box(color: Color, padding: int = 16) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
 	box.bg_color = color
