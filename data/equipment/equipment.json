@@ -1,0 +1,35 @@
+[
+	{
+		"id": "camera",
+		"display_name": "Kamera",
+		"location": "studio",
+		"formats": ["short_video", "livestream", "long_video"],
+		"levels": [
+			{ "name": "Webcam HD", "price_cents": 12000, "quality_percent": 5 },
+			{ "name": "Systemkamera", "price_cents": 45000, "quality_percent": 10 },
+			{ "name": "Kinokamera", "price_cents": 150000, "quality_percent": 20 }
+		]
+	},
+	{
+		"id": "microphone",
+		"display_name": "Mikrofon",
+		"location": "studio",
+		"formats": ["livestream", "long_video", "community_qa"],
+		"levels": [
+			{ "name": "USB-Mikrofon", "price_cents": 8000, "quality_percent": 5 },
+			{ "name": "Studiomikrofon", "price_cents": 30000, "quality_percent": 10 },
+			{ "name": "Broadcast-Set", "price_cents": 90000, "quality_percent": 15 }
+		]
+	},
+	{
+		"id": "lighting",
+		"display_name": "Licht",
+		"location": "studio",
+		"formats": ["short_video", "livestream", "long_video"],
+		"levels": [
+			{ "name": "Ringlicht", "price_cents": 5000, "quality_percent": 3 },
+			{ "name": "Softboxen", "price_cents": 20000, "quality_percent": 7 },
+			{ "name": "Lichtsetup", "price_cents": 70000, "quality_percent": 12 }
+		]
+	}
+]

@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 3 (Streamer-Karriere) in Arbeit: Tickets 3.1–3.2 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 3 (Streamer-Karriere) in Arbeit: Tickets 3.1–3.3 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -101,13 +101,14 @@ Einstellungen → Spielstand löschen.
 project.godot        Projektkonfiguration (Hochformat, GL-Compatibility-Renderer)
 scenes/app/          Hauptszene app.tscn
 scripts/core/        GameState (eine Spielsitzung), GameData (alle Datenkataloge)
-scripts/systems/     Spielsysteme (Zeit, Ledger, Orte, Aktivitäten, Ereignisse, Termine, Kanal, Content, Speichern, Datenprüfung)
-scripts/models/      Datenmodelle (Buchung, Spielerwerte, Ort, Aktivität, Ereignis, Termin, Kanal-Änderung, Content-Format)
+scripts/systems/     Spielsysteme (Zeit, Ledger, Orte, Aktivitäten, Ereignisse, Termine, Kanal, Content, Ausrüstung, Speichern, Datenprüfung)
+scripts/models/      Datenmodelle (Buchung, Spielerwerte, Ort, Aktivität, Ereignis, Termin, Kanal-Änderung, Content-Format, Ausrüstung)
 data/locations/      Orte als JSON (Kartenposition, Öffnungszeiten)
 data/activities/     Aktivitäten als JSON (je an einen Ort gebunden)
 data/events/         Ereignisse als JSON
 data/appointments/   Feste Termine als JSON
 data/content/        Content-Formate als JSON (Phase 3)
+data/equipment/      Ausrüstung mit Stufen als JSON (Phase 3)
 scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht, Stadtkarte (zeigen nur an, keine Spielregeln)
 assets/kenney/       Grafiken aus Kenney-CC0-Paketen (nur benutzte Dateien, je mit License.txt)
 tests/               Tests + Runner (nicht im iOS-Export)

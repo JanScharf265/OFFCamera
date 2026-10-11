@@ -196,6 +196,7 @@ func _version_1_text(minutes: int) -> String:
 	game.erase("location")
 	game.erase("appointments")
 	game.erase("channel")
+	game.erase("equipment")
 	game["time"]["minutes"] = minutes
 	return JSON.stringify({"version": 1, "game": game})
 
@@ -203,7 +204,7 @@ func _version_1_text(minutes: int) -> String:
 func test_save_file_has_current_version_with_location_and_appointments() -> void:
 	SaveSystemScript.save(_new_game(), PATH)
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	assert_eq(int(data["version"]), 3)
+	assert_eq(int(data["version"]), SaveSystemScript.SAVE_VERSION)
 	assert_eq(data["game"]["location"], {"current": "home"})
 	assert_eq(int(data["game"]["appointments"]["since_minutes"]), TimeSystemScript.at(1, 8))
 
@@ -257,6 +258,7 @@ func test_unknown_location_falls_back_to_home() -> void:
 func _version_2_text() -> String:
 	var game := _played_game().to_dict()
 	game.erase("channel")
+	game.erase("equipment")
 	return JSON.stringify({"version": 2, "game": game})
 
 
@@ -289,3 +291,15 @@ func test_channel_survives_save_and_load() -> void:
 	assert_eq(loaded.channel.reputation, 54)
 	assert_eq(loaded.channel.get_history().size(), 1)
 	assert_eq(loaded.channel.get_history()[0].reason, "Testlauf")
+
+
+func test_version_3_is_migrated_without_equipment() -> void:
+	var game := _played_game().to_dict()
+	game.erase("equipment")
+	_write(JSON.stringify({"version": 3, "game": game}))
+	var result := _load()
+	var loaded: GameStateScript = result["game"]
+	assert_true(loaded != null, "Migration fehlgeschlagen: %s" % result["error"])
+	if loaded != null:
+		assert_eq(loaded.equipment.get_level("camera"), 0)
+		assert_eq(loaded.channel.followers, _played_game().channel.followers)

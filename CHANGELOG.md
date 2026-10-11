@@ -5,6 +5,8 @@
 - Spielstand Version 3 (Kanal) mit Migration von Version 2 (Ticket 3.1)
 - Content-Formate als Daten: Kurzvideo (Wohnung), Livestream, Langes Video, Q&A mit der Community (Studio); exakt berechnete Wirkung mit Vorschau auf der Karte (Ticket 3.2)
 - Aktivität „Kurzer Stream“ entfällt, ersetzt durch das Format „Livestream“ (Ticket 3.2)
+- Ausrüstung als Daten: Kamera, Mikrofon, Licht mit je 3 Stufen, Kauf im Studio über das Ledger, Qualitätsbonus für passende Formate (Ticket 3.3)
+- Spielstand Version 4 (Ausrüstung) mit Migration von Version 3 (Ticket 3.3)
 
 ## Unveröffentlicht – Grafik-Ticket G1 (iPhone-Abnahme ok, 11.10.2026)
 - Isometrische Stadtkarte im Stil eines Städtebauspiels: Straßen, Promenade, Strand, Meer, Bäume, Füllbebauung

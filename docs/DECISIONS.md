@@ -47,9 +47,16 @@ Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslauf
 führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
 Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
 
+## 014 – Ausrüstung
+Drei Teile (Kamera, Mikrofon, Licht) mit je drei Stufen, Kauf nur im Studio und nur Stufe für Stufe, ohne
+Spielzeit. Der Qualitätsbonus gilt für die erreichte Stufe (nicht aufsummiert) und nur für die Formate des Teils.
+Jede Stufe wird höchstens einmal bezahlt (Schutzschlüssel `equipment:<id>:<stufe>`). Kein Verschleiß, kein
+Wiederverkauf. Preise und Boni sind Platzhalter fürs Balancing. Fehlt ein Teil später in den Daten, wird es beim
+Laden ignoriert; eine zu hohe Stufe wird auf das Maximum gesetzt, statt den Spielstand abzulehnen.
+
 ## 013 – Content-Formate exakt berechnet
 Zufall nur bei Ereignissen (Entscheidung des Game Directors); Content-Ergebnisse sind exakt und werden vor dem
-Produzieren angezeigt. Qualität = 100 % + (Community − 50) / 2 (+ Equipment ab Ticket 3.3), mindestens 10 %.
+Produzieren angezeigt. Qualität = 100 % + Ausrüstung (014) + (Community − 50) / 2, mindestens 10 %.
 Follower-Zuwachs und Einnahme haben einen Grundwert plus einen Anteil je 1.000 Follower, beides × Qualität;
 der Follower-Anteil wächst also mit der Reichweite, die Wachstumsbremse (012) begrenzt ihn. Community und Ruf
 ändern sich um feste Werte des Formats. Ganzzahlig, abgerundet. Ein Livestream bringt zu Spielbeginn exakt

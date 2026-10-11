@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 3 (Tickets 3.1–3.2) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 3 (Tickets 3.1–3.3) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -97,6 +97,7 @@ Stand Phase 3 (Tickets 3.1–3.2) auf Basis von Phase 2 + Grafik-Ticket G1: Kana
 - Daten: `id`, `display_name`, optional `description`, `location`, `duration_minutes` (> 0), optional `effects`
   (PlayerStats), `channel` {`followers_base` ≥ 0, `followers_per_mille` ≥ 0, `community`, `reputation`},
   `income` {`base_cents` ≥ 0, `per_1000_followers_cents` ≥ 0}. `GameData` prüft den Ort.
+- Qualität = 100 % + Boni aus dem EquipmentSystem + Community-Bonus.
 - `preview(id)`: exakte Wirkung beim aktuellen Stand (Qualität mit Anteilen, Follower roh/gebremst, Community,
   Ruf, Einnahme, Effekte); `quality_text()`/`explain()` für Anzeige und Kanal-Protokoll.
 - `check(id)` / `produce(id)` wie beim ActivitySystem (Ort, Öffnungszeit, Energie). Ausführung: Einnahme ins Ledger
@@ -104,14 +105,24 @@ Stand Phase 3 (Tickets 3.1–3.2) auf Basis von Phase 2 + Grafik-Ticket G1: Kana
   `time.advance(dauer)` → `content_produced`. Kein eigener Spielstand (Schutzschlüssel aus Format + Startminute).
 - UI: Content-Karten stehen im Abschnitt „Aktivitäten“ vor den Aktivitäten des Orts (Button `ContentButton_<id>`).
 
+### Ausrüstung (`data/equipment/equipment.json`, `EquipmentCatalog`, `EquipmentSystem`)
+- Daten: `id`, `display_name`, `location` (Kaufort), `formats` (verbesserte Formate), `levels` (≥ 1) mit `name`,
+  `price_cents` > 0, `quality_percent` > 0 und steigend. `GameData` prüft Ort und Formate.
+- `check_buy(id)` / `buy(id)`: nächste Stufe, nur am Kaufort, nur mit genug Geld. Ausgabe im Ledger
+  (Kategorie/Quelle `equipment`, Schutzschlüssel `equipment:<id>:<stufe>`), dann Stufe erhöhen. Keine Spielzeit.
+- `quality_parts(format)` liefert die Boni für das ContentSystem.
+- Gespeichert: `{"levels": {id: stufe}}`; unbekannte Teile werden beim Laden ignoriert, zu hohe Stufen begrenzt.
+- UI: Abschnitt „Ausrüstung“ am Kaufort (Button `EquipmentButton_<id>`, verschwindet auf höchster Stufe).
+
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 3, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 4, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
-  Spielerwerte, Ort, Ereignisse (ausgelöst, offen, entschieden + gewählte Option), Termine, Kanal.
+  Spielerwerte, Ort, Ereignisse (ausgelöst, offen, entschieden + gewählte Option), Termine, Kanal, Ausrüstung.
 - Migration 1 → 2: Ort = Wohnung, Termine `since_minutes` = gespeicherte Spielzeit.
 - Migration 2 → 3: Kanal mit Startwerten und leerem Protokoll.
+- Migration 3 → 4: Ausrüstung leer (nichts gekauft).
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.
@@ -175,6 +186,7 @@ Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
 | `AppointmentSystem` | Termine: wahrnehmen, verpasst, Kollisionen |
 | `ChannelSystem` | Follower, Community-Stimmung, Ruf, Kanal-Protokoll |
 | `ContentSystem` | Prüfen, Berechnen und Produzieren von Content |
+| `EquipmentSystem` | Ausrüstungsstufen, Kauf, Qualitätsbonus |
 | `SaveSystem` | versionierter lokaler Spielstand |
 
 UI-Szenen lesen Zustand und rufen Systeme auf; sie ändern Werte nie direkt.
@@ -186,7 +198,7 @@ Systeme melden Änderungen über Signale (z. B. `time_advanced`, `day_changed`, 
 assets/   kenney/ (CC0-Grafiken)
 scenes/   app/, menus/, hud/, …
 scripts/  core/, systems/, models/, ui/
-data/     activities/, locations/, events/, appointments/, content/
+data/     activities/, locations/, events/, appointments/, content/, equipment/
 tests/
 ```
 

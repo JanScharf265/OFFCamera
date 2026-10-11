@@ -219,6 +219,22 @@ func test_attend_appointment_in_ui() -> void:
 	app.free()
 
 
+func test_buy_equipment_in_studio_raises_quality() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	assert_true(_find(app, "EquipmentButton_camera") == null, "Ausrüstung darf es zu Hause nicht geben")
+	_travel(app, "studio")
+	assert_eq((_find(app, "EquipmentTitle_camera") as Label).text, "Kamera · Stufe 0/3 (nichts)")
+	_press(app, "EquipmentButton_camera")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 380,00 €")
+	assert_eq((_find(app, "EquipmentTitle_camera") as Label).text, "Kamera · Stufe 1/3 (Webcam HD)")
+	var summary := (_find(app, "ContentSummary_livestream") as Label).text
+	assert_true(summary.ends_with("+26,25 €"), summary)
+	app.free()
+
+
 func _travel(app: Node, location_id: String) -> void:
 	_press(app, "MapPin_%s" % location_id)
 	_press(app, "TravelButton")

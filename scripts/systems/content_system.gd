@@ -4,7 +4,7 @@ extends RefCounted
 ## Prüft und produziert Content (Phase 3). Das Ergebnis ist exakt berechenbar
 ## (kein Zufall) und wird vorher per preview() angezeigt:
 ##
-##   Qualität (%)  = 100 + Community-Bonus [+ Equipment ab Ticket 3.3], mindestens MIN_QUALITY
+##   Qualität (%)  = 100 + Ausrüstungs-Boni (EquipmentSystem) + Community-Bonus, mindestens MIN_QUALITY
 ##                   Community-Bonus = (Community-Stimmung − 50) / 2  → −25 … +25 %
 ##   Follower roh  = (followers_base + Follower × followers_per_mille / 1000) × Qualität / 100
 ##   Follower      = Follower roh nach der Wachstumsbremse des ChannelSystems
@@ -26,6 +26,7 @@ const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const LocationSystemScript := preload("res://scripts/systems/location_system.gd")
 const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
+const EquipmentSystemScript := preload("res://scripts/systems/equipment_system.gd")
 const ContentFormatCatalogScript := preload("res://scripts/systems/content_format_catalog.gd")
 const ContentFormatScript := preload("res://scripts/models/content_format.gd")
 
@@ -39,17 +40,19 @@ var _ledger: LedgerSystemScript
 var _stats: PlayerStatsScript
 var _locations: LocationSystemScript
 var _channel: ChannelSystemScript
+var _equipment: EquipmentSystemScript
 var _catalog: ContentFormatCatalogScript
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
-		locations: LocationSystemScript, channel: ChannelSystemScript,
+		locations: LocationSystemScript, channel: ChannelSystemScript, equipment: EquipmentSystemScript,
 		catalog: ContentFormatCatalogScript) -> void:
 	_time = time
 	_ledger = ledger
 	_stats = stats
 	_locations = locations
 	_channel = channel
+	_equipment = equipment
 	_catalog = catalog
 
 
@@ -57,10 +60,10 @@ func get_catalog() -> ContentFormatCatalogScript:
 	return _catalog
 
 
-## Qualitätsanteile mit Bezeichnung, z. B. [{"label": "Community-Stimmung", "percent": 5}].
-## Nur Anteile ≠ 0.
-func quality_parts(_format_id: String) -> Array[Dictionary]:
-	var parts: Array[Dictionary] = []
+## Qualitätsanteile mit Bezeichnung, z. B. [{"label": "Kamera (Webcam HD)", "percent": 5},
+## {"label": "Community-Stimmung", "percent": 5}]. Erst Ausrüstung, dann Community; nur Anteile ≠ 0.
+func quality_parts(format_id: String) -> Array[Dictionary]:
+	var parts: Array[Dictionary] = _equipment.quality_parts(format_id)
 	@warning_ignore("integer_division")
 	var community_bonus := (_channel.community - 50) / 2
 	if community_bonus != 0:

@@ -44,6 +44,8 @@ var _feedback_label: Label
 var _cards := {}
 ## format_id -> {"button": Button, "reason": Label, "summary": Label, "quality": Label}
 var _content_cards := {}
+## equipment_id -> {"button": Button, "reason": Label, "title": Label, "next": Label}
+var _equipment_cards := {}
 var _activity_title: Label
 var _activity_list: VBoxContainer
 var _activities_location := ""
@@ -271,6 +273,50 @@ func _build_content_card(format_id: String) -> Control:
 	return card
 
 
+func _build_equipment_card(equipment_id: String) -> Control:
+	var card := UiStyle.card()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	card.add_child(box)
+	var title := UiStyle.label("")
+	title.name = "EquipmentTitle_%s" % equipment_id
+	box.add_child(title)
+	var next := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
+	box.add_child(next)
+	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
+	reason.visible = false
+	box.add_child(reason)
+	var button := _scroll_button("Kaufen", "EquipmentButton_%s" % equipment_id)
+	button.pressed.connect(_on_equipment_pressed.bind(equipment_id))
+	box.add_child(button)
+	_equipment_cards[equipment_id] = {"button": button, "reason": reason, "title": title, "next": next}
+	return card
+
+
+func _refresh_equipment_card(equipment_id: String) -> void:
+	var definition := _game.equipment.get_catalog().get_definition(equipment_id)
+	var card: Dictionary = _equipment_cards[equipment_id]
+	var level := _game.equipment.get_level(equipment_id)
+	var current_name: String = definition.get_level(level)["name"] if level > 0 else "nichts"
+	card["title"].text = "%s · Stufe %d/%d (%s)" % [definition.display_name, level, definition.max_level(), current_name]
+	var next := _game.equipment.get_next_level(equipment_id)
+	var format_names := PackedStringArray()
+	for format_id in definition.formats:
+		var format := _game.content.get_catalog().get_definition(format_id)
+		format_names.append(format.display_name if format != null else format_id)
+	if next.is_empty():
+		card["next"].text = "Höchste Stufe: +%d %% Qualität für %s." % [definition.get_level(level)["quality_percent"],
+				", ".join(format_names)]
+	else:
+		card["next"].text = "Nächste Stufe: %s · Qualität +%d %% für %s · %s" % [next["name"], next["quality_percent"],
+				", ".join(format_names), LedgerSystemScript.format_cents(next["price_cents"])]
+	var reason := _game.equipment.check_buy(equipment_id)
+	card["button"].visible = not next.is_empty()
+	card["button"].disabled = not reason.is_empty()
+	card["reason"].text = reason
+	card["reason"].visible = not reason.is_empty() and not next.is_empty()
+
+
 ## true = ausführen. Bei einer Warnung erst beim zweiten Tipp auf dieselbe Aktion.
 func _confirmed(key: String, warning: String) -> bool:
 	if warning.is_empty() or _confirm_key == key:
@@ -305,6 +351,19 @@ func _on_content_pressed(format_id: String) -> void:
 		parts.append(ActivityText.signed_money(outcome["income_cents"]))
 	var result := " (%s)" % " · ".join(parts) if not parts.is_empty() else ""
 	_after_action(reason, "%s produziert%s" % [format.display_name, result])
+
+
+func _on_equipment_pressed(equipment_id: String) -> void:
+	if _was_scroll():
+		return
+	var definition := _game.equipment.get_catalog().get_definition(equipment_id)
+	var next := _game.equipment.get_next_level(equipment_id)
+	var reason := _game.equipment.buy(equipment_id)
+	var text := ""
+	if reason.is_empty():
+		text = "%s gekauft: %s (%s)" % [definition.display_name, next["name"],
+				ActivityText.signed_money(-next["price_cents"])]
+	_after_action(reason, text)
 
 
 func _on_location_pressed(location_id: String) -> void:
@@ -399,14 +458,20 @@ func _refresh_activities() -> void:
 		_clear(_activity_list)
 		_cards.clear()
 		_content_cards.clear()
+		_equipment_cards.clear()
 		var format_ids := _game.content.get_catalog().get_ids_at(current)
 		var ids := _game.activities.get_catalog().get_ids_at(current)
-		if ids.is_empty() and format_ids.is_empty():
+		var equipment_ids := _game.equipment.get_catalog().get_ids_at(current)
+		if ids.is_empty() and format_ids.is_empty() and equipment_ids.is_empty():
 			_activity_list.add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 		for id in format_ids:
 			_activity_list.add_child(_build_content_card(id))
 		for id in ids:
 			_activity_list.add_child(_build_activity_card(id))
+		if not equipment_ids.is_empty():
+			_activity_list.add_child(UiStyle.section_label("Ausrüstung"))
+		for id in equipment_ids:
+			_activity_list.add_child(_build_equipment_card(id))
 
 	for activity_id in _cards:
 		var reason := _game.activities.check(activity_id)
@@ -424,6 +489,9 @@ func _refresh_activities() -> void:
 		card["button"].disabled = not reason.is_empty()
 		card["reason"].text = reason
 		card["reason"].visible = not reason.is_empty()
+
+	for equipment_id in _equipment_cards:
+		_refresh_equipment_card(equipment_id)
 
 
 func _refresh_appointments() -> void:
