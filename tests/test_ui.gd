@@ -302,9 +302,71 @@ func test_found_company_in_office() -> void:
 	app.free()
 
 
+func test_company_section_before_and_after_founding() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	assert_eq((_find(app, "CompanyBalanceLabel") as Label).visible, false)
+	assert_true(_screen_has_text(app, "Noch kein Unternehmen. Gründen möglich: Merch-Label (Büro)."), "Hinweis fehlt")
+	_travel(app, "office")
+	_press(app, "CompanyFoundButton_merch_label")
+	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "Firmenkonto: 200,00 €")
+	assert_eq((_find(app, "CompanyName") as Label).text, "Merch-Label")
+	assert_eq((_find(app, "CompanyValue_utilization") as Label).text, "Auslastung 50/100")
+	assert_eq((_find(app, "CompanyForecast") as Label).text,
+			"Heute erwartet: Umsatz +15,90 € · Fixkosten -20,00 € · Ergebnis -4,10 € (abgerechnet beim Tageswechsel; Auslastung -3 ohne Pflege)")
+	assert_eq((_find(app, "CompanyBranch") as Label).text, "Filiale Merch-Laden: noch nicht eröffnet (im Ladenlokal)")
+	assert_true(_screen_contains(app, "Gründung: Merch-Label"), "Buchung fehlt")
+	app.free()
+
+
+func test_deposit_and_withdraw_buttons_move_money() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_travel(app, "office")
+	_press(app, "CompanyFoundButton_merch_label")  # privat 150 €, Firma 200 €
+	_press(app, "CompanyDepositButton")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 50,00 €")
+	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "Firmenkonto: 300,00 €")
+	assert_eq((_find(app, "CompanyDepositButton") as Button).disabled, true)  # nur noch 50 € privat
+	_press(app, "CompanyWithdrawButton")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 150,00 €")
+	assert_true(_screen_contains(app, "Einlage ins Unternehmen (Firma)"), "Firmenbuchung nicht markiert")
+	app.free()
+
+
+func test_settlement_appears_in_feedback_and_list() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_travel(app, "office")
+	_press(app, "CompanyFoundButton_merch_label")  # 09:20
+	_press(app, "StartButton_order_stock")         # Auslastung 56, 10:20
+	app.game.time.advance(TimeSystemScript.at(1, 23) - app.game.time.get_minutes())
+	_travel(app, "home")
+	_press(app, "StartButton_sleep")  # über Mitternacht -> Tagesabschluss Tag 1
+	var feedback := (_find(app, "FeedbackLabel") as Label).text
+	assert_true("Tagesabschluss Tag 1: Umsatz" in feedback, feedback)
+	assert_true(_screen_contains(app, "Tag 1: ohne Pflege sinkt die Auslastung"), "Protokoll fehlt")
+	assert_true(_screen_has_text(app, "Auslastung -3"), "Änderung fehlt")
+	app.free()
+
+
 func _travel(app: Node, location_id: String) -> void:
 	_press(app, "MapPin_%s" % location_id)
 	_press(app, "TravelButton")
+
+
+## Wie _screen_has_text, aber Teiltext (z. B. Zeilen mit vorangestelltem Zeitstempel).
+func _screen_contains(root: Node, text: String) -> bool:
+	for label in root.find_children("*", "Label", true, false):
+		if text in (label as Label).text and (label as Label).visible:
+			return true
+	return false
 
 
 func _screen_has_text(root: Node, text: String) -> bool:

@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 4 (Tickets 4.1–4.4: Konten, Unternehmen gründen, Tagesabschluss, Filiale und Management) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 4 (Tickets 4.1–4.5 umgesetzt, Abnahme ausstehend: Konten, Unternehmen, Tagesabschluss, Filiale, Management, Unternehmens-UI) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -200,6 +200,11 @@ Stand Phase 4 (Tickets 4.1–4.4: Konten, Unternehmen gründen, Tagesabschluss, 
 - Kanal (Phase 3): HUD-Zeile `ChannelLabel`; Abschnitt „Kanal“ (Follower, Anteil laut Wachstumsbremse,
   Balken für Community-Stimmung und Ruf) und „Kanal-Verlauf“ (letzte 5 Protokolleinträge: Zeit, Begründung,
   tatsächliche Änderung; bei Kürzung auch die gewünschte Änderung und die Ursache). Texte in `activity_text.gd`.
+- Unternehmen (Phase 4): HUD-Zeile `CompanyBalanceLabel` (nur mit Unternehmen); Abschnitt „Unternehmen“
+  (Hinweis zur Gründung bzw. Karte mit Firmenkonto, Auslastung, Ruf, `preview_day()`-Prognose, Filial-Status,
+  Einlage/Entnahme in 100-€-Schritten), „Tagesabschlüsse“ (letzte 5, unbezahlte rot) und „Unternehmens-Verlauf“
+  (letzte 5 Protokolleinträge). Firmenbuchungen in „Letzte Buchungen“ mit „(Firma)“. Gründungs- und
+  Filial-Karten erscheinen am jeweiligen Ort im Abschnitt „Aktivitäten“.
 - Kollision mit Termin: erster Tipp zeigt die Warnung, zweiter Tipp auf dieselbe Aktion führt aus.
 - Offenes Ereignis: `EventPanel` ersetzt die Liste, bis eine Option gewählt ist.
 - Automatisch gespeichert wird beim Start eines neuen Spiels, nach jeder erfolgreichen Aktion

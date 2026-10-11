@@ -106,6 +106,20 @@ static func signed_int(value: int) -> String:
 	return ("+" if value > 0 else "") + format_int(value)
 
 
+## Eine Zeile im Unternehmens-Protokoll, z. B. ["Tag 2 · 09:20  Ware nachbestellen", "Auslastung +6"].
+static func company_change_text(change) -> Array[String]:
+	var head := "%s  %s" % [TimeSystemScript.format_stamp(change.time_minutes), change.reason]
+	var applied := company_parts(change.applied)
+	var detail := " · ".join(applied)
+	if change.requested.is_empty():
+		detail = ""
+	elif applied.is_empty():
+		detail = "keine Änderung"
+	if change.was_limited():
+		detail += " (gewünscht: %s · Grenze erreicht)" % " · ".join(company_parts(change.requested))
+	return [head, detail]
+
+
 ## Eine Zeile im Kanal-Verlauf: "Tag 1 · 08:20  Livestream · Qualität 100 %" und die Änderung,
 ## z. B. "+17 Follower · Community +2" oder mit Hinweis, wenn Bremse/Grenze gekürzt hat.
 static func channel_change_text(change) -> Array[String]:

@@ -10,6 +10,7 @@
 - Neuer Ort „Ladenlokal“ an der Promenade (eigenes Gebäude auf der Karte); dort Filiale „Merch-Laden“ eröffnen (300 € vom Firmenkonto, 2 h), danach eigener Grundumsatz und eigene Fixkosten im Tagesabschluss (Ticket 4.4)
 - Management-Aktivitäten als Daten: Ware nachbestellen, Kampagne planen (Büro), Merch im Stream zeigen (Studio), Laden führen (Ladenlokal) – mit Voraussetzung und Wirkung aufs Unternehmen (Ticket 4.4)
 - Spielstand Version 9 (Filiale) mit Migration von Version 8 (Ticket 4.4)
+- Spielansicht: Firmenkonto im HUD, Abschnitt „Unternehmen“ (Auslastung, Ruf, erwartetes Tagesergebnis, Filiale, Einlage/Entnahme 100 €), „Tagesabschlüsse“ und „Unternehmens-Verlauf“ mit Begründungen; Firmenbuchungen in den letzten Buchungen markiert (Ticket 4.5)
 
 ## Unveröffentlicht – Phase 3 (iPhone-Abnahme ok, 11.10.2026)
 - ChannelSystem: Kanalprofil mit Followern (0–1.000.000, Wachstumsbremse), Community-Stimmung und Ruf (0–100); jede Änderung mit Begründung im Kanal-Protokoll (Ticket 3.1)

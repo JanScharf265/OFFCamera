@@ -22,12 +22,16 @@ const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const LocationSystemScript := preload("res://scripts/systems/location_system.gd")
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
+const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
 const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const CityMapScript := preload("res://scripts/ui/city_map.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 const RECENT_ENTRY_COUNT := 5
 const RECENT_CHANNEL_COUNT := 5
+const RECENT_COMPANY_COUNT := 5
+## Betrag je Tipp auf Einlage/Entnahme.
+const TRANSFER_STEP_CENTS := 10000
 const UPCOMING_APPOINTMENT_COUNT := 2
 ## Hat sich die Liste zwischen Antippen und Loslassen weiter bewegt,
 ## war es ein Scrollen, kein Tippen – die Aktion startet dann nicht.
@@ -46,6 +50,12 @@ var _growth_label: Label
 var _channel_score_labels := {}
 var _channel_score_bars := {}
 var _channel_history: VBoxContainer
+var _company_balance_label: Label
+var _company_panel: VBoxContainer
+var _company_settlements: VBoxContainer
+var _company_history: VBoxContainer
+## Zuletzt gebauter Zustand des Unternehmens-Abschnitts ("none"/"founded"), um nur bei Wechsel neu zu bauen.
+var _company_panel_state := ""
 var _stat_labels := {}
 var _stat_bars := {}
 var _feedback_label: Label
@@ -138,6 +148,16 @@ func _ready() -> void:
 	_channel_history = _list("ChannelHistory", 8)
 	content.add_child(_channel_history)
 
+	content.add_child(UiStyle.section_label("Unternehmen"))
+	_company_panel = _list("CompanyPanel", 12)
+	content.add_child(_company_panel)
+	content.add_child(UiStyle.section_label("Tagesabschlüsse"))
+	_company_settlements = _list("CompanySettlements", 8)
+	content.add_child(_company_settlements)
+	content.add_child(UiStyle.section_label("Unternehmens-Verlauf"))
+	_company_history = _list("CompanyHistory", 8)
+	content.add_child(_company_history)
+
 	content.add_child(UiStyle.section_label("Letzte Buchungen"))
 	_ledger_list = _list("LedgerList", 8)
 	content.add_child(_ledger_list)
@@ -181,6 +201,10 @@ func _build_hud() -> Control:
 	_balance_label = UiStyle.label("")
 	_balance_label.name = "BalanceLabel"
 	box.add_child(_balance_label)
+
+	_company_balance_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
+	_company_balance_label.name = "CompanyBalanceLabel"
+	box.add_child(_company_balance_label)
 
 	_channel_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
 	_channel_label.name = "ChannelLabel"
@@ -603,6 +627,7 @@ func _refresh() -> void:
 	_refresh_appointments()
 	_refresh_location_panel()
 	_refresh_channel()
+	_refresh_company()
 	_refresh_ledger_list()
 	_refresh_event()
 
@@ -795,6 +820,133 @@ func _refresh_channel() -> void:
 		_channel_history.add_child(row)
 
 
+func _refresh_company() -> void:
+	var company := _game.company
+	_company_balance_label.visible = company.is_founded()
+	_company_balance_label.text = "Firmenkonto: %s" % LedgerSystemScript.format_cents(
+			_game.ledger.get_balance(LedgerSystemScript.COMPANY))
+
+	var state := "founded" if company.is_founded() else "none"
+	if state != _company_panel_state:
+		_company_panel_state = state
+		_clear(_company_panel)
+		if company.is_founded():
+			_company_panel.add_child(_build_company_overview())
+		else:
+			var hint := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+			hint.name = "CompanyHint"
+			_company_panel.add_child(hint)
+	if company.is_founded():
+		_update_company_overview()
+	else:
+		var names := PackedStringArray()
+		for type_id in company.get_catalog().get_ids():
+			var definition := company.get_catalog().get_definition(type_id)
+			var location := _game.locations.get_catalog().get_definition(definition.found_location)
+			names.append("%s (%s)" % [definition.display_name, location.display_name if location != null else "?"])
+		(_company_panel.find_child("CompanyHint", false, false) as Label).text = \
+				"Noch kein Unternehmen. Gründen möglich: %s." % ", ".join(names)
+
+	_clear(_company_settlements)
+	var settlements := company.get_settlements()
+	if settlements.is_empty():
+		_company_settlements.add_child(UiStyle.label("Noch keine Tagesabschlüsse.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+	for i in range(settlements.size() - 1, maxi(settlements.size() - RECENT_COMPANY_COUNT, 0) - 1, -1):
+		var settlement: Dictionary = settlements[i]
+		var color := UiStyle.TEXT if settlement["paid"] else UiStyle.NEGATIVE
+		_company_settlements.add_child(UiStyle.wrapping_label(settlement["text"], UiStyle.SMALL_FONT_SIZE, color))
+
+	_clear(_company_history)
+	var history := company.get_history()
+	if history.is_empty():
+		_company_history.add_child(UiStyle.label("Noch keine Änderungen.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+	for i in range(history.size() - 1, maxi(history.size() - RECENT_COMPANY_COUNT, 0) - 1, -1):
+		var lines := ActivityText.company_change_text(history[i])
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 2)
+		row.add_child(UiStyle.wrapping_label(lines[0], UiStyle.SMALL_FONT_SIZE))
+		if not lines[1].is_empty():
+			row.add_child(UiStyle.wrapping_label(lines[1], UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+		_company_history.add_child(row)
+
+
+func _build_company_overview() -> Control:
+	var card := UiStyle.card()
+	var box := VBoxContainer.new()
+	box.name = "CompanyOverview"
+	box.add_theme_constant_override("separation", 8)
+	card.add_child(box)
+	for label_name in ["CompanyName", "CompanyAccount"]:
+		var label := UiStyle.label("", UiStyle.LARGE_FONT_SIZE if label_name == "CompanyName" else UiStyle.FONT_SIZE)
+		label.name = label_name
+		box.add_child(label)
+	for key in ["utilization", "reputation"]:
+		var label := UiStyle.label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+		label.name = "CompanyValue_%s" % key
+		box.add_child(label)
+		var bar := ProgressBar.new()
+		bar.name = "CompanyBar_%s" % key
+		bar.min_value = 0
+		bar.max_value = CompanySystemScript.MAX_SCORE
+		bar.show_percentage = false
+		bar.custom_minimum_size.y = 14
+		box.add_child(bar)
+	for label_name in ["CompanyForecast", "CompanyBranch"]:
+		var label := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
+		label.name = label_name
+		box.add_child(label)
+	# Untereinander: nebeneinander wären die Texte auf schmalen Geräten breiter als der Bildschirm.
+	var deposit := _scroll_button("%s einlegen (privat → Firma)" % LedgerSystemScript.format_cents(TRANSFER_STEP_CENTS),
+			"CompanyDepositButton")
+	deposit.pressed.connect(_on_company_transfer_pressed.bind(true))
+	box.add_child(deposit)
+	var withdraw := _scroll_button("%s entnehmen (Firma → privat)" % LedgerSystemScript.format_cents(TRANSFER_STEP_CENTS),
+			"CompanyWithdrawButton")
+	withdraw.pressed.connect(_on_company_transfer_pressed.bind(false))
+	box.add_child(withdraw)
+	return card
+
+
+func _update_company_overview() -> void:
+	var company := _game.company
+	var box := _company_panel.find_child("CompanyOverview", true, false) as Control
+	var definition := company.get_type()
+	(box.find_child("CompanyName", false, false) as Label).text = definition.display_name
+	(box.find_child("CompanyAccount", false, false) as Label).text = "Firmenkonto: %s" % \
+			LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY))
+	for key in ["utilization", "reputation"]:
+		var value := company.get_value(key)
+		(box.find_child("CompanyValue_%s" % key, false, false) as Label).text = "%s %d/%d" % [
+				CompanySystemScript.LABELS[key], value, CompanySystemScript.MAX_SCORE]
+		(box.find_child("CompanyBar_%s" % key, false, false) as ProgressBar).value = value
+	var outcome := company.preview_day()
+	(box.find_child("CompanyForecast", false, false) as Label).text = \
+			"Heute erwartet: Umsatz %s · Fixkosten %s · Ergebnis %s (abgerechnet beim Tageswechsel; Auslastung -%d ohne Pflege)" % [
+			ActivityText.signed_money(outcome["revenue_cents"]), ActivityText.signed_money(-outcome["costs_cents"]),
+			ActivityText.signed_money(outcome["revenue_cents"] - outcome["costs_cents"]), definition.utilization_decay_per_day]
+	var branch_label := box.find_child("CompanyBranch", false, false) as Label
+	branch_label.visible = definition.has_branch
+	if definition.has_branch:
+		var location := _game.locations.get_catalog().get_definition(definition.branch_location)
+		var place := location.display_name if location != null else definition.branch_location
+		branch_label.text = ("Filiale %s: geöffnet (%s)" if company.is_branch_open() else "Filiale %s: noch nicht eröffnet (im %s)") \
+				% [definition.branch_display_name, place]
+	var deposit := box.find_child("CompanyDepositButton", true, false) as Button
+	deposit.disabled = not company.check_deposit(TRANSFER_STEP_CENTS).is_empty()
+	var withdraw := box.find_child("CompanyWithdrawButton", true, false) as Button
+	withdraw.disabled = not company.check_withdraw(TRANSFER_STEP_CENTS).is_empty()
+
+
+func _on_company_transfer_pressed(is_deposit: bool) -> void:
+	if _was_scroll():
+		return
+	var amount := ActivityText.signed_money(TRANSFER_STEP_CENTS)
+	if is_deposit:
+		_after_action(_game.company.deposit(TRANSFER_STEP_CENTS), "Einlage %s ins Unternehmen" % amount)
+	else:
+		_after_action(_game.company.withdraw(TRANSFER_STEP_CENTS), "Entnahme %s aus dem Unternehmen" % amount)
+
+
 func _refresh_ledger_list() -> void:
 	_clear(_ledger_list)
 	var entries := _game.ledger.get_entries()
@@ -806,7 +958,9 @@ func _refresh_ledger_list() -> void:
 	for i in range(entries.size() - 1, oldest_shown - 1, -1):
 		var entry := entries[i]
 		var row := HBoxContainer.new()
-		var text := UiStyle.wrapping_label("%s  %s" % [TimeSystemScript.format_stamp(entry.time_minutes), entry.description],
+		var account_mark := " (Firma)" if entry.account == LedgerSystemScript.COMPANY else ""
+		var text := UiStyle.wrapping_label("%s  %s%s" % [TimeSystemScript.format_stamp(entry.time_minutes),
+				entry.description, account_mark],
 				UiStyle.SMALL_FONT_SIZE)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(text)
