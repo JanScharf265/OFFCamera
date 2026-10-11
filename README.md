@@ -76,13 +76,25 @@ Warnungen zu Kamera-/Mikrofon-/Foto-Usage-Descriptions sind harmlos (die App fra
 
 Fehler? Exakte Meldung aus Godot bzw. Xcode kopieren (siehe „Fehlerbericht“ in [`CLAUDE.md`](CLAUDE.md)).
 
+## Tests ausführen (Mac)
+
+```sh
+cd ~/Developer/OFFCamera
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . -s res://tests/run_tests.gd
+```
+
+Am Ende steht `N bestanden, M fehlgeschlagen`. ERROR-Zeilen direkt nach
+„(die folgende ERROR-Meldung ist erwartet)“ sind beabsichtigt.
+
 ## Projektstruktur
 
 ```
 project.godot        Projektkonfiguration (Hochformat, GL-Compatibility-Renderer)
 scenes/app/          App-Szenen (aktuell: Startbildschirm)
+scripts/systems/     Spielsysteme (Zeit, später Ledger, Events, …)
 scripts/ui/          UI-Skripte (zeigen nur an, keine Spielregeln)
+tests/               Tests + Runner (nicht im iOS-Export)
 docs/                Roadmap, Architektur, Entscheidungen
 ```
 
-Weitere Ordner (`scripts/systems/`, `data/`, `tests/` …) entstehen erst, wenn sie gebraucht werden.
+Weitere Ordner (`data/` …) entstehen erst, wenn sie gebraucht werden.

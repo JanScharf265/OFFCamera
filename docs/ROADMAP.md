@@ -17,6 +17,13 @@ Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und 
 Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, Energie, Stimmung),
 2–4 Aktivitäten, zentrales TimeSystem, zentrales Ledger, ein Ereignis, Speichern/Laden, Fehler- und Leerzustände.
 
+- [ ] Ticket 1: TimeSystem + Test-Runner (Code fertig, Testlauf auf dem Mac ausstehend)
+- [ ] Ticket 2: LedgerSystem
+- [ ] Ticket 3: GameState + ActivitySystem (Aktivitäten als Daten)
+- [ ] Ticket 4: Hauptmenü + HUD (danach iPhone-Test)
+- [ ] Ticket 5: EventSystem (ein Ereignis, genau einmal)
+- [ ] Ticket 6: SaveSystem + „Fortsetzen“ (danach iPhone-Test)
+
 Abnahme: Aktivität ändert Zeit exakt wie definiert · Einnahme und Ausgabe im Ledger · Ereignis nur einmal ·
 Speichern → App schließen → Laden konsistent · auf dem iPhone komplett per Touch bedienbar.
 

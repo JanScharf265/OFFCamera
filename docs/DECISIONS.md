@@ -12,3 +12,8 @@ damit sich die UI an verschiedene iPhone-Seitenverhältnisse anpasst. Die Editor
 ## 003 – Godot-Version
 Festgelegt auf **Godot 4.7.2.stable** (Standard-Version, nicht .NET), bestätigt über „Über Godot“ und installierte iOS-Exportvorlagen.
 Xcode 27.0. Nicht mitten in einer Phase aktualisieren.
+
+## 004 – Systeme als RefCounted, eigener Test-Runner
+Spielsysteme sind `RefCounted`-Klassen statt Autoloads, damit sie ohne Szene testbar sind und es
+keine versteckten globalen Zustände gibt. Tests laufen mit einem eigenen kleinen Runner
+(`tests/run_tests.gd`) statt eines Addons wie GUT – keine zusätzliche Abhängigkeit.
