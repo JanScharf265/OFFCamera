@@ -13,7 +13,7 @@ Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und 
 - [x] Commit markiert funktionierenden Ausgangsstand (`bac525c`), Versionen im README eingetragen
 - [x] App startet auch ohne Xcode vom Homescreen
 
-## Phase 1 – Spielbares Grundgerüst (Code fertig, iPhone-Abnahme ausstehend)
+## Phase 1 – Spielbares Grundgerüst ✅ (11.10.2026)
 Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, Energie, Stimmung),
 2–4 Aktivitäten, zentrales TimeSystem, zentrales Ledger, ein Ereignis, Speichern/Laden, Fehler- und Leerzustände.
 
@@ -22,22 +22,22 @@ Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, 
 - [x] Ticket 3: GameState + ActivitySystem (Aktivitäten als Daten) (48/48 Tests grün)
 - [x] Ticket 4: Hauptmenü + HUD (53/53 Tests grün, auf dem iPhone bedienbar inkl. Scrollen)
 - [x] Ticket 5: EventSystem (ein Ereignis, genau einmal) (Tests grün, im Editor geprüft)
-- [ ] Ticket 6: SaveSystem, „Fortsetzen“, Einstellungen (Code fertig; Testlauf + iPhone-Abnahme ausstehend)
+- [x] Ticket 6: SaveSystem, „Fortsetzen“, Einstellungen (Tests grün, iPhone-Abnahme ok)
 
-Abnahme auf dem iPhone (alle Punkte abhaken, dann ist Phase 1 fertig):
-- [ ] Neues Spiel startet: Tag 1 · Mo, 08:00, 500,00 €, Energie 80, Stimmung 60
-- [ ] Aktivität ändert Zeit exakt wie auf der Karte angegeben
-- [ ] Eine Ausgabe (Essen gehen) und eine Einnahme (Kurzer Stream) stehen in den letzten Buchungen
-- [ ] Gesperrte Aktivität zeigt den Grund (z. B. zu wenig Energie)
-- [ ] Ereignis um 20:00 erscheint genau einmal; nach „Zusagen“ +30,00 € in den Buchungen
-- [ ] App komplett beenden (wegwischen), neu öffnen, „Fortsetzen“: gleiche Zeit, gleiches Geld, gleiche Buchungen
-- [ ] Ereignis kommt nach dem Laden nicht erneut
-- [ ] „Neues Spiel“ fragt nach, bevor es den Spielstand überschreibt
-- [ ] Einstellungen → Spielstand löschen (mit Rückfrage) → „Fortsetzen“ ist weg
-- [ ] Alles per Touch bedienbar, nichts von Notch/Home-Balken verdeckt, Liste scrollbar
-- [ ] Flugmodus an: App funktioniert unverändert
+Abnahme auf dem iPhone (gemeinsam mit Phase 2 durchgespielt, alles ok):
+- [x] Neues Spiel startet: Tag 1 · Mo, 08:00, 500,00 €, Energie 80, Stimmung 60
+- [x] Aktivität ändert Zeit exakt wie auf der Karte angegeben
+- [x] Eine Ausgabe (Essen gehen) und eine Einnahme (Kurzer Stream) stehen in den letzten Buchungen
+- [x] Gesperrte Aktivität zeigt den Grund (z. B. zu wenig Energie)
+- [x] Ereignis um 20:00 erscheint genau einmal; nach „Zusagen“ +30,00 € in den Buchungen
+- [x] App komplett beenden (wegwischen), neu öffnen, „Fortsetzen“: gleiche Zeit, gleiches Geld, gleiche Buchungen
+- [x] Ereignis kommt nach dem Laden nicht erneut
+- [x] „Neues Spiel“ fragt nach, bevor es den Spielstand überschreibt
+- [x] Einstellungen → Spielstand löschen (mit Rückfrage) → „Fortsetzen“ ist weg
+- [x] Alles per Touch bedienbar, nichts von Notch/Home-Balken verdeckt, Liste scrollbar
+- [x] Flugmodus an: App funktioniert unverändert
 
-## Phase 2 – Alltag und Marbella ← aktuell
+## Phase 2 – Alltag und Marbella ✅ (11.10.2026)
 Orte als Daten mit Kartenposition und Öffnungszeiten, 2D-Stadtkarte, Reisezeit über das TimeSystem,
 ortsgebundene Aktivitäten, feste Termine, Speicherstand Version 2 mit Migration.
 Auf Wunsch des Game Directors begonnen, bevor die iPhone-Abnahme von Phase 1 durch war.
@@ -49,20 +49,26 @@ Auf Wunsch des Game Directors begonnen, bevor die iPhone-Abnahme von Phase 1 dur
 - [x] Feste Termine aus Daten: vor Ort ab 1 h vorher wahrnehmen, verpasst kostet Stimmung, Warnung bei Kollision
 - [x] Speicherstand Version 2, Migration von Version 1
 - [x] Automatische Tests (127/127 grün auf dem Mac, Godot 4.7.2 headless)
-- [ ] Im Editor durchgespielt
-- [ ] iPhone-Abnahme
+- [x] Im Editor durchgespielt
+- [x] iPhone-Abnahme
 
 Abnahme auf dem iPhone:
-- [ ] Neues Spiel startet in der Wohnung; Karte zeigt alle fünf Orte, alles antippbar
-- [ ] Ort antippen zeigt Öffnungszeiten, Entfernung und Fahrzeit (Wohnung → Studio: 3,6 km · 20 min)
-- [ ] „Hinfahren“ stellt die Uhr exakt um die Fahrzeit vor, Ort im HUD wechselt
-- [ ] Nur Aktivitäten des aktuellen Orts sind sichtbar; geschlossener Ort zeigt den Grund
-- [ ] Schlafen: +8 h, Energie +60
-- [ ] Termin „Treffen mit der Kamerafrau“ (Tag 1, 14:00, Studio) ab 13:00 vor Ort wahrnehmbar
-- [ ] Aktion, die den Termin überschneidet, zeigt erst eine Warnung; zweiter Tipp führt sie aus
-- [ ] Verpasster Termin: Hinweis und Stimmung −10, genau einmal (auch nach Neustart nicht erneut)
-- [ ] Spielstand aus Phase 1 lässt sich fortsetzen (Ort Wohnung, gleiche Zeit/Geld/Buchungen)
-- [ ] Karte und Listen per Touch scrollbar, nichts verdeckt
+- [x] Neues Spiel startet in der Wohnung; Karte zeigt alle fünf Orte, alles antippbar
+- [x] Ort antippen zeigt Öffnungszeiten, Entfernung und Fahrzeit (Wohnung → Studio: 3,6 km · 20 min)
+- [x] „Hinfahren“ stellt die Uhr exakt um die Fahrzeit vor, Ort im HUD wechselt
+- [x] Nur Aktivitäten des aktuellen Orts sind sichtbar; geschlossener Ort zeigt den Grund
+- [x] Schlafen: +8 h, Energie +60
+- [x] Termin „Treffen mit der Kamerafrau“ (Tag 1, 14:00, Studio) ab 13:00 vor Ort wahrnehmbar
+- [x] Aktion, die den Termin überschneidet, zeigt erst eine Warnung; zweiter Tipp führt sie aus
+- [x] Verpasster Termin: Hinweis und Stimmung −10, genau einmal (auch nach Neustart nicht erneut)
+- [x] Spielstand aus Phase 1 lässt sich fortsetzen (Ort Wohnung, gleiche Zeit/Geld/Buchungen)
+- [x] Karte und Listen per Touch scrollbar, nichts verdeckt
+
+## Grafik-Ticket G1 – Isometrische Stadtansicht ← als Nächstes
+Auf Wunsch des Game Directors vor Phase 3: Stadtkarte im Stil eines Städtebauspiels
+(isometrisch, schräg von oben) mit Meer, Straßen und erkennbaren Gebäuden für die fünf Orte,
+Standortmarkierung und Fahrzeug beim Reisen. Nur Darstellung – Spiellogik und Tests bleiben unverändert.
+Grafiken aus frei nutzbaren (CC0) Asset-Paketen, später austauschbar.
 
 ## Spätere Phasen
 3. Streamer-/Creator-Karriere
