@@ -48,6 +48,9 @@ Stand Phase 1, Ticket 4: Zeit, Ledger, Spielerwerte, Aktivitäten und eine erste
   Texte für Aktivitäten/Beträge in `activity_text.gd`.
 - `game_screen.gd` aktiviert/deaktiviert Aktivitäten ausschließlich über `ActivitySystem.check()`
   und aktualisiert nach jeder Aktion explizit (nicht über System-Signale, die mitten im Ablauf feuern).
+- Scrollen per Touch: Karten und Buttons in der Liste haben `mouse_filter = PASS`, damit Wischgesten
+  die `ScrollContainer` erreichen. Hat sich die Liste zwischen Antippen und Loslassen eines Buttons
+  um mehr als 12 px bewegt, gilt das als Scrollen und die Aktivität startet nicht.
 - „Fortsetzen“ setzt vorerst nur die Sitzung im Speicher fort; Speichern folgt in Ticket 6.
 
 ### Konvention: Verweise zwischen Skripten

@@ -17,6 +17,9 @@ const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 const RECENT_ENTRY_COUNT := 5
+## Hat sich die Liste zwischen Antippen und Loslassen weiter bewegt,
+## war es ein Scrollen, kein Tippen – die Aktivität startet dann nicht.
+const TAP_SCROLL_TOLERANCE := 12
 
 var _game: GameStateScript
 var _date_label: Label
@@ -28,6 +31,8 @@ var _feedback_label: Label
 ## activity_id -> {"button": Button, "reason": Label}
 var _cards := {}
 var _ledger_list: VBoxContainer
+var _scroll: ScrollContainer
+var _scroll_at_press := 0
 
 
 ## Vor dem Einfügen in den Baum aufrufen.
@@ -46,9 +51,11 @@ func _ready() -> void:
 	add_child(_feedback_label)
 
 	var scroll := ScrollContainer.new()
+	scroll.name = "ActivityScroll"
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
+	_scroll = scroll
 
 	var content := VBoxContainer.new()
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -126,6 +133,9 @@ func _build_activity_card(activity_id: String) -> Control:
 
 	var button := UiStyle.button("Starten")
 	button.name = "StartButton_%s" % activity_id
+	# PASS: Wischgesten auf dem Button erreichen die ScrollContainer.
+	button.mouse_filter = Control.MOUSE_FILTER_PASS
+	button.button_down.connect(func() -> void: _scroll_at_press = _scroll.scroll_vertical)
 	button.pressed.connect(_on_activity_pressed.bind(activity_id))
 	box.add_child(button)
 
@@ -134,6 +144,8 @@ func _build_activity_card(activity_id: String) -> Control:
 
 
 func _on_activity_pressed(activity_id: String) -> void:
+	if absi(_scroll.scroll_vertical - _scroll_at_press) > TAP_SCROLL_TOLERANCE:
+		return
 	var definition := _game.activities.get_catalog().get_definition(activity_id)
 	var reason := _game.activities.start(activity_id)
 	if reason.is_empty():

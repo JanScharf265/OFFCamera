@@ -66,9 +66,12 @@ static func button(text: String) -> Button:
 	return result
 
 
+## Karten leiten Berührungen weiter (PASS), damit eine umgebende
+## ScrollContainer auch dann scrollt, wenn die Geste auf der Karte beginnt.
 static func card() -> PanelContainer:
 	var result := PanelContainer.new()
 	result.add_theme_stylebox_override("panel", _box(SURFACE, PADDING))
+	result.mouse_filter = Control.MOUSE_FILTER_PASS
 	return result
 
 
