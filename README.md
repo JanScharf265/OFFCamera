@@ -6,7 +6,6 @@ Kein App Store, kein Android, offline spielbar.
 ## Stand
 
 **Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen) – als Nächstes: Grafik-Ticket G1 (isometrische Stadt), danach Phase 3.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
-Phase 1: Code fertig, iPhone-Abnahme ausstehend. (Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).)
 
 | Was | Status |
 | --- | --- |
