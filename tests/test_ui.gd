@@ -6,6 +6,9 @@ const AppScript := preload("res://scripts/ui/app.gd")
 const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
+const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
+
+const TEST_SAVE_PATH := "user://test_ui_savegame.json"
 
 
 func test_format_duration() -> void:
@@ -102,9 +105,64 @@ func test_event_replaces_activities_until_decided() -> void:
 	app.free()
 
 
+func test_save_and_continue_after_restart() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "StartButton_stream_short")  # 08:00 -> 10:00, +25,00 €
+	app.free()  # wie App beenden
+
+	var restarted := _start_app(true)
+	assert_true(_find(restarted, "ContinueButton") != null, "Fortsetzen fehlt nach Neustart")
+	_press(restarted, "ContinueButton")
+	assert_eq((_find(restarted, "ClockLabel") as Label).text, "10:00")
+	assert_eq((_find(restarted, "BalanceLabel") as Label).text, "Konto: 525,00 €")
+	assert_eq(restarted.game.ledger.get_entries().size(), 1)
+	restarted.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
+func test_new_game_with_existing_save_needs_confirmation() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "StartButton_rest")  # 08:00 -> 09:00
+	_press(app, "MenuButton")
+
+	_press(app, "NewGameButton")  # erster Tipp: nur Rückfrage
+	assert_eq(app.game.time.format_clock(), "09:00")
+	_press(app, "NewGameButton")  # zweiter Tipp: neues Spiel
+	assert_eq(app.game.time.format_clock(), "08:00")
+	app.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
+func test_delete_save_in_settings() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "MenuButton")
+	_press(app, "SettingsButton")
+	_press(app, "DeleteSaveButton")  # Rückfrage
+	assert_true(SaveSystemScript.has_save(TEST_SAVE_PATH), "nach erstem Tipp darf noch nichts gelöscht sein")
+	_press(app, "DeleteSaveButton")
+	assert_eq(SaveSystemScript.has_save(TEST_SAVE_PATH), false)
+	assert_true(app.game == null, "Sitzung sollte verworfen sein")
+	_press(app, "BackButton")
+	assert_true(_find(app, "ContinueButton") == null, "Fortsetzen darf ohne Spielstand nicht da sein")
+	app.free()
+
+
 ## App in den Baum hängen; null (mit Fehlermeldung), wenn _ready() nicht lief.
-func _start_app() -> AppScript:
+## Startet immer ohne vorhandenen Spielstand (eigener Testpfad).
+func _start_app(keep_save: bool = false) -> AppScript:
+	if not keep_save:
+		SaveSystemScript.delete_save(TEST_SAVE_PATH)
 	var app := AppScript.new()
+	app.save_path = TEST_SAVE_PATH
 	(Engine.get_main_loop() as SceneTree).root.add_child(app)
 	assert_true(app.is_inside_tree(), "App hängt nicht im Szenenbaum")
 	if not app.is_inside_tree():

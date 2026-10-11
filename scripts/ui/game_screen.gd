@@ -9,6 +9,8 @@ extends VBoxContainer
 ## wo check() noch "Zeitfortschritt läuft" melden würde.
 
 signal menu_pressed
+## Nach jeder erfolgreichen Aktion (Aktivität, Ereignis-Entscheidung) – die App speichert dann.
+signal state_changed
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
@@ -161,6 +163,18 @@ func _on_activity_pressed(activity_id: String) -> void:
 	else:
 		_show_feedback(reason, UiStyle.NEGATIVE)
 	_refresh()
+	if reason.is_empty():
+		state_changed.emit()
+
+
+## Hinweis in der Rückmeldezeile (z. B. nach dem Laden eines Backups).
+func show_message(text: String) -> void:
+	_show_feedback(text, UiStyle.TEXT)
+
+
+## Fehler in der Rückmeldezeile (z. B. Speichern fehlgeschlagen).
+func show_error(text: String) -> void:
+	_show_feedback(text, UiStyle.NEGATIVE)
 
 
 func _show_feedback(text: String, color: Color) -> void:
@@ -225,6 +239,8 @@ func _on_event_option_pressed(event_id: String, option_id: String, option_label:
 	else:
 		_show_feedback(reason, UiStyle.NEGATIVE)
 	_refresh()
+	if reason.is_empty():
+		state_changed.emit()
 
 
 func _refresh_ledger_list() -> void:

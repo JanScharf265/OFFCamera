@@ -1,16 +1,24 @@
 extends Control
 
-## Wurzel der App: Theme, Safe Area und Wechsel zwischen den Bildschirmen.
+## Wurzel der App: Theme, Safe Area, Bildschirmwechsel und Speichern.
 ## Hält die aktuelle Spielsitzung (GameState) – dafür ist kein Autoload nötig.
+##
+## Automatisch gespeichert wird: beim Start eines neuen Spiels, nach jeder
+## erfolgreichen Aktion im Spiel, beim Wechsel ins Menü und wenn die App in den
+## Hintergrund geht oder geschlossen wird (iOS kann eine App jederzeit beenden).
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
 const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 const EventCatalogScript := preload("res://scripts/systems/event_catalog.gd")
+const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
 const MainMenuScript := preload("res://scripts/ui/main_menu.gd")
 const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
+const SettingsScreenScript := preload("res://scripts/ui/settings_screen.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
-## Laufende Sitzung oder null, solange kein Spiel gestartet wurde.
+## Speicherort; Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
+var save_path := SaveSystemScript.DEFAULT_PATH
+## Laufende Sitzung oder null, solange kein Spiel gestartet/geladen wurde.
 var game: GameStateScript
 
 var _catalog: ActivityCatalogScript
@@ -46,24 +54,78 @@ func _ready() -> void:
 	show_main_menu()
 
 
-func show_main_menu() -> void:
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT \
+			or what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_save_game()
+
+
+func show_main_menu(message: String = "") -> void:
+	_save_game()
 	var menu := MainMenuScript.new()
-	menu.continue_available = game != null
+	menu.continue_available = game != null or SaveSystemScript.has_save(save_path)
+	menu.message = message
 	menu.new_game_pressed.connect(start_new_game)
-	menu.continue_pressed.connect(show_game)
+	menu.continue_pressed.connect(continue_game)
+	menu.settings_pressed.connect(show_settings)
 	_set_screen(menu)
 
 
 func start_new_game() -> void:
 	game = GameStateScript.new(_catalog, _event_catalog)
+	_save_game()
 	show_game()
 
 
-func show_game() -> void:
+## Setzt die Sitzung im Speicher fort oder lädt den Spielstand.
+func continue_game() -> void:
+	if game == null:
+		var result := SaveSystemScript.load_game(_catalog, _event_catalog, save_path)
+		if result["game"] == null:
+			var reason: String = result["error"]
+			show_main_menu(reason if not reason.is_empty() else "Es gibt noch keinen Spielstand.")
+			return
+		game = result["game"]
+		if result["from_backup"]:
+			show_game("Der letzte Spielstand war beschädigt – das Backup wurde geladen.")
+			return
+	show_game()
+
+
+func show_game(message: String = "") -> void:
 	var screen := GameScreenScript.new()
 	screen.setup(game)
 	screen.menu_pressed.connect(show_main_menu)
+	screen.state_changed.connect(_save_game)
 	_set_screen(screen)
+	if not message.is_empty():
+		screen.show_message(message)
+
+
+func show_settings(message: String = "") -> void:
+	var settings := SettingsScreenScript.new()
+	settings.has_save = game != null or SaveSystemScript.has_save(save_path)
+	settings.message = message
+	settings.delete_save_pressed.connect(_delete_save)
+	settings.back_pressed.connect(show_main_menu)
+	_set_screen(settings)
+
+
+func _delete_save() -> void:
+	SaveSystemScript.delete_save(save_path)
+	game = null
+	show_settings("Der Spielstand wurde gelöscht.")
+
+
+func _save_game() -> void:
+	if game == null:
+		return
+	var error := SaveSystemScript.save(game, save_path)
+	if error.is_empty():
+		return
+	push_error("App: %s" % error)
+	if _screen != null and _screen.has_method("show_error"):
+		_screen.call("show_error", error)
 
 
 func _set_screen(screen: Control) -> void:

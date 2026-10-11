@@ -37,3 +37,31 @@ func _init(activity_catalog: ActivityCatalogScript, event_catalog: EventCatalogS
 	stats = PlayerStatsScript.new(START_ENERGY, START_MOOD)
 	activities = ActivitySystemScript.new(time, ledger, stats, activity_catalog)
 	events = EventSystemScript.new(time, ledger, stats, event_catalog)
+
+
+func to_dict() -> Dictionary:
+	return {
+		"time": time.to_dict(),
+		"ledger": ledger.to_dict(),
+		"stats": stats.to_dict(),
+		"events": events.to_dict(),
+	}
+
+
+## Überschreibt den Zustand mit gespeicherten Daten. "" = ok, sonst Fehlertext.
+## Bei einem Fehler kann der GameState teilweise geändert sein – der Aufrufer
+## verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
+func restore(data: Dictionary) -> String:
+	for section in ["time", "ledger", "stats"]:
+		if typeof(data.get(section)) != TYPE_DICTIONARY:
+			return "Abschnitt '%s' fehlt." % section
+	var error := time.restore(data["time"])
+	if error.is_empty():
+		error = ledger.restore(data["ledger"])
+	if error.is_empty():
+		error = stats.restore(data["stats"])
+	if error.is_empty():
+		var events_data: Variant = data.get("events", {})
+		error = events.restore(events_data) if typeof(events_data) == TYPE_DICTIONARY \
+				else "Abschnitt 'events' ist ungültig."
+	return error

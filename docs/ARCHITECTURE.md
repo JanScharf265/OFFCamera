@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 1, Ticket 5: Zeit, Ledger, Spielerwerte, Aktivitäten, Ereignisse und eine spielbare UI.
+Stand Phase 1, Ticket 6: alle Kernsysteme von Phase 1 inkl. Speichern/Laden; iPhone-Abnahme ausstehend.
 
 ## Umgesetzt
 
@@ -54,6 +54,19 @@ Stand Phase 1, Ticket 5: Zeit, Ledger, Spielerwerte, Aktivitäten, Ereignisse un
   Ablehnung mit Text, Ereignis bleibt offen.
 - Laden eines Spielstands (Ticket 6) löst nichts erneut aus, weil nur `time_advanced` auslöst.
 
+### Speichern/Laden (`scripts/systems/save_system.gd`)
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 1, "game": GameState.to_dict()}`.
+  Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
+  sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
+- Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
+  Spielerwerte, Ereignisse (ausgelöst, offen, entschieden + gewählte Option).
+- Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
+- Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
+  ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.
+- Neue Formatversion: `SAVE_VERSION` erhöhen und in `_migrate()` einen Schritt ergänzen.
+- Bekannte Grenze: Ein Ereignis, das erst nach dem Speichern zu den Daten hinzukommt und dessen
+  Zeitpunkt schon vorbei ist, wird in diesem Spielstand nie ausgelöst.
+
 ### UI (`scenes/app/app.tscn`, `scripts/ui/`)
 - `app.gd` (Hauptszene): Theme, Safe Area (nur auf Mobilgeräten, in Viewport-Koordinaten umgerechnet),
   hält die laufende `GameState`-Sitzung und wechselt zwischen `main_menu.gd` und `game_screen.gd`.
@@ -65,7 +78,12 @@ Stand Phase 1, Ticket 5: Zeit, Ledger, Spielerwerte, Aktivitäten, Ereignisse un
   die `ScrollContainer` erreichen. Hat sich die Liste zwischen Antippen und Loslassen eines Buttons
   um mehr als 12 px bewegt, gilt das als Scrollen und die Aktivität startet nicht.
 - Offenes Ereignis: `EventPanel` ersetzt die Aktivitätsliste, bis eine Option gewählt ist.
-- „Fortsetzen“ setzt vorerst nur die Sitzung im Speicher fort; Speichern folgt in Ticket 6.
+- Automatisch gespeichert wird beim Start eines neuen Spiels, nach jeder erfolgreichen Aktion
+  (`GameScreen.state_changed`), beim Wechsel ins Menü und bei `NOTIFICATION_APPLICATION_PAUSED`,
+  `…_FOCUS_OUT` und `NOTIFICATION_WM_CLOSE_REQUEST`. Speicherfehler erscheinen in der Rückmeldezeile.
+- Hauptmenü: „Fortsetzen“ (Sitzung im Speicher oder Spielstand auf dem Gerät), „Neues Spiel“
+  (zweiter Tipp nötig, wenn ein Spiel existiert), „Einstellungen“ (`settings_screen.gd`:
+  Spielstand löschen mit zweitem Tipp).
 
 ### Konvention: Verweise zwischen Skripten
 Skripte referenzieren einander über `const X := preload("res://…")` statt über `class_name`.

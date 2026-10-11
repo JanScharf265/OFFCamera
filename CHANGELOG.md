@@ -9,6 +9,8 @@
 - Alter Phase-0-Startbildschirm entfernt
 - Scrollen per Touch auf dem iPhone, Schutz vor Fehlstart beim Scrollen
 - EventSystem mit Ereignissen als JSON-Daten; erstes Ereignis „Anfrage einer kleinen Marke“ (Tag 1, 20:00) (Ticket 5)
+- Speichern/Laden mit Versionsnummer, Backup und Prüfung; automatisches Speichern; Fortsetzen nach Neustart (Ticket 6)
+- Einstellungen mit „Spielstand löschen“; Rückfrage vor „Neues Spiel“ (Ticket 6)
 
 ## 0.0.1 – Phase 0
 - Godot-4-Grundprojekt (Hochformat, GL Compatibility, 720×1280)

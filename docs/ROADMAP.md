@@ -21,11 +21,21 @@ Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, 
 - [x] Ticket 2: LedgerSystem (27/27 Tests grün auf dem Mac)
 - [x] Ticket 3: GameState + ActivitySystem (Aktivitäten als Daten) (48/48 Tests grün)
 - [x] Ticket 4: Hauptmenü + HUD (53/53 Tests grün, auf dem iPhone bedienbar inkl. Scrollen)
-- [ ] Ticket 5: EventSystem (ein Ereignis, genau einmal) (Code fertig, Testlauf ausstehend)
-- [ ] Ticket 6: SaveSystem + „Fortsetzen“ (danach iPhone-Test)
+- [x] Ticket 5: EventSystem (ein Ereignis, genau einmal) (Tests grün, im Editor geprüft)
+- [ ] Ticket 6: SaveSystem, „Fortsetzen“, Einstellungen (Code fertig; Testlauf + iPhone-Abnahme ausstehend)
 
-Abnahme: Aktivität ändert Zeit exakt wie definiert · Einnahme und Ausgabe im Ledger · Ereignis nur einmal ·
-Speichern → App schließen → Laden konsistent · auf dem iPhone komplett per Touch bedienbar.
+Abnahme auf dem iPhone (alle Punkte abhaken, dann ist Phase 1 fertig):
+- [ ] Neues Spiel startet: Tag 1 · Mo, 08:00, 500,00 €, Energie 80, Stimmung 60
+- [ ] Aktivität ändert Zeit exakt wie auf der Karte angegeben
+- [ ] Eine Ausgabe (Essen gehen) und eine Einnahme (Kurzer Stream) stehen in den letzten Buchungen
+- [ ] Gesperrte Aktivität zeigt den Grund (z. B. zu wenig Energie)
+- [ ] Ereignis um 20:00 erscheint genau einmal; nach „Zusagen“ +30,00 € in den Buchungen
+- [ ] App komplett beenden (wegwischen), neu öffnen, „Fortsetzen“: gleiche Zeit, gleiches Geld, gleiche Buchungen
+- [ ] Ereignis kommt nach dem Laden nicht erneut
+- [ ] „Neues Spiel“ fragt nach, bevor es den Spielstand überschreibt
+- [ ] Einstellungen → Spielstand löschen (mit Rückfrage) → „Fortsetzen“ ist weg
+- [ ] Alles per Touch bedienbar, nichts von Notch/Home-Balken verdeckt, Liste scrollbar
+- [ ] Flugmodus an: App funktioniert unverändert
 
 ## Spätere Phasen
 2. Alltag und Marbella-Karte (Wohnung, Studio, Café, Fitnessstudio, Büro; Reisezeit, Termine)

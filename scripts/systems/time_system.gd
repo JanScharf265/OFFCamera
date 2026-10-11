@@ -102,6 +102,22 @@ func format_date() -> String:
 	return "Tag %d · %s" % [get_day(), WEEKDAY_NAMES[get_weekday()]]
 
 
+func to_dict() -> Dictionary:
+	return {"minutes": _minutes}
+
+
+## Stellt einen gespeicherten Zustand her, ohne Signale zu senden.
+## "" = ok, sonst Fehlertext (Zustand bleibt dann unverändert).
+func restore(data: Dictionary) -> String:
+	var value: Variant = data.get("minutes")
+	if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or value != floorf(value) or value < 0:
+		return "Zeit: 'minutes' fehlt oder ist ungültig."
+	if _is_advancing:
+		return "Zeit: Laden während eines Zeitfortschritts ist nicht möglich."
+	_minutes = int(value)
+	return ""
+
+
 ## Lässt genau `minutes` Spielminuten vergehen.
 ## Gibt false zurück und ändert nichts, wenn minutes <= 0 ist oder
 ## advance() aus einem Signal-Handler heraus erneut aufgerufen wird.

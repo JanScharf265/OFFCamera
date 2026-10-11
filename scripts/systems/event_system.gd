@@ -87,6 +87,50 @@ func resolve(event_id: String, option_id: String) -> String:
 	return ""
 
 
+func to_dict() -> Dictionary:
+	return {
+		"triggered": _triggered.keys(),
+		"pending": Array(_pending),
+		"resolved": _resolved.duplicate(),
+	}
+
+
+## Stellt einen gespeicherten Zustand her, ohne etwas auszulösen oder zu buchen.
+## Offene Ereignisse, die es in den Daten nicht mehr gibt, werden verworfen.
+## "" = ok, sonst Fehlertext (Zustand bleibt dann unverändert).
+func restore(data: Dictionary) -> String:
+	var triggered := {}
+	var pending := PackedStringArray()
+	var resolved := {}
+
+	var raw_triggered: Variant = data.get("triggered", [])
+	var raw_pending: Variant = data.get("pending", [])
+	var raw_resolved: Variant = data.get("resolved", {})
+	if typeof(raw_triggered) not in [TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY] \
+			or typeof(raw_pending) not in [TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY] \
+			or typeof(raw_resolved) != TYPE_DICTIONARY:
+		return "Ereignisse: Format ungültig."
+
+	for id in raw_triggered:
+		if typeof(id) != TYPE_STRING:
+			return "Ereignisse: ungültige ID in 'triggered'."
+		triggered[id] = true
+	for id in raw_resolved:
+		if typeof(id) != TYPE_STRING or typeof(raw_resolved[id]) != TYPE_STRING or not triggered.has(id):
+			return "Ereignisse: 'resolved' passt nicht zu 'triggered'."
+		resolved[id] = raw_resolved[id]
+	for id in raw_pending:
+		if typeof(id) != TYPE_STRING or not triggered.has(id) or resolved.has(id) or pending.has(id):
+			return "Ereignisse: 'pending' passt nicht zu 'triggered'/'resolved'."
+		if _catalog.get_definition(id) != null:
+			pending.append(id)
+
+	_triggered = triggered
+	_pending = pending
+	_resolved = resolved
+	return ""
+
+
 func _on_time_advanced(from_minutes: int, to_minutes: int) -> void:
 	var due: Array[EventDefinitionScript] = []
 	for definition in _catalog.get_all():

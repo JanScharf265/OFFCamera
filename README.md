@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0 abgeschlossen ✅ – als Nächstes Phase 1: Spielbares Grundgerüst** (siehe [`docs/ROADMAP.md`](docs/ROADMAP.md))
+**Phase 1: Spielbares Grundgerüst – Code fertig, iPhone-Abnahme ausstehend** (siehe [`docs/ROADMAP.md`](docs/ROADMAP.md))
 
 | Was | Status |
 | --- | --- |
@@ -85,6 +85,12 @@ cd ~/Developer/OFFCamera
 
 Am Ende steht `N bestanden, M fehlgeschlagen`. ERROR-Zeilen direkt nach
 „(die folgende ERROR-Meldung ist erwartet)“ sind beabsichtigt.
+
+## Spielstand
+
+Liegt lokal auf dem Gerät (`user://savegame.json`, daneben `savegame.json.bak`). Auf dem Mac:
+`~/Library/Application Support/Godot/app_userdata/OFF CAMERA/`. Zurücksetzen im Spiel über
+Einstellungen → Spielstand löschen.
 
 ## Projektstruktur
 

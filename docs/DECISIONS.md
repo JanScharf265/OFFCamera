@@ -22,3 +22,9 @@ keine versteckten globalen Zustände gibt. Tests laufen mit einem eigenen kleine
 Bildschirme werden in GDScript aus Containern aufgebaut, nur die Hauptszene ist eine `.tscn`.
 Grund: Ohne Editor in der Entwicklungsumgebung sind handgeschriebene Szenendateien fehleranfällig;
 Code ist prüfbar und per Test durchklickbar. Kann später für einzelne Bildschirme geändert werden.
+
+## 006 – Spielstand als JSON mit Backup
+Ein Spielstand, lokal unter `user://savegame.json`, als lesbares JSON mit Versionsnummer.
+Atomar über `.tmp` + Umbenennen, der vorherige Stand bleibt als `.bak`. Kein Cloud-Sync.
+JSON statt Godot-Ressourcen, weil es lesbar, robust gegen Code-Änderungen und leicht zu prüfen ist.
+Mehrere Spielstände sind (noch) nicht vorgesehen.
