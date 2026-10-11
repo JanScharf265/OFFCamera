@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 4 (Tickets 4.1–4.2: Konten, Unternehmen gründen) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 4 (Tickets 4.1–4.3: Konten, Unternehmen gründen, Tagesabschluss) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -137,11 +137,17 @@ Stand Phase 4 (Tickets 4.1–4.2: Konten, Unternehmen gründen) auf Basis von Ph
   → `time.advance(dauer)` → `company_founded`.
 - `deposit()` / `withdraw()`: Umbuchungen `company:deposit:<n>` / `company:withdraw:<n>`, keine Spielzeit.
 - `apply(deltas, quelle, begründung, referenz, schlüssel)` für `utilization`/`reputation` (0–100), Protokoll `co_000001…`.
-- Gespeichert: `{"founded": false}` oder Art, Gründungszeit, Werte, Zähler, Protokoll, `used_keys`.
+- Tagesabschluss: `day_changed(tag)` rechnet Tag − 1 ab (wenn gegründet und noch nicht abgerechnet).
+  `preview_day()` = Grundlage, Reichweite, Auslastung, Ruf-Anteil, Umsatz, Fixkosten. Buchungen aufs Firmenkonto:
+  Umsatz (`sales`, `company:day:<t>:revenue`), Fixkosten (`fixed_costs`, `:costs`) nur wenn gedeckt, sonst Ruf −
+  (`:unpaid`); danach Auslastung − Verfall (`:decay`). Eintrag in `get_settlements()` (letzte 60) mit Erklärtext;
+  `take_settlement_notices()` liefert neue Abschlüsse einmal für die Rückmeldung (wie verpasste Termine).
+- Gespeichert: `{"founded": false}` oder Art, Gründungszeit, Werte, Zähler, Protokoll, `used_keys`,
+  `last_settled_day`, `settlements`.
 - UI (vorläufig): Karte „Merch-Label · Unternehmen“ im Büro mit „Gründen“ bzw. Kurzstatus.
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 7, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 8, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -152,6 +158,7 @@ Stand Phase 4 (Tickets 4.1–4.2: Konten, Unternehmen gründen) auf Basis von Ph
 - Migration 4 → 5: Ereignis-Seed = `MIGRATED_SEED` (1).
 - Migration 5 → 6: `opening_balance_cents` → `opening_balances` {private, company: 0}, alle Buchungen `account = private`.
 - Migration 6 → 7: Unternehmen `{"founded": false}`.
+- Migration 7 → 8: gegründetes Unternehmen: `last_settled_day` = gespeicherter Tag − 1, `settlements` leer.
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.

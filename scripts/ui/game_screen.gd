@@ -508,6 +508,8 @@ func _after_action(reason: String, success_text: String) -> void:
 			var definition := _game.appointments.get_catalog().get_definition(id)
 			text += "\nTermin verpasst: „%s“ (%s)." % [definition.title,
 					ActivityText.option_summary(definition.missed_effects, 0)]
+		for settlement in _game.company.take_settlement_notices():
+			text += "\nTagesabschluss %s" % settlement
 		_show_feedback(text, UiStyle.TEXT)
 	else:
 		_show_feedback(reason, UiStyle.NEGATIVE)

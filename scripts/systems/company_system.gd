@@ -17,23 +17,37 @@ extends RefCounted
 ## "company:withdraw:<n>" (Zähler im Spielstand), kosten keine Spielzeit.
 ## Änderungen an Auslastung/Ruf nur über apply() – mit Begründung im Unternehmens-Protokoll
 ## (gleiches Eintragsmodell wie das Kanal-Protokoll).
+##
+## Tagesabschluss (Ticket 4.3): bei day_changed(tag) wird der Vortag abgerechnet – nur dann,
+## kein Zeitfortschritt im Hintergrund. Exakt und ganzzahlig (abgerundet):
+##   Grundlage = base_revenue + Follower × revenue_per_1000 / 1000
+##   Umsatz    = Grundlage × Auslastung / 100 × (100 + (Ruf − 50) / 2) / 100
+##   1. Umsatz aufs Firmenkonto      (Kategorie "sales",       Schlüssel "company:day:<t>:revenue")
+##   2. Fixkosten vom Firmenkonto    (Kategorie "fixed_costs", Schlüssel "company:day:<t>:costs");
+##      reicht das Firmenkonto nicht, wird nichts abgebucht (nie negativ), dafür sinkt der Ruf
+##      um unpaid_reputation_penalty ("company:day:<t>:unpaid")
+##   3. Auslastung sinkt um utilization_decay_per_day ("company:day:<t>:decay") – Pflege vor Ort hält dagegen
+## Jeder Tag wird höchstens einmal abgerechnet (last_settled_day + Schutzschlüssel), auch nach dem Laden.
 
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const LocationSystemScript := preload("res://scripts/systems/location_system.gd")
 const CompanyTypeCatalogScript := preload("res://scripts/systems/company_type_catalog.gd")
 const CompanyTypeScript := preload("res://scripts/models/company_type.gd")
+const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const ChangeScript := preload("res://scripts/models/channel_change.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
 signal company_founded(type_id: String)
 signal company_changed(change: ChangeScript)
+signal day_settled(day: int)
 
 const KEYS := ["utilization", "reputation"]
 const LABELS := {"utilization": "Auslastung", "reputation": "Ruf des Unternehmens"}
 const MAX_SCORE := 100
 const HISTORY_LIMIT := 200
 const SOURCE := "company"
+const SETTLEMENT_LIMIT := 60
 
 var utilization := 0
 var reputation := 0
@@ -42,6 +56,7 @@ var _time: TimeSystemScript
 var _ledger: LedgerSystemScript
 var _locations: LocationSystemScript
 var _catalog: CompanyTypeCatalogScript
+var _channel: ChannelSystemScript
 var _type_id := ""
 var _founded_minutes := -1
 var _deposits := 0
@@ -49,14 +64,22 @@ var _withdrawals := 0
 var _history: Array[ChangeScript] = []
 var _next_number := 1
 var _used_keys := {}
+## Letzter abgerechneter Tag (Gründungstag − 1 direkt nach der Gründung).
+var _last_settled_day := 0
+## Tagesabschlüsse, älteste zuerst: {day, revenue_cents, costs_cents, paid, text}
+var _settlements: Array[Dictionary] = []
+## Seit dem letzten take_settlement_notices() neu abgerechnete Tage (nicht gespeichert).
+var _new_settlements: Array[int] = []
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, locations: LocationSystemScript,
-		catalog: CompanyTypeCatalogScript) -> void:
+		channel: ChannelSystemScript, catalog: CompanyTypeCatalogScript) -> void:
 	_time = time
 	_ledger = ledger
 	_locations = locations
+	_channel = channel
 	_catalog = catalog
+	time.day_changed.connect(_on_day_changed)
 
 
 func get_catalog() -> CompanyTypeCatalogScript:
@@ -123,6 +146,7 @@ func found(type_id: String) -> String:
 	_deposits = 1
 	_type_id = type_id
 	_founded_minutes = _time.get_minutes()
+	_last_settled_day = TimeSystemScript.day_of(_founded_minutes) - 1
 	utilization = definition.start_utilization
 	reputation = definition.start_reputation
 	_record({}, {}, SOURCE, "Gegründet: %s (Auslastung %d, Ruf %d)" % [definition.display_name, utilization,
@@ -219,6 +243,42 @@ func get_history() -> Array[ChangeScript]:
 	return _history.duplicate()
 
 
+## Erwarteter Tagesabschluss beim aktuellen Stand (für Anzeige und Abrechnung):
+## {base_cents, reach_cents, utilization, reputation_percent, revenue_cents, costs_cents}. {} ohne Unternehmen.
+@warning_ignore("integer_division")
+func preview_day() -> Dictionary:
+	var definition := get_type()
+	if definition == null:
+		return {}
+	var reach := _channel.followers * definition.revenue_per_1000_followers_cents / 1000
+	var reputation_percent := (reputation - 50) / 2
+	var revenue := (definition.base_revenue_per_day_cents + reach) * utilization / 100 \
+			* (100 + reputation_percent) / 100
+	return {
+		"base_cents": definition.base_revenue_per_day_cents,
+		"reach_cents": reach,
+		"utilization": utilization,
+		"reputation_percent": reputation_percent,
+		"revenue_cents": revenue,
+		"costs_cents": definition.fixed_costs_per_day_cents,
+	}
+
+
+## Tagesabschlüsse, älteste zuerst (Kopie).
+func get_settlements() -> Array[Dictionary]:
+	return _settlements.duplicate(true)
+
+
+## Texte der seit dem letzten Aufruf neu abgerechneten Tage (je einmal, für die Rückmeldung).
+func take_settlement_notices() -> PackedStringArray:
+	var texts := PackedStringArray()
+	for settlement in _settlements:
+		if int(settlement["day"]) in _new_settlements:
+			texts.append(settlement["text"])
+	_new_settlements.clear()
+	return texts
+
+
 func to_dict() -> Dictionary:
 	if not is_founded():
 		return {"founded": false}
@@ -240,6 +300,8 @@ func to_dict() -> Dictionary:
 		"next_number": _next_number,
 		"history": entries,
 		"used_keys": _used_keys.duplicate(),
+		"last_settled_day": _last_settled_day,
+		"settlements": _settlements.duplicate(true),
 	}
 
 
@@ -266,6 +328,25 @@ func restore(data: Dictionary) -> String:
 	var deposits := reader.int_field(data, "deposits", where, true)
 	var withdrawals := reader.int_field(data, "withdrawals", where, true)
 	var next_number := reader.int_field(data, "next_number", where, true)
+	var last_settled_day := reader.int_field(data, "last_settled_day", where, true)
+	var settlements: Array[Dictionary] = []
+	var raw_settlements: Variant = data.get("settlements")
+	if typeof(raw_settlements) != TYPE_ARRAY:
+		reader.errors.append("Unternehmen: 'settlements' fehlt oder ist keine Liste.")
+	else:
+		for i in raw_settlements.size():
+			var raw: Variant = raw_settlements[i]
+			var context := "Tagesabschluss #%d" % (i + 1)
+			if typeof(raw) != TYPE_DICTIONARY or typeof(raw.get("paid")) != TYPE_BOOL:
+				reader.errors.append("%s: ungültig." % context)
+				continue
+			settlements.append({
+				"day": reader.int_field(raw, "day", context, true),
+				"revenue_cents": reader.int_field(raw, "revenue_cents", context, true),
+				"costs_cents": reader.int_field(raw, "costs_cents", context, true),
+				"paid": raw["paid"],
+				"text": reader.string_field(raw, "text", context, true),
+			})
 
 	var history: Array[ChangeScript] = []
 	var raw_history: Variant = data.get("history")
@@ -313,6 +394,9 @@ func restore(data: Dictionary) -> String:
 	_next_number = next_number
 	_history = history
 	_used_keys = used_keys
+	_last_settled_day = last_settled_day
+	_settlements = settlements
+	_new_settlements.clear()
 	return ""
 
 
@@ -326,6 +410,63 @@ func _reset() -> void:
 	_history = []
 	_next_number = 1
 	_used_keys = {}
+	_last_settled_day = 0
+	_settlements = []
+	_new_settlements.clear()
+
+
+func _on_day_changed(day: int) -> void:
+	var settled_day := day - 1
+	if not is_founded() or settled_day <= _last_settled_day:
+		return
+	_settle(settled_day)
+
+
+func _settle(day: int) -> void:
+	var definition := get_type()
+	var outcome := preview_day()
+	var prefix := "company:day:%d" % day
+	var reference := "day:%d" % day
+	var revenue: int = outcome["revenue_cents"]
+	var costs: int = outcome["costs_cents"]
+	if revenue > 0:
+		_ledger.post(revenue, "sales", "Tagesumsatz Tag %d" % day, SOURCE, reference, prefix + ":revenue",
+				false, LedgerSystemScript.COMPANY)
+	var paid := true
+	if costs > 0:
+		paid = _ledger.can_afford(costs, LedgerSystemScript.COMPANY)
+		if paid:
+			_ledger.post(-costs, "fixed_costs", "Fixkosten Tag %d" % day, SOURCE, reference, prefix + ":costs",
+					false, LedgerSystemScript.COMPANY)
+	var text := "Tag %d: Umsatz %s (%s + %s Reichweite · Auslastung %d %% · Ruf %s %%)" % [day,
+			_signed_money(revenue), LedgerSystemScript.format_cents(outcome["base_cents"]),
+			LedgerSystemScript.format_cents(outcome["reach_cents"]), outcome["utilization"],
+			_signed_percent(outcome["reputation_percent"])]
+	if paid:
+		text += " · Fixkosten %s · Ergebnis %s" % [_signed_money(-costs), _signed_money(revenue - costs)]
+	else:
+		text += " · Fixkosten %s nicht bezahlt (Firmenkonto zu leer) – Ruf -%d" % [
+				LedgerSystemScript.format_cents(costs), definition.unpaid_reputation_penalty]
+		apply({"reputation": -definition.unpaid_reputation_penalty}, SOURCE,
+				"Tag %d: Fixkosten nicht bezahlt" % day, reference, prefix + ":unpaid")
+	if definition.utilization_decay_per_day > 0:
+		apply({"utilization": -definition.utilization_decay_per_day}, SOURCE,
+				"Tag %d: ohne Pflege sinkt die Auslastung" % day, reference, prefix + ":decay")
+	_settlements.append({"day": day, "revenue_cents": revenue, "costs_cents": costs, "paid": paid, "text": text})
+	if _settlements.size() > SETTLEMENT_LIMIT:
+		_settlements = _settlements.slice(_settlements.size() - SETTLEMENT_LIMIT)
+	_new_settlements.append(day)
+	_last_settled_day = day
+	day_settled.emit(day)
+
+
+static func _signed_money(cents: int) -> String:
+	var text := LedgerSystemScript.format_cents(cents)
+	return "+" + text if cents > 0 else text
+
+
+static func _signed_percent(value: int) -> String:
+	return "±0" if value == 0 else "%+d" % value
 
 
 func _record(requested: Dictionary, applied: Dictionary, source: String, reason: String,

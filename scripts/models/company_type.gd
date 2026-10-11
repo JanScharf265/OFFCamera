@@ -24,3 +24,5 @@ var fixed_costs_per_day_cents: int
 var base_revenue_per_day_cents: int
 var revenue_per_1000_followers_cents: int
 var utilization_decay_per_day: int
+## Ruf-Verlust, wenn die Fixkosten eines Tages nicht bezahlt werden können.
+var unpaid_reputation_penalty: int

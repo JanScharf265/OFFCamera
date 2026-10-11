@@ -47,6 +47,16 @@ Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslauf
 führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
 Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
 
+## 018 – Tagesabschluss
+Abgerechnet wird der Vortag beim Tageswechsel (`day_changed`) – kein Zeitfortschritt im Hintergrund, der Gründungstag
+zählt als erster (Teil-)Tag. Umsatz = (Grundumsatz + Follower × Anteil / 1000) × Auslastung % × (100 + (Ruf − 50) / 2) %,
+ganzzahlig abgerundet; Fixkosten fest je Art. Das Firmenkonto wird nie negativ (Entscheidung des Game Directors):
+reicht es nicht, entfallen die Fixkosten dieses Tages und der Ruf des Unternehmens sinkt (Platzhalter: 5). Ohne Pflege
+sinkt die Auslastung täglich (Platzhalter: 3); Pflege vor Ort kommt mit Ticket 4.4. Zeitstempel der Buchungen ist der
+Zeitpunkt der Abrechnung (Ende des Zeitfortschritts), wie bei Ereignissen. Jeder Tag höchstens einmal
+(`last_settled_day` + Schutzschlüssel `company:day:<tag>:…`). Migration von Version 7: frühere Tage werden nicht
+nachträglich abgerechnet. Zu Spielbeginn macht das Label ohne Pflege leicht Verlust (Platzhalterzahlen, Phase 8).
+
 ## 017 – Unternehmen gründen
 Das Merch-Label wird im Büro (Coworking) gegründet und verkauft zunächst online; die Filiale (Ticket 4.4) ist der
 physische zweite Standort. Gründung kostet Spielzeit (1 h), eine Gebühr vom Privatkonto und eine Mindesteinlage

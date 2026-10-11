@@ -166,3 +166,136 @@ func test_restore_rejects_unknown_type() -> void:
 	var other := Helpers.new_game()
 	assert_true("unbekannte Art" in other.company.restore(data), "unbekannte Art akzeptiert")
 	assert_eq(other.company.is_founded(), false)
+
+
+# --- Tagesabschluss (Ticket 4.3) ---------------------------------------------------
+
+func _to_next_morning(game: GameStateScript) -> void:
+	game.time.advance(TimeSystemScript.at(game.time.get_day() + 1, 8) - game.time.get_minutes())
+
+
+func test_preview_day_at_start_is_exact() -> void:
+	var game := _founded()  # 120 Follower, Auslastung 50, Ruf 50
+	var outcome := game.company.preview_day()
+	assert_eq(outcome["reach_cents"], 180)        # 120 × 1500 / 1000
+	assert_eq(outcome["revenue_cents"], 1590)     # (3000 + 180) × 50 / 100 × 100 / 100
+	assert_eq(outcome["costs_cents"], 2000)
+	assert_eq(outcome["reputation_percent"], 0)
+
+
+func test_settlement_books_revenue_and_costs_on_company_account() -> void:
+	var game := _founded()  # Firmenkonto 200 €
+	_to_next_morning(game)  # rechnet Tag 1 ab
+	assert_eq(game.ledger.get_balance("company"), 20000 + 1590 - 2000)
+	var sales := game.ledger.get_entries_by_category("sales")
+	assert_eq(sales.size(), 1)
+	if sales.size() == 1:
+		assert_eq(sales[0].account, "company")
+		assert_eq(sales[0].reference, "day:1")
+		assert_eq(sales[0].time_minutes, TimeSystemScript.at(2, 8))  # Zeitpunkt der Abrechnung
+	assert_eq(game.ledger.get_entries_by_category("fixed_costs").size(), 1)
+	assert_eq(game.ledger.get_balance("private"), 15000)  # Privatkonto unberührt
+
+
+func test_settlement_explains_itself_once() -> void:
+	var game := _founded()
+	_to_next_morning(game)
+	var expected := "Tag 1: Umsatz +15,90 € (30,00 € + 1,80 € Reichweite · Auslastung 50 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -4,10 €"
+	assert_eq(game.company.get_settlements()[0]["text"], expected)
+	assert_eq(game.company.take_settlement_notices(), PackedStringArray([expected]))
+	assert_eq(game.company.take_settlement_notices(), PackedStringArray())
+
+
+func test_utilization_decays_each_day_with_reason() -> void:
+	var game := _founded()
+	_to_next_morning(game)
+	_to_next_morning(game)
+	assert_eq(game.company.utilization, 44)
+	var last = game.company.get_history()[-1]
+	assert_eq(last.reason, "Tag 2: ohne Pflege sinkt die Auslastung")
+	assert_eq(last.applied, {"utilization": -3})
+
+
+func test_each_day_is_settled_exactly_once_even_when_skipping_days() -> void:
+	var game := _founded()
+	game.time.advance(TimeSystemScript.at(5, 8) - game.time.get_minutes())  # Tage 1–4
+	var days := []
+	for settlement in game.company.get_settlements():
+		days.append(settlement["day"])
+	assert_eq(days, [1, 2, 3, 4])
+	assert_eq(game.ledger.get_entries_by_category("sales").size(), 4)
+
+
+func test_company_account_never_goes_negative_and_unpaid_costs_cost_reputation() -> void:
+	var game := _founded()
+	game.company.withdraw(20000)  # Firmenkonto leer
+	_to_next_morning(game)
+	assert_eq(game.ledger.get_balance("company"), 1590)  # Umsatz ja, Fixkosten nicht
+	assert_eq(game.ledger.get_entries_by_category("fixed_costs").size(), 0)
+	assert_eq(game.company.reputation, 45)
+	var settlement: Dictionary = game.company.get_settlements()[0]
+	assert_eq(settlement["paid"], false)
+	assert_true("nicht bezahlt" in settlement["text"], settlement["text"])
+	for account in ["private", "company"]:
+		assert_true(game.ledger.get_balance(account) >= 0, account)
+
+
+func test_no_settlement_before_founding_or_on_founding_day() -> void:
+	var game := Helpers.new_game()
+	_to_next_morning(game)
+	assert_eq(game.ledger.get_entries_by_category("sales").size(), 0)
+	game.locations.travel("office")
+	game.company.found("merch_label")  # Tag 2
+	assert_true(game.company.get_settlements().is_empty(), "Abschluss am Gründungstag")
+	_to_next_morning(game)
+	assert_eq(game.company.get_settlements()[0]["day"], 2)
+
+
+func test_followers_and_reputation_raise_revenue() -> void:
+	var game := _founded()
+	game.channel.apply({"followers": 9880}, "test", "Wachstum")
+	game.company.apply({"reputation": 20, "utilization": 30}, "test", "gute Arbeit")
+	var outcome := game.company.preview_day()
+	var followers := game.channel.followers
+	@warning_ignore("integer_division")
+	var expected: int = (3000 + followers * 1500 / 1000) * 80 / 100 * 110 / 100
+	assert_eq(outcome["revenue_cents"], expected)
+
+
+func test_load_does_not_settle_again() -> void:
+	var game := _founded()
+	_to_next_morning(game)
+	SaveSystemScript.delete_save(PATH)
+	SaveSystemScript.save(game, PATH)
+	var loaded: GameStateScript = SaveSystemScript.load_game(Helpers.game_data(), PATH)["game"]
+	assert_true(loaded != null, "Laden fehlgeschlagen")
+	if loaded == null:
+		return
+	assert_eq(loaded.company.get_settlements().size(), 1)
+	assert_eq(loaded.company.take_settlement_notices(), PackedStringArray())
+	_to_next_morning(loaded)
+	_to_next_morning(game)
+	assert_eq(loaded.ledger.get_balance("company"), game.ledger.get_balance("company"))
+	assert_eq(loaded.ledger.get_entries_by_category("sales").size(), 2)
+	SaveSystemScript.delete_save(PATH)
+
+
+func test_version_7_founded_company_settles_from_current_day() -> void:
+	var game := _founded()
+	_to_next_morning(game)  # Tag 2, ein Abschluss
+	var saved := game.to_dict()
+	saved["company"].erase("last_settled_day")
+	saved["company"].erase("settlements")
+	SaveSystemScript.delete_save(PATH)
+	var file := FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(JSON.stringify({"version": 7, "game": saved}))
+	file.close()
+	var loaded: GameStateScript = SaveSystemScript.load_game(Helpers.game_data(), PATH)["game"]
+	assert_true(loaded != null, "Migration fehlgeschlagen")
+	if loaded == null:
+		return
+	assert_true(loaded.company.get_settlements().is_empty(), "Verlauf sollte leer starten")
+	_to_next_morning(loaded)
+	assert_eq(loaded.company.get_settlements()[0]["day"], 2)
+	assert_eq(loaded.ledger.get_entries_by_category("sales").size(), 2)  # Tag 1 (vor Migration) + Tag 2
+	SaveSystemScript.delete_save(PATH)

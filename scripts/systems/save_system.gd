@@ -18,8 +18,9 @@ const GameDataScript := preload("res://scripts/core/game_data.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
+const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
-const SAVE_VERSION := 7
+const SAVE_VERSION := 8
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -134,6 +135,17 @@ static func _migrate(data: Dictionary, version: int) -> String:
 			return ledger_error
 	if version < 7:
 		data["game"]["company"] = {"founded": false}
+	if version < 8:
+		var company: Variant = data["game"].get("company")
+		if typeof(company) != TYPE_DICTIONARY:
+			return "Unternehmen fehlt."
+		if company.get("founded") == true:
+			var minutes: Variant = data["game"].get("time", {}).get("minutes")
+			if not DataReaderScript.is_whole_number(minutes):
+				return "Zeit fehlt."
+			# Der laufende Tag wird beim nächsten Tageswechsel abgerechnet, frühere nicht nachträglich.
+			company["last_settled_day"] = TimeSystemScript.day_of(int(minutes)) - 1
+			company["settlements"] = []
 	data["version"] = SAVE_VERSION
 	return ""
 
@@ -157,6 +169,7 @@ static func _migrate_1_to_2(game: Dictionary) -> String:
 ## Version 6 (Phase 4): Konten im Ledger – alte Buchungen gehören zum Privatkonto
 ##   (LedgerSystem.migrate_single_account()).
 ## Version 7 (Phase 4): Unternehmen – noch nicht gegründet (direkt in _migrate()).
+## Version 8 (Phase 4): Tagesabschluss – gegründete Unternehmen rechnen ab dem laufenden Tag ab.
 static func _migrate_2_to_3(game: Dictionary) -> void:
 	game["channel"] = ChannelSystemScript.initial_dict(GameStateScript.START_FOLLOWERS,
 			GameStateScript.START_COMMUNITY, GameStateScript.START_REPUTATION)

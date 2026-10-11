@@ -5,7 +5,7 @@ extends RefCounted
 ## Pflichtfelder je Eintrag: id, display_name, found_location, founding_minutes > 0,
 ## founding_fee_cents > 0, min_deposit_cents > 0, start_utilization/start_reputation 0–100,
 ## fixed_costs_per_day_cents ≥ 0, base_revenue_per_day_cents ≥ 0, revenue_per_1000_followers_cents ≥ 0,
-## utilization_decay_per_day ≥ 0. Optional: description.
+## utilization_decay_per_day ≥ 0, unpaid_reputation_penalty ≥ 0. Optional: description.
 
 const CompanyTypeScript := preload("res://scripts/models/company_type.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -13,7 +13,7 @@ const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 const DEFAULT_PATH := "res://data/company/company_types.json"
 const POSITIVE_FIELDS := ["founding_minutes", "founding_fee_cents", "min_deposit_cents"]
 const NON_NEGATIVE_FIELDS := ["fixed_costs_per_day_cents", "base_revenue_per_day_cents",
-		"revenue_per_1000_followers_cents", "utilization_decay_per_day"]
+		"revenue_per_1000_followers_cents", "utilization_decay_per_day", "unpaid_reputation_penalty"]
 const SCORE_FIELDS := ["start_utilization", "start_reputation"]
 
 var errors: PackedStringArray = []
