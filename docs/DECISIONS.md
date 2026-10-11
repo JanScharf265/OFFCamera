@@ -17,3 +17,8 @@ Xcode 27.0. Nicht mitten in einer Phase aktualisieren.
 Spielsysteme sind `RefCounted`-Klassen statt Autoloads, damit sie ohne Szene testbar sind und es
 keine versteckten globalen Zustände gibt. Tests laufen mit einem eigenen kleinen Runner
 (`tests/run_tests.gd`) statt eines Addons wie GUT – keine zusätzliche Abhängigkeit.
+
+## 005 – UI im Code statt handgeschriebener Szenen
+Bildschirme werden in GDScript aus Containern aufgebaut, nur die Hauptszene ist eine `.tscn`.
+Grund: Ohne Editor in der Entwicklungsumgebung sind handgeschriebene Szenendateien fehleranfällig;
+Code ist prüfbar und per Test durchklickbar. Kann später für einzelne Bildschirme geändert werden.

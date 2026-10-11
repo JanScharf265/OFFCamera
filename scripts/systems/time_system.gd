@@ -78,6 +78,25 @@ func format_clock() -> String:
 	return "%02d:%02d" % [get_hour(), get_minute()]
 
 
+## Zeitpunkt beliebiger Minuten, z. B. "Tag 2 · 14:30".
+@warning_ignore("integer_division")
+static func format_stamp(minutes: int) -> String:
+	var minute_of_day := minutes % MINUTES_PER_DAY
+	return "Tag %d · %02d:%02d" % [day_of(minutes), minute_of_day / MINUTES_PER_HOUR, minutes % MINUTES_PER_HOUR]
+
+
+## Dauer, z. B. 45 -> "45 min", 60 -> "1 h", 90 -> "1 h 30 min".
+@warning_ignore("integer_division")
+static func format_duration(minutes: int) -> String:
+	var hours := minutes / MINUTES_PER_HOUR
+	var rest := minutes % MINUTES_PER_HOUR
+	if hours == 0:
+		return "%d min" % rest
+	if rest == 0:
+		return "%d h" % hours
+	return "%d h %d min" % [hours, rest]
+
+
 ## z. B. "Tag 3 · Mi"
 func format_date() -> String:
 	return "Tag %d · %s" % [get_day(), WEEKDAY_NAMES[get_weekday()]]

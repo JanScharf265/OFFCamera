@@ -10,6 +10,7 @@ const MIN_VALUE := 0
 const MAX_VALUE := 100
 ## Alle gültigen Schlüssel für Effekte in Daten (z. B. activities.json).
 const KEYS := ["energy", "mood"]
+const LABELS := {"energy": "Energie", "mood": "Stimmung"}
 
 var energy: int
 var mood: int

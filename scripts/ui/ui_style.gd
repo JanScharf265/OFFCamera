@@ -1,0 +1,80 @@
+extends RefCounted
+
+## Gemeinsame Farben, Größen und Bausteine für die UI.
+## Größen beziehen sich auf die 720 px breite Basisauflösung
+## (ca. 1,8 Bildpunkte pro iOS-Punkt – 96 px ≈ 53 pt Touch-Höhe).
+
+const BACKGROUND := Color(0.07, 0.07, 0.09)
+const SURFACE := Color(0.13, 0.13, 0.16)
+const SURFACE_PRESSED := Color(0.2, 0.2, 0.25)
+const TEXT := Color(0.92, 0.92, 0.95)
+const MUTED := Color(0.62, 0.62, 0.68)
+const ACCENT := Color(0.84, 0.27, 0.35)
+const ACCENT_PRESSED := Color(0.66, 0.2, 0.27)
+const DISABLED := Color(0.25, 0.25, 0.28)
+const POSITIVE := Color(0.45, 0.8, 0.5)
+const NEGATIVE := Color(0.95, 0.5, 0.45)
+
+const PADDING := 24
+const FONT_SIZE := 30
+const SMALL_FONT_SIZE := 24
+const LARGE_FONT_SIZE := 44
+const TITLE_FONT_SIZE := 72
+const BUTTON_HEIGHT := 96
+const CORNER_RADIUS := 16
+
+
+static func create_theme() -> Theme:
+	var theme := Theme.new()
+	theme.default_font_size = FONT_SIZE
+	theme.set_color("font_color", "Label", TEXT)
+
+	theme.set_stylebox("normal", "Button", _box(ACCENT))
+	theme.set_stylebox("hover", "Button", _box(ACCENT))  # Touch: kein Hover-Effekt
+	theme.set_stylebox("pressed", "Button", _box(ACCENT_PRESSED))
+	theme.set_stylebox("hover_pressed", "Button", _box(ACCENT_PRESSED))
+	theme.set_stylebox("disabled", "Button", _box(DISABLED))
+	theme.set_stylebox("focus", "Button", StyleBoxEmpty.new())
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		theme.set_color(color_name, "Button", TEXT)
+	theme.set_color("font_disabled_color", "Button", MUTED)
+	return theme
+
+
+static func label(text: String, font_size: int = FONT_SIZE, color: Color = TEXT) -> Label:
+	var result := Label.new()
+	result.text = text
+	result.add_theme_font_size_override("font_size", font_size)
+	result.add_theme_color_override("font_color", color)
+	return result
+
+
+static func wrapping_label(text: String, font_size: int = FONT_SIZE, color: Color = TEXT) -> Label:
+	var result := label(text, font_size, color)
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return result
+
+
+static func section_label(text: String) -> Label:
+	return label(text, SMALL_FONT_SIZE, MUTED)
+
+
+static func button(text: String) -> Button:
+	var result := Button.new()
+	result.text = text
+	result.custom_minimum_size.y = BUTTON_HEIGHT
+	return result
+
+
+static func card() -> PanelContainer:
+	var result := PanelContainer.new()
+	result.add_theme_stylebox_override("panel", _box(SURFACE, PADDING))
+	return result
+
+
+static func _box(color: Color, padding: int = 16) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = color
+	box.set_corner_radius_all(CORNER_RADIUS)
+	box.set_content_margin_all(padding)
+	return box

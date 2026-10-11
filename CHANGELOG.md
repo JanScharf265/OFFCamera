@@ -5,6 +5,8 @@
 - Eigener Test-Runner, Tests vom iOS-Export ausgeschlossen
 - LedgerSystem: Buchungen in Cent, Kontostand nur über Buchungen, Schutz vor Doppelbuchung und Überziehung (Ticket 2)
 - GameState, PlayerStats, Aktivitäten als JSON-Daten mit Prüfung, ActivitySystem (Ticket 3)
+- Hauptmenü (Neues Spiel, Fortsetzen im Speicher), Spielansicht mit HUD, Aktivitäten-Karten und letzten Buchungen; Safe Area (Ticket 4)
+- Alter Phase-0-Startbildschirm entfernt
 
 ## 0.0.1 – Phase 0
 - Godot-4-Grundprojekt (Hochformat, GL Compatibility, 720×1280)

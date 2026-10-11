@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 1, Ticket 3: Zeit, Ledger, Spielerwerte und Aktivitäten vorhanden; noch keine Spiel-UI.
+Stand Phase 1, Ticket 4: Zeit, Ledger, Spielerwerte, Aktivitäten und eine erste spielbare UI.
 
 ## Umgesetzt
 
@@ -40,6 +40,15 @@ Stand Phase 1, Ticket 3: Zeit, Ledger, Spielerwerte und Aktivitäten vorhanden; 
   `start` prüft erst alles (Energie reicht, Geld reicht, kein laufender Zeitfortschritt) und führt
   dann aus: Buchung (Zeitstempel = Beginn) → Effekte → `time.advance(dauer)` → `activity_completed`.
 - Datendateien werden per `include_filter="data/*"` in den iOS-Export aufgenommen.
+
+### UI (`scenes/app/app.tscn`, `scripts/ui/`)
+- `app.gd` (Hauptszene): Theme, Safe Area (nur auf Mobilgeräten, in Viewport-Koordinaten umgerechnet),
+  hält die laufende `GameState`-Sitzung und wechselt zwischen `main_menu.gd` und `game_screen.gd`.
+- UI wird im Code aus Containern gebaut (keine festen Pixelpositionen). Farben/Größen in `ui_style.gd`,
+  Texte für Aktivitäten/Beträge in `activity_text.gd`.
+- `game_screen.gd` aktiviert/deaktiviert Aktivitäten ausschließlich über `ActivitySystem.check()`
+  und aktualisiert nach jeder Aktion explizit (nicht über System-Signale, die mitten im Ablauf feuern).
+- „Fortsetzen“ setzt vorerst nur die Sitzung im Speicher fort; Speichern folgt in Ticket 6.
 
 ### Konvention: Verweise zwischen Skripten
 Skripte referenzieren einander über `const X := preload("res://…")` statt über `class_name`.
