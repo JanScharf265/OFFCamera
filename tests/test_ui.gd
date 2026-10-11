@@ -27,9 +27,9 @@ func test_activity_summaries() -> void:
 
 
 func test_click_through_new_game_activity_menu_and_continue() -> void:
-	var tree := Engine.get_main_loop() as SceneTree
-	var app := AppScript.new()
-	tree.root.add_child(app)
+	var app := _start_app()
+	if app == null:
+		return
 
 	var new_game := _find(app, "NewGameButton") as Button
 	assert_true(new_game != null, "NewGameButton fehlt")
@@ -58,10 +58,12 @@ func test_click_through_new_game_activity_menu_and_continue() -> void:
 
 
 func test_disabled_activity_shows_reason() -> void:
-	var tree := Engine.get_main_loop() as SceneTree
-	var app := AppScript.new()
-	tree.root.add_child(app)
-	(_find(app, "NewGameButton") as Button).pressed.emit()
+	var app := _start_app()
+	if app == null:
+		return
+	if not _press(app, "NewGameButton"):
+		app.free()
+		return
 
 	app.game.stats.apply({"energy": -75})  # 80 -> 5
 	(_find(app, "StartButton_rest") as Button).pressed.emit()  # 5 -> 20, aktualisiert die Anzeige
@@ -75,6 +77,25 @@ func test_disabled_activity_shows_reason() -> void:
 	assert_eq((_find(app, "StartButton_stream_short") as Button).disabled, true)
 
 	app.free()
+
+
+## App in den Baum hängen; null (mit Fehlermeldung), wenn _ready() nicht lief.
+func _start_app() -> AppScript:
+	var app := AppScript.new()
+	(Engine.get_main_loop() as SceneTree).root.add_child(app)
+	assert_true(app.is_inside_tree(), "App hängt nicht im Szenenbaum")
+	if not app.is_inside_tree():
+		app.free()
+		return null
+	return app
+
+
+func _press(root: Node, node_name: String) -> bool:
+	var button := _find(root, node_name) as Button
+	assert_true(button != null, "%s fehlt" % node_name)
+	if button != null:
+		button.pressed.emit()
+	return button != null
 
 
 func _find(root: Node, node_name: String) -> Node:

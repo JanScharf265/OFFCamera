@@ -9,6 +9,12 @@ const TEST_DIR := "res://tests/"
 
 
 func _initialize() -> void:
+	# Erst im ersten Frame starten: In _initialize() hängt root noch nicht im
+	# Baum, eingefügte Knoten bekämen sonst kein _ready() (UI-Tests).
+	process_frame.connect(_run_all, CONNECT_ONE_SHOT)
+
+
+func _run_all() -> void:
 	var passed := 0
 	var failed := 0
 
