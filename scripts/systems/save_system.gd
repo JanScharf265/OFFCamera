@@ -16,8 +16,9 @@ extends RefCounted
 const GameStateScript := preload("res://scripts/core/game_state.gd")
 const GameDataScript := preload("res://scripts/core/game_data.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
+const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 const DEFAULT_PATH := "user://savegame.json"
 
 
@@ -114,6 +115,8 @@ static func _migrate(data: Dictionary, version: int) -> String:
 		var error := _migrate_1_to_2(data["game"])
 		if not error.is_empty():
 			return error
+	if version < 3:
+		_migrate_2_to_3(data["game"])
 	data["version"] = SAVE_VERSION
 	return ""
 
@@ -129,3 +132,9 @@ static func _migrate_1_to_2(game: Dictionary) -> String:
 	if not game.has("events"):
 		game["events"] = {}
 	return ""
+
+
+## Version 3 (Phase 3): Kanalprofil kommt dazu – Startwerte, leeres Protokoll.
+static func _migrate_2_to_3(game: Dictionary) -> void:
+	game["channel"] = ChannelSystemScript.initial_dict(GameStateScript.START_FOLLOWERS,
+			GameStateScript.START_COMMUNITY, GameStateScript.START_REPUTATION)

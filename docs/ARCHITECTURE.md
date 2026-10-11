@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 2 + Grafik-Ticket G1: Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 3 (Ticket 3.1) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -83,13 +83,24 @@ Stand Phase 2 + Grafik-Ticket G1: Orte, isometrische Stadtkarte, Reisezeit, orts
 - Termine mit Beginn vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe.
 - Gespeichert: `since_minutes`, `attended`, `missed` (sortierte ID-Listen).
 
+### Kanal (`scripts/systems/channel_system.gd`, Modell `scripts/models/channel_change.gd`)
+- Einzige Autorität für das Kanalprofil: `followers` (0–1.000.000), `community` und `reputation` (0–100).
+- Einziger Weg zu ändern: `apply(deltas, quelle, begründung, referenz, idempotency_key)`. Ablehnung (`null`, keine
+  Änderung): unbekannter Schlüssel, keine ganze Zahl, leere Quelle/Begründung, alles 0, Schlüssel schon verwendet.
+- Wachstumsbremse: positive Follower-Änderungen × (MAX − aktuell) / MAX, gerundet (`damped_follower_gain()`
+  auch als Vorschau). Danach Begrenzung auf die Grenzen.
+- Kanal-Protokoll: Eintrag `ch_000001…` mit Spielzeit, Quelle, Begründung, Referenz, `requested` und `applied`
+  (`was_limited()` = Bremse/Grenze hat gekürzt). Signal `channel_changed(change)`. Letzte 200 Einträge bleiben.
+- Gespeichert: Werte, `next_number`, `history`, `used_keys`.
+
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 2, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 3, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
-  Spielerwerte, Ort, Ereignisse (ausgelöst, offen, entschieden + gewählte Option), Termine.
+  Spielerwerte, Ort, Ereignisse (ausgelöst, offen, entschieden + gewählte Option), Termine, Kanal.
 - Migration 1 → 2: Ort = Wohnung, Termine `since_minutes` = gespeicherte Spielzeit.
+- Migration 2 → 3: Kanal mit Startwerten und leerem Protokoll.
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.
@@ -151,6 +162,7 @@ Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
 | `ActivitySystem` | Prüfen und Ausführen von Aktivitäten |
 | `LocationSystem` | aktueller Ort, Reisezeit, Öffnungszeiten, Fahrten |
 | `AppointmentSystem` | Termine: wahrnehmen, verpasst, Kollisionen |
+| `ChannelSystem` | Follower, Community-Stimmung, Ruf, Kanal-Protokoll |
 | `SaveSystem` | versionierter lokaler Spielstand |
 
 UI-Szenen lesen Zustand und rufen Systeme auf; sie ändern Werte nie direkt.

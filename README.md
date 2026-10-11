@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) abgeschlossen ✅ (auf dem iPhone abgenommen) – als Nächstes: Phase 3.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 3 (Streamer-Karriere) in Arbeit: Ticket 3.1 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -101,8 +101,8 @@ Einstellungen → Spielstand löschen.
 project.godot        Projektkonfiguration (Hochformat, GL-Compatibility-Renderer)
 scenes/app/          Hauptszene app.tscn
 scripts/core/        GameState (eine Spielsitzung), GameData (alle Datenkataloge)
-scripts/systems/     Spielsysteme (Zeit, Ledger, Orte, Aktivitäten, Ereignisse, Termine, Speichern, Datenprüfung)
-scripts/models/      Datenmodelle (Buchung, Spielerwerte, Ort, Aktivität, Ereignis, Termin)
+scripts/systems/     Spielsysteme (Zeit, Ledger, Orte, Aktivitäten, Ereignisse, Termine, Kanal, Speichern, Datenprüfung)
+scripts/models/      Datenmodelle (Buchung, Spielerwerte, Ort, Aktivität, Ereignis, Termin, Kanal-Änderung)
 data/locations/      Orte als JSON (Kartenposition, Öffnungszeiten)
 data/activities/     Aktivitäten als JSON (je an einen Ort gebunden)
 data/events/         Ereignisse als JSON

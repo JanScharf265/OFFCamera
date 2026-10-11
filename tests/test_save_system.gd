@@ -195,14 +195,15 @@ func _version_1_text(minutes: int) -> String:
 	var game := _new_game().to_dict()
 	game.erase("location")
 	game.erase("appointments")
+	game.erase("channel")
 	game["time"]["minutes"] = minutes
 	return JSON.stringify({"version": 1, "game": game})
 
 
-func test_save_file_has_version_2_with_location_and_appointments() -> void:
+func test_save_file_has_current_version_with_location_and_appointments() -> void:
 	SaveSystemScript.save(_new_game(), PATH)
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	assert_eq(int(data["version"]), 2)
+	assert_eq(int(data["version"]), 3)
 	assert_eq(data["game"]["location"], {"current": "home"})
 	assert_eq(int(data["game"]["appointments"]["since_minutes"]), TimeSystemScript.at(1, 8))
 
@@ -226,7 +227,7 @@ func test_version_1_is_migrated_to_home_without_penalties() -> void:
 	assert_eq(loaded.appointments.is_open("gym_trial"), true)
 
 
-func test_migrated_save_is_written_as_version_2() -> void:
+func test_migrated_save_is_written_as_current_version() -> void:
 	_write(_version_1_text(TimeSystemScript.at(1, 9)))
 	var loaded: GameStateScript = _load()["game"]
 	SaveSystemScript.save(loaded, PATH)
@@ -250,3 +251,41 @@ func test_unknown_location_falls_back_to_home() -> void:
 	assert_true(loaded != null, "unbekannter Ort sollte nicht abbrechen")
 	if loaded != null:
 		assert_eq(loaded.locations.get_current(), "home")
+
+
+## Spielstand im Format von Version 2 (Phase 2): ohne Kanal.
+func _version_2_text() -> String:
+	var game := _played_game().to_dict()
+	game.erase("channel")
+	return JSON.stringify({"version": 2, "game": game})
+
+
+func test_version_2_is_migrated_with_channel_start_values() -> void:
+	var played := _played_game()
+	_write(_version_2_text())
+	var result := _load()
+	var loaded: GameStateScript = result["game"]
+	assert_true(loaded != null, "Migration fehlgeschlagen: %s" % result["error"])
+	if loaded == null:
+		return
+	assert_eq(loaded.channel.followers, GameStateScript.START_FOLLOWERS)
+	assert_eq(loaded.channel.community, GameStateScript.START_COMMUNITY)
+	assert_eq(loaded.channel.reputation, GameStateScript.START_REPUTATION)
+	assert_true(loaded.channel.get_history().is_empty(), "Protokoll sollte leer sein")
+	# Alles andere bleibt wie gespeichert.
+	assert_eq(loaded.time.get_minutes(), played.time.get_minutes())
+	assert_eq(loaded.ledger.get_balance(), played.ledger.get_balance())
+
+
+func test_channel_survives_save_and_load() -> void:
+	var game := _new_game()
+	game.channel.apply({"followers": 30, "reputation": 4}, "test", "Testlauf")
+	SaveSystemScript.save(game, PATH)
+	var loaded: GameStateScript = _load()["game"]
+	assert_true(loaded != null, "Laden fehlgeschlagen")
+	if loaded == null:
+		return
+	assert_eq(loaded.channel.followers, 150)
+	assert_eq(loaded.channel.reputation, 54)
+	assert_eq(loaded.channel.get_history().size(), 1)
+	assert_eq(loaded.channel.get_history()[0].reason, "Testlauf")

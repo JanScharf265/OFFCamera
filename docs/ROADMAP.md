@@ -81,7 +81,16 @@ Grafiken aus frei nutzbaren (CC0) Asset-Paketen, später austauschbar.
 - [x] Im Editor durchgespielt (Wischen mit der Maus, Tippen auf Gebäude/Schilder)
 - [x] iPhone-Abnahme: Wischen flüssig, Tippen trifft, Seite scrollt außerhalb der Karte, Notch/Home-Balken frei
 
-## Phase 3 – Streamer-/Creator-Karriere ← als Nächstes
+## Phase 3 – Streamer-/Creator-Karriere ← in Arbeit
+Kanalprofil (Follower, Community-Stimmung, Ruf) mit Grenzen und Wachstumsbremse, Content-Formate als Daten,
+Einnahmen nur über das Ledger, Equipment-Upgrades, zufällige regelbasierte Karriere-Ereignisse mit festem Seed,
+in der UI nachvollziehbar, warum sich Werte geändert haben.
+
+- [x] Ticket 3.1: ChannelSystem mit Kanal-Protokoll, Wachstumsbremse, Spielstand Version 3 + Migration (152/152 Tests grün)
+- [ ] Ticket 3.2: Content-Formate als Daten, ContentSystem; „Kurzer Stream“ wird zum Format „Livestream“
+- [ ] Ticket 3.3: Equipment-Upgrades
+- [ ] Ticket 3.4: Zufällige Karriere-Ereignisse mit festem Seed
+- [ ] Ticket 3.5: Karriere-UI, Kanal-Verlauf, iPhone-Abnahme
 
 ## Spätere Phasen
 4. Fiktionales Unternehmen und zweiter Standort

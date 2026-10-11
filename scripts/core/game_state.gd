@@ -14,12 +14,16 @@ const LocationSystemScript := preload("res://scripts/systems/location_system.gd"
 const ActivitySystemScript := preload("res://scripts/systems/activity_system.gd")
 const EventSystemScript := preload("res://scripts/systems/event_system.gd")
 const AppointmentSystemScript := preload("res://scripts/systems/appointment_system.gd")
+const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
 const START_BALANCE_CENTS := 50000
 const START_ENERGY := 80
 const START_MOOD := 60
+const START_FOLLOWERS := 120
+const START_COMMUNITY := 50
+const START_REPUTATION := 50
 
 var data: GameDataScript
 var time: TimeSystemScript
@@ -29,6 +33,7 @@ var locations: LocationSystemScript
 var activities: ActivitySystemScript
 var events: EventSystemScript
 var appointments: AppointmentSystemScript
+var channel: ChannelSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -41,6 +46,7 @@ func _init(game_data: GameDataScript) -> void:
 	activities = ActivitySystemScript.new(time, ledger, stats, locations, data.activities)
 	events = EventSystemScript.new(time, ledger, stats, data.events)
 	appointments = AppointmentSystemScript.new(time, ledger, stats, locations, data.appointments)
+	channel = ChannelSystemScript.new(time, START_FOLLOWERS, START_COMMUNITY, START_REPUTATION)
 
 
 func to_dict() -> Dictionary:
@@ -51,6 +57,7 @@ func to_dict() -> Dictionary:
 		"location": locations.to_dict(),
 		"events": events.to_dict(),
 		"appointments": appointments.to_dict(),
+		"channel": channel.to_dict(),
 	}
 
 
@@ -58,7 +65,7 @@ func to_dict() -> Dictionary:
 ## sonst Fehlertext. Bei einem Fehler kann der GameState teilweise geändert sein –
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
-	for section in ["time", "ledger", "stats", "location", "events", "appointments"]:
+	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -72,4 +79,6 @@ func restore(saved: Dictionary) -> String:
 		error = events.restore(saved["events"])
 	if error.is_empty():
 		error = appointments.restore(saved["appointments"])
+	if error.is_empty():
+		error = channel.restore(saved["channel"])
 	return error
