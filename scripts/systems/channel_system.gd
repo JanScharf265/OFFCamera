@@ -62,6 +62,12 @@ func damped_follower_gain(raw_gain: int) -> int:
 	return mini(gain, MAX_FOLLOWERS - followers)
 
 
+## Anteil (%) neuer Follower, der wegen der Wachstumsbremse ankommt (100 bei 0 Followern, 0 am Maximum).
+@warning_ignore("integer_division")
+func growth_percent() -> int:
+	return (MAX_FOLLOWERS - followers) * 100 / MAX_FOLLOWERS
+
+
 ## Wendet Änderungen wie {"followers": 80, "community": -5} an und protokolliert sie.
 ## Gibt den Protokolleintrag zurück oder null bei Ablehnung (dann keine Änderung):
 ## unbekannter Schlüssel, keine ganze Zahl, leere Quelle/Begründung, alles 0,

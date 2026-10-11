@@ -68,9 +68,42 @@ static func channel_parts(deltas: Dictionary) -> PackedStringArray:
 	var parts := PackedStringArray()
 	var followers: int = deltas.get("followers", 0)
 	if followers != 0:
-		parts.append("%+d Follower" % followers)
+		parts.append("%s Follower" % signed_int(followers))
 	for key in ["community", "reputation"]:
 		var change: int = deltas.get(key, 0)
 		if change != 0:
 			parts.append("%s %+d" % [CHANNEL_SHORT_LABELS[key], change])
 	return parts
+
+
+## Ganze Zahl mit Tausenderpunkten, z. B. 12345 -> "12.345".
+static func format_int(value: int) -> String:
+	var digits := str(absi(value))
+	var grouped := ""
+	for i in digits.length():
+		if i > 0 and (digits.length() - i) % 3 == 0:
+			grouped += "."
+		grouped += digits[i]
+	return ("-" if value < 0 else "") + grouped
+
+
+## Mit Vorzeichen, z. B. "+1.200" / "-35".
+static func signed_int(value: int) -> String:
+	return ("+" if value > 0 else "") + format_int(value)
+
+
+## Eine Zeile im Kanal-Verlauf: "Tag 1 · 08:20  Livestream · Qualität 100 %" und die Änderung,
+## z. B. "+17 Follower · Community +2" oder mit Hinweis, wenn Bremse/Grenze gekürzt hat.
+static func channel_change_text(change) -> Array[String]:
+	var head := "%s  %s" % [TimeSystemScript.format_stamp(change.time_minutes), change.reason]
+	var applied := channel_parts(change.applied)
+	var detail := " · ".join(applied) if not applied.is_empty() else "keine Änderung"
+	if change.was_limited():
+		var causes := PackedStringArray()
+		for key in change.requested:
+			if int(change.applied.get(key, 0)) != int(change.requested[key]):
+				var cause := "Wachstumsbremse" if key == "followers" and change.requested[key] > 0 else "Grenze erreicht"
+				if cause not in causes:
+					causes.append(cause)
+		detail += " (gewünscht: %s · %s)" % [" · ".join(channel_parts(change.requested)), ", ".join(causes)]
+	return [head, detail]

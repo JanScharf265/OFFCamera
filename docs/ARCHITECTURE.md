@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 3 (Tickets 3.1–3.4) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 3 (Tickets 3.1–3.5, Abnahme ausstehend) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -164,6 +164,9 @@ Stand Phase 3 (Tickets 3.1–3.4) auf Basis von Phase 2 + Grafik-Ticket G1: Kana
     aufgerufen vom GameScreen erst nach erfolgreichem `LocationSystem.travel()`. `LocationMarker` wippt über dem aktuellen Ort.
   - Gebäudeaussehen je Orts-ID als Tabelle `BUILDINGS`; Grafiken unter `assets/kenney/` (CC0, je mit `License.txt`).
     Fehlt eine Grafik, wird das Teil ausgelassen statt abzustürzen.
+- Kanal (Phase 3): HUD-Zeile `ChannelLabel`; Abschnitt „Kanal“ (Follower, Anteil laut Wachstumsbremse,
+  Balken für Community-Stimmung und Ruf) und „Kanal-Verlauf“ (letzte 5 Protokolleinträge: Zeit, Begründung,
+  tatsächliche Änderung; bei Kürzung auch die gewünschte Änderung und die Ursache). Texte in `activity_text.gd`.
 - Kollision mit Termin: erster Tipp zeigt die Warnung, zweiter Tipp auf dieselbe Aktion führt aus.
 - Offenes Ereignis: `EventPanel` ersetzt die Liste, bis eine Option gewählt ist.
 - Automatisch gespeichert wird beim Start eines neuen Spiels, nach jeder erfolgreichen Aktion

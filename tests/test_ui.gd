@@ -8,6 +8,7 @@ const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
+const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 
 const TEST_SAVE_PATH := "user://test_ui_savegame.json"
 
@@ -249,6 +250,40 @@ func test_random_event_is_decided_in_panel_with_channel_effects() -> void:
 	assert_eq((_find(app, "EventPanel") as Control).visible, false)
 	assert_eq(app.game.channel.community, 46)
 	assert_eq(app.game.events.is_resolved("tech_failure@3"), true)
+	app.free()
+
+
+func test_number_formatting() -> void:
+	assert_eq(ActivityText.format_int(0), "0")
+	assert_eq(ActivityText.format_int(1234567), "1.234.567")
+	assert_eq(ActivityText.signed_int(1200), "+1.200")
+	assert_eq(ActivityText.signed_int(-35), "-35")
+
+
+func test_channel_change_text_explains_brake_and_limits() -> void:
+	var channel := ChannelSystemScript.new(TimeSystemScript.new(TimeSystemScript.at(1, 8, 20)), 500000, 98)
+	var braked := channel.apply({"followers": 2000, "community": 5}, "content", "Livestream · Qualität 100 %")
+	var lines := ActivityText.channel_change_text(braked)
+	assert_eq(lines[0], "Tag 1 · 08:20  Livestream · Qualität 100 %")
+	assert_eq(lines[1], "+1.000 Follower · Community +2 (gewünscht: +2.000 Follower · Community +5 · Wachstumsbremse, Grenze erreicht)")
+	var plain := channel.apply({"reputation": -3}, "event", "Shitstorm: Aussitzen")
+	assert_eq(ActivityText.channel_change_text(plain)[1], "Ruf -3")
+
+
+func test_channel_panel_and_history_after_livestream() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	assert_eq((_find(app, "ChannelLabel") as Label).text, "Kanal: 120 Follower · Community 50 · Ruf 50")
+	assert_true(_screen_has_text(app, "Noch keine Änderungen."), "Leerzustand fehlt")
+	_travel(app, "studio")
+	_press(app, "ContentButton_livestream")
+	assert_eq((_find(app, "ChannelLabel") as Label).text, "Kanal: 137 Follower · Community 52 · Ruf 50")
+	assert_eq((_find(app, "FollowersLabel") as Label).text, "137 Follower")
+	assert_eq((_find(app, "GrowthLabel") as Label).text, "Wachstumsbremse: 99 % neuer Follower kommen an (Maximum 1.000.000).")
+	assert_true(_screen_has_text(app, "Tag 1 · 08:20  Livestream · Qualität 100 %"), "Begründung fehlt im Verlauf")
+	assert_true(_screen_has_text(app, "+17 Follower · Community +2"), "Änderung fehlt im Verlauf")
 	app.free()
 
 

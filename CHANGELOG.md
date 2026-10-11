@@ -10,6 +10,7 @@
 - Zufällige, regelbasierte Karriere-Ereignisse mit festem Seed: Kooperationsanfrage, Shitstorm, Raid, Technikpanne, virales Kurzvideo; Bedingungen an den Kanal, Abklingzeit, höchstens eins pro Tag (Ticket 3.4)
 - Ereignis-Optionen können Follower (absolut/prozentual), Community-Stimmung und Ruf ändern – mit Begründung im Kanal-Protokoll (Ticket 3.4)
 - Spielstand Version 5 (Seed) mit Migration von Version 4 (Ticket 3.4)
+- Spielansicht: Kanal im HUD, Kanal-Karte (Follower, Wachstumsbremse, Community-Stimmung, Ruf) und Kanal-Verlauf mit Begründung jeder Änderung, inklusive Hinweis, wenn Bremse oder Grenze gekürzt haben (Ticket 3.5)
 
 ## Unveröffentlicht – Grafik-Ticket G1 (iPhone-Abnahme ok, 11.10.2026)
 - Isometrische Stadtkarte im Stil eines Städtebauspiels: Straßen, Promenade, Strand, Meer, Bäume, Füllbebauung

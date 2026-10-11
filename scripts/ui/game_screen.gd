@@ -1,7 +1,7 @@
 extends VBoxContainer
 
-## Spielansicht: HUD (Datum, Uhrzeit, Ort, Konto, Werte), Content-Formate und Aktivitäten am aktuellen
-## Ort, nächste Termine, Stadtkarte mit Fahrten, letzte Buchungen.
+## Spielansicht: HUD (Datum, Uhrzeit, Ort, Konto, Kanal, Werte), Content-Formate und Aktivitäten am aktuellen
+## Ort, nächste Termine, Stadtkarte mit Fahrten, Kanal mit Verlauf (warum sich Werte geändert haben), letzte Buchungen.
 ## Ist ein Ereignis offen, ersetzt es die Liste, bis entschieden ist.
 ## Zeigt nur an und ruft Systeme auf – Regeln stehen in den Systemen.
 ##
@@ -21,11 +21,13 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const LocationSystemScript := preload("res://scripts/systems/location_system.gd")
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
+const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const CityMapScript := preload("res://scripts/ui/city_map.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 const RECENT_ENTRY_COUNT := 5
+const RECENT_CHANNEL_COUNT := 5
 const UPCOMING_APPOINTMENT_COUNT := 2
 ## Hat sich die Liste zwischen Antippen und Loslassen weiter bewegt,
 ## war es ein Scrollen, kein Tippen – die Aktion startet dann nicht.
@@ -37,6 +39,13 @@ var _date_label: Label
 var _clock_label: Label
 var _location_label: Label
 var _balance_label: Label
+var _channel_label: Label
+var _followers_label: Label
+var _growth_label: Label
+## "community"/"reputation" -> Label bzw. ProgressBar
+var _channel_score_labels := {}
+var _channel_score_bars := {}
+var _channel_history: VBoxContainer
 var _stat_labels := {}
 var _stat_bars := {}
 var _feedback_label: Label
@@ -119,6 +128,12 @@ func _ready() -> void:
 	content.add_child(_map)
 	content.add_child(_build_location_panel())
 
+	content.add_child(UiStyle.section_label("Kanal"))
+	content.add_child(_build_channel_panel())
+	content.add_child(UiStyle.section_label("Kanal-Verlauf"))
+	_channel_history = _list("ChannelHistory", 8)
+	content.add_child(_channel_history)
+
 	content.add_child(UiStyle.section_label("Letzte Buchungen"))
 	_ledger_list = _list("LedgerList", 8)
 	content.add_child(_ledger_list)
@@ -163,6 +178,10 @@ func _build_hud() -> Control:
 	_balance_label.name = "BalanceLabel"
 	box.add_child(_balance_label)
 
+	_channel_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
+	_channel_label.name = "ChannelLabel"
+	box.add_child(_channel_label)
+
 	for key in PlayerStatsScript.KEYS:
 		var stat_label := UiStyle.label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
 		box.add_child(stat_label)
@@ -175,6 +194,31 @@ func _build_hud() -> Control:
 		box.add_child(bar)
 		_stat_bars[key] = bar
 	return hud
+
+
+func _build_channel_panel() -> Control:
+	var panel := UiStyle.card()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	_followers_label = UiStyle.label("", UiStyle.LARGE_FONT_SIZE)
+	_followers_label.name = "FollowersLabel"
+	box.add_child(_followers_label)
+	_growth_label = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+	_growth_label.name = "GrowthLabel"
+	box.add_child(_growth_label)
+	for key in ["community", "reputation"]:
+		var label := UiStyle.label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+		box.add_child(label)
+		_channel_score_labels[key] = label
+		var bar := ProgressBar.new()
+		bar.min_value = 0
+		bar.max_value = ChannelSystemScript.MAX_SCORE
+		bar.show_percentage = false
+		bar.custom_minimum_size.y = 14
+		box.add_child(bar)
+		_channel_score_bars[key] = bar
+	return panel
 
 
 func _build_location_panel() -> Control:
@@ -446,6 +490,7 @@ func _refresh() -> void:
 	_refresh_activities()
 	_refresh_appointments()
 	_refresh_location_panel()
+	_refresh_channel()
 	_refresh_ledger_list()
 	_refresh_event()
 
@@ -594,6 +639,33 @@ func _on_event_option_pressed(event_id: String, option_id: String, option_label:
 	_refresh()
 	if reason.is_empty():
 		state_changed.emit()
+
+
+func _refresh_channel() -> void:
+	var channel := _game.channel
+	_channel_label.text = "Kanal: %s Follower · Community %d · Ruf %d" % [
+			ActivityText.format_int(channel.followers), channel.community, channel.reputation]
+	_followers_label.text = "%s Follower" % ActivityText.format_int(channel.followers)
+	_growth_label.text = "Wachstumsbremse: %d %% neuer Follower kommen an (Maximum %s)." % [
+			channel.growth_percent(), ActivityText.format_int(ChannelSystemScript.MAX_FOLLOWERS)]
+	for key in _channel_score_labels:
+		var value := channel.get_value(key)
+		_channel_score_labels[key].text = "%s %d/%d" % [ChannelSystemScript.LABELS[key], value, ChannelSystemScript.MAX_SCORE]
+		_channel_score_bars[key].value = value
+
+	_clear(_channel_history)
+	var history := channel.get_history()
+	if history.is_empty():
+		_channel_history.add_child(UiStyle.label("Noch keine Änderungen.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+		return
+	var oldest_shown := maxi(history.size() - RECENT_CHANNEL_COUNT, 0)
+	for i in range(history.size() - 1, oldest_shown - 1, -1):
+		var lines := ActivityText.channel_change_text(history[i])
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 2)
+		row.add_child(UiStyle.wrapping_label(lines[0], UiStyle.SMALL_FONT_SIZE))
+		row.add_child(UiStyle.wrapping_label(lines[1], UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+		_channel_history.add_child(row)
 
 
 func _refresh_ledger_list() -> void:
