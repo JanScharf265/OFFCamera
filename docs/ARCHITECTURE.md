@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 1, Ticket 2: `TimeSystem` und `LedgerSystem` vorhanden, noch nicht im Spiel verdrahtet.
+Stand Phase 1, Ticket 3: Zeit, Ledger, Spielerwerte und Aktivitäten vorhanden; noch keine Spiel-UI.
 
 ## Umgesetzt
 
@@ -22,6 +22,24 @@ Stand Phase 1, Ticket 2: `TimeSystem` und `LedgerSystem` vorhanden, noch nicht i
   ungültig (`INVALID`), nicht genug Geld (`INSUFFICIENT_FUNDS`, außer `allow_negative`),
   bereits verwendeter `idempotency_key` (`DUPLICATE`).
 - Signale: `entry_posted(entry)`, danach `balance_changed(balance_cents)`.
+
+### GameState (`scripts/core/game_state.gd`)
+- Bündelt die Systeme einer Spielsitzung (kein Autoload). `GameState.new(catalog)` = neues Spiel
+  mit Startwerten (Platzhalter: Tag 1 08:00, 500,00 €, Energie 80, Stimmung 60).
+
+### PlayerStats (`scripts/models/player_stats.gd`)
+- Abstrakte Werte 0–100 (`energy`, `mood`), nur über `apply(deltas)` änderbar, begrenzt auf 0–100.
+
+### Aktivitäten (`data/activities/activities.json`, `ActivityCatalog`, `ActivitySystem`)
+- Daten: `id` (a–z, 0–9, _), `display_name`, `description`, `duration_minutes` (> 0),
+  optional `money_cents` (+ Einnahme / − Ausgabe, dann `category` Pflicht), optional `effects`
+  (nur Schlüssel aus `PlayerStats.KEYS`, ganze Zahlen).
+- `ActivityCatalog` prüft alles beim Laden, sammelt verständliche Fehler und übernimmt bei
+  einem Fehler gar nichts.
+- `ActivitySystem.check(id)` / `start(id)` geben `""` (ok) oder einen Anzeigetext zurück.
+  `start` prüft erst alles (Energie reicht, Geld reicht, kein laufender Zeitfortschritt) und führt
+  dann aus: Buchung (Zeitstempel = Beginn) → Effekte → `time.advance(dauer)` → `activity_completed`.
+- Datendateien werden per `include_filter="data/*"` in den iOS-Export aufgenommen.
 
 ### Konvention: Verweise zwischen Skripten
 Skripte referenzieren einander über `const X := preload("res://…")` statt über `class_name`.

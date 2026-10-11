@@ -18,8 +18,8 @@ Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, 
 2–4 Aktivitäten, zentrales TimeSystem, zentrales Ledger, ein Ereignis, Speichern/Laden, Fehler- und Leerzustände.
 
 - [x] Ticket 1: TimeSystem + Test-Runner (12/12 Tests grün auf dem Mac)
-- [ ] Ticket 2: LedgerSystem (Code fertig, Testlauf auf dem Mac ausstehend)
-- [ ] Ticket 3: GameState + ActivitySystem (Aktivitäten als Daten)
+- [x] Ticket 2: LedgerSystem (27/27 Tests grün auf dem Mac)
+- [ ] Ticket 3: GameState + ActivitySystem (Aktivitäten als Daten) (Code fertig, Testlauf ausstehend)
 - [ ] Ticket 4: Hauptmenü + HUD (danach iPhone-Test)
 - [ ] Ticket 5: EventSystem (ein Ereignis, genau einmal)
 - [ ] Ticket 6: SaveSystem + „Fortsetzen“ (danach iPhone-Test)

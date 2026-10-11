@@ -46,6 +46,11 @@ func get_minutes() -> int:
 	return _minutes
 
 
+## true, solange advance() seine Signale verschickt.
+func is_advancing() -> bool:
+	return _is_advancing
+
+
 func get_day() -> int:
 	return day_of(_minutes)
 

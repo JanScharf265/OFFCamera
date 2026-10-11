@@ -1,0 +1,27 @@
+[
+	{
+		"id": "stream_short",
+		"display_name": "Kurzer Stream",
+		"description": "Zwei Stunden live. Kostet Energie, bringt etwas Geld und Laune.",
+		"duration_minutes": 120,
+		"money_cents": 2500,
+		"category": "creator",
+		"effects": { "energy": -20, "mood": 5 }
+	},
+	{
+		"id": "rest",
+		"display_name": "Ausruhen",
+		"description": "Eine Stunde abschalten.",
+		"duration_minutes": 60,
+		"effects": { "energy": 15, "mood": 3 }
+	},
+	{
+		"id": "eat_out",
+		"display_name": "Essen gehen",
+		"description": "Eine Stunde essen gehen.",
+		"duration_minutes": 60,
+		"money_cents": -1500,
+		"category": "food",
+		"effects": { "energy": 10, "mood": 5 }
+	}
+]

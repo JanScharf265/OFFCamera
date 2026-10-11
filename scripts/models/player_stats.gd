@@ -1,0 +1,37 @@
+class_name PlayerStats
+extends RefCounted
+
+## Abstrakte Spielerwerte, jeweils 0–100. Keine medizinische Simulation.
+## Werte nur über apply() ändern – das hält die Grenzen ein.
+
+signal stats_changed
+
+const MIN_VALUE := 0
+const MAX_VALUE := 100
+## Alle gültigen Schlüssel für Effekte in Daten (z. B. activities.json).
+const KEYS := ["energy", "mood"]
+
+var energy: int
+var mood: int
+
+
+func _init(p_energy: int = 80, p_mood: int = 60) -> void:
+	energy = clampi(p_energy, MIN_VALUE, MAX_VALUE)
+	mood = clampi(p_mood, MIN_VALUE, MAX_VALUE)
+
+
+func get_value(key: String) -> int:
+	assert(key in KEYS)
+	return get(key)
+
+
+## Wendet Änderungen wie {"energy": -20, "mood": 5} an und begrenzt auf 0–100.
+func apply(deltas: Dictionary) -> void:
+	if deltas.is_empty():
+		return
+	for key in deltas:
+		if key not in KEYS:
+			push_error("PlayerStats: unbekannter Wert '%s'." % key)
+			continue
+		set(key, clampi(get(key) + int(deltas[key]), MIN_VALUE, MAX_VALUE))
+	stats_changed.emit()
