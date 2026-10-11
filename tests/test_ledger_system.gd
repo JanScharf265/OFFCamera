@@ -112,7 +112,7 @@ func test_signals_fire_once_per_accepted_entry_only() -> void:
 	var posted_ids := []
 	var balances := []
 	var on_posted := func(entry) -> void: posted_ids.append(entry.id)
-	var on_balance := func(balance: int) -> void: balances.append(balance)
+	var on_balance := func(balance: int, _account: String) -> void: balances.append(balance)
 	ledger.entry_posted.connect(on_posted)
 	ledger.balance_changed.connect(on_balance)
 	ledger.post(500, "misc", "Plus", "test")
@@ -159,3 +159,151 @@ func test_format_cents() -> void:
 	assert_eq(LedgerSystemScript.format_cents(123456), "1.234,56 €")
 	assert_eq(LedgerSystemScript.format_cents(100000000), "1.000.000,00 €")
 	assert_eq(LedgerSystemScript.format_cents(-99900), "-999,00 €")
+
+
+# --- Konten und Umbuchungen (Phase 4, Ticket 4.1) -------------------------------
+
+func test_accounts_have_separate_balances() -> void:
+	var ledger := _make_ledger(10000)
+	assert_eq(ledger.get_balance("private"), 10000)
+	assert_eq(ledger.get_balance("company"), 0)
+	ledger.post(5000, "sales", "Umsatz", "company", "", "", false, "company")
+	assert_eq(ledger.get_balance("company"), 5000)
+	assert_eq(ledger.get_balance(), 10000)  # Standard = Privatkonto
+	assert_eq(ledger.get_entries_for_account("company").size(), 1)
+	assert_eq(ledger.get_entries_for_account("private").size(), 0)
+	assert_eq(ledger.get_entries()[0].account, "company")
+
+
+func test_existing_calls_book_on_private_account() -> void:
+	var ledger := _make_ledger(1000)
+	var entry := ledger.post(-200, "food", "Kaffee", "activity")
+	assert_eq(entry.account, "private")
+	assert_eq(ledger.get_balance("private"), 800)
+
+
+func test_overdraft_is_checked_per_account() -> void:
+	var ledger := _make_ledger(10000)
+	assert_true(ledger.post(-1, "rent", "Miete", "company", "", "", false, "company") == null, "Firmenkonto überzogen")
+	assert_eq(ledger.last_rejection, LedgerSystemScript.Rejection.INSUFFICIENT_FUNDS)
+	assert_eq(ledger.can_afford(5000, "company"), false)
+	assert_eq(ledger.can_afford(5000, "private"), true)
+
+
+func test_unknown_account_is_rejected() -> void:
+	var ledger := _make_ledger(1000)
+	expect_error_output()
+	assert_true(ledger.post(100, "misc", "X", "test", "", "", false, "offshore") == null, "unbekanntes Konto")
+	assert_eq(ledger.last_rejection, LedgerSystemScript.Rejection.INVALID)
+	assert_eq(ledger.get_entries().size(), 0)
+
+
+func test_transfer_books_two_linked_entries() -> void:
+	var ledger := _make_ledger(10000)
+	var entries := ledger.transfer(3000, "private", "company", "Einlage", "company", "deposit:1")
+	assert_eq(entries.size(), 2)
+	if entries.size() != 2:
+		return
+	assert_eq(entries[0].amount_cents, -3000)
+	assert_eq(entries[0].account, "private")
+	assert_eq(entries[1].amount_cents, 3000)
+	assert_eq(entries[1].account, "company")
+	assert_eq(entries[0].reference, "deposit:1")
+	assert_eq(entries[1].reference, "deposit:1")
+	assert_eq(entries[0].category, "transfer")
+	assert_eq(ledger.get_balance("private"), 7000)
+	assert_eq(ledger.get_balance("company"), 3000)
+	assert_eq(ledger.to_dict()["used_keys"].keys().size(), 2)
+	assert_true(ledger.to_dict()["used_keys"].has("deposit:1|out"), "Schlüssel des Abgangs fehlt")
+	assert_true(ledger.to_dict()["used_keys"].has("deposit:1|in"), "Schlüssel des Zugangs fehlt")
+
+
+func test_transfer_is_booked_only_once() -> void:
+	var ledger := _make_ledger(10000)
+	assert_eq(ledger.transfer(3000, "private", "company", "Einlage", "company", "deposit:1").size(), 2)
+	assert_eq(ledger.transfer(3000, "private", "company", "Einlage", "company", "deposit:1").size(), 0)
+	assert_eq(ledger.last_rejection, LedgerSystemScript.Rejection.DUPLICATE)
+	assert_eq(ledger.get_entries().size(), 2)
+	assert_eq(ledger.get_balance("company"), 3000)
+
+
+func test_failed_transfer_books_nothing() -> void:
+	var ledger := _make_ledger(1000)
+	var posted := []
+	ledger.entry_posted.connect(func(entry) -> void: posted.append(entry.id))
+	assert_eq(ledger.transfer(5000, "private", "company", "Einlage", "company", "deposit:1").size(), 0)
+	assert_eq(ledger.last_rejection, LedgerSystemScript.Rejection.INSUFFICIENT_FUNDS)
+	expect_error_output()
+	assert_eq(ledger.transfer(100, "private", "private", "Kreis", "company", "loop:1").size(), 0)
+	expect_error_output()
+	assert_eq(ledger.transfer(100, "private", "company", "Ohne Schlüssel", "company", "").size(), 0)
+	assert_eq(ledger.get_entries().size(), 0)
+	assert_true(posted.is_empty(), "Signal trotz Ablehnung")
+	assert_eq(ledger.get_balance("private"), 1000)
+
+
+func test_withdrawal_needs_company_funds() -> void:
+	var ledger := _make_ledger(10000)
+	ledger.transfer(3000, "private", "company", "Einlage", "company", "deposit:1")
+	assert_eq(ledger.transfer(4000, "company", "private", "Entnahme", "company", "withdraw:1").size(), 0)
+	assert_eq(ledger.transfer(1000, "company", "private", "Entnahme", "company", "withdraw:1").size(), 2)
+	assert_eq(ledger.get_balance("company"), 2000)
+	assert_eq(ledger.get_balance("private"), 8000)
+
+
+func test_balance_signal_names_the_account() -> void:
+	var ledger := _make_ledger(1000)
+	var seen := []
+	ledger.balance_changed.connect(func(balance: int, account: String) -> void: seen.append([account, balance]))
+	ledger.transfer(400, "private", "company", "Einlage", "company", "deposit:1")
+	assert_eq(seen, [["private", 600], ["company", 400]])
+
+
+func test_accounts_survive_round_trip() -> void:
+	var ledger := _make_ledger(10000)
+	ledger.transfer(3000, "private", "company", "Einlage", "company", "deposit:1")
+	ledger.post(-500, "rent", "Miete", "company", "", "", false, "company")
+	var copy := _make_ledger(0)
+	assert_eq(copy.restore(JSON.parse_string(JSON.stringify(ledger.to_dict()))), "")
+	assert_eq(copy.get_balance("private"), 7000)
+	assert_eq(copy.get_balance("company"), 2500)
+	assert_eq(copy.recalculate_balance("company"), copy.get_balance("company"))
+	assert_eq(copy.transfer(3000, "private", "company", "Einlage", "company", "deposit:1").size(), 0)
+
+
+func test_restore_rejects_half_transfer() -> void:
+	var ledger := _make_ledger(10000)
+	ledger.transfer(3000, "private", "company", "Einlage", "company", "deposit:1")
+	var data := ledger.to_dict()
+	data["used_keys"].erase("deposit:1|in")
+	var copy := _make_ledger(0)
+	var error := copy.restore(data)
+	assert_true("unvollständig" in error, error)
+	assert_eq(copy.get_entries().size(), 0)
+
+
+func test_restore_rejects_unknown_account() -> void:
+	var ledger := _make_ledger(10000)
+	ledger.post(100, "misc", "X", "test")
+	var data := ledger.to_dict()
+	data["entries"][0]["account"] = "offshore"
+	assert_true("unbekanntes Konto" in _make_ledger(0).restore(data), "unbekanntes Konto akzeptiert")
+
+
+func test_migrate_single_account_assigns_private() -> void:
+	var old := {"opening_balance_cents": 50000, "next_number": 3, "used_keys": {"event:x": "tx_000002"},
+		"entries": [
+			{"id": "tx_000001", "time_minutes": 500, "amount_cents": 2500, "category": "creator",
+				"description": "Kurzer Stream", "source": "activity", "reference": "stream_short"},
+			{"id": "tx_000002", "time_minutes": 900, "amount_cents": 3000, "category": "creator",
+				"description": "Marke", "source": "event", "reference": "x"},
+		]}
+	assert_eq(LedgerSystemScript.migrate_single_account(old), "")
+	var ledger := _make_ledger(0)
+	assert_eq(ledger.restore(old), "")
+	assert_eq(ledger.get_balance("private"), 55500)
+	assert_eq(ledger.get_balance("company"), 0)
+	for entry in ledger.get_entries():
+		assert_eq(entry.account, "private", entry.id)
+	assert_eq(ledger.post(100, "misc", "Neu", "test").id, "tx_000003")
+	assert_true(ledger.post(3000, "creator", "Marke", "event", "x", "event:x") == null, "Schutzschlüssel verloren")

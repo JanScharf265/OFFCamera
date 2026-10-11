@@ -16,10 +16,12 @@ var description: String
 var source: String
 ## Optionale Referenz auf Aktivität, Ort oder Ereignis (ID).
 var reference: String
+## Konto (Phase 4): "private" oder "company" (LedgerSystem.ACCOUNTS).
+var account: String
 
 
 func _init(p_id: String, p_time_minutes: int, p_amount_cents: int, p_category: String,
-		p_description: String, p_source: String, p_reference: String = "") -> void:
+		p_description: String, p_source: String, p_reference: String = "", p_account: String = "private") -> void:
 	id = p_id
 	time_minutes = p_time_minutes
 	amount_cents = p_amount_cents
@@ -27,6 +29,7 @@ func _init(p_id: String, p_time_minutes: int, p_amount_cents: int, p_category: S
 	description = p_description
 	source = p_source
 	reference = p_reference
+	account = p_account
 
 
 func is_income() -> bool:

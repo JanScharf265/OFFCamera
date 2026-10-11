@@ -107,7 +107,16 @@ Abnahme auf dem iPhone:
 - [x] Spielstand aus Phase 2 lässt sich fortsetzen (Kanal mit Startwerten, keine Ausrüstung)
 - [x] Alles per Touch bedienbar und scrollbar, nichts verdeckt
 
-## Phase 4 – Fiktionales Unternehmen und zweiter Standort ← als Nächstes
+## Phase 4 – Fiktionales Unternehmen und zweiter Standort ← in Arbeit
+Merch- und Lifestyle-Label (Follower treiben den Umsatz), getrennte Konten privat/Firma im einen Ledger,
+Tagesabschluss beim Tageswechsel, zweiter Standort als Filiale in Marbella, Management vor Ort (ohne Pflege sinkt
+die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), noch keine Mitarbeitenden.
+
+- [x] Ticket 4.1: Konten „privat“/„Firma“ im LedgerSystem, Umbuchungen als zwei verknüpfte Buchungen, Spielstand Version 6 + Migration (211/211 Tests grün)
+- [ ] Ticket 4.2: Unternehmen gründen (CompanySystem, Unternehmens-Protokoll)
+- [ ] Ticket 4.3: Tagesabschluss beim Tageswechsel
+- [ ] Ticket 4.4: Zweiter Standort und Management vor Ort
+- [ ] Ticket 4.5: Unternehmens-UI und iPhone-Abnahme
 
 ## Spätere Phasen
 5. Finanzen, Fristen, Behördenereignisse

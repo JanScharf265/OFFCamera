@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht – Phase 4
+- LedgerSystem mit Konten „privat“ und „Firma“: Kontostand und Überziehungsschutz je Konto; Umbuchungen (Einlage/Entnahme) als zwei verknüpfte Buchungen, nie halb (Ticket 4.1)
+- Spielstand Version 6 mit Migration: alte Buchungen gehören zum Privatkonto (Ticket 4.1)
+
 ## Unveröffentlicht – Phase 3 (iPhone-Abnahme ok, 11.10.2026)
 - ChannelSystem: Kanalprofil mit Followern (0–1.000.000, Wachstumsbremse), Community-Stimmung und Ruf (0–100); jede Änderung mit Begründung im Kanal-Protokoll (Ticket 3.1)
 - Spielstand Version 3 (Kanal) mit Migration von Version 2 (Ticket 3.1)

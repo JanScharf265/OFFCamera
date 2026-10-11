@@ -21,3 +21,14 @@ const TEST_SEED := 12345
 ## Neues Spiel mit echten Daten (Tag 1, 08:00, Wohnung) und festem Seed.
 static func new_game(data: GameDataScript = null, p_seed: int = TEST_SEED) -> GameStateScript:
 	return GameStateScript.new(data if data != null else game_data(), p_seed)
+
+
+## Wandelt GameState.to_dict() in das Ledger-Format vor Spielstand-Version 6 zurück
+## (ein Konto, Buchungen ohne "account") – für Migrationstests alter Spielstände.
+static func with_single_account_ledger(game: Dictionary) -> Dictionary:
+	var ledger: Dictionary = game["ledger"]
+	ledger["opening_balance_cents"] = ledger["opening_balances"]["private"]
+	ledger.erase("opening_balances")
+	for entry in ledger["entries"]:
+		entry.erase("account")
+	return game

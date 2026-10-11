@@ -184,7 +184,7 @@ func test_version_4_save_gets_fixed_seed() -> void:
 	saved["events"].erase("seed")
 	SaveSystemScript.delete_save(PATH)
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
-	file.store_string(JSON.stringify({"version": 4, "game": saved}))
+	file.store_string(JSON.stringify({"version": 4, "game": Helpers.with_single_account_ledger(saved)}))
 	file.close()
 	var loaded: GameStateScript = SaveSystemScript.load_game(Helpers.game_data(), PATH)["game"]
 	assert_true(loaded != null, "Migration fehlgeschlagen")

@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 4 (Ticket 4.1: Konten) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -14,6 +14,12 @@ Stand Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 +
   Das EventSystem (Ticket 5) verarbeitet fällige Ereignisse im Intervall `(from, to]`.
 
 ### LedgerSystem (`scripts/systems/ledger_system.gd`, Modell `scripts/models/ledger_entry.gd`)
+- Konten (Phase 4): `private` und `company` im selben Ledger; jede Buchung hat `account`. `post(…, account)`,
+  `get_balance(account)`, `can_afford(betrag, account)`, `recalculate_balance(account)`,
+  `get_entries_for_account(account)` – ohne Angabe jeweils das Privatkonto.
+- `transfer(betrag, von, nach, beschreibung, quelle, schlüssel)`: zwei Buchungen (Kategorie `transfer`,
+  Referenz = Schlüssel, Schutzschlüssel `<schlüssel>|out`/`|in`); erst alles prüfen, dann beide buchen.
+  Beim Laden wird eine halbe Umbuchung abgelehnt. `balance_changed(betrag, konto)`.
 - Einzige Autorität für Geld. Beträge in **ganzen Cent** (`int`), Einnahme > 0, Ausgabe < 0.
 - Kontostand = Startwert + Summe aller Buchungen; `recalculate_balance()` prüft das.
 - Jede Buchung: ID `tx_000001…`, Spielzeit vom TimeSystem, Betrag, Kategorie, Beschreibung, Quelle,
@@ -123,7 +129,7 @@ Stand Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 +
 - UI: Abschnitt „Ausrüstung“ am Kaufort (Button `EquipmentButton_<id>`, verschwindet auf höchster Stufe).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 5, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 6, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -132,6 +138,7 @@ Stand Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 +
 - Migration 2 → 3: Kanal mit Startwerten und leerem Protokoll.
 - Migration 3 → 4: Ausrüstung leer (nichts gekauft).
 - Migration 4 → 5: Ereignis-Seed = `MIGRATED_SEED` (1).
+- Migration 5 → 6: `opening_balance_cents` → `opening_balances` {private, company: 0}, alle Buchungen `account = private`.
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.

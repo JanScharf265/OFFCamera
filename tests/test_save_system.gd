@@ -198,7 +198,7 @@ func _version_1_text(minutes: int) -> String:
 	game.erase("channel")
 	game.erase("equipment")
 	game["time"]["minutes"] = minutes
-	return JSON.stringify({"version": 1, "game": game})
+	return JSON.stringify({"version": 1, "game": Helpers.with_single_account_ledger(game)})
 
 
 func test_save_file_has_current_version_with_location_and_appointments() -> void:
@@ -259,7 +259,7 @@ func _version_2_text() -> String:
 	var game := _played_game().to_dict()
 	game.erase("channel")
 	game.erase("equipment")
-	return JSON.stringify({"version": 2, "game": game})
+	return JSON.stringify({"version": 2, "game": Helpers.with_single_account_ledger(game)})
 
 
 func test_version_2_is_migrated_with_channel_start_values() -> void:
@@ -296,10 +296,45 @@ func test_channel_survives_save_and_load() -> void:
 func test_version_3_is_migrated_without_equipment() -> void:
 	var game := _played_game().to_dict()
 	game.erase("equipment")
-	_write(JSON.stringify({"version": 3, "game": game}))
+	_write(JSON.stringify({"version": 3, "game": Helpers.with_single_account_ledger(game)}))
 	var result := _load()
 	var loaded: GameStateScript = result["game"]
 	assert_true(loaded != null, "Migration fehlgeschlagen: %s" % result["error"])
 	if loaded != null:
 		assert_eq(loaded.equipment.get_level("camera"), 0)
 		assert_eq(loaded.channel.followers, _played_game().channel.followers)
+
+
+## Regressionstest Ticket 4.1: Spielstand Version 5 (ein Konto) -> Version 6 (Konten).
+func test_version_5_ledger_is_migrated_to_private_account() -> void:
+	var played := _played_game()  # Buchungen: Livestream, Essen, Marke
+	var game := Helpers.with_single_account_ledger(played.to_dict())
+	_write(JSON.stringify({"version": 5, "game": game}))
+	var result := _load()
+	var loaded: GameStateScript = result["game"]
+	assert_true(loaded != null, "Migration fehlgeschlagen: %s" % result["error"])
+	if loaded == null:
+		return
+	assert_eq(loaded.ledger.get_balance("private"), played.ledger.get_balance())
+	assert_eq(loaded.ledger.get_balance("company"), 0)
+	assert_eq(loaded.ledger.get_opening_balance("private"), 50000)
+	assert_eq(loaded.ledger.get_entries().size(), played.ledger.get_entries().size())
+	for entry in loaded.ledger.get_entries():
+		assert_eq(entry.account, "private", entry.id)
+	# Kein Ereignis wird nach der Migration nochmal gebucht.
+	assert_eq(loaded.events.resolve("first_brand_request", "accept"), "Dieses Ereignis ist nicht offen.")
+	# Gespeichert wird danach im neuen Format.
+	SaveSystemScript.save(loaded, PATH)
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	assert_eq(int(data["version"]), 6)
+	assert_eq(data["game"]["ledger"]["opening_balances"], {"private": 50000.0, "company": 0.0})
+	assert_true(not data["game"]["ledger"].has("opening_balance_cents"), "altes Feld noch vorhanden")
+
+
+func test_version_5_without_ledger_start_is_rejected() -> void:
+	var game := Helpers.with_single_account_ledger(_new_game().to_dict())
+	game["ledger"].erase("opening_balance_cents")
+	_write(JSON.stringify({"version": 5, "game": game}))
+	var result := _load()
+	assert_true(result["game"] == null, "kaputter v5-Stand darf nicht laden")
+	assert_true("umgewandelt" in result["error"], result["error"])

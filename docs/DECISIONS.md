@@ -47,6 +47,17 @@ Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslauf
 führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
 Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
 
+## 016 – Konten im einen Ledger
+Privat- und Firmenkonto liegen im selben LedgerSystem (Entscheidung des Game Directors): jede Buchung hat ein
+Feld `account`, Kontostände und Überziehungsschutz gelten je Konto, Buchungs-IDs und Schutzschlüssel sind
+gemeinsam. Bestehende Aufrufe buchen ohne Angabe auf das Privatkonto. Umbuchung = genau zwei Buchungen
+(Kategorie `transfer`, gemeinsame Referenz = Schlüssel, Schutzschlüssel `<schlüssel>|out` und `<schlüssel>|in`);
+alles wird vorher geprüft, danach können beide Hälften nicht mehr scheitern. Beim Laden wird abgelehnt, wenn
+von einer Umbuchung nur eine Hälfte da ist. `|` statt `:`, weil `:` und `@` in anderen Schlüsseln vorkommen
+und z. B. ein Ereignis mit der ID `in` sonst wie eine Umbuchungshälfte aussähe.
+Migration auf Version 6: alter Startwert wird Startwert des Privatkontos, Firmenkonto beginnt bei 0, alle
+bisherigen Buchungen gehören zum Privatkonto.
+
 ## 015 – Zufallsereignisse mit festem Seed
 Gewürfelt wird nur beim Tageswechsel (`day_changed`), nicht pro Aktion – so hängt der Verlauf nicht davon ab,
 wie man den Tag in Aktionen aufteilt. Wurf = FNV-1a 32 Bit von "<seed>|<tag>|<id>" modulo 100: zustandslos,

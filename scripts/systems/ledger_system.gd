@@ -1,15 +1,20 @@
 class_name LedgerSystem
 extends RefCounted
 
-## Einzige Autorität für Geld. Jede Änderung des Kontostands ist eine Buchung.
+## Einzige Autorität für Geld. Jede Änderung eines Kontostands ist eine Buchung.
 ##
-## Kontostand = Startwert + Summe aller Buchungen (ganze Cent).
+## Konten (Phase 4): "private" (Privatkonto) und "company" (Firmenkonto) – beide in
+## diesem einen Ledger, jede Buchung trägt ihr Konto. Kontostand je Konto =
+## Startwert des Kontos + Summe seiner Buchungen (ganze Cent).
 ## Regeln:
-## - Betrag 0 sowie leere Kategorie/Beschreibung/Quelle sind ungültig.
-## - Ausgaben, die den Kontostand unter 0 bringen würden, werden abgelehnt,
+## - Betrag 0, unbekanntes Konto sowie leere Kategorie/Beschreibung/Quelle sind ungültig.
+## - Ausgaben, die den Kontostand des Kontos unter 0 bringen würden, werden abgelehnt,
 ##   außer der Aufrufer erlaubt es ausdrücklich (allow_negative).
 ## - Eine Buchung mit idempotency_key wird höchstens einmal angenommen –
 ##   Schutz gegen Doppelbuchungen bei erneut ausgeführten Ereignissen.
+## - Umbuchung (transfer) zwischen Konten = genau zwei Buchungen mit gemeinsamer
+##   Referenz und den Schutzschlüsseln "<schlüssel>|out" / "<schlüssel>|in".
+##   Erst wird alles geprüft, dann beide gebucht – nie nur eine Hälfte.
 ## Abgelehnte Buchungen ändern nichts, senden keine Signale und setzen
 ## last_rejection auf den Grund.
 
@@ -18,71 +23,107 @@ const LedgerEntryScript := preload("res://scripts/models/ledger_entry.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
 signal entry_posted(entry: LedgerEntryScript)
-signal balance_changed(balance_cents: int)
+signal balance_changed(balance_cents: int, account: String)
 
 enum Rejection { NONE, INVALID, INSUFFICIENT_FUNDS, DUPLICATE }
+
+const PRIVATE := "private"
+const COMPANY := "company"
+const ACCOUNTS: Array[String] = [PRIVATE, COMPANY]
+const ACCOUNT_LABELS := {PRIVATE: "Privatkonto", COMPANY: "Firmenkonto"}
+const TRANSFER_CATEGORY := "transfer"
+## "|" kommt in keinem anderen Schutzschlüssel vor (IDs sind a–z, 0–9, _; sonst ":" und "@").
+const TRANSFER_OUT_SUFFIX := "|out"
+const TRANSFER_IN_SUFFIX := "|in"
 
 var last_rejection: Rejection = Rejection.NONE
 
 var _time: TimeSystemScript
-var _opening_balance_cents: int
-var _balance_cents: int
+## account -> Startwert in Cent
+var _opening := {}
+## account -> laufender Kontostand in Cent
+var _balances := {}
 var _entries: Array[LedgerEntryScript] = []
 var _next_number := 1
 var _used_keys := {}
 
 
+## opening_balance_cents ist der Startwert des Privatkontos; das Firmenkonto beginnt bei 0.
 func _init(time: TimeSystemScript, opening_balance_cents: int = 0) -> void:
 	_time = time
-	_opening_balance_cents = opening_balance_cents
-	_balance_cents = opening_balance_cents
+	_opening = {PRIVATE: opening_balance_cents, COMPANY: 0}
+	_balances = _opening.duplicate()
 
 
-## Bucht einen Betrag. Gibt die neue Buchung zurück oder null bei Ablehnung.
+## Bucht einen Betrag auf ein Konto. Gibt die neue Buchung zurück oder null bei Ablehnung.
 func post(amount_cents: int, category: String, description: String, source: String,
 		reference: String = "", idempotency_key: String = "",
-		allow_negative: bool = false) -> LedgerEntryScript:
-	if amount_cents == 0 or category.is_empty() or description.is_empty() or source.is_empty():
-		push_error("LedgerSystem: ungültige Buchung (Betrag %d, Kategorie '%s', Beschreibung '%s', Quelle '%s')."
-				% [amount_cents, category, description, source])
+		allow_negative: bool = false, account: String = PRIVATE) -> LedgerEntryScript:
+	if amount_cents == 0 or category.is_empty() or description.is_empty() or source.is_empty() \
+			or account not in ACCOUNTS:
+		push_error("LedgerSystem: ungültige Buchung (Betrag %d, Kategorie '%s', Beschreibung '%s', Quelle '%s', Konto '%s')."
+				% [amount_cents, category, description, source, account])
 		last_rejection = Rejection.INVALID
 		return null
 	if not idempotency_key.is_empty() and _used_keys.has(idempotency_key):
 		last_rejection = Rejection.DUPLICATE
 		return null
-	if amount_cents < 0 and not allow_negative and _balance_cents + amount_cents < 0:
+	if amount_cents < 0 and not allow_negative and _balances[account] + amount_cents < 0:
 		last_rejection = Rejection.INSUFFICIENT_FUNDS
 		return null
-
-	var entry := LedgerEntryScript.new("tx_%06d" % _next_number, _time.get_minutes(), amount_cents,
-			category, description, source, reference)
-	_next_number += 1
-	_entries.append(entry)
-	if not idempotency_key.is_empty():
-		_used_keys[idempotency_key] = entry.id
-	_balance_cents += amount_cents
-	last_rejection = Rejection.NONE
-
-	entry_posted.emit(entry)
-	balance_changed.emit(_balance_cents)
-	return entry
+	return _book(amount_cents, category, description, source, reference, idempotency_key, account)
 
 
-func can_afford(cost_cents: int) -> bool:
-	return cost_cents <= _balance_cents
+## Umbuchung zwischen zwei Konten (z. B. Einlage privat -> Firma). Gibt beide Buchungen
+## [Abgang, Zugang] zurück oder [] bei Ablehnung (dann keine Änderung).
+## idempotency_key ist Pflicht; gebucht wird mit "<key>|out" und "<key>|in", Referenz = key.
+func transfer(amount_cents: int, from_account: String, to_account: String, description: String,
+		source: String, idempotency_key: String) -> Array[LedgerEntryScript]:
+	var result: Array[LedgerEntryScript] = []
+	if amount_cents <= 0 or from_account not in ACCOUNTS or to_account not in ACCOUNTS \
+			or from_account == to_account or description.is_empty() or source.is_empty() \
+			or idempotency_key.is_empty():
+		push_error("LedgerSystem: ungültige Umbuchung (Betrag %d, %s -> %s, Schlüssel '%s')."
+				% [amount_cents, from_account, to_account, idempotency_key])
+		last_rejection = Rejection.INVALID
+		return result
+	var out_key := idempotency_key + TRANSFER_OUT_SUFFIX
+	var in_key := idempotency_key + TRANSFER_IN_SUFFIX
+	if _used_keys.has(out_key) or _used_keys.has(in_key):
+		last_rejection = Rejection.DUPLICATE
+		return result
+	if _balances[from_account] < amount_cents:
+		last_rejection = Rejection.INSUFFICIENT_FUNDS
+		return result
+	# Alles geprüft – beide Hälften können jetzt nicht mehr scheitern.
+	result.append(_book(-amount_cents, TRANSFER_CATEGORY, description, source, idempotency_key, out_key, from_account))
+	result.append(_book(amount_cents, TRANSFER_CATEGORY, description, source, idempotency_key, in_key, to_account))
+	return result
 
 
-func get_balance() -> int:
-	return _balance_cents
+func can_afford(cost_cents: int, account: String = PRIVATE) -> bool:
+	return cost_cents <= _balances.get(account, 0)
 
 
-func get_opening_balance() -> int:
-	return _opening_balance_cents
+func get_balance(account: String = PRIVATE) -> int:
+	return _balances.get(account, 0)
 
 
-## Alle Buchungen in Buchungsreihenfolge (Kopie der Liste).
+func get_opening_balance(account: String = PRIVATE) -> int:
+	return _opening.get(account, 0)
+
+
+## Alle Buchungen in Buchungsreihenfolge (Kopie der Liste), über alle Konten.
 func get_entries() -> Array[LedgerEntryScript]:
 	return _entries.duplicate()
+
+
+func get_entries_for_account(account: String) -> Array[LedgerEntryScript]:
+	var result: Array[LedgerEntryScript] = []
+	for entry in _entries:
+		if entry.account == account:
+			result.append(entry)
+	return result
 
 
 func get_entries_by_category(category: String) -> Array[LedgerEntryScript]:
@@ -93,11 +134,12 @@ func get_entries_by_category(category: String) -> Array[LedgerEntryScript]:
 	return result
 
 
-## Kontostand frisch aus Startwert + Buchungen. Muss immer get_balance() entsprechen.
-func recalculate_balance() -> int:
-	var total := _opening_balance_cents
+## Kontostand frisch aus Startwert + Buchungen des Kontos. Muss immer get_balance() entsprechen.
+func recalculate_balance(account: String = PRIVATE) -> int:
+	var total: int = _opening.get(account, 0)
 	for entry in _entries:
-		total += entry.amount_cents
+		if entry.account == account:
+			total += entry.amount_cents
 	return total
 
 
@@ -107,22 +149,29 @@ func to_dict() -> Dictionary:
 		entries.append({
 			"id": entry.id, "time_minutes": entry.time_minutes, "amount_cents": entry.amount_cents,
 			"category": entry.category, "description": entry.description, "source": entry.source,
-			"reference": entry.reference,
+			"reference": entry.reference, "account": entry.account,
 		})
 	return {
-		"opening_balance_cents": _opening_balance_cents,
+		"opening_balances": _opening.duplicate(),
 		"next_number": _next_number,
 		"entries": entries,
 		"used_keys": _used_keys.duplicate(),
 	}
 
 
-## Stellt einen gespeicherten Zustand her, ohne Signale zu senden. Der Kontostand
-## wird aus Startwert + Buchungen neu berechnet, nie aus der Datei übernommen.
+## Stellt einen gespeicherten Zustand her, ohne Signale zu senden. Kontostände
+## werden aus Startwerten + Buchungen neu berechnet, nie aus der Datei übernommen.
+## Umbuchungen müssen vollständig sein (zu jedem "<key>|out" ein "<key>|in" und umgekehrt).
 ## "" = ok, sonst Fehlertext (Zustand bleibt dann unverändert).
 func restore(data: Dictionary) -> String:
 	var reader := DataReaderScript.new()
-	var opening := reader.int_field(data, "opening_balance_cents", "Ledger", true)
+	var opening := {}
+	var raw_opening: Variant = data.get("opening_balances")
+	if typeof(raw_opening) != TYPE_DICTIONARY:
+		reader.errors.append("Ledger: 'opening_balances' fehlt oder ist kein Objekt.")
+	else:
+		for account in ACCOUNTS:
+			opening[account] = reader.int_field(raw_opening, account, "Ledger (opening_balances)", true)
 	var next_number := reader.int_field(data, "next_number", "Ledger", true)
 
 	var entries: Array[LedgerEntryScript] = []
@@ -145,13 +194,17 @@ func restore(data: Dictionary) -> String:
 			var description := reader.string_field(raw, "description", where, true)
 			var source := reader.string_field(raw, "source", where, true)
 			var reference := reader.string_field(raw, "reference", where, false)
+			var account := reader.string_field(raw, "account", where, true)
 			if amount == 0 or time_minutes < 0:
 				reader.errors.append("%s: Betrag 0 oder negative Zeit." % where)
+			if not account.is_empty() and account not in ACCOUNTS:
+				reader.errors.append("%s: unbekanntes Konto '%s'." % [where, account])
 			if ids.has(id):
 				reader.errors.append("%s: ID '%s' kommt doppelt vor." % [where, id])
 			if reader.errors.size() == error_count:
 				ids[id] = true
-				entries.append(LedgerEntryScript.new(id, time_minutes, amount, category, description, source, reference))
+				entries.append(LedgerEntryScript.new(id, time_minutes, amount, category, description, source,
+						reference, account))
 
 	var used_keys := {}
 	var raw_keys: Variant = data.get("used_keys", {})
@@ -163,18 +216,64 @@ func restore(data: Dictionary) -> String:
 				reader.errors.append("Ledger: 'used_keys' enthält ungültige Einträge.")
 				break
 			used_keys[key] = raw_keys[key]
+		for key in used_keys:
+			var partner := _transfer_partner_key(key)
+			if not partner.is_empty() and not used_keys.has(partner):
+				reader.errors.append("Ledger: Umbuchung '%s' ist unvollständig (es fehlt '%s')." % [key, partner])
 
 	if reader.errors.is_empty() and next_number <= entries.size():
 		reader.errors.append("Ledger: 'next_number' (%d) passt nicht zu %d Buchungen." % [next_number, entries.size()])
 	if not reader.errors.is_empty():
 		return "; ".join(reader.errors)
 
-	_opening_balance_cents = opening
+	_opening = opening
 	_entries = entries
 	_next_number = next_number
 	_used_keys = used_keys
-	_balance_cents = recalculate_balance()
+	_balances = {}
+	for account in ACCOUNTS:
+		_balances[account] = recalculate_balance(account)
 	last_rejection = Rejection.NONE
+	return ""
+
+
+## Wandelt einen Ledger-Stand von Spielstand-Version ≤ 5 (ein Konto) um: Startwert wird
+## Privatkonto-Startwert, alle Buchungen gehören zum Privatkonto. Ändert `data` direkt.
+static func migrate_single_account(data: Dictionary) -> String:
+	if not DataReaderScript.is_whole_number(data.get("opening_balance_cents")):
+		return "Ledger: Startwert fehlt."
+	if typeof(data.get("entries")) != TYPE_ARRAY:
+		return "Ledger: Buchungen fehlen."
+	data["opening_balances"] = {PRIVATE: int(data["opening_balance_cents"]), COMPANY: 0}
+	data.erase("opening_balance_cents")
+	for entry in data["entries"]:
+		if typeof(entry) == TYPE_DICTIONARY:
+			entry["account"] = PRIVATE
+	return ""
+
+
+func _book(amount_cents: int, category: String, description: String, source: String,
+		reference: String, idempotency_key: String, account: String) -> LedgerEntryScript:
+	var entry := LedgerEntryScript.new("tx_%06d" % _next_number, _time.get_minutes(), amount_cents,
+			category, description, source, reference, account)
+	_next_number += 1
+	_entries.append(entry)
+	if not idempotency_key.is_empty():
+		_used_keys[idempotency_key] = entry.id
+	_balances[account] += amount_cents
+	last_rejection = Rejection.NONE
+
+	entry_posted.emit(entry)
+	balance_changed.emit(_balances[account], account)
+	return entry
+
+
+## "<k>|out" -> "<k>|in" und umgekehrt; "" für andere Schlüssel.
+static func _transfer_partner_key(key: String) -> String:
+	if key.ends_with(TRANSFER_OUT_SUFFIX):
+		return key.trim_suffix(TRANSFER_OUT_SUFFIX) + TRANSFER_IN_SUFFIX
+	if key.ends_with(TRANSFER_IN_SUFFIX):
+		return key.trim_suffix(TRANSFER_IN_SUFFIX) + TRANSFER_OUT_SUFFIX
 	return ""
 
 
