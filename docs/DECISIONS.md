@@ -10,5 +10,5 @@ damit sich die UI an verschiedene iPhone-Seitenverhältnisse anpasst. Die Editor
 405×720 verkleinert, damit das Testfenster auf den Mac-Bildschirm passt.
 
 ## 003 – Godot-Version
-Projekt wurde mit Feature-Tag `4.5` angelegt (ohne lokales Godot erstellt). Die tatsächlich
-verwendete stabile Version wird nach dem ersten Öffnen im README eingetragen und hier bestätigt.
+Festgelegt auf **Godot 4.5.1.stable** (Standard-Version, nicht .NET), bestätigt durch Start im Editor.
+Xcode 27.0. Nicht mitten in einer Phase aktualisieren.

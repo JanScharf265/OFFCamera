@@ -9,7 +9,7 @@ Kein App Store, kein Android, offline spielbar.
 
 | Was | Status |
 | --- | --- |
-| Godot-Projekt + Startbildschirm | angelegt, im Editor noch ungetestet |
+| Godot-Projekt + Startbildschirm | läuft im Godot-Editor (Mac) |
 | iOS-Export nach Xcode | offen |
 | Start auf dem iPhone | offen |
 
@@ -17,8 +17,8 @@ Kein App Store, kein Android, offline spielbar.
 
 | Tool | Version |
 | --- | --- |
-| Godot | _bitte eintragen, z. B. 4.5.1.stable_ |
-| Xcode | _bitte eintragen (`xcodebuild -version`)_ |
+| Godot | 4.5.1.stable |
+| Xcode | 27.0 (27A266a) |
 | macOS | _bitte eintragen_ |
 | Test-iPhone | _Modell + iOS-Version eintragen_ |
 
