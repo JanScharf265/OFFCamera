@@ -557,15 +557,16 @@ func _refresh_location_panel() -> void:
 
 
 func _refresh_event() -> void:
+	var instance_id := _game.events.get_next_pending_id()
 	var pending := _game.events.get_next_pending()
 	_scroll.visible = pending == null
 	_event_panel.visible = pending != null
 	if pending == null:
 		_shown_event_id = ""
 		return
-	if pending.id == _shown_event_id:
+	if instance_id == _shown_event_id:
 		return
-	_shown_event_id = pending.id
+	_shown_event_id = instance_id
 
 	_clear(_event_panel)
 	var box := VBoxContainer.new()
@@ -575,11 +576,12 @@ func _refresh_event() -> void:
 	box.add_child(UiStyle.wrapping_label(pending.title))
 	box.add_child(UiStyle.wrapping_label(pending.text, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 	for option in pending.options:
-		box.add_child(UiStyle.wrapping_label(ActivityText.option_summary(option.effects, option.money_cents),
+		var channel := _game.events.option_channel_deltas(instance_id, option.id)
+		box.add_child(UiStyle.wrapping_label(ActivityText.option_summary(option.effects, option.money_cents, channel),
 				UiStyle.SMALL_FONT_SIZE))
 		var button := UiStyle.button(option.label)
 		button.name = "EventOption_%s" % option.id
-		button.pressed.connect(_on_event_option_pressed.bind(pending.id, option.id, option.label))
+		button.pressed.connect(_on_event_option_pressed.bind(instance_id, option.id, option.label))
 		box.add_child(button)
 
 

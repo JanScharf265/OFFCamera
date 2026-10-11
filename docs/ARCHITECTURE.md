@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 3 (Tickets 3.1–3.3) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 3 (Tickets 3.1–3.4) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -67,7 +67,15 @@ Stand Phase 3 (Tickets 3.1–3.3) auf Basis von Phase 2 + Grafik-Ticket G1: Kana
   Dann: Geld über das Ledger (`source = "event"`, `idempotency_key = "event:<id>"`), Werte über
   `PlayerStats`. Entscheidungen kosten keine Spielzeit. Unbekannte Option oder zu wenig Geld:
   Ablehnung mit Text, Ereignis bleibt offen.
-- Laden eines Spielstands (Ticket 6) löst nichts erneut aus, weil nur `time_advanced` auslöst.
+- Laden eines Spielstands (Ticket 6) löst nichts erneut aus, weil nur `time_advanced`/`day_changed` auslösen.
+- Zufallsereignisse (Phase 3): `trigger` {`random`: {`chance_percent` 1–100, `from_day` ≥ 2, `cooldown_days`,
+  `max_times`, `conditions` {min_/max_ followers|community|reputation}}}. Bei `day_changed(tag)` wird je Kandidat
+  (Priorität, dann ID) geprüft: Tag ≥ from_day, Bedingungen, Abklingzeit, max_times, dann
+  `roll(tag, id)` = FNV-1a("seed|tag|id") % 100 < Chance. Höchstens eins pro Tag. Instanz-ID `<id>@<tag>`;
+  Ledger-/Kanal-Schutzschlüssel `event:<instanz>`. Seed kommt vom GameState (neues Spiel zufällig, Tests fest).
+- Optionen können zusätzlich `channel` {followers, followers_percent, community, reputation} haben →
+  `channel.apply()` mit Begründung „<Titel>: <Option>“. `option_channel_deltas()` liefert die Vorschau (nach Bremse).
+- Gespeichert zusätzlich: `seed`.
 
 ### Termine (`data/appointments/appointments.json`, `AppointmentCatalog`, `AppointmentSystem`)
 - Daten: `id`, `title`, optional `description`, `location`, `start` {`day`, `hour`, optional `minute`},
@@ -115,7 +123,7 @@ Stand Phase 3 (Tickets 3.1–3.3) auf Basis von Phase 2 + Grafik-Ticket G1: Kana
 - UI: Abschnitt „Ausrüstung“ am Kaufort (Button `EquipmentButton_<id>`, verschwindet auf höchster Stufe).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 4, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 5, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -123,6 +131,7 @@ Stand Phase 3 (Tickets 3.1–3.3) auf Basis von Phase 2 + Grafik-Ticket G1: Kana
 - Migration 1 → 2: Ort = Wohnung, Termine `since_minutes` = gespeicherte Spielzeit.
 - Migration 2 → 3: Kanal mit Startwerten und leerem Protokoll.
 - Migration 3 → 4: Ausrüstung leer (nichts gekauft).
+- Migration 4 → 5: Ereignis-Seed = `MIGRATED_SEED` (1).
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.

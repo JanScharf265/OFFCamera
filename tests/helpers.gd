@@ -14,6 +14,10 @@ static func game_data() -> GameDataScript:
 	return data
 
 
-## Neues Spiel mit echten Daten (Tag 1, 08:00, Wohnung).
-static func new_game(data: GameDataScript = null) -> GameStateScript:
-	return GameStateScript.new(data if data != null else game_data())
+## Fester Seed für Tests – Zufallsereignisse laufen damit immer gleich.
+const TEST_SEED := 12345
+
+
+## Neues Spiel mit echten Daten (Tag 1, 08:00, Wohnung) und festem Seed.
+static func new_game(data: GameDataScript = null, p_seed: int = TEST_SEED) -> GameStateScript:
+	return GameStateScript.new(data if data != null else game_data(), p_seed)

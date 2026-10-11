@@ -11,3 +11,6 @@ var money_cents: int
 var category: String
 ## Änderungen an PlayerStats, z. B. {"mood": 5}.
 var effects: Dictionary
+## Änderungen am Kanal (Phase 3): followers (absolut), followers_percent (vom aktuellen Stand),
+## community, reputation – z. B. {"followers_percent": -5, "reputation": -6}.
+var channel: Dictionary

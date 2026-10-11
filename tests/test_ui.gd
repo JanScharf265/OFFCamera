@@ -3,6 +3,7 @@ extends "res://tests/base_test.gd"
 ## Texte und ein Durchklick-Test der App ohne Fenster.
 
 const AppScript := preload("res://scripts/ui/app.gd")
+const Helpers := preload("res://tests/helpers.gd")
 const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
@@ -235,6 +236,22 @@ func test_buy_equipment_in_studio_raises_quality() -> void:
 	app.free()
 
 
+func test_random_event_is_decided_in_panel_with_channel_effects() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	app.game.events._trigger("tech_failure@3")  # wie nach einem Tageswechsel gewürfelt
+	_press(app, "MapPin_home")  # aktualisiert die Anzeige
+	assert_eq((_find(app, "EventPanel") as Control).visible, true)
+	assert_true(_screen_has_text(app, "Stimmung -5 · Community -4 · Ruf -1"), "Kanal-Folgen fehlen")
+	_press(app, "EventOption_improvise")
+	assert_eq((_find(app, "EventPanel") as Control).visible, false)
+	assert_eq(app.game.channel.community, 46)
+	assert_eq(app.game.events.is_resolved("tech_failure@3"), true)
+	app.free()
+
+
 func _travel(app: Node, location_id: String) -> void:
 	_press(app, "MapPin_%s" % location_id)
 	_press(app, "TravelButton")
@@ -254,6 +271,7 @@ func _start_app(keep_save: bool = false) -> AppScript:
 		SaveSystemScript.delete_save(TEST_SAVE_PATH)
 	var app := AppScript.new()
 	app.save_path = TEST_SAVE_PATH
+	app.new_game_seed = Helpers.TEST_SEED
 	(Engine.get_main_loop() as SceneTree).root.add_child(app)
 	assert_true(app.is_inside_tree(), "App hängt nicht im Szenenbaum")
 	if not app.is_inside_tree():

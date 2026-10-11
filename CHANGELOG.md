@@ -7,6 +7,9 @@
 - Aktivität „Kurzer Stream“ entfällt, ersetzt durch das Format „Livestream“ (Ticket 3.2)
 - Ausrüstung als Daten: Kamera, Mikrofon, Licht mit je 3 Stufen, Kauf im Studio über das Ledger, Qualitätsbonus für passende Formate (Ticket 3.3)
 - Spielstand Version 4 (Ausrüstung) mit Migration von Version 3 (Ticket 3.3)
+- Zufällige, regelbasierte Karriere-Ereignisse mit festem Seed: Kooperationsanfrage, Shitstorm, Raid, Technikpanne, virales Kurzvideo; Bedingungen an den Kanal, Abklingzeit, höchstens eins pro Tag (Ticket 3.4)
+- Ereignis-Optionen können Follower (absolut/prozentual), Community-Stimmung und Ruf ändern – mit Begründung im Kanal-Protokoll (Ticket 3.4)
+- Spielstand Version 5 (Seed) mit Migration von Version 4 (Ticket 3.4)
 
 ## Unveröffentlicht – Grafik-Ticket G1 (iPhone-Abnahme ok, 11.10.2026)
 - Isometrische Stadtkarte im Stil eines Städtebauspiels: Straßen, Promenade, Strand, Meer, Bäume, Füllbebauung

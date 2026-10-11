@@ -12,7 +12,7 @@ func _new_game(events: Array) -> GameStateScript:
 	var data := Helpers.game_data()
 	data.appointments.load_data([])
 	assert_true(data.events.load_data(events), "Testdaten ungültig: %s" % "; ".join(data.events.errors))
-	return GameStateScript.new(data)
+	return GameStateScript.new(data, Helpers.TEST_SEED)
 
 
 func _event(id: String, hour: int, priority: int = 0, options: Array = []) -> Dictionary:
@@ -130,6 +130,6 @@ func test_event_due_during_activity_is_triggered() -> void:
 func test_game_without_event_catalog_has_no_events() -> void:
 	var data := Helpers.game_data()
 	data.events.load_data([])
-	var game := GameStateScript.new(data)
+	var game := GameStateScript.new(data, Helpers.TEST_SEED)
 	game.time.advance(3 * TimeSystemScript.MINUTES_PER_DAY)
 	assert_eq(game.events.has_pending(), false)

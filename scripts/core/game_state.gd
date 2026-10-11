@@ -41,18 +41,27 @@ var equipment: EquipmentSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
-func _init(game_data: GameDataScript) -> void:
+## p_seed bestimmt die Zufallsereignisse (gleicher Seed = gleicher Verlauf);
+## -1 = neuer zufälliger Seed (wird mit dem Spielstand gespeichert).
+func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	data = game_data
 	time = TimeSystemScript.new(TimeSystemScript.at(START_DAY, START_HOUR))
 	ledger = LedgerSystemScript.new(time, START_BALANCE_CENTS)
 	stats = PlayerStatsScript.new(START_ENERGY, START_MOOD)
 	locations = LocationSystemScript.new(time, data.locations, GameDataScript.START_LOCATION)
 	activities = ActivitySystemScript.new(time, ledger, stats, locations, data.activities)
-	events = EventSystemScript.new(time, ledger, stats, data.events)
 	appointments = AppointmentSystemScript.new(time, ledger, stats, locations, data.appointments)
 	channel = ChannelSystemScript.new(time, START_FOLLOWERS, START_COMMUNITY, START_REPUTATION)
+	events = EventSystemScript.new(time, ledger, stats, channel, data.events, p_seed if p_seed >= 0 else new_seed())
 	equipment = EquipmentSystemScript.new(time, ledger, locations, data.equipment)
 	content = ContentSystemScript.new(time, ledger, stats, locations, channel, equipment, data.formats)
+
+
+## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).
+static func new_seed() -> int:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	return rng.randi() & 0x7FFFFFFF
 
 
 func to_dict() -> Dictionary:

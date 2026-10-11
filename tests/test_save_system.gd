@@ -18,7 +18,7 @@ func _init() -> void:
 
 
 func _new_game() -> GameStateScript:
-	return GameStateScript.new(_data)
+	return GameStateScript.new(_data, Helpers.TEST_SEED)
 
 
 func _load() -> Dictionary:

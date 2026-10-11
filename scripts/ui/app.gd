@@ -17,6 +17,8 @@ const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 ## Speicherort; Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
 var save_path := SaveSystemScript.DEFAULT_PATH
+## Seed für neue Spiele; -1 = zufällig (Tests setzen einen festen Wert).
+var new_game_seed := -1
 ## Laufende Sitzung oder null, solange kein Spiel gestartet/geladen wurde.
 var game: GameStateScript
 
@@ -64,7 +66,7 @@ func show_main_menu(message: String = "") -> void:
 
 
 func start_new_game() -> void:
-	game = GameStateScript.new(_data)
+	game = GameStateScript.new(_data, new_game_seed)
 	_save_game()
 	show_game()
 

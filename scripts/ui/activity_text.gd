@@ -30,8 +30,12 @@ static func summary(definition: ActivityDefinitionScript) -> String:
 
 
 ## Folgen einer Ereignis-Option, z. B. "Stimmung +5 · +30,00 €" oder "Keine Folgen".
-static func option_summary(effects: Dictionary, money_cents: int) -> String:
-	var parts := effect_parts(effects, money_cents)
+## channel = bereits berechnete Kanaländerung (EventSystem.option_channel_deltas()).
+static func option_summary(effects: Dictionary, money_cents: int, channel: Dictionary = {}) -> String:
+	var parts := effect_parts(effects, 0)
+	parts.append_array(channel_parts(channel))
+	if money_cents != 0:
+		parts.append(signed_money(money_cents))
 	return " · ".join(parts) if not parts.is_empty() else "Keine Folgen"
 
 

@@ -18,7 +18,9 @@ const GameDataScript := preload("res://scripts/core/game_data.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 
-const SAVE_VERSION := 4
+const SAVE_VERSION := 5
+## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
+const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
 
 
@@ -119,6 +121,10 @@ static func _migrate(data: Dictionary, version: int) -> String:
 		_migrate_2_to_3(data["game"])
 	if version < 4:
 		data["game"]["equipment"] = {"levels": {}}
+	if version < 5:
+		if typeof(data["game"].get("events")) != TYPE_DICTIONARY:
+			return "Ereignisse fehlen."
+		data["game"]["events"]["seed"] = MIGRATED_SEED
 	data["version"] = SAVE_VERSION
 	return ""
 
@@ -138,6 +144,7 @@ static func _migrate_1_to_2(game: Dictionary) -> String:
 
 ## Version 3 (Phase 3): Kanalprofil kommt dazu – Startwerte, leeres Protokoll.
 ## Version 4 (Phase 3): Ausrüstung kommt dazu – nichts gekauft (direkt in _migrate()).
+## Version 5 (Phase 3): Seed für Zufallsereignisse (MIGRATED_SEED, direkt in _migrate()).
 static func _migrate_2_to_3(game: Dictionary) -> void:
 	game["channel"] = ChannelSystemScript.initial_dict(GameStateScript.START_FOLLOWERS,
 			GameStateScript.START_COMMUNITY, GameStateScript.START_REPUTATION)

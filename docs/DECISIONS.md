@@ -47,6 +47,16 @@ Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslauf
 führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
 Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
 
+## 015 – Zufallsereignisse mit festem Seed
+Gewürfelt wird nur beim Tageswechsel (`day_changed`), nicht pro Aktion – so hängt der Verlauf nicht davon ab,
+wie man den Tag in Aktionen aufteilt. Wurf = FNV-1a 32 Bit von "<seed>|<tag>|<id>" modulo 100: zustandslos,
+plattformunabhängig, selbst implementiert (nicht `String.hash()`, das sich mit der Engine ändern könnte).
+Gespeichert wird nur der Seed; Abklingzeit und Anzahl ergeben sich aus den ausgelösten Instanzen (`<id>@<tag>`).
+Höchstens ein Zufallsereignis pro Tag (Priorität, dann ID), damit es nicht stapelt. Alle Zufallsereignisse
+frühestens ab Tag 3 – die ersten Tage bleiben ruhig. Neues Spiel: zufälliger Seed; alte Spielstände: Seed 1.
+Prozentuale Follower-Änderungen werden beim Entscheiden vom aktuellen Stand berechnet; Zuwächse laufen durch
+die Wachstumsbremse. Bedingungen prüfen den Kanal zum Zeitpunkt des Würfelns.
+
 ## 014 – Ausrüstung
 Drei Teile (Kamera, Mikrofon, Licht) mit je drei Stufen, Kauf nur im Studio und nur Stufe für Stufe, ohne
 Spielzeit. Der Qualitätsbonus gilt für die erreichte Stufe (nicht aufsummiert) und nur für die Formate des Teils.

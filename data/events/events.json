@@ -8,5 +8,59 @@
 			{ "id": "accept", "label": "Zusagen", "money_cents": 3000, "category": "creator", "effects": { "mood": 5 } },
 			{ "id": "decline", "label": "Höflich absagen", "effects": { "mood": 2 } }
 		]
+	},
+	{
+		"id": "brand_deal",
+		"title": "Kooperationsanfrage",
+		"text": "Eine Modemarke von der Costa del Sol will ein gesponsertes Video. Gutes Geld – aber passt es zu deinem Kanal?",
+		"priority": 2,
+		"trigger": { "random": { "chance_percent": 25, "from_day": 3, "cooldown_days": 5, "conditions": { "min_followers": 500, "min_reputation": 60 } } },
+		"options": [
+			{ "id": "accept", "label": "Annehmen", "money_cents": 15000, "category": "creator", "channel": { "community": -2, "reputation": -3 } },
+			{ "id": "decline", "label": "Ablehnen", "channel": { "reputation": 1 } }
+		]
+	},
+	{
+		"id": "shitstorm",
+		"title": "Shitstorm",
+		"text": "Ein alter Clip wird aus dem Zusammenhang gerissen. Die Kommentare kochen.",
+		"priority": 3,
+		"trigger": { "random": { "chance_percent": 30, "from_day": 3, "cooldown_days": 4, "conditions": { "max_community": 35 } } },
+		"options": [
+			{ "id": "apologize", "label": "Entschuldigen und erklären", "effects": { "mood": -5 }, "channel": { "community": 8, "reputation": -2 } },
+			{ "id": "ignore", "label": "Aussitzen", "effects": { "mood": -2 }, "channel": { "followers_percent": -5, "reputation": -6 } }
+		]
+	},
+	{
+		"id": "raid",
+		"title": "Raid",
+		"text": "Ein größerer Kanal schickt seine Zuschauer zu dir.",
+		"priority": 1,
+		"trigger": { "random": { "chance_percent": 10, "from_day": 3, "cooldown_days": 6, "conditions": { "min_followers": 300 } } },
+		"options": [
+			{ "id": "thank", "label": "Herzlich bedanken", "effects": { "mood": 5 }, "channel": { "followers": 150, "community": 3 } }
+		]
+	},
+	{
+		"id": "tech_failure",
+		"title": "Technikpanne",
+		"text": "Mitten in der Woche streikt die Technik. Reparieren lassen oder improvisieren?",
+		"priority": 0,
+		"trigger": { "random": { "chance_percent": 8, "from_day": 3, "cooldown_days": 7 } },
+		"options": [
+			{ "id": "repair", "label": "Reparieren lassen", "money_cents": -6000, "category": "repair", "effects": { "mood": -3 } },
+			{ "id": "improvise", "label": "Improvisieren", "effects": { "mood": -5 }, "channel": { "community": -4, "reputation": -1 } }
+		]
+	},
+	{
+		"id": "viral_short",
+		"title": "Kurzvideo geht viral",
+		"text": "Eines deiner Kurzvideos taucht plötzlich überall auf.",
+		"priority": 1,
+		"trigger": { "random": { "chance_percent": 5, "from_day": 3, "cooldown_days": 10, "conditions": { "min_followers": 150 } } },
+		"options": [
+			{ "id": "ride_wave", "label": "Welle nutzen und nachlegen", "effects": { "energy": -10, "mood": 8 }, "channel": { "followers": 100, "followers_percent": 20 } },
+			{ "id": "stay_calm", "label": "Gelassen bleiben", "effects": { "mood": 4 }, "channel": { "followers_percent": 8 } }
+		]
 	}
 ]
