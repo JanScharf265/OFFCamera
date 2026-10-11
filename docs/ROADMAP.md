@@ -87,7 +87,7 @@ Einnahmen nur über das Ledger, Equipment-Upgrades, zufällige regelbasierte Kar
 in der UI nachvollziehbar, warum sich Werte geändert haben.
 
 - [x] Ticket 3.1: ChannelSystem mit Kanal-Protokoll, Wachstumsbremse, Spielstand Version 3 + Migration (152/152 Tests grün)
-- [ ] Ticket 3.2: Content-Formate als Daten, ContentSystem; „Kurzer Stream“ wird zum Format „Livestream“
+- [x] Ticket 3.2: Content-Formate als Daten, ContentSystem; „Kurzer Stream“ wird zum Format „Livestream“ (165/165 Tests grün)
 - [ ] Ticket 3.3: Equipment-Upgrades
 - [ ] Ticket 3.4: Zufällige Karriere-Ereignisse mit festem Seed
 - [ ] Ticket 3.5: Karriere-UI, Kanal-Verlauf, iPhone-Abnahme

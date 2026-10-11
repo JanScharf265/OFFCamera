@@ -28,27 +28,25 @@ func test_new_game_has_start_values() -> void:
 	assert_eq(game.locations.get_current(), "home")
 
 
-func test_stream_changes_time_stats_and_money_exactly() -> void:
-	var game := _game_at("studio")  # 08:00 -> 08:20
-	assert_eq(game.activities.start("stream_short"), "")
-	assert_eq(game.time.format_clock(), "10:20")
-	assert_eq(game.stats.energy, 60)
-	assert_eq(game.stats.mood, 65)
-	assert_eq(game.ledger.get_balance(), 52500)
-
-
+## Seit Phase 3 hat keine echte Aktivität eine Einnahme mehr (Streams sind Content);
+## das ActivitySystem unterstützt sie aber weiter – geprüft mit Testdaten.
 func test_income_is_in_ledger_with_reference_and_start_time() -> void:
-	var game := _game_at("studio")
-	game.activities.start("stream_short")
+	var data := Helpers.game_data()
+	data.activities.load_data([{"id": "side_job", "display_name": "Nebenjob", "location": "office",
+			"duration_minutes": 60, "money_cents": 2500, "category": "work", "effects": {"energy": -10}}])
+	var game := GameStateScript.new(data)
+	game.locations.travel("office")  # 08:00 -> 08:20
+	assert_eq(game.activities.start("side_job"), "")
 	var entries := game.ledger.get_entries()
 	assert_eq(entries.size(), 1)
 	if entries.size() != 1:
 		return
 	assert_eq(entries[0].amount_cents, 2500)
-	assert_eq(entries[0].category, "creator")
+	assert_eq(entries[0].category, "work")
 	assert_eq(entries[0].source, "activity")
-	assert_eq(entries[0].reference, "stream_short")
+	assert_eq(entries[0].reference, "side_job")
 	assert_eq(entries[0].time_minutes, TimeSystemScript.at(1, 8, 20))
+	assert_eq(game.stats.energy, 70)
 
 
 func test_expense_is_in_ledger() -> void:
@@ -101,8 +99,8 @@ func test_training_and_week_planning() -> void:
 
 func test_activity_elsewhere_is_rejected_without_any_change() -> void:
 	var game := _new_game()
-	assert_eq(game.activities.check("stream_short"), "Nur vor Ort möglich: Studio.")
-	assert_eq(game.activities.start("stream_short"), "Nur vor Ort möglich: Studio.")
+	assert_eq(game.activities.check("training"), "Nur vor Ort möglich: Fitnessstudio.")
+	assert_eq(game.activities.start("training"), "Nur vor Ort möglich: Fitnessstudio.")
 	assert_eq(game.time.format_clock(), "08:00")
 	assert_eq(game.ledger.get_entries().size(), 0)
 
@@ -123,11 +121,11 @@ func test_activity_must_end_before_closing() -> void:
 
 
 func test_too_little_energy_is_rejected_without_any_change() -> void:
-	var game := _game_at("studio")
+	var game := _game_at("gym")  # 08:15
 	game.stats.apply({"energy": -70})  # 80 -> 10
-	var reason := game.activities.start("stream_short")
-	assert_eq(reason, "Zu wenig Energie (benötigt 20).")
-	assert_eq(game.time.format_clock(), "08:20")
+	var reason := game.activities.start("training")
+	assert_eq(reason, "Zu wenig Energie (benötigt 15).")
+	assert_eq(game.time.format_clock(), "08:15")
 	assert_eq(game.stats.energy, 10)
 	assert_eq(game.ledger.get_entries().size(), 0)
 

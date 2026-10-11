@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 3 (Ticket 3.1) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 3 (Tickets 3.1–3.2) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -93,6 +93,17 @@ Stand Phase 3 (Ticket 3.1) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil
   (`was_limited()` = Bremse/Grenze hat gekürzt). Signal `channel_changed(change)`. Letzte 200 Einträge bleiben.
 - Gespeichert: Werte, `next_number`, `history`, `used_keys`.
 
+### Content (`data/content/formats.json`, `ContentFormatCatalog`, `ContentSystem`)
+- Daten: `id`, `display_name`, optional `description`, `location`, `duration_minutes` (> 0), optional `effects`
+  (PlayerStats), `channel` {`followers_base` ≥ 0, `followers_per_mille` ≥ 0, `community`, `reputation`},
+  `income` {`base_cents` ≥ 0, `per_1000_followers_cents` ≥ 0}. `GameData` prüft den Ort.
+- `preview(id)`: exakte Wirkung beim aktuellen Stand (Qualität mit Anteilen, Follower roh/gebremst, Community,
+  Ruf, Einnahme, Effekte); `quality_text()`/`explain()` für Anzeige und Kanal-Protokoll.
+- `check(id)` / `produce(id)` wie beim ActivitySystem (Ort, Öffnungszeit, Energie). Ausführung: Einnahme ins Ledger
+  (`source = "content"`, Kategorie `creator`, Zeitstempel = Beginn) → Effekte → `channel.apply()` mit Begründung →
+  `time.advance(dauer)` → `content_produced`. Kein eigener Spielstand (Schutzschlüssel aus Format + Startminute).
+- UI: Content-Karten stehen im Abschnitt „Aktivitäten“ vor den Aktivitäten des Orts (Button `ContentButton_<id>`).
+
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
 - Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 3, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
@@ -163,6 +174,7 @@ Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
 | `LocationSystem` | aktueller Ort, Reisezeit, Öffnungszeiten, Fahrten |
 | `AppointmentSystem` | Termine: wahrnehmen, verpasst, Kollisionen |
 | `ChannelSystem` | Follower, Community-Stimmung, Ruf, Kanal-Protokoll |
+| `ContentSystem` | Prüfen, Berechnen und Produzieren von Content |
 | `SaveSystem` | versionierter lokaler Spielstand |
 
 UI-Szenen lesen Zustand und rufen Systeme auf; sie ändern Werte nie direkt.
@@ -174,7 +186,7 @@ Systeme melden Änderungen über Signale (z. B. `time_advanced`, `day_changed`, 
 assets/   kenney/ (CC0-Grafiken)
 scenes/   app/, menus/, hud/, …
 scripts/  core/, systems/, models/, ui/
-data/     activities/, locations/, events/
+data/     activities/, locations/, events/, appointments/, content/
 tests/
 ```
 

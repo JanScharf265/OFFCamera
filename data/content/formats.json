@@ -1,0 +1,42 @@
+[
+	{
+		"id": "short_video",
+		"display_name": "Kurzvideo",
+		"description": "Ein schneller Clip fürs Handy, gedreht am Küchentisch.",
+		"location": "home",
+		"duration_minutes": 60,
+		"effects": { "energy": -10, "mood": 2 },
+		"channel": { "followers_base": 8, "followers_per_mille": 10, "community": 1, "reputation": 0 },
+		"income": { "base_cents": 300, "per_1000_followers_cents": 500 }
+	},
+	{
+		"id": "livestream",
+		"display_name": "Livestream",
+		"description": "Zwei Stunden live mit dem Chat.",
+		"location": "studio",
+		"duration_minutes": 120,
+		"effects": { "energy": -20, "mood": 5 },
+		"channel": { "followers_base": 15, "followers_per_mille": 20, "community": 2, "reputation": 0 },
+		"income": { "base_cents": 2020, "per_1000_followers_cents": 4000 }
+	},
+	{
+		"id": "long_video",
+		"display_name": "Langes Video",
+		"description": "Vier Stunden Dreh und Schnitt für ein aufwendiges Video.",
+		"location": "studio",
+		"duration_minutes": 240,
+		"effects": { "energy": -35, "mood": 3 },
+		"channel": { "followers_base": 30, "followers_per_mille": 35, "community": 1, "reputation": 2 },
+		"income": { "base_cents": 3000, "per_1000_followers_cents": 6000 }
+	},
+	{
+		"id": "community_qa",
+		"display_name": "Q&A mit der Community",
+		"description": "Eine Stunde Fragen aus dem Chat beantworten.",
+		"location": "studio",
+		"duration_minutes": 60,
+		"effects": { "energy": -10, "mood": 4 },
+		"channel": { "followers_base": 3, "followers_per_mille": 5, "community": 6, "reputation": 1 },
+		"income": { "base_cents": 0, "per_1000_followers_cents": 0 }
+	}
+]

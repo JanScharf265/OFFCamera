@@ -24,7 +24,7 @@ func test_format_stamp() -> void:
 func test_activity_summaries() -> void:
 	var catalog := ActivityCatalogScript.new()
 	catalog.load_file()
-	assert_eq(ActivityText.summary(catalog.get_definition("stream_short")), "2 h · Energie -20 · Stimmung +5 · +25,00 €")
+	assert_eq(ActivityText.summary(catalog.get_definition("training")), "1 h 30 min · Energie -15 · Stimmung +10")
 	assert_eq(ActivityText.summary(catalog.get_definition("rest")), "1 h · Energie +15 · Stimmung +3")
 	assert_eq(ActivityText.summary(catalog.get_definition("eat_out")), "1 h · Energie +10 · Stimmung +5 · -15,00 €")
 
@@ -47,7 +47,7 @@ func test_click_through_new_game_activity_menu_and_continue() -> void:
 	assert_eq((_find(app, "LocationLabel") as Label).text, "Ort: Wohnung")
 
 	_travel(app, "studio")  # 08:00 -> 08:20
-	(_find(app, "StartButton_stream_short") as Button).pressed.emit()
+	(_find(app, "ContentButton_livestream") as Button).pressed.emit()
 	assert_eq((_find(app, "ClockLabel") as Label).text, "10:20")
 	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 525,00 €")
 	assert_eq(app.game.ledger.get_entries().size(), 1)
@@ -72,12 +72,12 @@ func test_disabled_activity_shows_reason() -> void:
 		return
 
 	_travel(app, "studio")
-	assert_eq((_find(app, "StartButton_stream_short") as Button).disabled, false)
+	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, false)
 
 	app.game.stats.apply({"energy": -70})  # 80 -> 10
 	_press(app, "MenuButton")
 	_press(app, "ContinueButton")
-	assert_eq((_find(app, "StartButton_stream_short") as Button).disabled, true)
+	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, true)
 	assert_true(_screen_has_text(app, "Zu wenig Energie (benötigt 20)."), "Grund wird nicht angezeigt")
 
 	app.free()
@@ -112,7 +112,7 @@ func test_save_and_continue_after_restart() -> void:
 		return
 	_press(app, "NewGameButton")
 	_travel(app, "studio")                   # 08:00 -> 08:20
-	_press(app, "StartButton_stream_short")  # -> 10:20, +25,00 €
+	_press(app, "ContentButton_livestream")  # -> 10:20, +25,00 €
 	app.free()  # wie App beenden
 
 	var restarted := _start_app(true)

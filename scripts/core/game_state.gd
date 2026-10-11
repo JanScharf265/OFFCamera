@@ -15,6 +15,7 @@ const ActivitySystemScript := preload("res://scripts/systems/activity_system.gd"
 const EventSystemScript := preload("res://scripts/systems/event_system.gd")
 const AppointmentSystemScript := preload("res://scripts/systems/appointment_system.gd")
 const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
+const ContentSystemScript := preload("res://scripts/systems/content_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -34,6 +35,7 @@ var activities: ActivitySystemScript
 var events: EventSystemScript
 var appointments: AppointmentSystemScript
 var channel: ChannelSystemScript
+var content: ContentSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -47,6 +49,7 @@ func _init(game_data: GameDataScript) -> void:
 	events = EventSystemScript.new(time, ledger, stats, data.events)
 	appointments = AppointmentSystemScript.new(time, ledger, stats, locations, data.appointments)
 	channel = ChannelSystemScript.new(time, START_FOLLOWERS, START_COMMUNITY, START_REPUTATION)
+	content = ContentSystemScript.new(time, ledger, stats, locations, channel, data.formats)
 
 
 func to_dict() -> Dictionary:

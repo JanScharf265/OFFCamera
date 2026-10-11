@@ -11,18 +11,18 @@ func test_real_data_file_loads_without_errors() -> void:
 	var catalog := ActivityCatalogScript.new()
 	var ok := catalog.load_file()
 	assert_true(ok, "Fehler: %s" % "; ".join(catalog.errors))
-	assert_eq(catalog.get_ids(), PackedStringArray(["stream_short", "rest", "sleep", "eat_out", "coffee", "training", "plan_week"]))
+	assert_eq(catalog.get_ids(), PackedStringArray(["rest", "sleep", "eat_out", "coffee", "training", "plan_week"]))
 	assert_eq(catalog.get_ids_at("cafe_harbor"), PackedStringArray(["eat_out", "coffee"]))
 
 
 func test_json_numbers_become_ints() -> void:
 	var catalog := ActivityCatalogScript.new()
 	catalog.load_file()
-	var stream := catalog.get_definition("stream_short")
-	assert_eq(stream.duration_minutes, 120)
-	assert_eq(stream.money_cents, 2500)
-	assert_eq(stream.get_effect("energy"), -20)
-	assert_eq(stream.get_effect("unknown"), 0)
+	var meal := catalog.get_definition("eat_out")
+	assert_eq(meal.duration_minutes, 60)
+	assert_eq(meal.money_cents, -1500)
+	assert_eq(meal.get_effect("energy"), 10)
+	assert_eq(meal.get_effect("unknown"), 0)
 
 
 func test_missing_file_is_reported() -> void:

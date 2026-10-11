@@ -35,7 +35,7 @@ func _write(text: String, path: String = PATH) -> void:
 func _played_game() -> GameStateScript:
 	var game := _new_game()
 	game.locations.travel("studio")        # 08:00 -> 08:20
-	game.activities.start("stream_short")  # -> 10:20, +25 €
+	game.content.produce("livestream")     # -> 10:20, +25 €
 	game.locations.travel("cafe_harbor")   # -> 10:40
 	game.activities.start("eat_out")       # -> 11:40, -15 €
 	game.time.advance(TimeSystemScript.at(1, 20) - game.time.get_minutes())  # Termin 14:00 verpasst, Ereignis fällig

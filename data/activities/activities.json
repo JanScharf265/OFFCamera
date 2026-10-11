@@ -1,15 +1,5 @@
 [
 	{
-		"id": "stream_short",
-		"display_name": "Kurzer Stream",
-		"description": "Zwei Stunden live. Kostet Energie, bringt etwas Geld und Laune.",
-		"location": "studio",
-		"duration_minutes": 120,
-		"money_cents": 2500,
-		"category": "creator",
-		"effects": { "energy": -20, "mood": 5 }
-	},
-	{
 		"id": "rest",
 		"display_name": "Ausruhen",
 		"description": "Eine Stunde abschalten.",

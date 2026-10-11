@@ -1,6 +1,6 @@
 extends VBoxContainer
 
-## Spielansicht: HUD (Datum, Uhrzeit, Ort, Konto, Werte), Aktivitäten am aktuellen
+## Spielansicht: HUD (Datum, Uhrzeit, Ort, Konto, Werte), Content-Formate und Aktivitäten am aktuellen
 ## Ort, nächste Termine, Stadtkarte mit Fahrten, letzte Buchungen.
 ## Ist ein Ereignis offen, ersetzt es die Liste, bis entschieden ist.
 ## Zeigt nur an und ruft Systeme auf – Regeln stehen in den Systemen.
@@ -42,6 +42,8 @@ var _stat_bars := {}
 var _feedback_label: Label
 ## activity_id -> {"button": Button, "reason": Label}
 var _cards := {}
+## format_id -> {"button": Button, "reason": Label, "summary": Label, "quality": Label}
+var _content_cards := {}
 var _activity_title: Label
 var _activity_list: VBoxContainer
 var _activities_location := ""
@@ -240,6 +242,35 @@ func _build_activity_card(activity_id: String) -> Control:
 	return card
 
 
+## Karte für ein Content-Format; Wirkung und Qualität werden in _refresh_activities() aktualisiert.
+func _build_content_card(format_id: String) -> Control:
+	var format := _game.content.get_catalog().get_definition(format_id)
+	var card := UiStyle.card()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	card.add_child(box)
+
+	box.add_child(UiStyle.label("%s · Content" % format.display_name))
+	if not format.description.is_empty():
+		box.add_child(UiStyle.wrapping_label(format.description, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+	var summary := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
+	summary.name = "ContentSummary_%s" % format_id
+	box.add_child(summary)
+	var quality := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+	box.add_child(quality)
+
+	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
+	reason.visible = false
+	box.add_child(reason)
+
+	var button := _scroll_button("Produzieren", "ContentButton_%s" % format_id)
+	button.pressed.connect(_on_content_pressed.bind(format_id))
+	box.add_child(button)
+
+	_content_cards[format_id] = {"button": button, "reason": reason, "summary": summary, "quality": quality}
+	return card
+
+
 ## true = ausführen. Bei einer Warnung erst beim zweiten Tipp auf dieselbe Aktion.
 func _confirmed(key: String, warning: String) -> bool:
 	if warning.is_empty() or _confirm_key == key:
@@ -258,6 +289,22 @@ func _on_activity_pressed(activity_id: String) -> void:
 		return
 	var reason := _game.activities.start(activity_id)
 	_after_action(reason, "%s erledigt" % definition.display_name)
+
+
+func _on_content_pressed(format_id: String) -> void:
+	if _was_scroll():
+		return
+	var format := _game.content.get_catalog().get_definition(format_id)
+	if not _confirmed("content:" + format_id, _game.appointments.conflict_warning(format.duration_minutes)):
+		return
+	var outcome := _game.content.preview(format_id)
+	var reason := _game.content.produce(format_id)
+	var parts := ActivityText.channel_parts({"followers": outcome["followers"], "community": outcome["community"],
+			"reputation": outcome["reputation"]})
+	if outcome["income_cents"] != 0:
+		parts.append(ActivityText.signed_money(outcome["income_cents"]))
+	var result := " (%s)" % " · ".join(parts) if not parts.is_empty() else ""
+	_after_action(reason, "%s produziert%s" % [format.display_name, result])
 
 
 func _on_location_pressed(location_id: String) -> void:
@@ -351,15 +398,29 @@ func _refresh_activities() -> void:
 		_activity_title.text = "Aktivitäten · %s" % _game.locations.get_current_definition().display_name
 		_clear(_activity_list)
 		_cards.clear()
+		_content_cards.clear()
+		var format_ids := _game.content.get_catalog().get_ids_at(current)
 		var ids := _game.activities.get_catalog().get_ids_at(current)
-		if ids.is_empty():
+		if ids.is_empty() and format_ids.is_empty():
 			_activity_list.add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+		for id in format_ids:
+			_activity_list.add_child(_build_content_card(id))
 		for id in ids:
 			_activity_list.add_child(_build_activity_card(id))
 
 	for activity_id in _cards:
 		var reason := _game.activities.check(activity_id)
 		var card: Dictionary = _cards[activity_id]
+		card["button"].disabled = not reason.is_empty()
+		card["reason"].text = reason
+		card["reason"].visible = not reason.is_empty()
+
+	for format_id in _content_cards:
+		var format := _game.content.get_catalog().get_definition(format_id)
+		var card: Dictionary = _content_cards[format_id]
+		card["summary"].text = ActivityText.content_summary(format.duration_minutes, _game.content.preview(format_id))
+		card["quality"].text = _game.content.quality_text(format_id)
+		var reason := _game.content.check(format_id)
 		card["button"].disabled = not reason.is_empty()
 		card["reason"].text = reason
 		card["reason"].visible = not reason.is_empty()
