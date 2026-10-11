@@ -7,9 +7,9 @@ Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und 
 - [x] Minimaler Startbildschirm
 - [x] Projekt öffnet in Godot ohne Fehler, Startszene läuft (Godot 4.7.2, Mac)
 - [x] iOS-Exportvorlagen (4.7.2)
-- [ ] iOS-Export-Preset
-- [ ] Export nach Xcode, Build erfolgreich
-- [ ] App startet auf dem iPhone
+- [x] iOS-Export-Preset
+- [x] Export nach Xcode, Build erfolgreich
+- [x] App startet auf dem iPhone (iOS 27.0)
 - [ ] Commit markiert funktionierenden Ausgangsstand, Versionen im README eingetragen
 
 ## Phase 1 – Spielbares Grundgerüst
