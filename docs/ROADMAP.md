@@ -20,8 +20,8 @@ Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, 
 - [x] Ticket 1: TimeSystem + Test-Runner (12/12 Tests grün auf dem Mac)
 - [x] Ticket 2: LedgerSystem (27/27 Tests grün auf dem Mac)
 - [x] Ticket 3: GameState + ActivitySystem (Aktivitäten als Daten) (48/48 Tests grün)
-- [ ] Ticket 4: Hauptmenü + HUD (Code fertig; Testlauf + iPhone-Test ausstehend)
-- [ ] Ticket 5: EventSystem (ein Ereignis, genau einmal)
+- [x] Ticket 4: Hauptmenü + HUD (53/53 Tests grün, auf dem iPhone bedienbar inkl. Scrollen)
+- [ ] Ticket 5: EventSystem (ein Ereignis, genau einmal) (Code fertig, Testlauf ausstehend)
 - [ ] Ticket 6: SaveSystem + „Fortsetzen“ (danach iPhone-Test)
 
 Abnahme: Aktivität ändert Zeit exakt wie definiert · Einnahme und Ausgabe im Ledger · Ereignis nur einmal ·

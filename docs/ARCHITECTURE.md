@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 1, Ticket 4: Zeit, Ledger, Spielerwerte, Aktivitäten und eine erste spielbare UI.
+Stand Phase 1, Ticket 5: Zeit, Ledger, Spielerwerte, Aktivitäten, Ereignisse und eine spielbare UI.
 
 ## Umgesetzt
 
@@ -41,6 +41,19 @@ Stand Phase 1, Ticket 4: Zeit, Ledger, Spielerwerte, Aktivitäten und eine erste
   dann aus: Buchung (Zeitstempel = Beginn) → Effekte → `time.advance(dauer)` → `activity_completed`.
 - Datendateien werden per `include_filter="data/*"` in den iOS-Export aufgenommen.
 
+### Ereignisse (`data/events/events.json`, `EventCatalog`, `EventSystem`)
+- Daten: `id`, `title`, `text`, optional `priority` (Standard 0), `trigger` {`day` ≥ 1, `hour` 0–23,
+  optional `minute`}, `options` (≥ 1) mit `id`, `label`, optional `money_cents`/`category`/`effects`
+  (gleiche Regeln wie bei Aktivitäten; gemeinsame Prüfung in `scripts/systems/data_reader.gd`).
+- `EventSystem` hört auf `time_advanced(from, to)` und löst jedes noch nie ausgelöste Ereignis mit
+  Fälligkeit in `(from, to]` genau einmal aus – sortiert nach Zeit, Priorität (höher zuerst), ID.
+  Ein Ereignis genau zur Startzeit des Spiels wird daher nie ausgelöst.
+- Ausgelöste Ereignisse warten als „offen“, bis `resolve(event_id, option_id)` aufgerufen wird.
+  Dann: Geld über das Ledger (`source = "event"`, `idempotency_key = "event:<id>"`), Werte über
+  `PlayerStats`. Entscheidungen kosten keine Spielzeit. Unbekannte Option oder zu wenig Geld:
+  Ablehnung mit Text, Ereignis bleibt offen.
+- Laden eines Spielstands (Ticket 6) löst nichts erneut aus, weil nur `time_advanced` auslöst.
+
 ### UI (`scenes/app/app.tscn`, `scripts/ui/`)
 - `app.gd` (Hauptszene): Theme, Safe Area (nur auf Mobilgeräten, in Viewport-Koordinaten umgerechnet),
   hält die laufende `GameState`-Sitzung und wechselt zwischen `main_menu.gd` und `game_screen.gd`.
@@ -51,6 +64,7 @@ Stand Phase 1, Ticket 4: Zeit, Ledger, Spielerwerte, Aktivitäten und eine erste
 - Scrollen per Touch: Karten und Buttons in der Liste haben `mouse_filter = PASS`, damit Wischgesten
   die `ScrollContainer` erreichen. Hat sich die Liste zwischen Antippen und Loslassen eines Buttons
   um mehr als 12 px bewegt, gilt das als Scrollen und die Aktivität startet nicht.
+- Offenes Ereignis: `EventPanel` ersetzt die Aktivitätsliste, bis eine Option gewählt ist.
 - „Fortsetzen“ setzt vorerst nur die Sitzung im Speicher fort; Speichern folgt in Ticket 6.
 
 ### Konvention: Verweise zwischen Skripten

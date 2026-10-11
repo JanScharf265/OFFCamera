@@ -5,6 +5,7 @@ extends Control
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
 const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
+const EventCatalogScript := preload("res://scripts/systems/event_catalog.gd")
 const MainMenuScript := preload("res://scripts/ui/main_menu.gd")
 const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
@@ -13,6 +14,7 @@ const UiStyle := preload("res://scripts/ui/ui_style.gd")
 var game: GameStateScript
 
 var _catalog: ActivityCatalogScript
+var _event_catalog: EventCatalogScript
 var _safe_area: MarginContainer
 var _screen: Control
 
@@ -32,8 +34,14 @@ func _ready() -> void:
 	_update_safe_area()
 
 	_catalog = ActivityCatalogScript.new()
+	_event_catalog = EventCatalogScript.new()
+	var errors := PackedStringArray()
 	if not _catalog.load_file():
-		_show_error("Die Spieldaten konnten nicht geladen werden:\n\n" + "\n".join(_catalog.errors))
+		errors.append_array(_catalog.errors)
+	if not _event_catalog.load_file():
+		errors.append_array(_event_catalog.errors)
+	if not errors.is_empty():
+		_show_error("Die Spieldaten konnten nicht geladen werden:\n\n" + "\n".join(errors))
 		return
 	show_main_menu()
 
@@ -47,7 +55,7 @@ func show_main_menu() -> void:
 
 
 func start_new_game() -> void:
-	game = GameStateScript.new(_catalog)
+	game = GameStateScript.new(_catalog, _event_catalog)
 	show_game()
 
 

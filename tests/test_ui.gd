@@ -79,6 +79,29 @@ func test_disabled_activity_shows_reason() -> void:
 	app.free()
 
 
+func test_event_replaces_activities_until_decided() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	if not _press(app, "NewGameButton"):
+		app.free()
+		return
+
+	app.game.time.advance(11 * 60)  # 08:00 -> 19:00
+	_press(app, "StartButton_rest")  # 19:00 -> 20:00, Ereignis wird fällig
+	var panel := _find(app, "EventPanel") as Control
+	var scroll := _find(app, "ActivityScroll") as Control
+	assert_eq(panel.visible, true)
+	assert_eq(scroll.visible, false)
+
+	_press(app, "EventOption_accept")
+	assert_eq(panel.visible, false)
+	assert_eq(scroll.visible, true)
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 530,00 €")
+
+	app.free()
+
+
 ## App in den Baum hängen; null (mit Fehlermeldung), wenn _ready() nicht lief.
 func _start_app() -> AppScript:
 	var app := AppScript.new()

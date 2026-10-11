@@ -17,10 +17,23 @@ static func signed_money(cents: int) -> String:
 ## z. B. "2 h · Energie -20 · Stimmung +5 · +25,00 €"
 static func summary(definition: ActivityDefinitionScript) -> String:
 	var parts := PackedStringArray([TimeSystemScript.format_duration(definition.duration_minutes)])
+	parts.append_array(effect_parts(definition.effects, definition.money_cents))
+	return " · ".join(parts)
+
+
+## Folgen einer Ereignis-Option, z. B. "Stimmung +5 · +30,00 €" oder "Keine Folgen".
+static func option_summary(effects: Dictionary, money_cents: int) -> String:
+	var parts := effect_parts(effects, money_cents)
+	return " · ".join(parts) if not parts.is_empty() else "Keine Folgen"
+
+
+## Werte in fester Reihenfolge (PlayerStats.KEYS), Geld zuletzt.
+static func effect_parts(effects: Dictionary, money_cents: int) -> PackedStringArray:
+	var parts := PackedStringArray()
 	for key in PlayerStatsScript.KEYS:
-		var change := definition.get_effect(key)
+		var change: int = effects.get(key, 0)
 		if change != 0:
 			parts.append("%s %+d" % [PlayerStatsScript.LABELS[key], change])
-	if definition.money_cents != 0:
-		parts.append(signed_money(definition.money_cents))
-	return " · ".join(parts)
+	if money_cents != 0:
+		parts.append(signed_money(money_cents))
+	return parts

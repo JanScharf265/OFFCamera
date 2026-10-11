@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 ## Spielansicht: HUD (Datum, Uhrzeit, Konto, Werte), Aktivitäten, letzte Buchungen.
+## Ist ein Ereignis offen, ersetzt es die Aktivitätsliste, bis entschieden ist.
 ## Zeigt nur an und ruft Systeme auf – Regeln stehen in den Systemen.
 ##
 ## Aktualisiert wird nach jeder Aktion explizit über _refresh(), nicht über
@@ -32,6 +33,8 @@ var _feedback_label: Label
 var _cards := {}
 var _ledger_list: VBoxContainer
 var _scroll: ScrollContainer
+var _event_panel: PanelContainer
+var _shown_event_id := ""
 var _scroll_at_press := 0
 
 
@@ -49,6 +52,11 @@ func _ready() -> void:
 	_feedback_label = UiStyle.wrapping_label("Wähle eine Aktivität.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
 	_feedback_label.name = "FeedbackLabel"
 	add_child(_feedback_label)
+
+	_event_panel = UiStyle.card()
+	_event_panel.name = "EventPanel"
+	_event_panel.visible = false
+	add_child(_event_panel)
 
 	var scroll := ScrollContainer.new()
 	scroll.name = "ActivityScroll"
@@ -178,6 +186,45 @@ func _refresh() -> void:
 		card["reason"].visible = not reason.is_empty()
 
 	_refresh_ledger_list()
+	_refresh_event()
+
+
+func _refresh_event() -> void:
+	var pending := _game.events.get_next_pending()
+	_scroll.visible = pending == null
+	_event_panel.visible = pending != null
+	if pending == null:
+		_shown_event_id = ""
+		return
+	if pending.id == _shown_event_id:
+		return
+	_shown_event_id = pending.id
+
+	for child in _event_panel.get_children():
+		_event_panel.remove_child(child)
+		child.queue_free()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	_event_panel.add_child(box)
+	box.add_child(UiStyle.section_label("Ereignis"))
+	box.add_child(UiStyle.wrapping_label(pending.title))
+	box.add_child(UiStyle.wrapping_label(pending.text, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+	for option in pending.options:
+		box.add_child(UiStyle.wrapping_label(ActivityText.option_summary(option.effects, option.money_cents),
+				UiStyle.SMALL_FONT_SIZE))
+		var button := UiStyle.button(option.label)
+		button.name = "EventOption_%s" % option.id
+		button.pressed.connect(_on_event_option_pressed.bind(pending.id, option.id, option.label))
+		box.add_child(button)
+
+
+func _on_event_option_pressed(event_id: String, option_id: String, option_label: String) -> void:
+	var reason := _game.events.resolve(event_id, option_id)
+	if reason.is_empty():
+		_show_feedback("„%s“ gewählt." % option_label, UiStyle.TEXT)
+	else:
+		_show_feedback(reason, UiStyle.NEGATIVE)
+	_refresh()
 
 
 func _refresh_ledger_list() -> void:

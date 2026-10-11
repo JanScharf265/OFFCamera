@@ -1,0 +1,12 @@
+[
+	{
+		"id": "first_brand_request",
+		"title": "Anfrage einer kleinen Marke",
+		"text": "Eine junge Getränkemarke aus Marbella schreibt dir: Ob du sie im nächsten Stream kurz erwähnst?",
+		"trigger": { "day": 1, "hour": 20 },
+		"options": [
+			{ "id": "accept", "label": "Zusagen", "money_cents": 3000, "category": "creator", "effects": { "mood": 5 } },
+			{ "id": "decline", "label": "Höflich absagen", "effects": { "mood": 2 } }
+		]
+	}
+]

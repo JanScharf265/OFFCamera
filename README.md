@@ -92,9 +92,10 @@ Am Ende steht `N bestanden, M fehlgeschlagen`. ERROR-Zeilen direkt nach
 project.godot        Projektkonfiguration (Hochformat, GL-Compatibility-Renderer)
 scenes/app/          Hauptszene app.tscn
 scripts/core/        GameState (eine Spielsitzung)
-scripts/systems/     Spielsysteme (Zeit, Ledger, Aktivitäten, später Events, …)
-scripts/models/      Datenmodelle (Buchung, Spielerwerte, Aktivität)
+scripts/systems/     Spielsysteme (Zeit, Ledger, Aktivitäten, Ereignisse, Datenprüfung)
+scripts/models/      Datenmodelle (Buchung, Spielerwerte, Aktivität, Ereignis)
 data/activities/     Aktivitäten als JSON
+data/events/         Ereignisse als JSON
 scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht (zeigen nur an, keine Spielregeln)
 tests/               Tests + Runner (nicht im iOS-Export)
 docs/                Roadmap, Architektur, Entscheidungen
