@@ -1,67 +1,336 @@
 extends Control
 
-## Einfache 2D-Stadtkarte: Hintergrund, Meer, ein antippbarer Pin pro Ort.
-## Positionen kommen aus den Ortsdaten (0–1), die Pins werden bei jeder
-## Größenänderung neu gesetzt – keine festen Pixelpositionen.
-## Zeigt nur an; was ein Tipp bewirkt, entscheidet der GameScreen.
+## Isometrische Stadtkarte (Grafik-Ticket G1): Straßen, Strand, Meer, ein Gebäude
+## mit Namensschild pro Ort, Markierung am aktuellen Ort und ein Auto, das nach
+## einer Fahrt zum Ziel fährt. Wischen verschiebt die Karte.
+## Zeigt nur an; was ein Tipp bewirkt, entscheidet der GameScreen. Das Raster
+## kommt aus `city_layout.gd`, die Grafiken aus Kenney-CC0-Paketen (assets/kenney/).
+## Die Fahranimation ist rein optisch – die Spielzeit ist beim Start schon vorgestellt.
 
 signal location_pressed(location_id: String)
-## Beim Herunterdrücken eines Pins (für die Unterscheidung Tippen/Scrollen).
+## Beim Herunterdrücken auf der Karte (für die Unterscheidung Tippen/Scrollen im GameScreen).
 signal pin_down
 
 const LocationCatalogScript := preload("res://scripts/systems/location_catalog.gd")
+const CityLayoutScript := preload("res://scripts/ui/city_layout.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
-const LAND := Color(0.12, 0.15, 0.17)
-const SEA := Color(0.1, 0.2, 0.32)
-const SEA_START := 0.88
-const PIN := Color(0.24, 0.24, 0.3)
+const MAP_HEIGHT := 520
+const PIN_HEIGHT := 64
+const ZOOM := 0.75
+## Ab so viel Bewegung (px) gilt eine Berührung als Wischen, nicht als Tipp.
+const DRAG_THRESHOLD := 12.0
+const CAR_SCALE := 1.6
+const SECONDS_PER_CELL := 0.12
+const MIN_TRAVEL_SECONDS := 0.8
+const MAX_TRAVEL_SECONDS := 2.5
+
+const SEA := Color(0.33, 0.6, 0.76)
+const WAVE := Color(0.55, 0.78, 0.9)
+const SAND_TOP := Color(0.94, 0.86, 0.63)
+const SAND_LEFT := Color(0.86, 0.76, 0.52)
+const SAND_RIGHT := Color(0.74, 0.64, 0.43)
+const PIN := Color(0.13, 0.13, 0.16, 0.92)
 const PIN_CURRENT := Color(0.22, 0.45, 0.3)
-const MAP_HEIGHT := 620
-const PIN_HEIGHT := 72
+const ROUTE := Color(0.84, 0.27, 0.35, 0.85)
+
+## Kachelmaße (Kenney „Isometric Tiles“): Unterkante einer Bodenkachel liegt 68 px
+## unter der Mitte ihrer Oberseite; Etagen sind 35 px hoch, Dächer sitzen 12 px höher.
+const TILE_BOTTOM := 68.0
+const BASE_TOP := -59.0
+const FLOOR_STEP := 35.0
+const ROOF_STEP := 12.0
+
+const CITY_DIR := "res://assets/kenney/isometric-city/"
+const BUILDING_DIR := "res://assets/kenney/isometric-buildings/"
+const VEHICLE_DIR := "res://assets/kenney/isometric-vehicles/"
+
+const TILES := {
+	"ground": "cityTiles_066",
+	"park": "cityTiles_067",
+	"road_ew": "cityTiles_073",
+	"road_ns": "cityTiles_081",
+	"cross": "cityTiles_089",
+	"closed_e": "cityTiles_088",
+	"closed_w": "cityTiles_095",
+	"closed_n": "cityTiles_096",
+	"closed_s": "cityTiles_103",
+	"tree": "cityDetails_010",
+}
+
+## Aussehen der Gebäude je Ort: Erdgeschoss, Etagen, optionales Dach (Dateinamen ohne .png).
+## Ein neuer Ort ohne Eintrag bekommt DEFAULT_BUILDING.
+const BUILDINGS := {
+	"home": {"base": "buildingTiles_021", "floors": ["buildingTiles_032", "buildingTiles_032"], "roof": "buildingTiles_065"},
+	"studio": {"base": "buildingTiles_003", "floors": ["buildingTiles_031"]},
+	"cafe_harbor": {"base": "buildingTiles_004", "floors": []},
+	"gym": {"base": "buildingTiles_026", "floors": ["buildingTiles_052"]},
+	"office": {"base": "buildingTiles_001", "floors": ["buildingTiles_016", "buildingTiles_016", "buildingTiles_016"]},
+}
+const DEFAULT_BUILDING := {"base": "buildingTiles_019", "floors": ["buildingTiles_016"]}
+const FILLER_BUILDINGS: Array[String] = ["buildingTiles_019", "buildingTiles_022", "buildingTiles_030"]
+
+## Fahrtrichtung im Raster -> Kenney-Blickrichtung.
+const CAR_DIRECTIONS := {
+	Vector2i(1, 0): "SE",
+	Vector2i(-1, 0): "NW",
+	Vector2i(0, 1): "SW",
+	Vector2i(0, -1): "NE",
+}
+
+
+## Wippender Pfeil über dem aktuellen Ort (eigener Knoten, damit die Karte
+## für die Animation nicht jedes Bild neu zeichnen muss).
+class Marker extends Control:
+	const SIZE := Vector2(44, 56)
+	var base_position := Vector2.ZERO
+	var _time := 0.0
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		size = SIZE
+
+	func _process(delta: float) -> void:
+		_time += delta
+		position = base_position + Vector2(0, sin(_time * 4.0) * 6.0)
+
+	func _draw() -> void:
+		var tip := Vector2(SIZE.x / 2.0, SIZE.y)
+		var arrow := PackedVector2Array([Vector2(4, 18), Vector2(SIZE.x - 4, 18), tip])
+		draw_colored_polygon(arrow, Color(0.22, 0.45, 0.3))
+		draw_circle(Vector2(SIZE.x / 2.0, 18), 18.0, Color(0.22, 0.45, 0.3))
+		draw_circle(Vector2(SIZE.x / 2.0, 18), 8.0, Color.WHITE)
+
 
 var _catalog: LocationCatalogScript
+var _layout: CityLayoutScript
 var _current := ""
 var _selected := ""
-## location_id -> Button
+## location_id -> Button (Namensschild)
 var _pins := {}
+var _marker: Marker
+## name -> Texture2D (null, wenn die Datei fehlt – dann wird das Teil ausgelassen)
+var _textures := {}
+
+## Bildschirmposition des Welt-Ursprungs.
+var _offset := Vector2.ZERO
+var _centered := false
+var _camera_tween: Tween
+
+var _drag_total := 0.0
+var _dragging := false
+var _sign_frame := -1
+
+## Auto: Zellfolge, Fortschritt (in Zellen) und Blickrichtung.
+var _car_path: Array[Vector2i] = []
+var _car_progress := 0.0
+var _car_direction := "SW"
+var _car_tween: Tween
 
 
 ## Vor dem Einfügen in den Baum aufrufen.
 func setup(catalog: LocationCatalogScript) -> void:
 	_catalog = catalog
+	_layout = CityLayoutScript.new(catalog)
 
 
 func _ready() -> void:
 	custom_minimum_size.y = MAP_HEIGHT
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# PASS: Wischgesten auf der Karte erreichen die umgebende ScrollContainer.
-	mouse_filter = Control.MOUSE_FILTER_PASS
+	# STOP: Wischen auf der Karte verschiebt nur die Karte, nicht die Seite.
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
+	_load_textures()
 	for id in _catalog.get_ids():
 		var pin := Button.new()
 		pin.name = "MapPin_%s" % id
 		pin.text = _catalog.get_definition(id).display_name
 		pin.custom_minimum_size.y = PIN_HEIGHT
 		pin.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+		# PASS: Wischen auf einem Schild erreicht die Karte und verschiebt sie.
 		pin.mouse_filter = Control.MOUSE_FILTER_PASS
-		pin.button_down.connect(func() -> void: pin_down.emit())
-		pin.pressed.connect(func() -> void: location_pressed.emit(id))
+		pin.button_down.connect(_on_sign_down)
+		pin.pressed.connect(_on_sign_pressed.bind(id))
 		add_child(pin)
 		_pins[id] = pin
-	resized.connect(_layout_pins)
+	_marker = Marker.new()
+	_marker.name = "LocationMarker"
+	add_child(_marker)
+	resized.connect(_on_resized)
 	_update_pins()
-	_layout_pins.call_deferred()
+	_on_resized.call_deferred()
 
 
-## Aktueller und ausgewählter Ort (für Farben und Fahrtlinie).
+## Aktueller und ausgewählter Ort (für Schilder, Markierung und Route).
 func set_state(current_id: String, selected_id: String) -> void:
+	var moved := current_id != _current
 	_current = current_id
 	_selected = selected_id
+	if moved and not is_traveling():
+		_park_car()
 	if is_node_ready():
 		_update_pins()
+		_layout_overlays()
 		queue_redraw()
 
+
+## Fahranimation von einem Ort zum anderen (nur Darstellung). Die Kamera folgt zum Ziel.
+func play_travel(from_id: String, to_id: String) -> void:
+	var path := _layout.travel_path(from_id, to_id)
+	if path.size() < 3:
+		_park_car()
+		return
+	if _car_tween != null:
+		_car_tween.kill()
+	_car_path = path.slice(1, path.size() - 1)
+	_set_car_progress(0.0)
+	var cells := _car_path.size() - 1
+	var seconds := clampf(cells * SECONDS_PER_CELL, MIN_TRAVEL_SECONDS, MAX_TRAVEL_SECONDS)
+	if not is_inside_tree() or cells == 0:
+		finish_travel()
+		return
+	_car_tween = create_tween()
+	_car_tween.tween_method(_set_car_progress, 0.0, float(cells), seconds) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_car_tween.finished.connect(finish_travel)
+	_move_camera_to(_layout.get_location_cell(to_id), seconds)
+	_layout_overlays()
+
+
+func is_traveling() -> bool:
+	return _car_tween != null and _car_tween.is_valid() and _car_tween.is_running()
+
+
+## Animation sofort beenden (auch für Tests): Auto steht an der Zufahrt des aktuellen Orts.
+func finish_travel() -> void:
+	if _car_tween != null:
+		_car_tween.kill()
+		_car_tween = null
+	_park_car()
+	_layout_overlays()
+
+
+## Rasterzelle, in der das Auto gerade steht (gerundet).
+func get_car_cell() -> Vector2i:
+	return Vector2i(_car_position().round())
+
+
+func get_layout() -> CityLayoutScript:
+	return _layout
+
+
+# --- Eingabe -----------------------------------------------------------------
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			# Gehört der Druck nicht zu einem Schild aus diesem Bild, ist eine alte Markierung ungültig.
+			if _sign_frame != Engine.get_process_frames():
+				_sign_frame = -1
+			_begin_touch()
+		else:
+			_end_touch(event.position)
+		accept_event()
+	elif event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		_drag_total += event.relative.length()
+		if _drag_total > DRAG_THRESHOLD:
+			_dragging = true
+		_set_offset(_offset + event.relative)
+		accept_event()
+
+
+func _begin_touch() -> void:
+	_drag_total = 0.0
+	_dragging = false
+	if _camera_tween != null:
+		_camera_tween.kill()
+	pin_down.emit()
+
+
+func _end_touch(screen_position: Vector2) -> void:
+	# Ein Tipp auf ein Schild wird schon über dessen `pressed` gemeldet.
+	var from_sign := _sign_frame >= 0
+	_sign_frame = -1
+	if _dragging or from_sign:
+		return
+	var id := _location_at(screen_position)
+	if not id.is_empty():
+		location_pressed.emit(id)
+
+
+func _on_sign_down() -> void:
+	_begin_touch()
+	_sign_frame = Engine.get_process_frames()
+
+
+func _on_sign_pressed(location_id: String) -> void:
+	if not _dragging:
+		location_pressed.emit(location_id)
+
+
+## Vorderstes Gebäude unter dem Finger.
+func _location_at(screen_position: Vector2) -> String:
+	var world := (screen_position - _offset) / ZOOM
+	var best := ""
+	var best_depth := -INF
+	for id in _pins:
+		var cell := _layout.get_location_cell(id)
+		var anchor := CityLayoutScript.cell_to_world(cell)
+		var top := _building_top(id)
+		var rect := Rect2(anchor.x - CityLayoutScript.HALF.x, anchor.y + top,
+				CityLayoutScript.HALF.x * 2.0, TILE_BOTTOM - top)
+		if rect.has_point(world) and cell.x + cell.y > best_depth:
+			best = id
+			best_depth = cell.x + cell.y
+	return best
+
+
+# --- Kamera ------------------------------------------------------------------
+
+func _on_resized() -> void:
+	if size.x <= 0.0:
+		return
+	if not _centered and _catalog.has(_current):
+		_centered = true
+		_set_offset(_offset_for(_layout.get_location_cell(_current)))
+	else:
+		_set_offset(_offset)
+
+
+func _offset_for(cell: Vector2i) -> Vector2:
+	return size / 2.0 - CityLayoutScript.cell_to_world(Vector2(cell)) * ZOOM
+
+
+func _move_camera_to(cell: Vector2i, seconds: float) -> void:
+	if _camera_tween != null:
+		_camera_tween.kill()
+	_camera_tween = create_tween()
+	_camera_tween.tween_method(_set_offset, _offset, _clamped(_offset_for(cell)), seconds) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _set_offset(value: Vector2) -> void:
+	_offset = _clamped(value)
+	_layout_overlays()
+	queue_redraw()
+
+
+## Die Stadt (inkl. Strand) deckt immer den sichtbaren Ausschnitt ab.
+func _clamped(value: Vector2) -> Vector2:
+	var bounds := CityLayoutScript.city_bounds()
+	var low := size - bounds.end * ZOOM
+	var high := -bounds.position * ZOOM
+	var result := value
+	result.x = (low.x + high.x) / 2.0 if low.x > high.x else clampf(value.x, low.x, high.x)
+	result.y = (low.y + high.y) / 2.0 if low.y > high.y else clampf(value.y, low.y, high.y)
+	return result
+
+
+func _to_screen(world: Vector2) -> Vector2:
+	return _offset + world * ZOOM
+
+
+# --- Schilder, Markierung, Auto -------------------------------------------------
 
 func _update_pins() -> void:
 	for id in _pins:
@@ -71,26 +340,199 @@ func _update_pins() -> void:
 			pin.add_theme_stylebox_override(state, UiStyle.flat_box(color))
 
 
-func _point(location_id: String) -> Vector2:
-	return _catalog.get_definition(location_id).map_position * size
-
-
-func _layout_pins() -> void:
+func _layout_overlays() -> void:
+	if _layout == null:
+		return
 	for id in _pins:
 		var pin: Button = _pins[id]
 		pin.reset_size()
-		var top_left := _point(id) - pin.size / 2.0
-		pin.position = top_left.clamp(Vector2.ZERO, (size - pin.size).max(Vector2.ZERO))
+		var anchor := CityLayoutScript.cell_to_world(_layout.get_location_cell(id))
+		var top := _to_screen(anchor + Vector2(0, _building_top(id) - 8.0))
+		pin.position = top - Vector2(pin.size.x / 2.0, pin.size.y)
+	if _marker != null:
+		_marker.visible = _pins.has(_current) and not is_traveling()
+		if _marker.visible:
+			var pin: Button = _pins[_current]
+			_marker.base_position = pin.position + Vector2((pin.size.x - _marker.size.x) / 2.0, -_marker.size.y - 4.0)
+
+
+func _park_car() -> void:
+	_car_path = []
+	if _layout != null and _catalog.has(_current):
+		_car_path = [_layout.access_cell(_current)]
+	_car_progress = 0.0
+	_car_direction = "SW"
 	queue_redraw()
 
 
+func _set_car_progress(value: float) -> void:
+	_car_progress = value
+	var index := clampi(int(floor(value)), 0, maxi(_car_path.size() - 2, 0))
+	if _car_path.size() >= 2:
+		var step := _car_path[index + 1] - _car_path[index]
+		_car_direction = CAR_DIRECTIONS.get(step, _car_direction)
+	queue_redraw()
+
+
+func _car_position() -> Vector2:
+	if _car_path.is_empty():
+		return Vector2(-1, -1)
+	var index := clampi(int(floor(_car_progress)), 0, _car_path.size() - 1)
+	var next := mini(index + 1, _car_path.size() - 1)
+	return Vector2(_car_path[index]).lerp(Vector2(_car_path[next]), _car_progress - index)
+
+
+# --- Zeichnen ----------------------------------------------------------------
+
+func _load_textures() -> void:
+	for key in TILES:
+		_textures[key] = _load(CITY_DIR + TILES[key])
+	var names: Array = FILLER_BUILDINGS.duplicate()
+	for style in BUILDINGS.values() + [DEFAULT_BUILDING]:
+		names.append(style["base"])
+		names.append_array(style["floors"])
+		if style.has("roof"):
+			names.append(style["roof"])
+	for building_name in names:
+		_textures[building_name] = _load(BUILDING_DIR + building_name)
+	for direction in CAR_DIRECTIONS.values():
+		_textures["car_" + direction] = _load(VEHICLE_DIR + "taxi_%s" % direction)
+
+
+static func _load(path_without_extension: String) -> Texture2D:
+	var path := path_without_extension + ".png"
+	return load(path) as Texture2D if ResourceLoader.exists(path) else null
+
+
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), LAND)
-	draw_rect(Rect2(0, size.y * SEA_START, size.x, size.y * (1.0 - SEA_START)), SEA)
+	draw_rect(Rect2(Vector2.ZERO, size), SEA)
+	if _layout == null:
+		return
+	draw_set_transform(_offset, 0.0, Vector2(ZOOM, ZOOM))
+	var view := Rect2(-_offset / ZOOM, size / ZOOM).grow(200.0)
+	var low := CityLayoutScript.min_cell()
+	var high := CityLayoutScript.max_cell()
+	# Maleralgorithmus: hintere Zellen zuerst (kleine gx + gy).
+	for depth in range(low.x + low.y, high.x + high.y + 1):
+		for x in range(maxi(low.x, depth - high.y), mini(high.x, depth - low.y) + 1):
+			var cell := Vector2i(x, depth - x)
+			var anchor := CityLayoutScript.cell_to_world(Vector2(cell))
+			if view.has_point(anchor):
+				_draw_cell(cell, anchor)
+	_draw_route()
+	_draw_car()
 	var font := get_theme_default_font()
-	draw_string(font, Vector2(16, size.y - 20), "Mittelmeer", HORIZONTAL_ALIGNMENT_LEFT, -1,
-			UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-	if _catalog.has(_current) and _catalog.has(_selected) and _current != _selected:
-		draw_line(_point(_current), _point(_selected), UiStyle.ACCENT, 6.0, true)
-	for id in _pins:
-		draw_circle(_point(id), 10.0, PIN_CURRENT if id == _current else UiStyle.TEXT)
+	draw_string(font, CityLayoutScript.cell_to_world(Vector2(6, CityLayoutScript.BEACH_ROW + 3)),
+			"Mittelmeer", HORIZONTAL_ALIGNMENT_LEFT, -1, int(UiStyle.SMALL_FONT_SIZE / ZOOM), Color(1, 1, 1, 0.7))
+	draw_set_transform(Vector2.ZERO)
+
+
+func _draw_cell(cell: Vector2i, anchor: Vector2) -> void:
+	match _layout.kind_at(cell):
+		CityLayoutScript.Kind.SEA:
+			if CityLayoutScript.variant(cell) % 6 == 0:
+				draw_line(anchor + Vector2(-18, 0), anchor + Vector2(18, 9), WAVE, 3.0)
+		CityLayoutScript.Kind.BEACH:
+			_draw_sand(anchor)
+		CityLayoutScript.Kind.ROAD:
+			_draw_tile(_textures[_road_tile(cell)], anchor)
+		CityLayoutScript.Kind.PARK:
+			_draw_tile(_textures["park"], anchor)
+		CityLayoutScript.Kind.TREES:
+			_draw_tile(_textures["ground"], anchor)
+			_draw_tree(anchor + Vector2(-26, -2))
+			_draw_tree(anchor + Vector2(22, -10))
+			_draw_tree(anchor + Vector2(0, 12))
+		CityLayoutScript.Kind.HOUSE:
+			var filler := FILLER_BUILDINGS[CityLayoutScript.variant(cell) % FILLER_BUILDINGS.size()]
+			_draw_tile(_textures[filler], anchor)
+		CityLayoutScript.Kind.LOCATION:
+			_draw_building(_layout.get_location_at(cell), anchor)
+		_:
+			_draw_tile(_textures["ground"], anchor)
+
+
+func _road_tile(cell: Vector2i) -> String:
+	var links := _layout.road_links(cell)
+	var open_count := links.values().count(true)
+	if open_count == 3:
+		for side in ["e", "w", "n", "s"]:
+			if not links[side]:
+				return "closed_" + side
+	if open_count == 2 and links["e"] and links["w"]:
+		return "road_ew"
+	if open_count == 2 and links["n"] and links["s"]:
+		return "road_ns"
+	return "cross"
+
+
+## Bodenteile sitzen mit ihrer Unterkante auf der Kachel.
+func _draw_tile(texture: Texture2D, anchor: Vector2) -> void:
+	if texture != null:
+		draw_texture(texture, anchor + Vector2(-texture.get_width() / 2.0, TILE_BOTTOM - texture.get_height()))
+
+
+func _draw_tree(position_on_tile: Vector2) -> void:
+	var texture: Texture2D = _textures["tree"]
+	if texture != null:
+		draw_texture(texture, position_on_tile - Vector2(texture.get_width() / 2.0, texture.get_height()))
+
+
+func _draw_building(location_id: String, anchor: Vector2) -> void:
+	var style: Dictionary = BUILDINGS.get(location_id, DEFAULT_BUILDING)
+	_draw_tile(_textures[style["base"]], anchor)
+	var y := anchor.y + BASE_TOP
+	for floor_name in style["floors"]:
+		y -= FLOOR_STEP
+		_draw_part(_textures[floor_name], anchor.x, y)
+	if style.has("roof"):
+		_draw_part(_textures[style["roof"]], anchor.x, y - ROOF_STEP)
+
+
+func _draw_part(texture: Texture2D, center_x: float, top_y: float) -> void:
+	if texture != null:
+		draw_texture(texture, Vector2(center_x - texture.get_width() / 2.0, top_y))
+
+
+## Oberkante des Gebäudes relativ zur Kachelmitte (negativ = darüber).
+func _building_top(location_id: String) -> float:
+	var style: Dictionary = BUILDINGS.get(location_id, DEFAULT_BUILDING)
+	var top: float = BASE_TOP - FLOOR_STEP * style["floors"].size()
+	if style.has("roof"):
+		top -= ROOF_STEP
+	return top
+
+
+func _draw_sand(anchor: Vector2) -> void:
+	var half := CityLayoutScript.HALF
+	var drop := 6.0
+	var top := anchor + Vector2(0, drop)
+	var thickness := TILE_BOTTOM - half.y - drop
+	var left := top + Vector2(-half.x, 0)
+	var right := top + Vector2(half.x, 0)
+	var front := top + Vector2(0, half.y)
+	var down := Vector2(0, thickness)
+	draw_colored_polygon(PackedVector2Array([left, front, front + down, left + down]), SAND_LEFT)
+	draw_colored_polygon(PackedVector2Array([front, right, right + down, front + down]), SAND_RIGHT)
+	draw_colored_polygon(PackedVector2Array([top + Vector2(0, -half.y), right, front, left]), SAND_TOP)
+
+
+func _draw_route() -> void:
+	if not _catalog.has(_current) or not _catalog.has(_selected) or _current == _selected or is_traveling():
+		return
+	var points := PackedVector2Array()
+	for cell in _layout.travel_path(_current, _selected):
+		points.append(CityLayoutScript.cell_to_world(Vector2(cell)) + Vector2(0, 4))
+	if points.size() >= 2:
+		draw_polyline(points, ROUTE, 10.0, true)
+
+
+func _draw_car() -> void:
+	if _car_path.is_empty():
+		return
+	var texture: Texture2D = _textures.get("car_" + _car_direction)
+	if texture == null:
+		return
+	var car_size := texture.get_size() * CAR_SCALE
+	var center := CityLayoutScript.cell_to_world(_car_position()) + Vector2(0, -4)
+	draw_texture_rect(texture, Rect2(center - car_size / 2.0, car_size), false)

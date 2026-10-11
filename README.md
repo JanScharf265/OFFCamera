@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen) – als Nächstes: Grafik-Ticket G1 (isometrische Stadt), danach Phase 3.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) umgesetzt, 137/137 Tests grün – Editor- und iPhone-Abnahme ausstehend; danach Phase 3.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -83,6 +83,9 @@ cd ~/Developer/OFFCamera
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path . -s res://tests/run_tests.gd
 ```
 
+Nach dem Hinzufügen neuer Grafiken einmal importieren (sonst fehlen sie im Headless-Lauf):
+`… --headless --path . --import`
+
 Am Ende steht `N bestanden, M fehlgeschlagen`. ERROR-Zeilen direkt nach
 „(die folgende ERROR-Meldung ist erwartet)“ sind beabsichtigt.
 
@@ -105,6 +108,7 @@ data/activities/     Aktivitäten als JSON (je an einen Ort gebunden)
 data/events/         Ereignisse als JSON
 data/appointments/   Feste Termine als JSON
 scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht, Stadtkarte (zeigen nur an, keine Spielregeln)
+assets/kenney/       Grafiken aus Kenney-CC0-Paketen (nur benutzte Dateien, je mit License.txt)
 tests/               Tests + Runner (nicht im iOS-Export)
 docs/                Roadmap, Architektur, Entscheidungen
 ```

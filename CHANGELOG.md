@@ -1,5 +1,12 @@
 # Changelog
 
+## Unveröffentlicht – Grafik-Ticket G1
+- Isometrische Stadtkarte im Stil eines Städtebauspiels: Straßen, Promenade, Strand, Meer, Bäume, Füllbebauung
+- Eigene Gebäude für Wohnung, Studio, Café am Hafen, Fitnessstudio und Büro, mit antippbaren Namensschildern
+- Wippende Standortmarkierung, Route zum ausgewählten Ort, Taxi fährt beim Reisen zum Ziel
+- Karte per Wischgeste verschiebbar (520 px hoch)
+- Grafiken: Kenney „Isometric Tiles“ City, Buildings, Vehicles (CC0) unter `assets/kenney/`
+
 ## Unveröffentlicht – Phase 2
 - Orte als Daten mit Kartenposition und Öffnungszeiten; Verweise zwischen Datenkatalogen werden beim Start geprüft (`GameData`)
 - LocationSystem: aktueller Ort, Reisezeit (5 min + 3 min/km, aufgerundet auf 5 min), Fahrten über das TimeSystem

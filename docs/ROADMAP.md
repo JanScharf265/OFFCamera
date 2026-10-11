@@ -64,11 +64,22 @@ Abnahme auf dem iPhone:
 - [x] Spielstand aus Phase 1 lässt sich fortsetzen (Ort Wohnung, gleiche Zeit/Geld/Buchungen)
 - [x] Karte und Listen per Touch scrollbar, nichts verdeckt
 
-## Grafik-Ticket G1 – Isometrische Stadtansicht ← als Nächstes
+## Grafik-Ticket G1 – Isometrische Stadtansicht ← in Abnahme
 Auf Wunsch des Game Directors vor Phase 3: Stadtkarte im Stil eines Städtebauspiels
 (isometrisch, schräg von oben) mit Meer, Straßen und erkennbaren Gebäuden für die fünf Orte,
 Standortmarkierung und Fahrzeug beim Reisen. Nur Darstellung – Spiellogik und Tests bleiben unverändert.
 Grafiken aus frei nutzbaren (CC0) Asset-Paketen, später austauschbar.
+
+- [x] Kenney „Isometric Tiles“ City/Buildings/Vehicles (CC0), nur benutzte Dateien unter `assets/kenney/`
+- [x] Isometrische Karte: Straßennetz, Promenade, Strand, Meer, Bäume, Füllbebauung
+- [x] Fünf erkennbare Gebäude mit antippbarem Namensschild; Gebäude selbst auch antippbar
+- [x] Wippende Markierung am aktuellen Ort, Route zum ausgewählten Ort
+- [x] Taxi fährt nach „Hinfahren“ über die Straßen zum Ziel (nur Animation)
+- [x] Wischen auf der Karte verschiebt nur die Karte (520 px hoch); Seite scrollt außerhalb
+- [x] Automatische Tests (137/137 grün, Godot 4.7.2 headless); Spiellogik unverändert
+- [x] Screenshots aus einem Fensterlauf auf dem Mac geprüft (Karte, Route, Fahrt, Strand)
+- [ ] Im Editor durchgespielt (Wischen mit der Maus, Tippen auf Gebäude/Schilder)
+- [ ] iPhone-Abnahme: Wischen flüssig, Tippen trifft, Seite scrollt außerhalb der Karte, Notch/Home-Balken frei
 
 ## Spätere Phasen
 3. Streamer-/Creator-Karriere

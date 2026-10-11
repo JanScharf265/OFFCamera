@@ -274,7 +274,10 @@ func _on_travel_pressed() -> void:
 	var warning := _game.appointments.conflict_warning(_game.locations.travel_minutes_to(target))
 	if not _confirmed("travel:" + target, warning):
 		return
+	var origin := _game.locations.get_current()
 	var reason := _game.locations.travel(target)
+	if reason.is_empty():
+		_map.play_travel(origin, target)
 	var name_text := _game.locations.get_catalog().get_definition(target).display_name if reason.is_empty() else ""
 	_after_action(reason, "Angekommen: %s" % name_text)
 

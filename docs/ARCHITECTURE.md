@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 2: Orte, Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. iPhone-Abnahme (Phase 1 und 2) ausstehend.
+Stand Phase 2 + Grafik-Ticket G1: Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -109,8 +109,19 @@ Stand Phase 2: Orte, Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine,
   um mehr als 12 px bewegt, gilt das als Scrollen und die Aktivität startet nicht.
 - Spielansicht (von oben): HUD mit Ort, Aktivitäten am aktuellen Ort (Liste wird bei Ortswechsel neu
   gebaut), nächste 2 Termine („Wahrnehmen“ nur wenn möglich, sonst der Grund), Stadtkarte
-  (`city_map.gd`: zeichnet Land/Meer/Fahrtlinie, Pins als Buttons, Lage aus `map_position` bei jeder
-  Größenänderung), Ortsdetails mit „Hinfahren“, letzte Buchungen.
+  (siehe unten), Ortsdetails mit „Hinfahren“, letzte Buchungen.
+- Stadtkarte (Grafik-Ticket G1), nur Darstellung:
+  - `city_layout.gd` (RefCounted, ohne Szene testbar): festes isometrisches Raster 15 × 15 plus Umland;
+    Straßen auf den Zeilen/Spalten 1, 5, 9, 13 (13 = Strandpromenade), darunter Strand und Meer.
+    Jeder Ort kommt auf das nächste freie Grundstück an einer Straße (aus `map_position`, deterministisch).
+    `travel_path()` = Breitensuche über Straßen; Projektion `cell_to_world()` (Kachel 132 × 66).
+  - `city_map.gd`: zeichnet in `_draw()` nach dem Maleralgorithmus (nur sichtbare Zellen), Zoom 0,75.
+    Namensschilder sind Buttons `MapPin_<id>`; Tippen aufs Gebäude wählt ebenfalls aus.
+    `mouse_filter = STOP`: Wischen verschiebt nur die Karte (ab 12 px kein Tipp mehr), Grenzen = Stadt inkl. Strand.
+    `play_travel(von, nach)` animiert ein Taxi entlang der Straßen (Tween, 0,8–2,5 s) und schwenkt die Kamera mit;
+    aufgerufen vom GameScreen erst nach erfolgreichem `LocationSystem.travel()`. `LocationMarker` wippt über dem aktuellen Ort.
+  - Gebäudeaussehen je Orts-ID als Tabelle `BUILDINGS`; Grafiken unter `assets/kenney/` (CC0, je mit `License.txt`).
+    Fehlt eine Grafik, wird das Teil ausgelassen statt abzustürzen.
 - Kollision mit Termin: erster Tipp zeigt die Warnung, zweiter Tipp auf dieselbe Aktion führt aus.
 - Offenes Ereignis: `EventPanel` ersetzt die Liste, bis eine Option gewählt ist.
 - Automatisch gespeichert wird beim Start eines neuen Spiels, nach jeder erfolgreichen Aktion
@@ -148,6 +159,7 @@ Systeme melden Änderungen über Signale (z. B. `time_advanced`, `day_changed`, 
 ## Geplante Ordner
 
 ```
+assets/   kenney/ (CC0-Grafiken)
 scenes/   app/, menus/, hud/, …
 scripts/  core/, systems/, models/, ui/
 data/     activities/, locations/, events/
