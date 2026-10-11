@@ -18,3 +18,6 @@ build/
 .DS_Store
 *.tmp
 *.log
+
+# Lokale Claude-Code-Arbeitsdaten (Worktrees)
+.claude/
