@@ -197,6 +197,7 @@ func _version_1_text(minutes: int) -> String:
 	game.erase("appointments")
 	game.erase("channel")
 	game.erase("equipment")
+	game.erase("company")
 	game["time"]["minutes"] = minutes
 	return JSON.stringify({"version": 1, "game": Helpers.with_single_account_ledger(game)})
 
@@ -259,6 +260,7 @@ func _version_2_text() -> String:
 	var game := _played_game().to_dict()
 	game.erase("channel")
 	game.erase("equipment")
+	game.erase("company")
 	return JSON.stringify({"version": 2, "game": Helpers.with_single_account_ledger(game)})
 
 
@@ -296,6 +298,7 @@ func test_channel_survives_save_and_load() -> void:
 func test_version_3_is_migrated_without_equipment() -> void:
 	var game := _played_game().to_dict()
 	game.erase("equipment")
+	game.erase("company")
 	_write(JSON.stringify({"version": 3, "game": Helpers.with_single_account_ledger(game)}))
 	var result := _load()
 	var loaded: GameStateScript = result["game"]
@@ -326,7 +329,7 @@ func test_version_5_ledger_is_migrated_to_private_account() -> void:
 	# Gespeichert wird danach im neuen Format.
 	SaveSystemScript.save(loaded, PATH)
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	assert_eq(int(data["version"]), 6)
+	assert_eq(int(data["version"]), SaveSystemScript.SAVE_VERSION)
 	assert_eq(data["game"]["ledger"]["opening_balances"], {"private": 50000.0, "company": 0.0})
 	assert_true(not data["game"]["ledger"].has("opening_balance_cents"), "altes Feld noch vorhanden")
 

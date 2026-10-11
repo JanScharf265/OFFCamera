@@ -13,6 +13,7 @@ const LocationCatalogScript := preload("res://scripts/systems/location_catalog.g
 const AppointmentCatalogScript := preload("res://scripts/systems/appointment_catalog.gd")
 const ContentFormatCatalogScript := preload("res://scripts/systems/content_format_catalog.gd")
 const EquipmentCatalogScript := preload("res://scripts/systems/equipment_catalog.gd")
+const CompanyTypeCatalogScript := preload("res://scripts/systems/company_type_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -23,6 +24,7 @@ var locations := LocationCatalogScript.new()
 var appointments := AppointmentCatalogScript.new()
 var formats := ContentFormatCatalogScript.new()
 var equipment := EquipmentCatalogScript.new()
+var company_types := CompanyTypeCatalogScript.new()
 
 var errors: PackedStringArray = []
 
@@ -30,7 +32,7 @@ var errors: PackedStringArray = []
 ## Lädt alle Standarddateien und prüft die Verweise. false = errors beschreibt alles.
 func load_all() -> bool:
 	errors.clear()
-	for catalog in [activities, events, locations, appointments, formats, equipment]:
+	for catalog in [activities, events, locations, appointments, formats, equipment, company_types]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 	if errors.is_empty():
@@ -58,6 +60,10 @@ func check_references() -> PackedStringArray:
 		for format_id in item.formats:
 			if not formats.has(format_id):
 				problems.append("Ausrüstung '%s': unbekanntes Format '%s'." % [id, format_id])
+	for id in company_types.get_ids():
+		var location := company_types.get_definition(id).found_location
+		if not locations.has(location):
+			problems.append("Unternehmensart '%s': unbekannter Ort '%s'." % [id, location])
 	for appointment in appointments.get_all():
 		if not locations.has(appointment.location):
 			problems.append("Termin '%s': unbekannter Ort '%s'." % [appointment.id, appointment.location])

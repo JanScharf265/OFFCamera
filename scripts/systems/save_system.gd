@@ -19,7 +19,7 @@ const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 
-const SAVE_VERSION := 6
+const SAVE_VERSION := 7
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -132,6 +132,8 @@ static func _migrate(data: Dictionary, version: int) -> String:
 		var ledger_error := LedgerSystemScript.migrate_single_account(data["game"]["ledger"])
 		if not ledger_error.is_empty():
 			return ledger_error
+	if version < 7:
+		data["game"]["company"] = {"founded": false}
 	data["version"] = SAVE_VERSION
 	return ""
 
@@ -154,6 +156,7 @@ static func _migrate_1_to_2(game: Dictionary) -> String:
 ## Version 5 (Phase 3): Seed für Zufallsereignisse (MIGRATED_SEED, direkt in _migrate()).
 ## Version 6 (Phase 4): Konten im Ledger – alte Buchungen gehören zum Privatkonto
 ##   (LedgerSystem.migrate_single_account()).
+## Version 7 (Phase 4): Unternehmen – noch nicht gegründet (direkt in _migrate()).
 static func _migrate_2_to_3(game: Dictionary) -> void:
 	game["channel"] = ChannelSystemScript.initial_dict(GameStateScript.START_FOLLOWERS,
 			GameStateScript.START_COMMUNITY, GameStateScript.START_REPUTATION)

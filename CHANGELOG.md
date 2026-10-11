@@ -3,6 +3,8 @@
 ## Unveröffentlicht – Phase 4
 - LedgerSystem mit Konten „privat“ und „Firma“: Kontostand und Überziehungsschutz je Konto; Umbuchungen (Einlage/Entnahme) als zwei verknüpfte Buchungen, nie halb (Ticket 4.1)
 - Spielstand Version 6 mit Migration: alte Buchungen gehören zum Privatkonto (Ticket 4.1)
+- Unternehmensart „Merch-Label“ als Daten; Gründung im Büro (1 h, 150 € Gebühr, 200 € Einlage aufs Firmenkonto); Auslastung und Ruf des Unternehmens mit Protokoll; Einlage/Entnahme als Umbuchungen (Ticket 4.2)
+- Spielstand Version 7 (Unternehmen) mit Migration von Version 6 (Ticket 4.2)
 
 ## Unveröffentlicht – Phase 3 (iPhone-Abnahme ok, 11.10.2026)
 - ChannelSystem: Kanalprofil mit Followern (0–1.000.000, Wachstumsbremse), Community-Stimmung und Ruf (0–100); jede Änderung mit Begründung im Kanal-Protokoll (Ticket 3.1)

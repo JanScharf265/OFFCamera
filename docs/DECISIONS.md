@@ -47,6 +47,14 @@ Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslauf
 führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
 Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
 
+## 017 – Unternehmen gründen
+Das Merch-Label wird im Büro (Coworking) gegründet und verkauft zunächst online; die Filiale (Ticket 4.4) ist der
+physische zweite Standort. Gründung kostet Spielzeit (1 h), eine Gebühr vom Privatkonto und eine Mindesteinlage
+(Umbuchung). Es gibt höchstens ein Unternehmen. Auslastung und Ruf des Unternehmens sind 0–100 und ändern sich
+nur mit Begründung im Unternehmens-Protokoll (gleiches Eintragsmodell wie das Kanal-Protokoll). Einlage und
+Entnahme kosten keine Spielzeit; ihre Schutzschlüssel zählen fortlaufend (Zähler im Spielstand), damit jede
+Umbuchung eindeutig ist. Alle Zahlen sind Platzhalter fürs Balancing.
+
 ## 016 – Konten im einen Ledger
 Privat- und Firmenkonto liegen im selben LedgerSystem (Entscheidung des Game Directors): jede Buchung hat ein
 Feld `account`, Kontostände und Überziehungsschutz gelten je Konto, Buchungs-IDs und Schutzschlüssel sind

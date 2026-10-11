@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 4 (Ticket 4.1: Konten) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 4 (Tickets 4.1–4.2: Konten, Unternehmen gründen) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -128,8 +128,20 @@ Stand Phase 4 (Ticket 4.1: Konten) auf Basis von Phase 3 (abgeschlossen, auf dem
 - Gespeichert: `{"levels": {id: stufe}}`; unbekannte Teile werden beim Laden ignoriert, zu hohe Stufen begrenzt.
 - UI: Abschnitt „Ausrüstung“ am Kaufort (Button `EquipmentButton_<id>`, verschwindet auf höchster Stufe).
 
+### Unternehmen (`data/company/company_types.json`, `CompanyTypeCatalog`, `CompanySystem`)
+- Daten je Art: `id`, `display_name`, `description`, `found_location`, `founding_minutes`, `founding_fee_cents`,
+  `min_deposit_cents`, `start_utilization`, `start_reputation`, `fixed_costs_per_day_cents`,
+  `base_revenue_per_day_cents`, `revenue_per_1000_followers_cents`, `utilization_decay_per_day`. `GameData` prüft den Ort.
+- `check_found(art)` / `found(art)`: am Gründungsort, geöffnet für die Dauer, Gebühr + Einlage auf dem Privatkonto.
+  Ablauf: Gebühr (`company:found:fee`) → Umbuchung privat → Firma (`company:deposit:1`) → Werte setzen, Protokoll
+  → `time.advance(dauer)` → `company_founded`.
+- `deposit()` / `withdraw()`: Umbuchungen `company:deposit:<n>` / `company:withdraw:<n>`, keine Spielzeit.
+- `apply(deltas, quelle, begründung, referenz, schlüssel)` für `utilization`/`reputation` (0–100), Protokoll `co_000001…`.
+- Gespeichert: `{"founded": false}` oder Art, Gründungszeit, Werte, Zähler, Protokoll, `used_keys`.
+- UI (vorläufig): Karte „Merch-Label · Unternehmen“ im Büro mit „Gründen“ bzw. Kurzstatus.
+
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 6, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 7, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -139,6 +151,7 @@ Stand Phase 4 (Ticket 4.1: Konten) auf Basis von Phase 3 (abgeschlossen, auf dem
 - Migration 3 → 4: Ausrüstung leer (nichts gekauft).
 - Migration 4 → 5: Ereignis-Seed = `MIGRATED_SEED` (1).
 - Migration 5 → 6: `opening_balance_cents` → `opening_balances` {private, company: 0}, alle Buchungen `account = private`.
+- Migration 6 → 7: Unternehmen `{"founded": false}`.
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.
@@ -206,6 +219,7 @@ Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
 | `ChannelSystem` | Follower, Community-Stimmung, Ruf, Kanal-Protokoll |
 | `ContentSystem` | Prüfen, Berechnen und Produzieren von Content |
 | `EquipmentSystem` | Ausrüstungsstufen, Kauf, Qualitätsbonus |
+| `CompanySystem` | Unternehmen: Gründung, Auslastung, Ruf, Einlage/Entnahme |
 | `SaveSystem` | versionierter lokaler Spielstand |
 
 UI-Szenen lesen Zustand und rufen Systeme auf; sie ändern Werte nie direkt.
@@ -217,7 +231,7 @@ Systeme melden Änderungen über Signale (z. B. `time_advanced`, `day_changed`, 
 assets/   kenney/ (CC0-Grafiken)
 scenes/   app/, menus/, hud/, …
 scripts/  core/, systems/, models/, ui/
-data/     activities/, locations/, events/, appointments/, content/, equipment/
+data/     activities/, locations/, events/, appointments/, content/, equipment/, company/
 tests/
 ```
 

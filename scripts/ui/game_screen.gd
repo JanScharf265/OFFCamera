@@ -55,6 +55,8 @@ var _cards := {}
 var _content_cards := {}
 ## equipment_id -> {"button": Button, "reason": Label, "title": Label, "next": Label}
 var _equipment_cards := {}
+## company_type_id -> {"button": Button, "reason": Label, "info": Label}
+var _company_cards := {}
 var _activity_title: Label
 var _activity_list: VBoxContainer
 var _activities_location := ""
@@ -361,6 +363,59 @@ func _refresh_equipment_card(equipment_id: String) -> void:
 	card["reason"].visible = not reason.is_empty() and not next.is_empty()
 
 
+## Gründung eines Unternehmens (Phase 4); Übersicht und Konten folgen in Ticket 4.5.
+func _build_company_card(type_id: String) -> Control:
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	var card := UiStyle.card()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	card.add_child(box)
+	box.add_child(UiStyle.label("%s · Unternehmen" % definition.display_name))
+	if not definition.description.is_empty():
+		box.add_child(UiStyle.wrapping_label(definition.description, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+	var info := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
+	info.name = "CompanyInfo_%s" % type_id
+	box.add_child(info)
+	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
+	reason.visible = false
+	box.add_child(reason)
+	var button := _scroll_button("Gründen", "CompanyFoundButton_%s" % type_id)
+	button.pressed.connect(_on_company_found_pressed.bind(type_id))
+	box.add_child(button)
+	_company_cards[type_id] = {"button": button, "reason": reason, "info": info}
+	return card
+
+
+func _refresh_company_card(type_id: String) -> void:
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	var card: Dictionary = _company_cards[type_id]
+	var founded_here := _game.company.is_founded() and _game.company.get_type().id == type_id
+	if founded_here:
+		card["info"].text = "Gegründet · Firmenkonto %s · Auslastung %d · Ruf %d" % [
+				LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY)),
+				_game.company.utilization, _game.company.reputation]
+	else:
+		card["info"].text = "%s · Gebühr %s · Einlage %s aufs Firmenkonto" % [
+				TimeSystemScript.format_duration(definition.founding_minutes),
+				LedgerSystemScript.format_cents(definition.founding_fee_cents),
+				LedgerSystemScript.format_cents(definition.min_deposit_cents)]
+	var reason := _game.company.check_found(type_id)
+	card["button"].visible = not _game.company.is_founded()
+	card["button"].disabled = not reason.is_empty()
+	card["reason"].text = reason
+	card["reason"].visible = not reason.is_empty() and not _game.company.is_founded()
+
+
+func _on_company_found_pressed(type_id: String) -> void:
+	if _was_scroll():
+		return
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	if not _confirmed("company:" + type_id, _game.appointments.conflict_warning(definition.founding_minutes)):
+		return
+	var reason := _game.company.found(type_id)
+	_after_action(reason, "%s gegründet" % definition.display_name)
+
+
 ## true = ausführen. Bei einer Warnung erst beim zweiten Tipp auf dieselbe Aktion.
 func _confirmed(key: String, warning: String) -> bool:
 	if warning.is_empty() or _confirm_key == key:
@@ -504,10 +559,12 @@ func _refresh_activities() -> void:
 		_cards.clear()
 		_content_cards.clear()
 		_equipment_cards.clear()
+		_company_cards.clear()
 		var format_ids := _game.content.get_catalog().get_ids_at(current)
 		var ids := _game.activities.get_catalog().get_ids_at(current)
 		var equipment_ids := _game.equipment.get_catalog().get_ids_at(current)
-		if ids.is_empty() and format_ids.is_empty() and equipment_ids.is_empty():
+		var company_ids := _game.company.get_catalog().get_ids_at(current)
+		if ids.is_empty() and format_ids.is_empty() and equipment_ids.is_empty() and company_ids.is_empty():
 			_activity_list.add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 		for id in format_ids:
 			_activity_list.add_child(_build_content_card(id))
@@ -517,6 +574,8 @@ func _refresh_activities() -> void:
 			_activity_list.add_child(UiStyle.section_label("Ausrüstung"))
 		for id in equipment_ids:
 			_activity_list.add_child(_build_equipment_card(id))
+		for id in company_ids:
+			_activity_list.add_child(_build_company_card(id))
 
 	for activity_id in _cards:
 		var reason := _game.activities.check(activity_id)
@@ -537,6 +596,9 @@ func _refresh_activities() -> void:
 
 	for equipment_id in _equipment_cards:
 		_refresh_equipment_card(equipment_id)
+
+	for type_id in _company_cards:
+		_refresh_company_card(type_id)
 
 
 func _refresh_appointments() -> void:

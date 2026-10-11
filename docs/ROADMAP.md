@@ -113,7 +113,7 @@ Tagesabschluss beim Tageswechsel, zweiter Standort als Filiale in Marbella, Mana
 die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), noch keine Mitarbeitenden.
 
 - [x] Ticket 4.1: Konten „privat“/„Firma“ im LedgerSystem, Umbuchungen als zwei verknüpfte Buchungen, Spielstand Version 6 + Migration (211/211 Tests grün)
-- [ ] Ticket 4.2: Unternehmen gründen (CompanySystem, Unternehmens-Protokoll)
+- [x] Ticket 4.2: Unternehmen gründen (CompanySystem, Unternehmens-Protokoll, Einlage/Entnahme; Spielstand Version 7) (225/225 Tests grün)
 - [ ] Ticket 4.3: Tagesabschluss beim Tageswechsel
 - [ ] Ticket 4.4: Zweiter Standort und Management vor Ort
 - [ ] Ticket 4.5: Unternehmens-UI und iPhone-Abnahme

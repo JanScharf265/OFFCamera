@@ -287,6 +287,21 @@ func test_channel_panel_and_history_after_livestream() -> void:
 	app.free()
 
 
+func test_found_company_in_office() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_travel(app, "office")
+	assert_eq((_find(app, "CompanyInfo_merch_label") as Label).text, "1 h · Gebühr 150,00 € · Einlage 200,00 € aufs Firmenkonto")
+	_press(app, "CompanyFoundButton_merch_label")
+	assert_eq((_find(app, "ClockLabel") as Label).text, "09:20")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 150,00 €")
+	assert_eq((_find(app, "CompanyInfo_merch_label") as Label).text, "Gegründet · Firmenkonto 200,00 € · Auslastung 50 · Ruf 50")
+	assert_eq((_find(app, "CompanyFoundButton_merch_label") as Button).visible, false)
+	app.free()
+
+
 func _travel(app: Node, location_id: String) -> void:
 	_press(app, "MapPin_%s" % location_id)
 	_press(app, "TravelButton")

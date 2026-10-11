@@ -1,8 +1,9 @@
 class_name ChannelChange
 extends RefCounted
 
-## Ein Eintrag im Kanal-Protokoll: warum sich Follower, Community-Stimmung oder
-## Ruf geändert haben. Wird nur vom ChannelSystem erzeugt und danach nicht mehr verändert.
+## Ein Eintrag im Kanal-Protokoll (warum sich Follower, Community-Stimmung oder Ruf geändert
+## haben) – dasselbe Modell nutzt das Unternehmens-Protokoll (Auslastung, Ruf des Unternehmens).
+## Wird nur vom ChannelSystem bzw. CompanySystem erzeugt und danach nicht mehr verändert.
 ##
 ## requested = gewünschte Änderung (z. B. vom Content-Format berechnet),
 ## applied   = tatsächlich angewendete Änderung nach Wachstumsbremse und Grenzen.
