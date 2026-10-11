@@ -2,7 +2,7 @@
 
 Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und committet sind.
 
-## Phase 0 – Projektgrundlage und iPhone-Export ← aktuell
+## Phase 0 – Projektgrundlage und iPhone-Export ✅ (11.10.2026)
 - [x] Godot-Projekt, `.gitignore`, README, Roadmap, Architektur-Notizen
 - [x] Minimaler Startbildschirm
 - [x] Projekt öffnet in Godot ohne Fehler, Startszene läuft (Godot 4.7.2, Mac)
@@ -10,9 +10,10 @@ Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und 
 - [x] iOS-Export-Preset
 - [x] Export nach Xcode, Build erfolgreich
 - [x] App startet auf dem iPhone (iOS 27.0)
-- [ ] Commit markiert funktionierenden Ausgangsstand, Versionen im README eingetragen
+- [x] Commit markiert funktionierenden Ausgangsstand (`bac525c`), Versionen im README eingetragen
+- [x] App startet auch ohne Xcode vom Homescreen
 
-## Phase 1 – Spielbares Grundgerüst
+## Phase 1 – Spielbares Grundgerüst ← aktuell
 Hauptmenü (Neues Spiel / Fortsetzen / Einstellungen), HUD (Tag, Uhrzeit, Geld, Energie, Stimmung),
 2–4 Aktivitäten, zentrales TimeSystem, zentrales Ledger, ein Ereignis, Speichern/Laden, Fehler- und Leerzustände.
 

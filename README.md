@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0 – Projektgrundlage und iPhone-Export** (siehe [`docs/ROADMAP.md`](docs/ROADMAP.md))
+**Phase 0 abgeschlossen ✅ – als Nächstes Phase 1: Spielbares Grundgerüst** (siehe [`docs/ROADMAP.md`](docs/ROADMAP.md))
 
 | Was | Status |
 | --- | --- |
