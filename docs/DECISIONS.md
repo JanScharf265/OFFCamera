@@ -47,6 +47,15 @@ Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslauf
 führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
 Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
 
+## 019 – Zweiter Standort und Management
+Der zweite Standort ist ein neuer Ort „Ladenlokal“ an der Promenade (Entscheidung 2a). Er ist von Anfang an auf
+der Karte; die Filiale „Merch-Laden“ wird dort eröffnet (Kosten vom Firmenkonto, Spielzeit) und bringt danach
+eigenen Grundumsatz und eigene Fixkosten in den Tagesabschluss – dieselbe Formel, keine Sonderlogik.
+Pflege vor Ort sind normale Aktivitäten mit `requires` („company“/„branch“) und `company`-Effekten, damit neue
+Management-Aktionen nur Daten brauchen. Die Wirkung steht mit Begründung (Name der Aktivität) im
+Unternehmens-Protokoll. „Merch im Stream zeigen“ ist die Verbindung Kanal → Unternehmen (Entscheidung 7).
+Gebäude der Filiale: Kenney `buildingTiles_020` (grüne Markise, zur Unterscheidung vom Café mit roter Markise).
+
 ## 018 – Tagesabschluss
 Abgerechnet wird der Vortag beim Tageswechsel (`day_changed`) – kein Zeitfortschritt im Hintergrund, der Gründungstag
 zählt als erster (Teil-)Tag. Umsatz = (Grundumsatz + Follower × Anteil / 1000) × Auslastung % × (100 + (Ruf − 50) / 2) %,

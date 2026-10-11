@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 4 (Tickets 4.1–4.3: Konten, Unternehmen gründen, Tagesabschluss) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand Phase 4 (Tickets 4.1–4.4: Konten, Unternehmen gründen, Tagesabschluss, Filiale und Management) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -56,6 +56,8 @@ Stand Phase 4 (Tickets 4.1–4.3: Konten, Unternehmen gründen, Tagesabschluss) 
   (nur Schlüssel aus `PlayerStats.KEYS`, ganze Zahlen).
 - `ActivityCatalog` prüft alles beim Laden, sammelt verständliche Fehler und übernimmt bei
   einem Fehler gar nichts.
+- Optional (Phase 4): `requires` (`company`/`branch`) und `company` {utilization, reputation} – Effekte aufs
+  Unternehmen werden nach den Spielerwerten mit Begründung (Name der Aktivität) angewendet.
 - `ActivitySystem.check(id)` / `start(id)` geben `""` (ok) oder einen Anzeigetext zurück.
   `start` prüft erst alles (kein laufender Zeitfortschritt, Spieler ist am Ort, Ort für die ganze Dauer
   geöffnet, Energie reicht, Geld reicht) und führt
@@ -135,6 +137,9 @@ Stand Phase 4 (Tickets 4.1–4.3: Konten, Unternehmen gründen, Tagesabschluss) 
 - `check_found(art)` / `found(art)`: am Gründungsort, geöffnet für die Dauer, Gebühr + Einlage auf dem Privatkonto.
   Ablauf: Gebühr (`company:found:fee`) → Umbuchung privat → Firma (`company:deposit:1`) → Werte setzen, Protokoll
   → `time.advance(dauer)` → `company_founded`.
+- Filiale (optional je Art: `branch` {location, display_name, opening_minutes, opening_fee_cents,
+  base_revenue_per_day_cents, fixed_costs_per_day_cents}): `check_open_branch()` / `open_branch()` am Filial-Ort,
+  Kosten vom Firmenkonto (`company:branch:open`), Spielzeit. Danach Filial-Umsatz/-Kosten im Tagesabschluss.
 - `deposit()` / `withdraw()`: Umbuchungen `company:deposit:<n>` / `company:withdraw:<n>`, keine Spielzeit.
 - `apply(deltas, quelle, begründung, referenz, schlüssel)` für `utilization`/`reputation` (0–100), Protokoll `co_000001…`.
 - Tagesabschluss: `day_changed(tag)` rechnet Tag − 1 ab (wenn gegründet und noch nicht abgerechnet).
@@ -143,11 +148,11 @@ Stand Phase 4 (Tickets 4.1–4.3: Konten, Unternehmen gründen, Tagesabschluss) 
   (`:unpaid`); danach Auslastung − Verfall (`:decay`). Eintrag in `get_settlements()` (letzte 60) mit Erklärtext;
   `take_settlement_notices()` liefert neue Abschlüsse einmal für die Rückmeldung (wie verpasste Termine).
 - Gespeichert: `{"founded": false}` oder Art, Gründungszeit, Werte, Zähler, Protokoll, `used_keys`,
-  `last_settled_day`, `settlements`.
+  `last_settled_day`, `settlements`, `branch_open`.
 - UI (vorläufig): Karte „Merch-Label · Unternehmen“ im Büro mit „Gründen“ bzw. Kurzstatus.
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 8, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 9, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -159,6 +164,7 @@ Stand Phase 4 (Tickets 4.1–4.3: Konten, Unternehmen gründen, Tagesabschluss) 
 - Migration 5 → 6: `opening_balance_cents` → `opening_balances` {private, company: 0}, alle Buchungen `account = private`.
 - Migration 6 → 7: Unternehmen `{"founded": false}`.
 - Migration 7 → 8: gegründetes Unternehmen: `last_settled_day` = gespeicherter Tag − 1, `settlements` leer.
+- Migration 8 → 9: gegründetes Unternehmen: `branch_open = false`.
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.

@@ -28,6 +28,9 @@ extends RefCounted
 ##      um unpaid_reputation_penalty ("company:day:<t>:unpaid")
 ##   3. Auslastung sinkt um utilization_decay_per_day ("company:day:<t>:decay") – Pflege vor Ort hält dagegen
 ## Jeder Tag wird höchstens einmal abgerechnet (last_settled_day + Schutzschlüssel), auch nach dem Laden.
+##
+## Filiale (Ticket 4.4): open_branch() am Filial-Ort, Kosten vom Firmenkonto ("company:branch:open"),
+## Spielzeit. Danach zählen Filial-Grundumsatz zur Grundlage und Filial-Fixkosten zu den Fixkosten.
 
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
@@ -41,6 +44,7 @@ const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 signal company_founded(type_id: String)
 signal company_changed(change: ChangeScript)
 signal day_settled(day: int)
+signal branch_opened
 
 const KEYS := ["utilization", "reputation"]
 const LABELS := {"utilization": "Auslastung", "reputation": "Ruf des Unternehmens"}
@@ -66,6 +70,7 @@ var _next_number := 1
 var _used_keys := {}
 ## Letzter abgerechneter Tag (Gründungstag − 1 direkt nach der Gründung).
 var _last_settled_day := 0
+var _branch_open := false
 ## Tagesabschlüsse, älteste zuerst: {day, revenue_cents, costs_cents, paid, text}
 var _settlements: Array[Dictionary] = []
 ## Seit dem letzten take_settlement_notices() neu abgerechnete Tage (nicht gespeichert).
@@ -98,6 +103,55 @@ func get_type() -> CompanyTypeScript:
 ## Spielzeit der Gründung (Minuten) oder -1.
 func get_founded_minutes() -> int:
 	return _founded_minutes
+
+
+func is_branch_open() -> bool:
+	return _branch_open
+
+
+## "" wenn die Filiale jetzt eröffnet werden kann, sonst ein Grund für die Anzeige.
+func check_open_branch() -> String:
+	var definition := get_type()
+	if definition == null:
+		return "Erst ein Unternehmen gründen (im Büro)."
+	if not definition.has_branch:
+		return "Für dieses Unternehmen gibt es keine Filiale."
+	if _branch_open:
+		return "Die Filiale ist bereits eröffnet."
+	if _time.is_advancing():
+		return "Gerade läuft bereits ein Zeitfortschritt."
+	if definition.branch_location != _locations.get_current():
+		var location := _locations.get_catalog().get_definition(definition.branch_location)
+		return "Nur vor Ort möglich: %s." % (location.display_name if location != null else definition.branch_location)
+	var closed_reason := _locations.check_open_during(definition.branch_location, _time.get_minutes(),
+			definition.branch_opening_minutes)
+	if not closed_reason.is_empty():
+		return closed_reason
+	if not _ledger.can_afford(definition.branch_opening_fee_cents, LedgerSystemScript.COMPANY):
+		return "Nicht genug Geld auf dem Firmenkonto (kostet %s)." % LedgerSystemScript.format_cents(
+				definition.branch_opening_fee_cents)
+	return ""
+
+
+## Eröffnet die Filiale: Kosten vom Firmenkonto → Protokoll → Zeitfortschritt → Signal. "" = eröffnet.
+func open_branch() -> String:
+	var reason := check_open_branch()
+	if not reason.is_empty():
+		return reason
+	var definition := get_type()
+	var entry := _ledger.post(-definition.branch_opening_fee_cents, "company",
+			"Eröffnung: %s" % definition.branch_display_name, SOURCE, definition.branch_location,
+			"company:branch:open", false, LedgerSystemScript.COMPANY)
+	if entry == null:
+		push_error("CompanySystem: Eröffnung der Filiale abgelehnt (Grund %d)." % _ledger.last_rejection)
+		return "Die Buchung ist fehlgeschlagen."
+	_branch_open = true
+	_record({}, {}, SOURCE, "Filiale eröffnet: %s (+%s Grundumsatz, %s Fixkosten pro Tag)" % [
+			definition.branch_display_name, LedgerSystemScript.format_cents(definition.branch_base_revenue_per_day_cents),
+			LedgerSystemScript.format_cents(definition.branch_fixed_costs_per_day_cents)], definition.branch_location)
+	_time.advance(definition.branch_opening_minutes)
+	branch_opened.emit()
+	return ""
 
 
 func get_value(key: String) -> int:
@@ -251,16 +305,19 @@ func preview_day() -> Dictionary:
 	if definition == null:
 		return {}
 	var reach := _channel.followers * definition.revenue_per_1000_followers_cents / 1000
+	var branch_base := definition.branch_base_revenue_per_day_cents if _branch_open else 0
+	var branch_costs := definition.branch_fixed_costs_per_day_cents if _branch_open else 0
 	var reputation_percent := (reputation - 50) / 2
-	var revenue := (definition.base_revenue_per_day_cents + reach) * utilization / 100 \
+	var revenue := (definition.base_revenue_per_day_cents + branch_base + reach) * utilization / 100 \
 			* (100 + reputation_percent) / 100
 	return {
 		"base_cents": definition.base_revenue_per_day_cents,
+		"branch_cents": branch_base,
 		"reach_cents": reach,
 		"utilization": utilization,
 		"reputation_percent": reputation_percent,
 		"revenue_cents": revenue,
-		"costs_cents": definition.fixed_costs_per_day_cents,
+		"costs_cents": definition.fixed_costs_per_day_cents + branch_costs,
 	}
 
 
@@ -302,6 +359,7 @@ func to_dict() -> Dictionary:
 		"used_keys": _used_keys.duplicate(),
 		"last_settled_day": _last_settled_day,
 		"settlements": _settlements.duplicate(true),
+		"branch_open": _branch_open,
 	}
 
 
@@ -329,6 +387,9 @@ func restore(data: Dictionary) -> String:
 	var withdrawals := reader.int_field(data, "withdrawals", where, true)
 	var next_number := reader.int_field(data, "next_number", where, true)
 	var last_settled_day := reader.int_field(data, "last_settled_day", where, true)
+	var branch_open: Variant = data.get("branch_open")
+	if typeof(branch_open) != TYPE_BOOL:
+		reader.errors.append("Unternehmen: 'branch_open' fehlt.")
 	var settlements: Array[Dictionary] = []
 	var raw_settlements: Variant = data.get("settlements")
 	if typeof(raw_settlements) != TYPE_ARRAY:
@@ -396,6 +457,7 @@ func restore(data: Dictionary) -> String:
 	_used_keys = used_keys
 	_last_settled_day = last_settled_day
 	_settlements = settlements
+	_branch_open = branch_open
 	_new_settlements.clear()
 	return ""
 
@@ -411,6 +473,7 @@ func _reset() -> void:
 	_next_number = 1
 	_used_keys = {}
 	_last_settled_day = 0
+	_branch_open = false
 	_settlements = []
 	_new_settlements.clear()
 
@@ -438,8 +501,11 @@ func _settle(day: int) -> void:
 		if paid:
 			_ledger.post(-costs, "fixed_costs", "Fixkosten Tag %d" % day, SOURCE, reference, prefix + ":costs",
 					false, LedgerSystemScript.COMPANY)
-	var text := "Tag %d: Umsatz %s (%s + %s Reichweite · Auslastung %d %% · Ruf %s %%)" % [day,
-			_signed_money(revenue), LedgerSystemScript.format_cents(outcome["base_cents"]),
+	var branch_text := ""
+	if outcome["branch_cents"] > 0:
+		branch_text = " + %s Filiale" % LedgerSystemScript.format_cents(outcome["branch_cents"])
+	var text := "Tag %d: Umsatz %s (%s%s + %s Reichweite · Auslastung %d %% · Ruf %s %%)" % [day,
+			_signed_money(revenue), LedgerSystemScript.format_cents(outcome["base_cents"]), branch_text,
 			LedgerSystemScript.format_cents(outcome["reach_cents"]), outcome["utilization"],
 			_signed_percent(outcome["reputation_percent"])]
 	if paid:

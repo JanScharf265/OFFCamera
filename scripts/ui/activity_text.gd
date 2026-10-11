@@ -8,6 +8,7 @@ const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const ActivityDefinitionScript := preload("res://scripts/models/activity_definition.gd")
 
 const CHANNEL_SHORT_LABELS := {"community": "Community", "reputation": "Ruf"}
+const COMPANY_SHORT_LABELS := {"utilization": "Auslastung", "reputation": "Ruf (Firma)"}
 
 
 ## Betrag mit Vorzeichen, z. B. "+25,00 €" / "-15,00 €".
@@ -25,8 +26,21 @@ static func km(tenths: int) -> String:
 ## z. B. "2 h · Energie -20 · Stimmung +5 · +25,00 €"
 static func summary(definition: ActivityDefinitionScript) -> String:
 	var parts := PackedStringArray([TimeSystemScript.format_duration(definition.duration_minutes)])
-	parts.append_array(effect_parts(definition.effects, definition.money_cents))
+	parts.append_array(effect_parts(definition.effects, 0))
+	parts.append_array(company_parts(definition.company_effects))
+	if definition.money_cents != 0:
+		parts.append(signed_money(definition.money_cents))
 	return " · ".join(parts)
+
+
+## Änderungen am Unternehmen, z. B. "Auslastung +6 · Ruf (Firma) +2".
+static func company_parts(deltas: Dictionary) -> PackedStringArray:
+	var parts := PackedStringArray()
+	for key in ["utilization", "reputation"]:
+		var change: int = deltas.get(key, 0)
+		if change != 0:
+			parts.append("%s %+d" % [COMPANY_SHORT_LABELS[key], change])
+	return parts
 
 
 ## Folgen einer Ereignis-Option, z. B. "Stimmung +5 · +30,00 €" oder "Keine Folgen".

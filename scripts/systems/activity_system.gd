@@ -9,14 +9,17 @@ extends RefCounted
 ## in fester Reihenfolge ausgeführt:
 ##   1. Buchung (Zeitstempel = Beginn der Aktivität)
 ##   2. Effekte auf Spielerwerte
-##   3. Zeitfortschritt um die Dauer
-##   4. Signal activity_completed
+##   3. Effekte aufs Unternehmen (Phase 4, mit Begründung im Unternehmens-Protokoll)
+##   4. Zeitfortschritt um die Dauer
+##   5. Signal activity_completed
+## Voraussetzung "company"/"branch": Unternehmen gegründet bzw. Filiale eröffnet.
 
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 const LocationSystemScript := preload("res://scripts/systems/location_system.gd")
+const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
 
 signal activity_completed(activity_id: String)
 
@@ -25,14 +28,16 @@ var _ledger: LedgerSystemScript
 var _stats: PlayerStatsScript
 var _catalog: ActivityCatalogScript
 var _locations: LocationSystemScript
+var _company: CompanySystemScript
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
-		locations: LocationSystemScript, catalog: ActivityCatalogScript) -> void:
+		locations: LocationSystemScript, company: CompanySystemScript, catalog: ActivityCatalogScript) -> void:
 	_time = time
 	_ledger = ledger
 	_stats = stats
 	_locations = locations
+	_company = company
 	_catalog = catalog
 
 
@@ -50,6 +55,10 @@ func check(activity_id: String) -> String:
 	if definition.location != _locations.get_current():
 		var location := _locations.get_catalog().get_definition(definition.location)
 		return "Nur vor Ort möglich: %s." % (location.display_name if location != null else definition.location)
+	if definition.requires == "company" and not _company.is_founded():
+		return "Erst ein Unternehmen gründen (im Büro)."
+	if definition.requires == "branch" and not _company.is_branch_open():
+		return "Erst die Filiale eröffnen."
 	var closed_reason := _locations.check_open_during(definition.location, _time.get_minutes(),
 			definition.duration_minutes)
 	if not closed_reason.is_empty():
@@ -76,6 +85,8 @@ func start(activity_id: String) -> String:
 			push_error("ActivitySystem: Buchung für '%s' trotz Prüfung abgelehnt." % activity_id)
 			return "Die Buchung ist fehlgeschlagen."
 	_stats.apply(definition.effects)
+	if not definition.company_effects.is_empty():
+		_company.apply(definition.company_effects, "activity", definition.display_name, definition.id)
 	_time.advance(definition.duration_minutes)
 	activity_completed.emit(definition.id)
 	return ""

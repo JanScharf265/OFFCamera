@@ -16,6 +16,10 @@ var money_cents: int
 var category: String
 ## Änderungen an PlayerStats, z. B. {"energy": -20, "mood": 5}.
 var effects: Dictionary
+## Voraussetzung (Phase 4): "" (keine), "company" (Unternehmen gegründet), "branch" (Filiale eröffnet).
+var requires: String
+## Änderungen am Unternehmen (Phase 4), z. B. {"utilization": 6, "reputation": 2}.
+var company_effects: Dictionary
 
 
 func get_effect(key: String) -> int:

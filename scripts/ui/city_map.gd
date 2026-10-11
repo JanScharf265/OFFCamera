@@ -66,6 +66,7 @@ const BUILDINGS := {
 	"cafe_harbor": {"base": "buildingTiles_004", "floors": []},
 	"gym": {"base": "buildingTiles_026", "floors": ["buildingTiles_052"]},
 	"office": {"base": "buildingTiles_001", "floors": ["buildingTiles_016", "buildingTiles_016", "buildingTiles_016"]},
+	"label_store": {"base": "buildingTiles_020", "floors": []},
 }
 const DEFAULT_BUILDING := {"base": "buildingTiles_019", "floors": ["buildingTiles_016"]}
 const FILLER_BUILDINGS: Array[String] = ["buildingTiles_019", "buildingTiles_022", "buildingTiles_030"]

@@ -51,12 +51,12 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	ledger = LedgerSystemScript.new(time, START_BALANCE_CENTS)
 	stats = PlayerStatsScript.new(START_ENERGY, START_MOOD)
 	locations = LocationSystemScript.new(time, data.locations, GameDataScript.START_LOCATION)
-	activities = ActivitySystemScript.new(time, ledger, stats, locations, data.activities)
 	appointments = AppointmentSystemScript.new(time, ledger, stats, locations, data.appointments)
 	channel = ChannelSystemScript.new(time, START_FOLLOWERS, START_COMMUNITY, START_REPUTATION)
 	events = EventSystemScript.new(time, ledger, stats, channel, data.events, p_seed if p_seed >= 0 else new_seed())
 	equipment = EquipmentSystemScript.new(time, ledger, locations, data.equipment)
 	company = CompanySystemScript.new(time, ledger, locations, channel, data.company_types)
+	activities = ActivitySystemScript.new(time, ledger, stats, locations, company, data.activities)
 	content = ContentSystemScript.new(time, ledger, stats, locations, channel, equipment, data.formats)
 
 

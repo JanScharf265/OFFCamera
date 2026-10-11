@@ -61,9 +61,11 @@ func check_references() -> PackedStringArray:
 			if not formats.has(format_id):
 				problems.append("Ausrüstung '%s': unbekanntes Format '%s'." % [id, format_id])
 	for id in company_types.get_ids():
-		var location := company_types.get_definition(id).found_location
-		if not locations.has(location):
-			problems.append("Unternehmensart '%s': unbekannter Ort '%s'." % [id, location])
+		var company_type := company_types.get_definition(id)
+		if not locations.has(company_type.found_location):
+			problems.append("Unternehmensart '%s': unbekannter Ort '%s'." % [id, company_type.found_location])
+		if company_type.has_branch and not locations.has(company_type.branch_location):
+			problems.append("Unternehmensart '%s': unbekannter Ort der Filiale '%s'." % [id, company_type.branch_location])
 	for appointment in appointments.get_all():
 		if not locations.has(appointment.location):
 			problems.append("Termin '%s': unbekannter Ort '%s'." % [appointment.id, appointment.location])

@@ -13,6 +13,14 @@
 		"base_revenue_per_day_cents": 3000,
 		"revenue_per_1000_followers_cents": 1500,
 		"unpaid_reputation_penalty": 5,
+		"branch": {
+			"location": "label_store",
+			"display_name": "Merch-Laden",
+			"opening_minutes": 120,
+			"opening_fee_cents": 30000,
+			"base_revenue_per_day_cents": 4000,
+			"fixed_costs_per_day_cents": 2500
+		},
 		"utilization_decay_per_day": 3
 	}
 ]

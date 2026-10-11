@@ -32,5 +32,12 @@
 		"description": "Ein Schreibtisch in einem Coworking-Space.",
 		"map_position": [0.8, 0.6],
 		"opening_hours": { "open": 8, "close": 18 }
+	},
+	{
+		"id": "label_store",
+		"display_name": "Ladenlokal",
+		"description": "Ein freies Ladenlokal an der Promenade – perfekt für einen eigenen Merch-Laden.",
+		"map_position": [0.9, 0.9],
+		"opening_hours": { "open": 10, "close": 20 }
 	}
 ]

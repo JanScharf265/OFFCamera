@@ -57,6 +57,8 @@ var _content_cards := {}
 var _equipment_cards := {}
 ## company_type_id -> {"button": Button, "reason": Label, "info": Label}
 var _company_cards := {}
+## company_type_id -> {"button": Button, "reason": Label, "info": Label} (Filiale)
+var _branch_cards := {}
 var _activity_title: Label
 var _activity_list: VBoxContainer
 var _activities_location := ""
@@ -406,6 +408,59 @@ func _refresh_company_card(type_id: String) -> void:
 	card["reason"].visible = not reason.is_empty() and not _game.company.is_founded()
 
 
+## Filiale am zweiten Standort (Ticket 4.4).
+func _build_branch_card(type_id: String) -> Control:
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	var card := UiStyle.card()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	card.add_child(box)
+	box.add_child(UiStyle.label("%s · Filiale" % definition.branch_display_name))
+	var info := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
+	info.name = "BranchInfo_%s" % type_id
+	box.add_child(info)
+	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
+	reason.visible = false
+	box.add_child(reason)
+	var button := _scroll_button("Filiale eröffnen", "BranchOpenButton_%s" % type_id)
+	button.pressed.connect(_on_branch_open_pressed.bind(type_id))
+	box.add_child(button)
+	_branch_cards[type_id] = {"button": button, "reason": reason, "info": info}
+	return card
+
+
+func _refresh_branch_card(type_id: String) -> void:
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	var card: Dictionary = _branch_cards[type_id]
+	var ours := _game.company.is_founded() and _game.company.get_type().id == type_id
+	var is_open := ours and _game.company.is_branch_open()
+	if is_open:
+		card["info"].text = "Geöffnet · +%s Grundumsatz und %s Fixkosten pro Tag" % [
+				LedgerSystemScript.format_cents(definition.branch_base_revenue_per_day_cents),
+				LedgerSystemScript.format_cents(definition.branch_fixed_costs_per_day_cents)]
+	else:
+		card["info"].text = "%s · %s vom Firmenkonto · danach +%s Grundumsatz, %s Fixkosten pro Tag" % [
+				TimeSystemScript.format_duration(definition.branch_opening_minutes),
+				LedgerSystemScript.format_cents(definition.branch_opening_fee_cents),
+				LedgerSystemScript.format_cents(definition.branch_base_revenue_per_day_cents),
+				LedgerSystemScript.format_cents(definition.branch_fixed_costs_per_day_cents)]
+	var reason := _game.company.check_open_branch()
+	card["button"].visible = not is_open
+	card["button"].disabled = not reason.is_empty()
+	card["reason"].text = reason
+	card["reason"].visible = not reason.is_empty() and not is_open
+
+
+func _on_branch_open_pressed(type_id: String) -> void:
+	if _was_scroll():
+		return
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	if not _confirmed("branch:" + type_id, _game.appointments.conflict_warning(definition.branch_opening_minutes)):
+		return
+	var reason := _game.company.open_branch()
+	_after_action(reason, "%s eröffnet" % definition.branch_display_name)
+
+
 func _on_company_found_pressed(type_id: String) -> void:
 	if _was_scroll():
 		return
@@ -562,11 +617,14 @@ func _refresh_activities() -> void:
 		_content_cards.clear()
 		_equipment_cards.clear()
 		_company_cards.clear()
+		_branch_cards.clear()
 		var format_ids := _game.content.get_catalog().get_ids_at(current)
 		var ids := _game.activities.get_catalog().get_ids_at(current)
 		var equipment_ids := _game.equipment.get_catalog().get_ids_at(current)
 		var company_ids := _game.company.get_catalog().get_ids_at(current)
-		if ids.is_empty() and format_ids.is_empty() and equipment_ids.is_empty() and company_ids.is_empty():
+		var branch_ids := _game.company.get_catalog().get_ids_with_branch_at(current)
+		if ids.is_empty() and format_ids.is_empty() and equipment_ids.is_empty() and company_ids.is_empty() \
+				and branch_ids.is_empty():
 			_activity_list.add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 		for id in format_ids:
 			_activity_list.add_child(_build_content_card(id))
@@ -578,6 +636,8 @@ func _refresh_activities() -> void:
 			_activity_list.add_child(_build_equipment_card(id))
 		for id in company_ids:
 			_activity_list.add_child(_build_company_card(id))
+		for id in branch_ids:
+			_activity_list.add_child(_build_branch_card(id))
 
 	for activity_id in _cards:
 		var reason := _game.activities.check(activity_id)
@@ -601,6 +661,9 @@ func _refresh_activities() -> void:
 
 	for type_id in _company_cards:
 		_refresh_company_card(type_id)
+
+	for type_id in _branch_cards:
+		_refresh_branch_card(type_id)
 
 
 func _refresh_appointments() -> void:

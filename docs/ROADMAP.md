@@ -115,7 +115,7 @@ die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), n
 - [x] Ticket 4.1: Konten „privat“/„Firma“ im LedgerSystem, Umbuchungen als zwei verknüpfte Buchungen, Spielstand Version 6 + Migration (211/211 Tests grün)
 - [x] Ticket 4.2: Unternehmen gründen (CompanySystem, Unternehmens-Protokoll, Einlage/Entnahme; Spielstand Version 7) (225/225 Tests grün)
 - [x] Ticket 4.3: Tagesabschluss beim Tageswechsel (Spielstand Version 8) (235/235 Tests grün)
-- [ ] Ticket 4.4: Zweiter Standort und Management vor Ort
+- [x] Ticket 4.4: Zweiter Standort (Ladenlokal, Filiale „Merch-Laden“) und Management-Aktivitäten; Spielstand Version 9 (243/243 Tests grün)
 - [ ] Ticket 4.5: Unternehmens-UI und iPhone-Abnahme
 
 ## Spätere Phasen

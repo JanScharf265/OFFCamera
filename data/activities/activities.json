@@ -50,5 +50,45 @@
 		"location": "office",
 		"duration_minutes": 60,
 		"effects": { "energy": -5, "mood": 6 }
+	},
+	{
+		"id": "order_stock",
+		"display_name": "Ware nachbestellen",
+		"description": "Bestände prüfen, Nachschub für Shirts und Caps ordern.",
+		"location": "office",
+		"duration_minutes": 60,
+		"requires": "company",
+		"effects": { "energy": -5 },
+		"company": { "utilization": 6 }
+	},
+	{
+		"id": "plan_campaign",
+		"display_name": "Kampagne planen",
+		"description": "Neue Motive, Fotos und ein Rabatt fürs Wochenende.",
+		"location": "office",
+		"duration_minutes": 90,
+		"requires": "company",
+		"effects": { "energy": -10, "mood": 2 },
+		"company": { "utilization": 2, "reputation": 3 }
+	},
+	{
+		"id": "merch_shoutout",
+		"display_name": "Merch im Stream zeigen",
+		"description": "Eine halbe Stunde die neue Kollektion in die Kamera halten.",
+		"location": "studio",
+		"duration_minutes": 30,
+		"requires": "company",
+		"effects": { "energy": -5 },
+		"company": { "utilization": 5 }
+	},
+	{
+		"id": "run_store",
+		"display_name": "Laden führen",
+		"description": "Vier Stunden hinter der Kasse, beraten, Regale auffüllen.",
+		"location": "label_store",
+		"duration_minutes": 240,
+		"requires": "branch",
+		"effects": { "energy": -20, "mood": 3 },
+		"company": { "utilization": 12, "reputation": 2 }
 	}
 ]

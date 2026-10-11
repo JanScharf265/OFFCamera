@@ -8,6 +8,9 @@ const ActivityDefinitionScript := preload("res://scripts/models/activity_definit
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
 const DEFAULT_PATH := "res://data/activities/activities.json"
+const REQUIREMENTS := ["", "company", "branch"]
+## Schlüssel wie CompanySystem.KEYS (hier wiederholt, damit der Katalog kein System lädt).
+const COMPANY_KEYS := ["utilization", "reputation"]
 
 var errors: PackedStringArray = []
 
@@ -99,6 +102,21 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> ActivityDef
 	definition.duration_minutes = reader.int_field(entry, "duration_minutes", where, true)
 	definition.money_cents = reader.int_field(entry, "money_cents", where, false)
 	definition.effects = reader.effects_field(entry, where)
+	definition.requires = reader.string_field(entry, "requires", where, false)
+	if definition.requires not in REQUIREMENTS:
+		reader.errors.append("%s: 'requires' muss \"company\" oder \"branch\" sein." % where)
+	definition.company_effects = {}
+	var company: Variant = entry.get("company", {})
+	if typeof(company) != TYPE_DICTIONARY:
+		reader.errors.append("%s: 'company' muss ein Objekt sein." % where)
+	else:
+		for key in company:
+			if key not in COMPANY_KEYS or not DataReaderScript.is_whole_number(company[key]):
+				reader.errors.append("%s: 'company' enthält ungültigen Wert '%s'." % [where, key])
+			elif int(company[key]) != 0:
+				definition.company_effects[key] = int(company[key])
+	if not definition.company_effects.is_empty() and definition.requires.is_empty():
+		reader.errors.append("%s: 'company'-Effekte brauchen 'requires'." % where)
 
 	if definition.duration_minutes <= 0 and DataReaderScript.is_whole_number(entry.get("duration_minutes")):
 		reader.errors.append("%s: 'duration_minutes' muss größer als 0 sein." % where)

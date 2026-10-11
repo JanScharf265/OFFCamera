@@ -7,6 +7,7 @@ const GameStateScript := preload("res://scripts/core/game_state.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const CompanyTypeCatalogScript := preload("res://scripts/systems/company_type_catalog.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
+const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.gd")
 
 const PATH := "user://test_company_save.json"
 
@@ -286,6 +287,7 @@ func test_version_7_founded_company_settles_from_current_day() -> void:
 	var saved := game.to_dict()
 	saved["company"].erase("last_settled_day")
 	saved["company"].erase("settlements")
+	saved["company"].erase("branch_open")
 	SaveSystemScript.delete_save(PATH)
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify({"version": 7, "game": saved}))
@@ -298,4 +300,122 @@ func test_version_7_founded_company_settles_from_current_day() -> void:
 	_to_next_morning(loaded)
 	assert_eq(loaded.company.get_settlements()[0]["day"], 2)
 	assert_eq(loaded.ledger.get_entries_by_category("sales").size(), 2)  # Tag 1 (vor Migration) + Tag 2
+	SaveSystemScript.delete_save(PATH)
+
+
+# --- Zweiter Standort und Management (Ticket 4.4) ---------------------------------------
+
+## Gegründet, Firmenkonto mit 500 € aufgefüllt, im Ladenlokal um 10:00.
+func _founded_at_store() -> GameStateScript:
+	var game := _founded()  # 09:20, Firmenkonto 200 €
+	game.ledger.post(50000, "test", "Startkapital für Test", "test")
+	game.company.deposit(30000)
+	assert_eq(game.locations.travel("label_store"), "", "Fahrt zum Ladenlokal")
+	game.time.advance(TimeSystemScript.at(1, 10) - game.time.get_minutes())
+	return game
+
+
+func test_branch_opens_with_company_money_and_time() -> void:
+	var game := _founded_at_store()
+	var company_before := game.ledger.get_balance("company")
+	assert_eq(game.company.open_branch(), "")
+	assert_eq(game.company.is_branch_open(), true)
+	assert_eq(game.ledger.get_balance("company"), company_before - 30000)
+	assert_eq(game.time.format_clock(), "12:00")
+	assert_eq(game.company.open_branch(), "Die Filiale ist bereits eröffnet.")
+	assert_eq(game.company.get_history()[-1].reason,
+			"Filiale eröffnet: Merch-Laden (+40,00 € Grundumsatz, 25,00 € Fixkosten pro Tag)")
+
+
+func test_branch_needs_company_location_hours_and_money() -> void:
+	var game := Helpers.new_game()
+	assert_eq(game.company.open_branch(), "Erst ein Unternehmen gründen (im Büro).")
+	game = _founded()  # Firmenkonto 200 € < 300 €
+	assert_eq(game.company.open_branch(), "Nur vor Ort möglich: Ladenlokal.")
+	game.locations.travel("label_store")
+	game.time.advance(TimeSystemScript.at(1, 10) - game.time.get_minutes())
+	assert_eq(game.company.open_branch(), "Nicht genug Geld auf dem Firmenkonto (kostet 300,00 €).")
+	game.time.advance(TimeSystemScript.at(1, 19) - game.time.get_minutes())
+	assert_eq(game.company.check_open_branch(), "Ladenlokal schließt vorher (geöffnet 10:00–20:00).")
+	assert_eq(game.company.is_branch_open(), false)
+
+
+func test_branch_adds_revenue_and_costs_to_settlement() -> void:
+	var game := _founded_at_store()
+	game.company.open_branch()
+	var outcome := game.company.preview_day()
+	assert_eq(outcome["branch_cents"], 4000)
+	assert_eq(outcome["revenue_cents"], (3000 + 4000 + 180) * 50 / 100)
+	assert_eq(outcome["costs_cents"], 4500)
+	_to_next_morning(game)
+	var text: String = game.company.get_settlements()[0]["text"]
+	assert_true(" + 40,00 € Filiale" in text, text)
+
+
+func test_management_activity_needs_company_and_raises_utilization() -> void:
+	var game := Helpers.new_game()
+	game.locations.travel("office")
+	assert_eq(game.activities.check("order_stock"), "Erst ein Unternehmen gründen (im Büro).")
+	game.company.found("merch_label")
+	assert_eq(game.activities.start("order_stock"), "")
+	assert_eq(game.company.utilization, 56)
+	var last = game.company.get_history()[-1]
+	assert_eq(last.source, "activity")
+	assert_eq(last.reason, "Ware nachbestellen")
+	assert_eq(last.reference, "order_stock")
+
+
+func test_run_store_needs_open_branch() -> void:
+	var game := _founded_at_store()
+	assert_eq(game.activities.check("run_store"), "Erst die Filiale eröffnen.")
+	game.company.open_branch()  # -> 12:00
+	assert_eq(game.activities.start("run_store"), "")
+	assert_eq(game.company.utilization, 62)
+	assert_eq(game.company.reputation, 52)
+	assert_eq(game.time.format_clock(), "16:00")
+
+
+func test_care_can_beat_decay() -> void:
+	var game := _founded()
+	for day in range(2, 5):
+		_to_next_morning(game)  # Verfall -3 (wir bleiben im Büro)
+		assert_eq(game.activities.start("order_stock"), "", "Tag %d" % day)  # Pflege +6
+	assert_eq(game.company.utilization, 59)  # 50 + 3 × (6 − 3)
+
+
+func test_activity_catalog_checks_company_fields() -> void:
+	var catalog := ActivityCatalogScript.new()
+	var base := {"id": "x", "display_name": "X", "location": "office", "duration_minutes": 30}
+	var wrong_requirement := base.duplicate()
+	wrong_requirement["requires"] = "yacht"
+	assert_eq(catalog.load_data([wrong_requirement]), false)
+	var effects_without_requirement := base.duplicate()
+	effects_without_requirement["company"] = {"utilization": 3}
+	assert_eq(catalog.load_data([effects_without_requirement]), false)
+	var bad_key := base.duplicate()
+	bad_key["requires"] = "company"
+	bad_key["company"] = {"profit": 3}
+	assert_eq(catalog.load_data([bad_key]), false)
+	var valid := base.duplicate()
+	valid["requires"] = "company"
+	valid["company"] = {"utilization": 3}
+	assert_eq(catalog.load_data([valid]), true)
+
+
+func test_branch_state_survives_save_and_version_8_migration() -> void:
+	var game := _founded_at_store()
+	game.company.open_branch()
+	SaveSystemScript.delete_save(PATH)
+	SaveSystemScript.save(game, PATH)
+	var loaded: GameStateScript = SaveSystemScript.load_game(Helpers.game_data(), PATH)["game"]
+	assert_true(loaded != null and loaded.company.is_branch_open(), "Filiale nach Laden zu")
+	var saved := game.to_dict()
+	saved["company"].erase("branch_open")
+	var file := FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(JSON.stringify({"version": 8, "game": saved}))
+	file.close()
+	var migrated: GameStateScript = SaveSystemScript.load_game(Helpers.game_data(), PATH)["game"]
+	assert_true(migrated != null, "Migration 8 -> 9 fehlgeschlagen")
+	if migrated != null:
+		assert_eq(migrated.company.is_branch_open(), false)
 	SaveSystemScript.delete_save(PATH)

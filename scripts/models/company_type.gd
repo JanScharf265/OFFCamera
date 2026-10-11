@@ -26,3 +26,12 @@ var revenue_per_1000_followers_cents: int
 var utilization_decay_per_day: int
 ## Ruf-Verlust, wenn die Fixkosten eines Tages nicht bezahlt werden können.
 var unpaid_reputation_penalty: int
+## Filiale (Ticket 4.4, optional): zweiter Standort mit eigenem Umsatz und eigenen Fixkosten.
+var has_branch := false
+var branch_location: String
+var branch_display_name: String
+var branch_opening_minutes: int
+## Eröffnungskosten (vom Firmenkonto, > 0).
+var branch_opening_fee_cents: int
+var branch_base_revenue_per_day_cents: int
+var branch_fixed_costs_per_day_cents: int
