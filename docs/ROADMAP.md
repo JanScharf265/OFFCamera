@@ -81,7 +81,7 @@ Grafiken aus frei nutzbaren (CC0) Asset-Paketen, später austauschbar.
 - [x] Im Editor durchgespielt (Wischen mit der Maus, Tippen auf Gebäude/Schilder)
 - [x] iPhone-Abnahme: Wischen flüssig, Tippen trifft, Seite scrollt außerhalb der Karte, Notch/Home-Balken frei
 
-## Phase 3 – Streamer-/Creator-Karriere ← in Abnahme
+## Phase 3 – Streamer-/Creator-Karriere ✅ (11.10.2026)
 Kanalprofil (Follower, Community-Stimmung, Ruf) mit Grenzen und Wachstumsbremse, Content-Formate als Daten,
 Einnahmen nur über das Ledger, Equipment-Upgrades, zufällige regelbasierte Karriere-Ereignisse mit festem Seed,
 in der UI nachvollziehbar, warum sich Werte geändert haben.
@@ -91,24 +91,25 @@ in der UI nachvollziehbar, warum sich Werte geändert haben.
 - [x] Ticket 3.3: Equipment-Upgrades (Kamera, Mikrofon, Licht, je 3 Stufen; Spielstand Version 4) (177/177 Tests grün)
 - [x] Ticket 3.4: Zufällige Karriere-Ereignisse mit festem Seed (5 Ereignisse; Spielstand Version 5) (193/193 Tests grün)
 - [x] Ticket 3.5: Karriere-UI: Kanal im HUD, Kanal-Karte mit Wachstumsbremse, Kanal-Verlauf mit Begründungen (196/196 Tests grün)
-- [ ] Im Editor durchgespielt
-- [ ] iPhone-Abnahme
+- [x] Im Editor durchgespielt – entfällt, durch die iPhone-Abnahme abgedeckt
+- [x] iPhone-Abnahme
 
 Abnahme auf dem iPhone:
-- [ ] Neues Spiel: HUD zeigt „Kanal: 120 Follower · Community 50 · Ruf 50“
-- [ ] Zu Hause gibt es „Kurzvideo“, im Studio „Livestream“, „Langes Video“, „Q&A mit der Community“; „Kurzer Stream“ ist weg
-- [ ] Jede Content-Karte zeigt vorher die Wirkung (Zeit, Energie, Stimmung, Follower, Community, Ruf, Geld) und die Qualität mit Anteilen
-- [ ] Livestream am Start: genau 2 h, +17 Follower, Community +2, +25,00 € in den Buchungen
-- [ ] Kanal-Verlauf zeigt nach jeder Produktion Zeit, Begründung (Format · Qualität) und die Änderung
-- [ ] Ausrüstung im Studio: Kamera Stufe 1 kaufen → -120,00 € in den Buchungen, Qualität beim Livestream steigt auf 105 %
-- [ ] Höchste Ausrüstungsstufe: Kaufen-Button verschwindet
-- [ ] Ab Tag 3 können Karriere-Ereignisse erscheinen; Optionen zeigen Kanal-Folgen; nach der Wahl steht der Grund im Kanal-Verlauf
-- [ ] App beenden, „Fortsetzen“: Kanal, Verlauf, Ausrüstung, Buchungen unverändert; kein Ereignis kommt doppelt
-- [ ] Spielstand aus Phase 2 lässt sich fortsetzen (Kanal mit Startwerten, keine Ausrüstung)
-- [ ] Alles per Touch bedienbar und scrollbar, nichts verdeckt
+- [x] Neues Spiel: HUD zeigt „Kanal: 120 Follower · Community 50 · Ruf 50“
+- [x] Zu Hause gibt es „Kurzvideo“, im Studio „Livestream“, „Langes Video“, „Q&A mit der Community“; „Kurzer Stream“ ist weg
+- [x] Jede Content-Karte zeigt vorher die Wirkung (Zeit, Energie, Stimmung, Follower, Community, Ruf, Geld) und die Qualität mit Anteilen
+- [x] Livestream am Start: genau 2 h, +17 Follower, Community +2, +25,00 € in den Buchungen
+- [x] Kanal-Verlauf zeigt nach jeder Produktion Zeit, Begründung (Format · Qualität) und die Änderung
+- [x] Ausrüstung im Studio: Kamera Stufe 1 kaufen → -120,00 € in den Buchungen, Qualität beim Livestream steigt auf 105 %
+- [x] Höchste Ausrüstungsstufe: Kaufen-Button verschwindet
+- [x] Ab Tag 3 können Karriere-Ereignisse erscheinen; Optionen zeigen Kanal-Folgen; nach der Wahl steht der Grund im Kanal-Verlauf
+- [x] App beenden, „Fortsetzen“: Kanal, Verlauf, Ausrüstung, Buchungen unverändert; kein Ereignis kommt doppelt
+- [x] Spielstand aus Phase 2 lässt sich fortsetzen (Kanal mit Startwerten, keine Ausrüstung)
+- [x] Alles per Touch bedienbar und scrollbar, nichts verdeckt
+
+## Phase 4 – Fiktionales Unternehmen und zweiter Standort ← als Nächstes
 
 ## Spätere Phasen
-4. Fiktionales Unternehmen und zweiter Standort
 5. Finanzen, Fristen, Behördenereignisse
 6. Save/Load-Stabilisierung und Migration
 7. Mobile Politur und Performance
