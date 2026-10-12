@@ -216,3 +216,14 @@ legt eine Testdatei der neuen Version an – ein Test verlangt sie. Migrationen 
 (`SaveSystem._run_migration()`). In Version 1 hieß der Aufruf noch `GameState.new(Kataloge)`; der Erzeuger kennt das.
 Die normale Testsuite soll schnell bleiben (Ziel < 1 Minute, derzeit ~1 s); lange Läufe kommen in 6.4 getrennt.
 
+## 028 – Robustes Speichern
+Entscheidungen des Game Directors: 3 rotierende Backups; eine liegengebliebene `.tmp` (abgebrochenes Speichern) wird
+nur übernommen, wenn sie vollständig lesbar ist und alle Prüfungen besteht – dann wird das Speichern zu Ende geführt;
+sonst wird sie wie ein defekter Stand aufbewahrt (`test_half_written_tmp_is_ignored_and_kept`). Defekte Dateien
+(Hauptdatei, Backup, .tmp) werden als `<name>.corrupt-<zeit>.json` aufbewahrt (höchstens 3, Zeit auf Mikrosekunden,
+damit die Reihenfolge stimmt) und aus der Rotation genommen, damit sie nie ein gutes Backup verdrängen. Dateien einer
+neueren Spielversion bleiben unberührt. Backups rotieren nur, wenn eine Hauptdatei existiert.
+Der Kopf `meta` (App-Version, Speicherzeit, Spieltag, Uhrzeit, Privatkonto, Datenkennung = MD5 der Datendateien) ist
+optional und wird beim Laden nicht gebraucht – deshalb keine neue Formatversion. Gespeichert wird nie während eines
+Zeitfortschritts.
+

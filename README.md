@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) in Arbeit: Ticket 6.1 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) in Arbeit: Tickets 6.1–6.2 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -106,7 +106,8 @@ Für die aktuelle Version statt `--path "$OUT/hist"` einfach `--path .`. Ein Tes
 
 ## Spielstand
 
-Liegt lokal auf dem Gerät (`user://savegame.json`, daneben `savegame.json.bak`). Auf dem Mac:
+Liegt lokal auf dem Gerät (`user://savegame.json`, daneben die Backups `savegame.json.bak`, `.bak2`, `.bak3`;
+defekte Stände werden als `savegame.corrupt-<zeit>.json` aufbewahrt, höchstens 3). Auf dem Mac:
 `~/Library/Application Support/Godot/app_userdata/OFF CAMERA/`. Zurücksetzen im Spiel über
 Einstellungen → Spielstand löschen.
 

@@ -3,11 +3,10 @@ extends RefCounted
 
 ## Lokaler, versionierter Spielstand (JSON unter user://).
 ##
-## Schreiben: erst in <pfad>.tmp, dann den bisherigen Stand nach <pfad>.bak
-## umbenennen, dann .tmp nach <pfad>. Eine halb geschriebene Datei ersetzt so nie
-## einen funktionierenden Spielstand.
-## Laden: Hauptdatei; ist sie defekt oder fehlt sie, das Backup. Eine fehlende
-## Datei ist kein Fehler (= noch kein Spielstand).
+## Schreiben: erst <pfad>.tmp (wieder eingelesen geprüft), dann 3 Backups rotieren, dann .tmp → <pfad>.
+## Eine halb geschriebene Datei ersetzt so nie einen funktionierenden Spielstand.
+## Laden: gültige liegengebliebene .tmp, sonst Hauptdatei, sonst .bak/.bak2/.bak3; defekte Dateien
+## werden aufbewahrt (.corrupt-…) und nie überschrieben. Eine fehlende Datei ist kein Fehler.
 ##
 ## Versionen: SAVE_VERSION erhöhen, wenn sich das Format ändert, in _run_migration() einen
 ## Schritt von der alten zur neuen Version ergänzen und eine echte Testdatei
@@ -27,63 +26,189 @@ const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
 
 
-## "" = gespeichert, sonst Fehlertext.
+## Backups: <pfad>.bak (neuestes), .bak2, .bak3.
+const BACKUP_SUFFIXES: Array[String] = [".bak", ".bak2", ".bak3"]
+const TMP_SUFFIX := ".tmp"
+## Defekte Stände werden als <ordner>/<name>.corrupt-<zeit>.json aufbewahrt, höchstens so viele.
+const CORRUPT_KEEP := 3
+
+
+## Speichert atomar. "" = gespeichert, sonst Fehlertext. Ablauf: <pfad>.tmp schreiben und wieder
+## einlesen (vollständig?), dann Backups rotieren (.bak2 → .bak3, .bak → .bak2, Hauptdatei → .bak) und
+## .tmp zur Hauptdatei machen. Nie während eines Zeitfortschritts (Zustand wäre halb fertig).
 static func save(game: GameStateScript, path: String = DEFAULT_PATH) -> String:
-	var text := JSON.stringify({"version": SAVE_VERSION, "game": game.to_dict()}, "\t")
-	var tmp_path := path + ".tmp"
+	if game.time.is_advancing():
+		return "Speichern während eines Zeitfortschritts ist nicht möglich."
+	var text := JSON.stringify({"version": SAVE_VERSION, "meta": _meta(game), "game": game.to_dict()}, "\t")
+	var tmp_path := path + TMP_SUFFIX
 	var file := FileAccess.open(tmp_path, FileAccess.WRITE)
 	if file == null:
 		return "Spielstand konnte nicht geschrieben werden (Fehler %d)." % FileAccess.get_open_error()
 	file.store_string(text)
 	file.close()
+	if FileAccess.get_file_as_string(tmp_path) != text:
+		return "Spielstand wurde nicht vollständig geschrieben."
+	return _promote_tmp(path)
 
-	if FileAccess.file_exists(path):
-		var backup_error := DirAccess.rename_absolute(path, path + ".bak")
-		if backup_error != OK:
-			return "Backup des Spielstands fehlgeschlagen (Fehler %d)." % backup_error
-	var rename_error := DirAccess.rename_absolute(tmp_path, path)
-	if rename_error != OK:
-		return "Spielstand konnte nicht abgeschlossen werden (Fehler %d)." % rename_error
+
+## Kopf eines Spielstands: nur zur Anzeige und Fehlersuche, beim Laden nicht nötig.
+static func _meta(game: GameStateScript) -> Dictionary:
+	return {
+		"app_version": ProjectSettings.get_setting("application/config/version", "?"),
+		"saved_at_unix": int(Time.get_unix_time_from_system()),
+		"game_minutes": game.time.get_minutes(),
+		"day_label": game.time.format_date(),
+		"clock": game.time.format_clock(),
+		"private_balance_cents": game.ledger.get_balance(LedgerSystemScript.PRIVATE),
+		"data_id": game.data.fingerprint if game.data != null else "",
+	}
+
+
+## Rotiert die Backups und macht <pfad>.tmp zur Hauptdatei. "" = ok.
+## Rotiert wird nur, wenn es eine Hauptdatei gibt – fehlt sie (z. B. als defekt aufbewahrt),
+## bleiben die vorhandenen Backups, wo sie sind.
+static func _promote_tmp(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		return _rename(path + TMP_SUFFIX, path)
+	for i in range(BACKUP_SUFFIXES.size() - 1, 0, -1):
+		var older := path + BACKUP_SUFFIXES[i]
+		var newer := path + BACKUP_SUFFIXES[i - 1]
+		if FileAccess.file_exists(newer):
+			if FileAccess.file_exists(older):
+				DirAccess.remove_absolute(older)
+			var rotate_error := DirAccess.rename_absolute(newer, older)
+			if rotate_error != OK:
+				return "Backup des Spielstands fehlgeschlagen (Fehler %d)." % rotate_error
+	var backup_error := DirAccess.rename_absolute(path, path + BACKUP_SUFFIXES[0])
+	if backup_error != OK:
+		return "Backup des Spielstands fehlgeschlagen (Fehler %d)." % backup_error
+	return _rename(path + TMP_SUFFIX, path)
+
+
+static func _rename(from_path: String, to_path: String) -> String:
+	var error := DirAccess.rename_absolute(from_path, to_path)
+	if error != OK:
+		return "Spielstand konnte nicht abgeschlossen werden (Fehler %d)." % error
 	return ""
 
 
 static func has_save(path: String = DEFAULT_PATH) -> bool:
-	return FileAccess.file_exists(path) or FileAccess.file_exists(path + ".bak")
+	for candidate in _candidates(path):
+		if FileAccess.file_exists(candidate):
+			return true
+	return false
 
 
-## Ergebnis: {"game": GameState oder null, "error": String, "from_backup": bool}
+## Kopf des Spielstands, der beim Laden zuerst versucht würde (Hauptdatei, sonst Backup), ohne zu laden –
+## für die Anzeige im Hauptmenü. {} wenn keiner lesbar ist oder er keinen Kopf hat.
+static func read_meta(path: String = DEFAULT_PATH) -> Dictionary:
+	for candidate in [path] + _backup_paths(path):
+		if not FileAccess.file_exists(candidate):
+			continue
+		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(candidate))
+		if typeof(data) == TYPE_DICTIONARY and typeof(data.get("meta")) == TYPE_DICTIONARY:
+			return data["meta"]
+	return {}
+
+
+## Lädt den neuesten gültigen Stand. Reihenfolge: liegengebliebene .tmp (abgebrochenes Speichern –
+## nur wenn vollständig lesbar und alle Prüfungen bestanden; dann wird das Speichern zu Ende geführt),
+## Hauptdatei, .bak, .bak2, .bak3. Defekte Dateien werden als .corrupt-<zeit> aufbewahrt und entfernt,
+## damit sie nie ein gutes Backup verdrängen; Dateien einer neueren Spielversion bleiben unberührt.
+## Ergebnis: {"game": GameState oder null, "error": String, "from_backup": bool, "source": String,
+##            "corrupt_kept": Array[String]}
 ## game == null und error == "" bedeutet: Es gibt keinen Spielstand.
 static func load_game(game_data: GameDataScript, path: String = DEFAULT_PATH) -> Dictionary:
-	var main_error := ""
-	if FileAccess.file_exists(path):
-		var main := _load_file(path, game_data)
-		if main["game"] != null:
-			return main
-		main_error = main["error"]
+	var kept: Array[String] = []
+	var first_error := ""
 
-	var backup_path := path + ".bak"
-	if FileAccess.file_exists(backup_path):
-		var backup := _load_file(backup_path, game_data)
-		if backup["game"] != null:
-			backup["from_backup"] = true
-			backup["error"] = main_error
-			return backup
-		if main_error.is_empty():
-			main_error = backup["error"]
+	var tmp_path := path + TMP_SUFFIX
+	if FileAccess.file_exists(tmp_path):
+		var tmp := _load_file(tmp_path, game_data)
+		if tmp["game"] != null and _promote_tmp(path).is_empty():
+			tmp["source"] = "tmp"
+			tmp["corrupt_kept"] = kept
+			return tmp
+		_keep_corrupt(tmp_path, kept)
 
-	return {"game": null, "error": main_error, "from_backup": false}
+	for candidate in [path] + _backup_paths(path):
+		if not FileAccess.file_exists(candidate):
+			continue
+		var result := _load_file(candidate, game_data)
+		if result["game"] != null:
+			result["from_backup"] = candidate != path
+			result["source"] = "main" if candidate == path else candidate.get_extension()
+			result["error"] = first_error
+			result["corrupt_kept"] = kept
+			return result
+		if first_error.is_empty():
+			first_error = result["error"]
+		if not result.get("newer", false):
+			_keep_corrupt(candidate, kept)
+
+	return {"game": null, "error": first_error, "from_backup": false, "source": "", "corrupt_kept": kept}
 
 
-## Löscht Spielstand, Backup und Zwischendatei.
+## Löscht Spielstand, Backups, Zwischendatei und aufbewahrte defekte Stände.
 static func delete_save(path: String = DEFAULT_PATH) -> void:
-	for file_path in [path, path + ".bak", path + ".tmp"]:
+	for file_path in _candidates(path) + corrupt_files(path):
 		if FileAccess.file_exists(file_path):
 			DirAccess.remove_absolute(file_path)
 
 
+## Aufbewahrte defekte Stände, älteste zuerst.
+static func corrupt_files(path: String = DEFAULT_PATH) -> Array[String]:
+	var result: Array[String] = []
+	var dir := path.get_base_dir()
+	var prefix := path.get_file().get_basename() + ".corrupt-"
+	for file_name in DirAccess.get_files_at(dir):
+		if file_name.begins_with(prefix) and file_name.ends_with(".json"):
+			result.append(dir.path_join(file_name))
+	result.sort()
+	return result
+
+
+static func _backup_paths(path: String) -> Array[String]:
+	var result: Array[String] = []
+	for suffix in BACKUP_SUFFIXES:
+		result.append(path + suffix)
+	return result
+
+
+static func _candidates(path: String) -> Array[String]:
+	var result: Array[String] = [path, path + TMP_SUFFIX]
+	result.append_array(_backup_paths(path))
+	return result
+
+
+## Verschiebt eine defekte Datei nach <name>.corrupt-<zeit>-<n>.json; behält höchstens CORRUPT_KEEP.
+static func _keep_corrupt(file_path: String, kept: Array[String]) -> void:
+	var base := file_path.get_base_dir().path_join(_corrupt_base(file_path))
+	# Mikrosekunden: Namen sortieren zeitlich richtig, auch bei mehreren Dateien pro Sekunde.
+	var stamp := "%017.6f" % Time.get_unix_time_from_system()
+	var number := 1
+	var target := "%s.corrupt-%s-%d.json" % [base, stamp, number]
+	while FileAccess.file_exists(target):  # mehrere defekte Dateien in derselben Sekunde
+		number += 1
+		target = "%s.corrupt-%s-%d.json" % [base, stamp, number]
+	if DirAccess.rename_absolute(file_path, target) != OK:
+		DirAccess.remove_absolute(file_path)
+		return
+	kept.append(target)
+	var existing := corrupt_files(base + ".json")
+	while existing.size() > CORRUPT_KEEP:
+		DirAccess.remove_absolute(existing.pop_front())
+
+
+## "user://savegame.json.bak2" -> "user://savegame"
+static func _corrupt_base(file_path: String) -> String:
+	var name := file_path.get_file()
+	return name.substr(0, name.find(".json")) if name.find(".json") >= 0 else name.get_basename()
+
+
 static func _load_file(path: String, game_data: GameDataScript) -> Dictionary:
-	var failed := func(message: String) -> Dictionary:
-		return {"game": null, "error": message, "from_backup": false}
+	var failed := func(message: String, newer: bool = false) -> Dictionary:
+		return {"game": null, "error": message, "from_backup": false, "newer": newer}
 
 	var text := FileAccess.get_file_as_string(path)
 	if text.is_empty():
@@ -99,7 +224,7 @@ static func _load_file(path: String, game_data: GameDataScript) -> Dictionary:
 	if not DataReaderScript.is_whole_number(version) or int(version) < 1:
 		return failed.call("Der Spielstand hat keine gültige Versionsnummer.")
 	if int(version) > SAVE_VERSION:
-		return failed.call("Der Spielstand stammt aus einer neueren Spielversion (%d) und kann nicht geladen werden." % int(version))
+		return failed.call("Der Spielstand stammt aus einer neueren Spielversion (%d) und kann nicht geladen werden." % int(version), true)
 	if typeof(data.get("game")) != TYPE_DICTIONARY:
 		return failed.call("Der Spielstand enthält keine Spieldaten.")
 	var migration_error := _migrate(data, int(version))
@@ -113,13 +238,9 @@ static func _load_file(path: String, game_data: GameDataScript) -> Dictionary:
 	return {"game": game, "error": "", "from_backup": false}
 
 
-## Hebt ältere Formate schrittweise auf SAVE_VERSION an (ändert `data` direkt).
-## "" = ok, sonst Fehlertext.
 ## Neue Formatversion: SAVE_VERSION erhöhen, in _run_migration() einen Schritt n → n + 1 ergänzen
 ## und eine echte Testdatei tests/fixtures/saves/v<neu>.json anlegen (siehe tests/test_save_fixtures.gd).
-
-## Hebt ältere Formate schrittweise auf SAVE_VERSION an (ändert `data` direkt).
-## "" = ok, sonst Fehlertext.
+## Hebt ältere Formate schrittweise auf SAVE_VERSION an (ändert `data` direkt). "" = ok, sonst Fehlertext.
 static func _migrate(data: Dictionary, version: int) -> String:
 	for step in range(version, SAVE_VERSION):
 		var error := _run_migration(step, data["game"])

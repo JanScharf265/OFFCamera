@@ -3,6 +3,7 @@
 ## Unveröffentlicht – Phase 6
 - Echte Testspielstände v1–v11, erzeugt mit dem Code der jeweiligen Commits; jeder lädt bis zur aktuellen Version, behält Zeit, Konten, Ort, Kanal, Ausrüstung, Unternehmen und ist weiterspielbar (Ticket 6.1)
 - Migrationen als Einzelschritte n → n + 1; ein Test verlangt eine Testdatei je Version (Ticket 6.1)
+- Robustes Speichern: Kopf mit App-Version, Speicherzeit, Spieltag, Kontostand und Datenkennung; 3 rotierende Backups; .tmp wird nach dem Schreiben geprüft; eine liegengebliebene .tmp wird nur übernommen, wenn sie vollständig lesbar ist und alle Prüfungen besteht, sonst als defekter Stand aufbewahrt (Regressionstest); defekte Stände werden nie überschrieben (höchstens 3 Kopien); kein Speichern während eines Zeitfortschritts (Ticket 6.2)
 
 ## Unveröffentlicht – Phase 5
 - Wertstellung je Buchung: Tagesabschlüsse gehören zum abgerechneten Tag (23:59), nicht zum Zeitpunkt der Abrechnung; Wochenauswertung je Konto ohne Umbuchungen (Ticket 5.1)

@@ -29,14 +29,20 @@ var company_types := CompanyTypeCatalogScript.new()
 var obligations := ObligationCatalogScript.new()
 
 var errors: PackedStringArray = []
+## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
+## damit sich später erkennen lässt, mit welchen Daten ein Stand gespeichert wurde. "" = nicht aus Dateien.
+var fingerprint := ""
 
 
 ## Lädt alle Standarddateien und prüft die Verweise. false = errors beschreibt alles.
 func load_all() -> bool:
 	errors.clear()
+	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
+		contents += FileAccess.get_file_as_string(catalog.DEFAULT_PATH)
+	fingerprint = contents.md5_text()
 	if errors.is_empty():
 		errors.append_array(check_references())
 	return errors.is_empty()

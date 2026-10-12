@@ -194,8 +194,13 @@ Stand Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI) 
 - Migration 8 → 9: gegründetes Unternehmen: `branch_open = false`.
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 9 → 10: Wertstellung = Buchungszeit; Tagesabschlüsse (`company`, `day:<t>`) auf Tag t, 23:59.
-- Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
-- Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
+- Schreiben (Phase 6): `.tmp` schreiben und wieder einlesen → wenn eine Hauptdatei existiert, Backups rotieren
+  (`.bak2` → `.bak3`, `.bak` → `.bak2`, Hauptdatei → `.bak`) → `.tmp` nach `savegame.json`. Nie während eines
+  Zeitfortschritts. Kopf `meta` (optional): App-Version, Speicherzeit, Spieltag, Uhrzeit, Privatkonto, `data_id`
+  (`GameData.fingerprint`); `read_meta()` liest ihn ohne zu laden.
+- Laden (Phase 6): gültige liegengebliebene `.tmp` (dann Speichern zu Ende führen), sonst Hauptdatei, `.bak`, `.bak2`,
+  `.bak3`. Defekte Dateien → `<name>.corrupt-<zeit>.json` (höchstens 3, `corrupt_files()`), neuere Versionen bleiben
+  unberührt. Ergebnis zusätzlich `source` und `corrupt_kept`. Früher: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.
 - Neue Formatversion: `SAVE_VERSION` erhöhen, in `_run_migration()` einen Schritt n → n + 1 ergänzen und eine
   echte Testdatei `tests/fixtures/saves/v<neu>.json` anlegen (Erzeuger `tests/fixtures/make_save.gd`, README).
