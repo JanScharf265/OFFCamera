@@ -196,3 +196,128 @@ func test_version_10_save_starts_obligations_from_now() -> void:
 	_to_morning(loaded, 15)
 	assert_eq(loaded.ledger.get_entries_by_category("rent").size(), 4)  # 2 alte + 2 neue, Tag 8 nicht doppelt
 	SaveSystemScript.delete_save(PATH)
+
+
+# --- Überfällig, Mahngebühr, Bezahlen von Hand (Ticket 5.3) --------------------------------
+
+## Privatkonto auf 50 € – die Wohnungsmiete (80 €) an Tag 8 bleibt offen, Studio (40 €) wird bezahlt.
+func _game_with_open_rent() -> GameStateScript:
+	var game := _game()
+	game.ledger.post(-45000, "test", "Ausgabe für Test", "test")
+	_to_morning(game, 8)
+	assert_eq(game.obligations.get_open().size(), 1, "Testaufbau: Wohnungsmiete offen")
+	return game
+
+
+func test_no_reminder_within_grace_period() -> void:
+	var game := _game_with_open_rent()
+	_to_morning(game, 10)  # Kulanz: Tag 9 und 10
+	var instance := game.obligations.get_instance("rent_home@8")
+	assert_eq(instance["reminded"], false)
+	assert_eq(instance["fee_cents"], 0)
+	assert_eq(game.stats.mood, 60)
+
+
+## Regressionstest (Entscheidung Game Director): Die Mahngebühr erhöht nur den offenen Betrag.
+## Gebucht wird erst beim Bezahlen – kein Konto wird dadurch negativ.
+func test_reminder_fee_raises_open_amount_without_booking() -> void:
+	var game := _game_with_open_rent()
+	var balance_before := game.ledger.get_balance()
+	var entries_before := game.ledger.get_entries().size()
+	_to_morning(game, 11)  # Kulanz vorbei -> Mahnung
+	var instance := game.obligations.get_instance("rent_home@8")
+	assert_eq(instance["reminded"], true)
+	assert_eq(instance["fee_cents"], 1000)
+	assert_eq(game.obligations.open_amount("rent_home@8"), 9000)
+	assert_eq(game.ledger.get_balance(), balance_before, "Mahngebühr wurde gebucht")
+	assert_eq(game.ledger.get_entries().size(), entries_before, "Buchung ohne Bezahlen")
+	assert_eq(game.ledger.get_entries_by_category("reminder_fee").size(), 0)
+	for account in ["private", "company"]:
+		assert_true(game.ledger.get_balance(account) >= 0, "%s negativ" % account)
+	assert_eq(game.stats.mood, 55)
+
+
+func test_reminder_happens_only_once() -> void:
+	var game := _game_with_open_rent()
+	_to_morning(game, 14)
+	assert_eq(game.obligations.get_instance("rent_home@8")["fee_cents"], 1000)
+	assert_eq(game.stats.mood, 55)
+
+
+func test_pay_needs_the_whole_open_amount() -> void:
+	var game := _game_with_open_rent()
+	_to_morning(game, 11)  # offen 90 €, Konto 10 €
+	assert_eq(game.obligations.pay("rent_home@8"), "Nicht genug Geld auf dem Privatkonto (offen: 90,00 €).")
+	assert_eq(game.ledger.get_entries_by_category("rent").size(), 1)  # nur Studio
+	game.ledger.post(8500, "test", "Einnahme für Test", "test")  # 95 €
+	assert_eq(game.obligations.check_pay("rent_home@8"), "")
+	assert_eq(game.obligations.pay("rent_home@8"), "")
+	assert_eq(game.ledger.get_balance(), 500)
+	assert_eq(game.obligations.get_instance("rent_home@8")["status"], "paid")
+	assert_eq(game.obligations.open_amount("rent_home@8"), 0)
+	assert_eq(game.obligations.pay("rent_home@8"), "Diese Frist ist nicht offen.")
+
+
+func test_payment_books_rent_dated_to_due_day_and_fee_dated_now() -> void:
+	var game := _game_with_open_rent()
+	_to_morning(game, 11)
+	game.ledger.post(10000, "test", "Einnahme für Test", "test")
+	game.obligations.pay("rent_home@8")
+	var rents := game.ledger.get_entries_by_category("rent")
+	var home_rent = rents[rents.size() - 1]
+	assert_eq(home_rent.reference, "rent_home@8")
+	assert_eq(home_rent.amount_cents, -8000)
+	assert_eq(home_rent.effective_minutes, TimeSystemScript.at(8, 0))
+	var fees := game.ledger.get_entries_by_category("reminder_fee")
+	assert_eq(fees.size(), 1)
+	if fees.size() == 1:
+		assert_eq(fees[0].amount_cents, -1000)
+		assert_eq(fees[0].description, "Mahngebühr: Miete Wohnung (Woche 2)")
+		assert_eq(fees[0].effective_minutes, game.time.get_minutes())
+
+
+func test_open_obligation_is_not_paid_automatically_later() -> void:
+	var game := _game_with_open_rent()
+	game.ledger.post(50000, "test", "Einnahme für Test", "test")
+	_to_morning(game, 12)
+	assert_eq(game.obligations.get_instance("rent_home@8")["status"], "open")
+
+
+func test_company_obligation_reminder_costs_company_reputation() -> void:
+	var game := _game()
+	game.locations.travel("office")
+	game.company.found("merch_label")
+	game.ledger.post(100000, "sales", "Großauftrag", "test", "", "", false, "company")
+	game.company.withdraw(game.ledger.get_balance("company"))  # Firmenkonto leer, Gewinn bleibt in Woche 1
+	_to_morning(game, 8)
+	assert_eq(game.obligations.get_instance("city_levy@8")["status"], "open")
+	_to_morning(game, 11)
+	# Leeres Firmenkonto kostet auch über unbezahlte Fixkosten Ruf – daher die Mahnung gezielt prüfen.
+	var reminders := []
+	for change in game.company.get_history():
+		if change.reason == "Mahnung: Stadtabgabe (für Woche 1)":
+			reminders.append(change)
+	assert_eq(reminders.size(), 1)
+	if reminders.size() == 1:
+		assert_eq(reminders[0].applied, {"reputation": -5})
+		assert_eq(reminders[0].reference, "city_levy@8")
+	assert_true(game.ledger.get_balance("company") >= 0, "Firmenkonto negativ")
+
+
+func test_reminder_state_survives_save_and_load() -> void:
+	var game := _game_with_open_rent()
+	_to_morning(game, 11)
+	SaveSystemScript.delete_save(PATH)
+	SaveSystemScript.save(game, PATH)
+	var data := Helpers.game_data()
+	data.appointments.load_data([])
+	data.events.load_data([])
+	var loaded: GameStateScript = SaveSystemScript.load_game(data, PATH)["game"]
+	assert_true(loaded != null, "Laden fehlgeschlagen")
+	if loaded == null:
+		return
+	assert_eq(loaded.obligations.open_amount("rent_home@8"), 9000)
+	_to_morning(loaded, 13)
+	assert_eq(loaded.obligations.get_instance("rent_home@8")["fee_cents"], 1000)  # nicht nochmal gemahnt
+	assert_eq(loaded.stats.mood, game.stats.mood)
+	SaveSystemScript.delete_save(PATH)

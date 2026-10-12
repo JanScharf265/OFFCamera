@@ -167,7 +167,11 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
   `first_day` genau eine Instanz `<frist>@<tag>` (fällig Tag 00:00). Betrag fest oder Prozent vom positiven
   Vorwochen-Ergebnis (`LedgerSystem.summarize`); 0 € → Status `waived`. Gedeckt → sofort gebucht (Quelle
   `obligation`, Schutzschlüssel `obligation:<instanz>`, Wertstellung = Fälligkeit, Status `paid`), sonst `open`.
-- `get_instances()`, `get_open()`, `open_amount()`, `take_notices()` (Hinweise je einmal für die Rückmeldung).
+- Überfällig (5.3): offen länger als `grace_days` nach dem Fälligkeitstag → einmal gemahnt (`reminded`):
+  `fee_cents` += Mahngebühr (nicht gebucht!), `overdue_effects` auf PlayerStats bzw. `overdue_company_effects`
+  über `CompanySystem.apply()` mit Begründung „Mahnung: …“. `check_pay()` / `pay()`: nur mit vollem offenem
+  Betrag; bucht Grundbetrag (Wertstellung = Fälligkeit) und Mahngebühr (Kategorie `reminder_fee`, `…:fee`).
+- `get_instances()`, `get_open()`, `count_open()`, `open_amount()`, `take_notices()` (Hinweise je einmal).
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)

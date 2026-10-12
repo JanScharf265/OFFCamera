@@ -178,3 +178,12 @@ Daten (`data/obligations/`); jede Fälligkeit ist eine Instanz `<frist>@<tag>` u
 (`last_processed_day`). Migration auf Version 11: vergangene Wochen werden nicht nachberechnet.
 Alles abstrakte Spielwerte – keine realen Steuer- oder Rechtsregeln.
 
+## 024 – Überfällige Fristen und Mahngebühr
+Entscheidung des Game Directors: Die Mahngebühr wird nicht sofort gebucht, sondern erhöht den offenen Betrag der
+Frist; gebucht wird erst beim Bezahlen, damit kein Konto negativ wird (Regressionstest
+`test_reminder_fee_raises_open_amount_without_booking`). Gemahnt wird einmal, sobald eine Frist länger als ihre
+Kulanz (2 Tage) nach dem Fälligkeitstag offen ist; Folgen Stimmung −5 (privat) bzw. Ruf des Unternehmens −5 (Firma,
+mit Begründung im Unternehmens-Protokoll). Offene Fristen werden nicht später automatisch abgebucht, sondern von Hand
+bezahlt – nur mit dem ganzen offenen Betrag. Beim Bezahlen entstehen zwei Buchungen: Grundbetrag (Wertstellung =
+Fälligkeit, zählt zur Woche der Frist) und Mahngebühr (Wertstellung = Zahltag). Kein Game Over.
+

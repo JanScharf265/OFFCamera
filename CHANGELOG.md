@@ -6,6 +6,7 @@
 - Spielstand Version 10 mit Migration: Wertstellung nachgetragen, alte Tagesabschlüsse auf ihren Tag korrigiert (Ticket 5.1)
 - Fristen als Daten (ObligationSystem): Miete Wohnung 80 €/Woche und Miete Studio 40 €/Woche vom Privatkonto, fiktive Stadtabgabe 15 % vom positiven Wochengewinn vom Firmenkonto; fällig montags ab Tag 8, automatisch bezahlt wenn gedeckt, sonst offen; Hinweise in der Rückmeldung (Ticket 5.2)
 - Spielstand Version 11 (Fristen) mit Migration von Version 10 (Ticket 5.2)
+- Überfällige Fristen: nach 2 Tagen Kulanz einmal gemahnt – Mahngebühr erhöht den offenen Betrag (gebucht erst beim Bezahlen, kein Konto wird negativ), Stimmung −5 bzw. Ruf des Unternehmens −5; Bezahlen von Hand nur mit vollem offenen Betrag (Ticket 5.3)
 
 ## Unveröffentlicht – Grafik-Ticket G2 (Querformat)
 - Querformat in beide Richtungen, Basisauflösung 1280×720 (G2.1)

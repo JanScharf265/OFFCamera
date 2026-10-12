@@ -10,27 +10,37 @@ extends RefCounted
 ## Konto der Frist (LedgerSystem.summarize, nach Wertstellung, ohne Umbuchungen); 0 € = entfällt.
 ## Reicht das Konto, wird sofort bezahlt (Wertstellung = Fälligkeit), sonst bleibt die Instanz offen.
 ## Jeder Tag wird höchstens einmal verarbeitet (last_processed_day), auch nach dem Laden.
+##
+## Überfällig (Ticket 5.3): Ist eine Instanz länger als grace_days nach ihrem Fälligkeitstag offen,
+## wird sie einmal gemahnt: Die Mahngebühr erhöht den OFFENEN Betrag (fee_cents) – gebucht wird sie
+## erst beim Bezahlen, damit kein Konto negativ wird –, und die Folgen (Stimmung bzw. Ruf des
+## Unternehmens) wirken einmal. pay() bucht Grundbetrag (Wertstellung = Fälligkeit) und Mahngebühr
+## (Wertstellung = jetzt) zusammen – nur, wenn das Konto den ganzen offenen Betrag deckt.
 
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const ObligationCatalogScript := preload("res://scripts/systems/obligation_catalog.gd")
 const ObligationDefinitionScript := preload("res://scripts/models/obligation_definition.gd")
 const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
+const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
 signal obligation_due(instance_id: String)
 signal obligation_paid(instance_id: String)
+signal obligation_reminded(instance_id: String)
 
 const STATUS_PAID := "paid"
 const STATUS_OPEN := "open"
 const STATUS_WAIVED := "waived"
 const SOURCE := "obligation"
+const FEE_CATEGORY := "reminder_fee"
 ## Gespeicherte Instanzen (älteste fallen weg, wenn bezahlt/entfallen).
 const HISTORY_LIMIT := 100
 
 var _time: TimeSystemScript
 var _ledger: LedgerSystemScript
 var _company: CompanySystemScript
+var _stats: PlayerStatsScript
 var _catalog: ObligationCatalogScript
 ## Instanzen in Fälligkeitsreihenfolge: {id, obligation, due_minutes, amount_cents, fee_cents,
 ## status, paid_minutes, reminded}
@@ -40,10 +50,11 @@ var _last_processed_day := 0
 var _notices := PackedStringArray()
 
 
-func _init(time: TimeSystemScript, ledger: LedgerSystemScript, company: CompanySystemScript,
-		catalog: ObligationCatalogScript) -> void:
+func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
+		company: CompanySystemScript, catalog: ObligationCatalogScript) -> void:
 	_time = time
 	_ledger = ledger
+	_stats = stats
 	_company = company
 	_catalog = catalog
 	_last_processed_day = TimeSystemScript.day_of(time.get_minutes())
@@ -117,6 +128,63 @@ func on_day_changed(day: int) -> void:
 		if not get_instance(instance_id).is_empty():
 			continue
 		_create(definition, instance_id, TimeSystemScript.at(day, 0))
+	for instance in _instances:
+		if instance["status"] == STATUS_OPEN and not instance["reminded"]:
+			var definition := _catalog.get_definition(instance["obligation"])
+			if definition != null and day > TimeSystemScript.day_of(instance["due_minutes"]) + definition.grace_days:
+				_remind(instance, definition)
+
+
+## Anzahl offener (überfälliger) Fristen – z. B. für Behördenereignisse.
+func count_open() -> int:
+	return get_open().size()
+
+
+## "" wenn die Instanz jetzt bezahlt werden kann, sonst ein Grund für die Anzeige.
+func check_pay(instance_id: String) -> String:
+	var instance := get_instance(instance_id)
+	if instance.is_empty():
+		return "Unbekannte Frist: %s" % instance_id
+	if instance["status"] != STATUS_OPEN:
+		return "Diese Frist ist nicht offen."
+	var definition := _catalog.get_definition(instance["obligation"])
+	if definition == null:
+		return "Diese Frist gibt es nicht mehr."
+	var total := open_amount(instance_id)
+	if not _ledger.can_afford(total, definition.account):
+		return "Nicht genug Geld auf dem %s (offen: %s)." % [LedgerSystemScript.ACCOUNT_LABELS[definition.account],
+				LedgerSystemScript.format_cents(total)]
+	return ""
+
+
+## Bezahlt eine offene Instanz komplett (Grundbetrag + Mahngebühr). "" = bezahlt.
+func pay(instance_id: String) -> String:
+	var reason := check_pay(instance_id)
+	if not reason.is_empty():
+		return reason
+	for instance in _instances:
+		if instance["id"] == instance_id:
+			var definition := _catalog.get_definition(instance["obligation"])
+			_book_payment(instance, definition)
+			_notices.append("%s bezahlt: %s." % [_label(definition, instance["due_minutes"]),
+					LedgerSystemScript.format_cents(-(int(instance["amount_cents"]) + int(instance["fee_cents"])))])
+			return ""
+	return "Unbekannte Frist: %s" % instance_id
+
+
+func _remind(instance: Dictionary, definition: ObligationDefinitionScript) -> void:
+	instance["reminded"] = true
+	instance["fee_cents"] = int(instance["fee_cents"]) + definition.reminder_fee_cents
+	var label := _label(definition, instance["due_minutes"])
+	if not definition.overdue_effects.is_empty():
+		_stats.apply(definition.overdue_effects)
+	if not definition.overdue_company_effects.is_empty():
+		_company.apply(definition.overdue_company_effects, SOURCE, "Mahnung: %s" % label, instance["id"],
+				"obligation:%s:reminder" % instance["id"])
+	_notices.append("Mahnung: %s – offen jetzt %s (+%s Mahngebühr)." % [label,
+			LedgerSystemScript.format_cents(int(instance["amount_cents"]) + int(instance["fee_cents"])),
+			LedgerSystemScript.format_cents(definition.reminder_fee_cents)])
+	obligation_reminded.emit(instance["id"])
 
 
 func _create(definition: ObligationDefinitionScript, instance_id: String, due_minutes: int) -> void:
@@ -140,13 +208,17 @@ func _create(definition: ObligationDefinitionScript, instance_id: String, due_mi
 	_trim()
 
 
-## Bucht den offenen Betrag einer Instanz (Teil von 5.3: inklusive Mahngebühr) und markiert sie bezahlt.
-## Der Aufrufer hat vorher geprüft, dass das Konto reicht.
+## Bucht den offenen Betrag einer Instanz und markiert sie bezahlt: Grundbetrag (Wertstellung =
+## Fälligkeit) und ggf. Mahngebühr (Wertstellung = jetzt). Der Aufrufer hat vorher geprüft, dass das
+## Konto den ganzen offenen Betrag deckt – danach kann keine der Buchungen mehr scheitern.
 func _book_payment(instance: Dictionary, definition: ObligationDefinitionScript) -> void:
 	var label := _label(definition, instance["due_minutes"])
 	var key := "obligation:%s" % instance["id"]
 	_ledger.post(-int(instance["amount_cents"]), definition.category, label, SOURCE, instance["id"],
 			key, false, definition.account, instance["due_minutes"])
+	if int(instance["fee_cents"]) > 0:
+		_ledger.post(-int(instance["fee_cents"]), FEE_CATEGORY, "Mahngebühr: %s" % label, SOURCE, instance["id"],
+				key + ":fee", false, definition.account)
 	instance["status"] = STATUS_PAID
 	instance["paid_minutes"] = _time.get_minutes()
 	obligation_paid.emit(instance["id"])
