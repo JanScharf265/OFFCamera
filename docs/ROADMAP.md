@@ -216,8 +216,16 @@ Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
 - [ ] Ein Spielstand aus einem früheren Build (Phase 5) lässt sich fortsetzen
 - [ ] Speichern bei wenig freiem Speicher bzw. im Flugmodus funktioniert (alles lokal)
 
+## Phase 7 – Mobile Politur und Performance ← in Arbeit
+Teil A ohne iPhone (Aufräumen, Layout-Tests, Performance auf dem Mac, iOS-Build vorbereiten), dann EIN gebündelter
+iPhone-Test, der die offenen iPhone-Abnahmen von Phase 3–6 und G2 ersetzt, dann Korrekturen.
+
+- [x] Ticket 7.1: Aufräumen, ObjectDB-Warnung untersucht – im Spiel kein Leck (gemessen), Ursache sind Kreisverweise in Tests; Wächter-Tests gegen Lecks (334/334 Tests grün)
+- [ ] Ticket 7.2: Layout-Tests für echte Bildschirmgrößen
+- [ ] Ticket 7.3: Performance auf dem Mac, Stromsparmodus, 60 FPS
+- [ ] Ticket 7.4: iOS-Build vorbereiten (Version 0.7.0, App-Symbol, Export nach Xcode)
+- [ ] Ticket 7.5: Gebündelter iPhone-Test (Game Director)
+- [ ] Ticket 7.6: Korrekturen aus dem iPhone-Test
+
 ## Spätere Phasen
-7. Mobile Politur und Performance – u. a. Warnung „124 ObjectDB instances leaked at exit“ am Ende des Testlaufs
-   untersuchen (besteht seit Längerem); inklusive der gesammelten iPhone-Abnahmen von Phase 3, Phase 4 und G2
-   (Checklisten oben) und aller folgenden Phasen
 8. Balancing und mehr Inhalte

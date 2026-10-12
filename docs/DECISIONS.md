@@ -258,3 +258,11 @@ implizit) und sagt, dass die defekte Datei aufbewahrt wurde; ist gar nichts ladb
 das dann einen zweiten Tipp braucht, und die aufbewahrten Kopien bleiben unberührt. „Spielstand löschen“ entfernt auch
 die aufbewahrten Kopien. `read_meta()` liest mit `JSON.new().parse()`, damit kaputte Dateien keine Engine-Fehler loggen.
 
+## 032 – ObjectDB-Warnung am Testende
+„124 ObjectDB instances were leaked at exit“ stammt nicht aus dem Spiel: Gemessen mit `Performance.OBJECT_COUNT`
+(nach Aufwärmen) hinterlassen neues Spiel (auch 9 Spieltage mit Unternehmen), Laden (gültig, kaputt, ungültig) und ein
+App-Durchgang (Fenster, Fahrt, Aktivität, Freigeben) 0 Objekte. Die Reste entstehen in Tests, die anonyme Funktionen
+mit Bezug auf das Spiel an dessen eigene Signale hängen (Kreisverweis RefCounted ↔ Callable). Entscheidung des Game
+Directors: nur dokumentieren, nicht umbauen. `tests/test_memory.gd` wacht darüber, dass das Spiel frei bleibt.
+Ein vermuteter Fix (Tweens der Karte beim Verlassen beenden) zeigte keine Wirkung und wurde verworfen.
+

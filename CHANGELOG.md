@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht – Phase 7
+- Warnung „ObjectDB instances leaked at exit“ untersucht: im Spiel kein Leck (0 Objekte pro neuem Spiel, Laden, App-Durchgang), Ursache sind Kreisverweise in Tests; Wächter-Tests `test_memory.gd` (Ticket 7.1)
+- Aufgeräumt: ungenutztes Kartensignal `pin_down` und ungenutzter Getter entfernt (Ticket 7.1)
+
 ## Unveröffentlicht – Phase 6
 - Echte Testspielstände v1–v11, erzeugt mit dem Code der jeweiligen Commits; jeder lädt bis zur aktuellen Version, behält Zeit, Konten, Ort, Kanal, Ausrüstung, Unternehmen und ist weiterspielbar (Ticket 6.1)
 - Migrationen als Einzelschritte n → n + 1; ein Test verlangt eine Testdatei je Version (Ticket 6.1)

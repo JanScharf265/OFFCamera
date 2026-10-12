@@ -8,8 +8,6 @@ extends Control
 ## Die Fahranimation ist rein optisch – die Spielzeit ist beim Start schon vorgestellt.
 
 signal location_pressed(location_id: String)
-## Beim Herunterdrücken auf der Karte (für die Unterscheidung Tippen/Scrollen im GameScreen).
-signal pin_down
 
 const LocationCatalogScript := preload("res://scripts/systems/location_catalog.gd")
 const CityLayoutScript := preload("res://scripts/ui/city_layout.gd")
@@ -312,7 +310,6 @@ func _begin_touch() -> void:
 	_dragging = false
 	if _camera_tween != null:
 		_camera_tween.kill()
-	pin_down.emit()
 
 
 func _end_touch(screen_position: Vector2) -> void:

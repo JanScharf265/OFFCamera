@@ -107,11 +107,6 @@ func get_type() -> CompanyTypeScript:
 	return _catalog.get_definition(_type_id) if is_founded() else null
 
 
-## Spielzeit der Gründung (Minuten) oder -1.
-func get_founded_minutes() -> int:
-	return _founded_minutes
-
-
 func is_branch_open() -> bool:
 	return _branch_open
 
