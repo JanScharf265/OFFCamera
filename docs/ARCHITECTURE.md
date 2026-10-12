@@ -1,6 +1,6 @@
 # Architektur
 
-Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Tickets 4.1–4.5 umgesetzt, Abnahme offen: Konten, Unternehmen, Tagesabschluss, Filiale, Management, Unternehmens-UI) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, Unternehmen, Tagesabschluss, Filiale, Management), Phase 3 (Kanal, Content, Ausrüstung, Zufallsereignisse) und Phase 2 + G1 (Orte, isometrische Stadtkarte, Reisezeit, Termine). Abnahme: Phase 1, 2 und G1 auf dem iPhone; Phase 3, 4 und G2 per Tests + Mac-Fensterlauf, iPhone-Abnahme gesammelt in Phase 7 (DECISIONS 021).
 
 ## Umgesetzt
 

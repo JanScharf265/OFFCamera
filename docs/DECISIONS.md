@@ -150,3 +150,12 @@ Zwei-Finger-Zoom begrenzt auf 0,5–1,0. Icons: Kenney „Game Icons“ und „G
 für „Termine“ gibt es kein Kalender-Icon, daher eine Fahne. G2.2 und G2.3 wurden zusammen umgesetzt, damit jeder
 Commit spielbar bleibt (ohne Fenster wären Aktivitäten nach dem Vollbild-Umbau nicht erreichbar gewesen). Spiellogik, Daten und
 Spielstand bleiben unverändert. Phase-4-Abnahme bleibt offen und wird nach G2 im neuen Layout nachgeholt.
+
+## 021 – Abnahme ohne iPhone, iPhone-Abnahme gesammelt in Phase 7
+Korrektur des Game Directors (12.10.2026): Die gemeldeten iPhone-Abnahmen von Phase 3, Phase 4 und G2 haben nicht
+stattgefunden; sie sind in der ROADMAP wieder offen. Ab jetzt gilt als Abnahme einer Phase: alle automatischen Tests
+grün **und** ein Fensterlauf auf dem Mac (Godot, nicht headless) mit Screenshots, die Claude selbst ansieht und prüft.
+Die iPhone-Abnahme (Touch, Safe Area, Ausrichtung, Export) wird gesammelt in Phase 7 (Mobile Politur) nachgeholt;
+die Checklisten „Abnahme auf dem iPhone“ bleiben bis dahin offen. Nie eine iPhone- oder Editor-Prüfung als erledigt
+eintragen, die nicht gemeldet wurde.
+

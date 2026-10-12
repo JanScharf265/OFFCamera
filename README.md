@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 3 (Streamer-Karriere) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 4 (Unternehmen) umgesetzt (Tickets 4.1–4.5, 246/246 Tests grün) – Abnahme offen. Grafik-Ticket G2 (Querformat, Karte als Hauptbildschirm) umgesetzt (255/255 Tests grün) – Editor- und iPhone-Abnahme (G2 + Phase 4) ausstehend.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Als Nächstes: Phase 5.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |

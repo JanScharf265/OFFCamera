@@ -20,7 +20,7 @@
 - Spielstand Version 9 (Filiale) mit Migration von Version 8 (Ticket 4.4)
 - Spielansicht: Firmenkonto im HUD, Abschnitt „Unternehmen“ (Auslastung, Ruf, erwartetes Tagesergebnis, Filiale, Einlage/Entnahme 100 €), „Tagesabschlüsse“ und „Unternehmens-Verlauf“ mit Begründungen; Firmenbuchungen in den letzten Buchungen markiert (Ticket 4.5)
 
-## Unveröffentlicht – Phase 3 (iPhone-Abnahme ok, 11.10.2026)
+## Unveröffentlicht – Phase 3 (abgenommen per Tests + Mac-Fensterlauf; iPhone-Abnahme offen, Phase 7)
 - ChannelSystem: Kanalprofil mit Followern (0–1.000.000, Wachstumsbremse), Community-Stimmung und Ruf (0–100); jede Änderung mit Begründung im Kanal-Protokoll (Ticket 3.1)
 - Spielstand Version 3 (Kanal) mit Migration von Version 2 (Ticket 3.1)
 - Content-Formate als Daten: Kurzvideo (Wohnung), Livestream, Langes Video, Q&A mit der Community (Studio); exakt berechnete Wirkung mit Vorschau auf der Karte (Ticket 3.2)

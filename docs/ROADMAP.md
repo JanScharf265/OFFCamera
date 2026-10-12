@@ -2,6 +2,10 @@
 
 Eine Phase gilt erst als abgeschlossen, wenn ihre Abnahmekriterien erfüllt und committet sind.
 
+**Abnahme ab 12.10.2026 (DECISIONS 021):** alle automatischen Tests grün + Fensterlauf auf dem Mac mit
+Screenshots, die Claude selbst prüft. Die iPhone-Abnahme wird gesammelt in Phase 7 (Mobile Politur) nachgeholt.
+Die Checklisten „Abnahme auf dem iPhone“ bleiben bis dahin offen.
+
 ## Phase 0 – Projektgrundlage und iPhone-Export ✅ (11.10.2026)
 - [x] Godot-Projekt, `.gitignore`, README, Roadmap, Architektur-Notizen
 - [x] Minimaler Startbildschirm
@@ -81,7 +85,7 @@ Grafiken aus frei nutzbaren (CC0) Asset-Paketen, später austauschbar.
 - [x] Im Editor durchgespielt (Wischen mit der Maus, Tippen auf Gebäude/Schilder)
 - [x] iPhone-Abnahme: Wischen flüssig, Tippen trifft, Seite scrollt außerhalb der Karte, Notch/Home-Balken frei
 
-## Phase 3 – Streamer-/Creator-Karriere ✅ (11.10.2026)
+## Phase 3 – Streamer-/Creator-Karriere ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
 Kanalprofil (Follower, Community-Stimmung, Ruf) mit Grenzen und Wachstumsbremse, Content-Formate als Daten,
 Einnahmen nur über das Ledger, Equipment-Upgrades, zufällige regelbasierte Karriere-Ereignisse mit festem Seed,
 in der UI nachvollziehbar, warum sich Werte geändert haben.
@@ -91,23 +95,24 @@ in der UI nachvollziehbar, warum sich Werte geändert haben.
 - [x] Ticket 3.3: Equipment-Upgrades (Kamera, Mikrofon, Licht, je 3 Stufen; Spielstand Version 4) (177/177 Tests grün)
 - [x] Ticket 3.4: Zufällige Karriere-Ereignisse mit festem Seed (5 Ereignisse; Spielstand Version 5) (193/193 Tests grün)
 - [x] Ticket 3.5: Karriere-UI: Kanal im HUD, Kanal-Karte mit Wachstumsbremse, Kanal-Verlauf mit Begründungen (196/196 Tests grün)
-- [x] Im Editor durchgespielt – entfällt, durch die iPhone-Abnahme abgedeckt
-- [x] iPhone-Abnahme
+- [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Content-Karten, Kanal-Karte, Kanal-Verlauf; damals Hochformat)
+- [ ] Im Editor durchgespielt – offen
+- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7 (die frühere Meldung „ok“ war falsch)
 
-Abnahme auf dem iPhone:
-- [x] Neues Spiel: HUD zeigt „Kanal: 120 Follower · Community 50 · Ruf 50“
-- [x] Zu Hause gibt es „Kurzvideo“, im Studio „Livestream“, „Langes Video“, „Q&A mit der Community“; „Kurzer Stream“ ist weg
-- [x] Jede Content-Karte zeigt vorher die Wirkung (Zeit, Energie, Stimmung, Follower, Community, Ruf, Geld) und die Qualität mit Anteilen
-- [x] Livestream am Start: genau 2 h, +17 Follower, Community +2, +25,00 € in den Buchungen
-- [x] Kanal-Verlauf zeigt nach jeder Produktion Zeit, Begründung (Format · Qualität) und die Änderung
-- [x] Ausrüstung im Studio: Kamera Stufe 1 kaufen → -120,00 € in den Buchungen, Qualität beim Livestream steigt auf 105 %
-- [x] Höchste Ausrüstungsstufe: Kaufen-Button verschwindet
-- [x] Ab Tag 3 können Karriere-Ereignisse erscheinen; Optionen zeigen Kanal-Folgen; nach der Wahl steht der Grund im Kanal-Verlauf
-- [x] App beenden, „Fortsetzen“: Kanal, Verlauf, Ausrüstung, Buchungen unverändert; kein Ereignis kommt doppelt
-- [x] Spielstand aus Phase 2 lässt sich fortsetzen (Kanal mit Startwerten, keine Ausrüstung)
-- [x] Alles per Touch bedienbar und scrollbar, nichts verdeckt
+Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
+- [ ] Neues Spiel: HUD zeigt „Kanal: 120 Follower · Community 50 · Ruf 50“
+- [ ] Zu Hause gibt es „Kurzvideo“, im Studio „Livestream“, „Langes Video“, „Q&A mit der Community“; „Kurzer Stream“ ist weg
+- [ ] Jede Content-Karte zeigt vorher die Wirkung (Zeit, Energie, Stimmung, Follower, Community, Ruf, Geld) und die Qualität mit Anteilen
+- [ ] Livestream am Start: genau 2 h, +17 Follower, Community +2, +25,00 € in den Buchungen
+- [ ] Kanal-Verlauf zeigt nach jeder Produktion Zeit, Begründung (Format · Qualität) und die Änderung
+- [ ] Ausrüstung im Studio: Kamera Stufe 1 kaufen → -120,00 € in den Buchungen, Qualität beim Livestream steigt auf 105 %
+- [ ] Höchste Ausrüstungsstufe: Kaufen-Button verschwindet
+- [ ] Ab Tag 3 können Karriere-Ereignisse erscheinen; Optionen zeigen Kanal-Folgen; nach der Wahl steht der Grund im Kanal-Verlauf
+- [ ] App beenden, „Fortsetzen“: Kanal, Verlauf, Ausrüstung, Buchungen unverändert; kein Ereignis kommt doppelt
+- [ ] Spielstand aus Phase 2 lässt sich fortsetzen (Kanal mit Startwerten, keine Ausrüstung)
+- [ ] Alles per Touch bedienbar und scrollbar, nichts verdeckt
 
-## Phase 4 – Fiktionales Unternehmen und zweiter Standort ← umgesetzt, Abnahme offen (nach G2 im neuen Layout)
+## Phase 4 – Fiktionales Unternehmen und zweiter Standort ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
 Merch- und Lifestyle-Label (Follower treiben den Umsatz), getrennte Konten privat/Firma im einen Ledger,
 Tagesabschluss beim Tageswechsel, zweiter Standort als Filiale in Marbella, Management vor Ort (ohne Pflege sinkt
 die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), noch keine Mitarbeitenden.
@@ -117,10 +122,11 @@ die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), n
 - [x] Ticket 4.3: Tagesabschluss beim Tageswechsel (Spielstand Version 8) (235/235 Tests grün)
 - [x] Ticket 4.4: Zweiter Standort (Ladenlokal, Filiale „Merch-Laden“) und Management-Aktivitäten; Spielstand Version 9 (243/243 Tests grün)
 - [x] Ticket 4.5: Unternehmens-UI: Firmenkonto im HUD, Unternehmens-Karte mit Prognose, Einlage/Entnahme, Tagesabschlüsse und Unternehmens-Verlauf (246/246 Tests grün)
-- [ ] Im Editor durchgespielt
-- [ ] iPhone-Abnahme
+- [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Gründung, Unternehmens-Karte, Tagesabschluss, Ladenlokal; Hochformat, Fenster seit G2)
+- [ ] Im Editor durchgespielt – offen
+- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
 
-Abnahme auf dem iPhone:
+Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
 - [ ] Neues Spiel: kein Firmenkonto im HUD; Abschnitt „Unternehmen“ zeigt „Noch kein Unternehmen. Gründen möglich: Merch-Label (Büro).“
 - [ ] Im Büro „Merch-Label gründen“: 1 h, Privatkonto −350 € (150 € Gebühr + 200 € Einlage), HUD zeigt „Firmenkonto: 200,00 €“
 - [ ] Buchungen: Gründung und Einlage sichtbar, Firmenbuchungen mit „(Firma)“ markiert
@@ -136,7 +142,7 @@ Abnahme auf dem iPhone:
 - [ ] Spielstand aus Phase 3 lässt sich fortsetzen (alle Buchungen auf dem Privatkonto, kein Unternehmen)
 - [ ] Alles per Touch bedienbar und scrollbar, nichts verdeckt oder abgeschnitten
 
-## Grafik-Ticket G2 – Querformat, Karte als Hauptbildschirm ← in Abnahme
+## Grafik-Ticket G2 – Querformat, Karte als Hauptbildschirm ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
 Grundsatzentscheidung des Game Directors (12.10.2026), vor Phase 5: Querformat (beide Richtungen), isometrische
 Stadtkarte im Vollbild, HUD in den oberen Ecken, Icon-Buttons an den Seiten öffnen Fenster, Gebäude antippen öffnet
 das Fenster des Orts. Safe Area (Notch seitlich, Home-Balken unten). Nur Darstellung – Spiellogik, Daten und Spielstand
@@ -146,10 +152,11 @@ bleiben unverändert (siehe DECISIONS 020).
 - [x] G2.2 + G2.3 (zusammen umgesetzt, damit jeder Stand spielbar bleibt): Karte als Vollbild, HUD, Seitenleisten,
   Hinweise, Zoom; Fenster für Ort, Termine, Kanal, Unternehmen, Buchungen, Ereignis (255/255 Tests grün)
 - [x] G2.4: Icons (Kenney „Game Icons“ + Erweiterung, CC0), Tests, Doku (255/255 Tests grün)
-- [ ] Im Editor durchgespielt
-- [ ] iPhone-Abnahme (zusammen mit der offenen Phase-4-Abnahme oben)
+- [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Start, Ortsfenster, Kanal-Fenster, Hinweis, Icons; 1280×720)
+- [ ] Im Editor durchgespielt – offen
+- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
 
-Abnahme auf dem iPhone (G2):
+Abnahme auf dem iPhone (G2, offen – gesammelt in Phase 7):
 - [ ] App startet im Querformat, in beiden Richtungen; Drehen des iPhones dreht das Bild mit
 - [ ] Karte füllt den ganzen Bildschirm (auch hinter Notch/Dynamic Island und Home-Balken)
 - [ ] HUD links oben (Tag, Uhrzeit, Ort) und rechts oben (Konto, Firmenkonto, Energie, Stimmung) – nichts von der Notch verdeckt, in beiden Richtungen
@@ -162,9 +169,10 @@ Abnahme auf dem iPhone (G2):
 - [ ] Hauptmenü und Einstellungen im Querformat bedienbar
 - [ ] „Fortsetzen“ nach Neustart: Spielstand unverändert (Spiellogik/Spielstand wurden nicht geändert)
 
-## Phase 5 – Finanzen, Fristen, Behördenereignisse
+## Phase 5 – Finanzen, Fristen, Behördenereignisse ← als Nächstes (Plan folgt)
 
 ## Spätere Phasen
 6. Save/Load-Stabilisierung und Migration
-7. Mobile Politur und Performance
+7. Mobile Politur und Performance – inklusive der gesammelten iPhone-Abnahmen von Phase 3, Phase 4 und G2
+   (Checklisten oben) und aller folgenden Phasen
 8. Balancing und mehr Inhalte
