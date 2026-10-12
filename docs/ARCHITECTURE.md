@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 4 (Tickets 4.1–4.5 umgesetzt, Abnahme ausstehend: Konten, Unternehmen, Tagesabschluss, Filiale, Management, Unternehmens-UI) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
+Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Tickets 4.1–4.5 umgesetzt, Abnahme offen: Konten, Unternehmen, Tagesabschluss, Filiale, Management, Unternehmens-UI) auf Basis von Phase 3 (abgeschlossen, auf dem iPhone abgenommen) auf Basis von Phase 2 + Grafik-Ticket G1: Kanalprofil, Content-Formate, Ausrüstung, Zufallsereignisse, Karriere-UI; Orte, isometrische Stadtkarte, Reisezeit, ortsgebundene Aktivitäten, Termine, Spielstand v2. Phase 1 und 2 auf dem iPhone abgenommen.
 
 ## Umgesetzt
 
@@ -180,39 +180,41 @@ Stand Phase 4 (Tickets 4.1–4.5 umgesetzt, Abnahme ausstehend: Konten, Unterneh
   hält die laufende `GameState`-Sitzung und wechselt zwischen `main_menu.gd` und `game_screen.gd`.
 - UI wird im Code aus Containern gebaut (keine festen Pixelpositionen). Farben/Größen in `ui_style.gd`,
   Texte für Aktivitäten/Beträge in `activity_text.gd`.
-- `game_screen.gd` aktiviert/deaktiviert Aktivitäten ausschließlich über `ActivitySystem.check()`
-  und aktualisiert nach jeder Aktion explizit (nicht über System-Signale, die mitten im Ablauf feuern).
-- Scrollen per Touch: Karten und Buttons in der Liste haben `mouse_filter = PASS`, damit Wischgesten
-  die `ScrollContainer` erreichen. Hat sich die Liste zwischen Antippen und Loslassen eines Buttons
-  um mehr als 12 px bewegt, gilt das als Scrollen und die Aktivität startet nicht.
-- Spielansicht (von oben): HUD mit Ort, Aktivitäten am aktuellen Ort (Liste wird bei Ortswechsel neu
-  gebaut), nächste 2 Termine („Wahrnehmen“ nur wenn möglich, sonst der Grund), Stadtkarte
-  (siehe unten), Ortsdetails mit „Hinfahren“, letzte Buchungen.
+- Spielansicht im Querformat (G2, `game_screen.gd`): Stadtkarte im Vollbild (auch unter Notch/Home-Balken),
+  darüber innerhalb der Safe Area: `HudLeft` (Tag, Uhrzeit, Ort), `HudRight` (Konto, Firmenkonto, Energie,
+  Stimmung), `LeftBar` (Termine, Kanal, Firma – erst nach der Gründung) und `RightBar` (Buchungen, Menü, Hier),
+  unten der Hinweis `Toast` (`FeedbackLabel`; kurze Texte ca. 4 s, lange/mehrzeilige bleiben bis zum Antippen).
+  Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
+- Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,
+  Tippen vs. Scrollen: > 12 px Bewegung zwischen Antippen und Loslassen = Scrollen). Inhalte mit `setup()`,
+  `get_title()`, `refresh()`: `location_window.gd` (Details, „Hinfahren“, Content, Aktivitäten, Ausrüstung,
+  Gründung, Filiale – an fremden Orten sichtbar, aber gesperrt mit dem Grund aus `check()`),
+  `appointments_window.gd`, `channel_window.gd` (Kanal + Verlauf), `company_window.gd` (Unternehmen,
+  Tagesabschlüsse, Verlauf, Einlage/Entnahme), `ledger_window.gd` (Buchungen, Filter alle/privat/Firma),
+  `event_window.gd` (offenes Ereignis, nicht schließbar). Immer nur ein Fenster, Karte dahinter abgedunkelt
+  (`Dim`, Tippen schließt). Aktionen laufen über öffentliche Handler des GameScreens (`on_activity_pressed()` …),
+  der nach jeder Aktion `_refresh()` aufruft (HUD, Karte, offenes Fenster, Ereignis) – nicht über System-Signale.
+- Buttons aktivieren/deaktivieren sich ausschließlich über die `check()`-Funktionen der Systeme.
 - Stadtkarte (Grafik-Ticket G1), nur Darstellung:
   - `city_layout.gd` (RefCounted, ohne Szene testbar): festes isometrisches Raster 15 × 15 plus Umland;
     Straßen auf den Zeilen/Spalten 1, 5, 9, 13 (13 = Strandpromenade), darunter Strand und Meer.
     Jeder Ort kommt auf das nächste freie Grundstück an einer Straße (aus `map_position`, deterministisch).
     `travel_path()` = Breitensuche über Straßen; Projektion `cell_to_world()` (Kachel 132 × 66).
-  - `city_map.gd`: zeichnet in `_draw()` nach dem Maleralgorithmus (nur sichtbare Zellen), Zoom 0,75.
+  - `city_map.gd`: zeichnet in `_draw()` nach dem Maleralgorithmus (nur sichtbare Zellen). Zoom 0,5–1,0
+    (Start 0,75) per Zwei-Finger-Geste (`InputEventScreenTouch/Drag`), Trackpad (`InputEventMagnifyGesture`)
+    oder Mausrad; der Punkt unter den Fingern bleibt stehen. `center_on(ort)` für „Hier“.
     Namensschilder sind Buttons `MapPin_<id>`; Tippen aufs Gebäude wählt ebenfalls aus.
     `mouse_filter = STOP`: Wischen verschiebt nur die Karte (ab 12 px kein Tipp mehr), Grenzen = Stadt inkl. Strand.
     `play_travel(von, nach)` animiert ein Taxi entlang der Straßen (Tween, 0,8–2,5 s) und schwenkt die Kamera mit;
     aufgerufen vom GameScreen erst nach erfolgreichem `LocationSystem.travel()`. `LocationMarker` wippt über dem aktuellen Ort.
   - Gebäudeaussehen je Orts-ID als Tabelle `BUILDINGS`; Grafiken unter `assets/kenney/` (CC0, je mit `License.txt`).
     Fehlt eine Grafik, wird das Teil ausgelassen statt abzustürzen.
-- Kanal (Phase 3): HUD-Zeile `ChannelLabel`; Abschnitt „Kanal“ (Follower, Anteil laut Wachstumsbremse,
-  Balken für Community-Stimmung und Ruf) und „Kanal-Verlauf“ (letzte 5 Protokolleinträge: Zeit, Begründung,
-  tatsächliche Änderung; bei Kürzung auch die gewünschte Änderung und die Ursache). Texte in `activity_text.gd`.
-- Unternehmen (Phase 4): HUD-Zeile `CompanyBalanceLabel` (nur mit Unternehmen); Abschnitt „Unternehmen“
-  (Hinweis zur Gründung bzw. Karte mit Firmenkonto, Auslastung, Ruf, `preview_day()`-Prognose, Filial-Status,
-  Einlage/Entnahme in 100-€-Schritten), „Tagesabschlüsse“ (letzte 5, unbezahlte rot) und „Unternehmens-Verlauf“
-  (letzte 5 Protokolleinträge). Firmenbuchungen in „Letzte Buchungen“ mit „(Firma)“. Gründungs- und
-  Filial-Karten erscheinen am jeweiligen Ort im Abschnitt „Aktivitäten“.
 - Kollision mit Termin: erster Tipp zeigt die Warnung, zweiter Tipp auf dieselbe Aktion führt aus.
-- Offenes Ereignis: `EventPanel` ersetzt die Liste, bis eine Option gewählt ist.
+- Offenes Ereignis: Fenster `Window_event` (Inhalt `EventPanel`) ersetzt jedes andere Fenster und sperrt die
+  Karte, bis eine Option gewählt ist.
 - Automatisch gespeichert wird beim Start eines neuen Spiels, nach jeder erfolgreichen Aktion
   (`GameScreen.state_changed`), beim Wechsel ins Menü und bei `NOTIFICATION_APPLICATION_PAUSED`,
-  `…_FOCUS_OUT` und `NOTIFICATION_WM_CLOSE_REQUEST`. Speicherfehler erscheinen in der Rückmeldezeile.
+  `…_FOCUS_OUT` und `NOTIFICATION_WM_CLOSE_REQUEST`. Speicherfehler erscheinen als Hinweis.
 - Hauptmenü: „Fortsetzen“ (Sitzung im Speicher oder Spielstand auf dem Gerät), „Neues Spiel“
   (zweiter Tipp nötig, wenn ein Spiel existiert), „Einstellungen“ (`settings_screen.gd`:
   Spielstand löschen mit zweitem Tipp).

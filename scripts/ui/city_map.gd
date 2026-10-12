@@ -1,6 +1,6 @@
 extends Control
 
-## Isometrische Stadtkarte (Grafik-Ticket G1): Straßen, Strand, Meer, ein Gebäude
+## Isometrische Stadtkarte (Grafik-Ticket G1, seit G2 Vollbild-Hauptbildschirm): Straßen, Strand, Meer, ein Gebäude
 ## mit Namensschild pro Ort, Markierung am aktuellen Ort und ein Auto, das nach
 ## einer Fahrt zum Ziel fährt. Wischen verschiebt die Karte.
 ## Zeigt nur an; was ein Tipp bewirkt, entscheidet der GameScreen. Das Raster
@@ -15,9 +15,12 @@ const LocationCatalogScript := preload("res://scripts/systems/location_catalog.g
 const CityLayoutScript := preload("res://scripts/ui/city_layout.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
-const MAP_HEIGHT := 520
 const PIN_HEIGHT := 64
-const ZOOM := 0.75
+## Zoom (G2): Start 0,75, begrenzt auf 0,5–1,0 (Zwei-Finger-Geste, Mausrad, Trackpad).
+const DEFAULT_ZOOM := 0.75
+const MIN_ZOOM := 0.5
+const MAX_ZOOM := 1.0
+const WHEEL_ZOOM_STEP := 1.1
 ## Ab so viel Bewegung (px) gilt eine Berührung als Wischen, nicht als Tipp.
 const DRAG_THRESHOLD := 12.0
 const CAR_SCALE := 1.6
@@ -128,6 +131,12 @@ var _car_progress := 0.0
 var _car_direction := "SW"
 var _car_tween: Tween
 
+var _zoom := DEFAULT_ZOOM
+## Aktive Finger (Index -> Position) für die Zwei-Finger-Geste.
+var _touches := {}
+var _pinch_distance := 0.0
+var _pinching := false
+
 
 ## Vor dem Einfügen in den Baum aufrufen.
 func setup(catalog: LocationCatalogScript) -> void:
@@ -136,8 +145,6 @@ func setup(catalog: LocationCatalogScript) -> void:
 
 
 func _ready() -> void:
-	custom_minimum_size.y = MAP_HEIGHT
-	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# STOP: Wischen auf der Karte verschiebt nur die Karte, nicht die Seite.
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
@@ -223,6 +230,22 @@ func get_layout() -> CityLayoutScript:
 # --- Eingabe -----------------------------------------------------------------
 
 func _gui_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		_handle_touch(event)
+		return
+	if event is InputEventMagnifyGesture:
+		zoom_at(event.position, event.factor)
+		accept_event()
+		return
+	if event is InputEventMouseButton and event.pressed \
+			and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		zoom_at(event.position, WHEEL_ZOOM_STEP if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / WHEEL_ZOOM_STEP)
+		accept_event()
+		return
+	if _pinching:
+		# Während zwei Finger zoomen, verschieben/tippen die nachgebildeten Mausereignisse nichts.
+		accept_event()
+		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			# Gehört der Druck nicht zu einem Schild aus diesem Bild, ist eine alte Markierung ungültig.
@@ -238,6 +261,50 @@ func _gui_input(event: InputEvent) -> void:
 			_dragging = true
 		_set_offset(_offset + event.relative)
 		accept_event()
+
+
+## Zwei-Finger-Geste: Abstandsänderung der beiden Finger zoomt um ihre Mitte.
+## (Ein Finger läuft weiter über die nachgebildeten Mausereignisse.)
+func _handle_touch(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_touches[event.index] = event.position
+		else:
+			_touches.erase(event.index)
+	else:
+		_touches[event.index] = event.position
+	if _touches.size() >= 2:
+		var points: Array = _touches.values()
+		var distance: float = points[0].distance_to(points[1])
+		if _pinching and _pinch_distance > 0.0:
+			zoom_at((points[0] + points[1]) / 2.0, distance / _pinch_distance)
+		_pinching = true
+		_dragging = true  # nach dem Zoomen löst Loslassen keinen Tipp aus
+		_pinch_distance = distance
+	elif _touches.is_empty():
+		_pinching = false
+		_pinch_distance = 0.0
+	accept_event()
+
+
+func get_zoom() -> float:
+	return _zoom
+
+
+## Zoomt um einen Bildschirmpunkt; der Weltpunkt darunter bleibt stehen. Begrenzung MIN_ZOOM–MAX_ZOOM.
+func zoom_at(screen_point: Vector2, factor: float) -> void:
+	var new_zoom := clampf(_zoom * factor, MIN_ZOOM, MAX_ZOOM)
+	if is_equal_approx(new_zoom, _zoom):
+		return
+	var world := (screen_point - _offset) / _zoom
+	_zoom = new_zoom
+	_set_offset(screen_point - world * _zoom)
+
+
+## Schwenkt die Kamera zu einem Ort (z. B. „Hier“-Button).
+func center_on(location_id: String) -> void:
+	if _catalog.has(location_id):
+		_move_camera_to(_layout.get_location_cell(location_id), 0.3)
 
 
 func _begin_touch() -> void:
@@ -271,7 +338,7 @@ func _on_sign_pressed(location_id: String) -> void:
 
 ## Vorderstes Gebäude unter dem Finger.
 func _location_at(screen_position: Vector2) -> String:
-	var world := (screen_position - _offset) / ZOOM
+	var world := (screen_position - _offset) / _zoom
 	var best := ""
 	var best_depth := -INF
 	for id in _pins:
@@ -299,7 +366,7 @@ func _on_resized() -> void:
 
 
 func _offset_for(cell: Vector2i) -> Vector2:
-	return size / 2.0 - CityLayoutScript.cell_to_world(Vector2(cell)) * ZOOM
+	return size / 2.0 - CityLayoutScript.cell_to_world(Vector2(cell)) * _zoom
 
 
 func _move_camera_to(cell: Vector2i, seconds: float) -> void:
@@ -319,8 +386,8 @@ func _set_offset(value: Vector2) -> void:
 ## Die Stadt (inkl. Strand) deckt immer den sichtbaren Ausschnitt ab.
 func _clamped(value: Vector2) -> Vector2:
 	var bounds := CityLayoutScript.city_bounds()
-	var low := size - bounds.end * ZOOM
-	var high := -bounds.position * ZOOM
+	var low := size - bounds.end * _zoom
+	var high := -bounds.position * _zoom
 	var result := value
 	result.x = (low.x + high.x) / 2.0 if low.x > high.x else clampf(value.x, low.x, high.x)
 	result.y = (low.y + high.y) / 2.0 if low.y > high.y else clampf(value.y, low.y, high.y)
@@ -328,7 +395,7 @@ func _clamped(value: Vector2) -> Vector2:
 
 
 func _to_screen(world: Vector2) -> Vector2:
-	return _offset + world * ZOOM
+	return _offset + world * _zoom
 
 
 # --- Schilder, Markierung, Auto -------------------------------------------------
@@ -409,8 +476,8 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), SEA)
 	if _layout == null:
 		return
-	draw_set_transform(_offset, 0.0, Vector2(ZOOM, ZOOM))
-	var view := Rect2(-_offset / ZOOM, size / ZOOM).grow(200.0)
+	draw_set_transform(_offset, 0.0, Vector2(_zoom, _zoom))
+	var view := Rect2(-_offset / _zoom, size / _zoom).grow(200.0)
 	var low := CityLayoutScript.min_cell()
 	var high := CityLayoutScript.max_cell()
 	# Maleralgorithmus: hintere Zellen zuerst (kleine gx + gy).
@@ -424,7 +491,7 @@ func _draw() -> void:
 	_draw_car()
 	var font := get_theme_default_font()
 	draw_string(font, CityLayoutScript.cell_to_world(Vector2(6, CityLayoutScript.BEACH_ROW + 3)),
-			"Mittelmeer", HORIZONTAL_ALIGNMENT_LEFT, -1, int(UiStyle.SMALL_FONT_SIZE / ZOOM), Color(1, 1, 1, 0.7))
+			"Mittelmeer", HORIZONTAL_ALIGNMENT_LEFT, -1, int(UiStyle.SMALL_FONT_SIZE / _zoom), Color(1, 1, 1, 0.7))
 	draw_set_transform(Vector2.ZERO)
 
 

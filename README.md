@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 3 (Streamer-Karriere) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 4 (Unternehmen) umgesetzt (Tickets 4.1–4.5, 246/246 Tests grün) – Abnahme offen. Grafik-Ticket G2 (Querformat) in Arbeit: G2.1 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 abgeschlossen ✅ (auf dem iPhone abgenommen). Grafik-Ticket G1 (isometrische Stadt) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 3 (Streamer-Karriere) abgeschlossen ✅ (auf dem iPhone abgenommen). Phase 4 (Unternehmen) umgesetzt (Tickets 4.1–4.5, 246/246 Tests grün) – Abnahme offen. Grafik-Ticket G2 (Querformat) in Arbeit: G2.1–G2.3 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -110,7 +110,7 @@ data/appointments/   Feste Termine als JSON
 data/content/        Content-Formate als JSON (Phase 3)
 data/equipment/      Ausrüstung mit Stufen als JSON (Phase 3)
 data/company/        Unternehmensarten als JSON (Phase 4)
-scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht, Stadtkarte (zeigen nur an, keine Spielregeln)
+scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht, Stadtkarte, windows/ (Fenster) – zeigen nur an, keine Spielregeln
 assets/kenney/       Grafiken aus Kenney-CC0-Paketen (nur benutzte Dateien, je mit License.txt)
 tests/               Tests + Runner (nicht im iOS-Export)
 docs/                Roadmap, Architektur, Entscheidungen

@@ -134,7 +134,7 @@ func _start_map() -> CityMapScript:
 	var map := CityMapScript.new()
 	map.setup(_catalog())
 	(Engine.get_main_loop() as SceneTree).root.add_child(map)
-	map.size = Vector2(720, CityMapScript.MAP_HEIGHT)
+	map.size = Vector2(1280, 720)
 	map.set_state("home", "home")
 	map._on_resized()
 	return map
@@ -150,4 +150,57 @@ func _touch(map: CityMapScript, point: Vector2, pressed: bool) -> void:
 	event.button_index = MOUSE_BUTTON_LEFT
 	event.pressed = pressed
 	event.position = point
+	map._gui_input(event)
+
+
+func test_zoom_is_limited_and_keeps_point_under_finger() -> void:
+	var map := _start_map()
+	var point := Vector2(640, 360)
+	var world_before: Vector2 = (point - map._offset) / map.get_zoom()
+	map.zoom_at(point, 1.2)
+	var world_after: Vector2 = (point - map._offset) / map.get_zoom()
+	assert_true(world_before.distance_to(world_after) < 1.0, "Punkt unter dem Finger verschoben")
+	map.zoom_at(point, 10.0)
+	assert_eq(map.get_zoom(), CityMapScript.MAX_ZOOM)
+	map.zoom_at(point, 0.01)
+	assert_eq(map.get_zoom(), CityMapScript.MIN_ZOOM)
+	map.free()
+
+
+func test_wheel_zooms() -> void:
+	var map := _start_map()
+	var before: float = map.get_zoom()
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	wheel.pressed = true
+	wheel.position = Vector2(640, 360)
+	map._gui_input(wheel)
+	assert_true(map.get_zoom() > before, "Mausrad zoomt nicht")
+	map.free()
+
+
+func test_two_finger_pinch_zooms_without_tap() -> void:
+	var map := _start_map()
+	var pressed: Array[String] = []
+	map.location_pressed.connect(func(id: String) -> void: pressed.append(id))
+	var before: float = map.get_zoom()
+	_finger(map, 0, Vector2(600, 360), true)
+	_finger(map, 1, Vector2(700, 360), true)
+	var drag := InputEventScreenDrag.new()
+	drag.index = 1
+	drag.position = Vector2(760, 360)  # Abstand 100 -> 160
+	map._gui_input(drag)
+	assert_true(map.get_zoom() > before, "Zwei-Finger-Geste zoomt nicht")
+	_finger(map, 1, Vector2(760, 360), false)
+	_finger(map, 0, Vector2(600, 360), false)
+	_touch(map, Vector2(600, 360), false)  # nachgebildetes Loslassen
+	assert_true(pressed.is_empty(), "Zoomen hat einen Ort ausgewählt")
+	map.free()
+
+
+func _finger(map: CityMapScript, index: int, point: Vector2, pressed: bool) -> void:
+	var event := InputEventScreenTouch.new()
+	event.index = index
+	event.position = point
+	event.pressed = pressed
 	map._gui_input(event)

@@ -143,8 +143,8 @@ das Fenster des Orts. Safe Area (Notch seitlich, Home-Balken unten). Nur Darstel
 bleiben unverändert (siehe DECISIONS 020).
 
 - [x] G2.1: Querformat und Grundgerüst (Projekteinstellungen, Safe Area je Bildschirm, Hauptmenü/Einstellungen) (248/248 Tests grün; Spielansicht bis G2.2 noch als schmale Spalte)
-- [ ] G2.2: Karte als Vollbild, HUD, Seitenleisten, Hinweise, Zwei-Finger-Zoom
-- [ ] G2.3: Fenster (Ort, Termine, Kanal, Unternehmen, Buchungen, Ereignis)
+- [x] G2.2 + G2.3 (zusammen umgesetzt, damit jeder Stand spielbar bleibt): Karte als Vollbild, HUD, Seitenleisten,
+  Hinweise, Zoom; Fenster für Ort, Termine, Kanal, Unternehmen, Buchungen, Ereignis (255/255 Tests grün)
 - [ ] G2.4: Icons, Tests, Doku
 - [ ] Im Editor durchgespielt
 - [ ] iPhone-Abnahme (zusammen mit der offenen Phase-4-Abnahme)

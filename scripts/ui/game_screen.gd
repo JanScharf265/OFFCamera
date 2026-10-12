@@ -1,91 +1,69 @@
-extends VBoxContainer
+extends Control
 
-## Spielansicht: HUD (Datum, Uhrzeit, Ort, Konto, Kanal, Werte), Content-Formate und Aktivitäten am aktuellen
-## Ort, nächste Termine, Stadtkarte mit Fahrten, Kanal mit Verlauf (warum sich Werte geändert haben), letzte Buchungen.
-## Ist ein Ereignis offen, ersetzt es die Liste, bis entschieden ist.
+## Spielansicht im Querformat (G2): die isometrische Stadtkarte im Vollbild, darüber
+## HUD-Ecken (links oben Tag/Uhrzeit/Ort, rechts oben Konten, Energie, Stimmung),
+## Seitenbuttons (links Termine, Kanal, Unternehmen; rechts Buchungen, Menü, Hier),
+## eine Hinweis-Leiste unten und höchstens ein Fenster (scripts/ui/windows/).
+## Gebäude antippen öffnet das Fenster des Orts. Ein offenes Ereignis erscheint als
+## Fenster, das zuerst entschieden werden muss.
 ## Zeigt nur an und ruft Systeme auf – Regeln stehen in den Systemen.
 ##
-## Aktualisiert wird nach jeder Aktion explizit über _refresh(), nicht über
-## die System-Signale: Die feuern teils mitten im Ablauf einer Aktivität,
-## wo check() noch "Zeitfortschritt läuft" melden würde.
-##
-## Würde eine Aktion einen Termin verpassen lassen, erscheint zuerst eine
-## Warnung; erst ein zweiter Tipp auf denselben Button führt sie aus.
+## Aktualisiert wird nach jeder Aktion explizit über _refresh(), nicht über die
+## System-Signale (die feuern teils mitten im Ablauf einer Aktion).
+## Würde eine Aktion einen Termin verpassen lassen, erscheint zuerst eine Warnung;
+## erst ein zweiter Tipp auf denselben Button führt sie aus.
 
 signal menu_pressed
-## Nach jeder erfolgreichen Aktion (Aktivität, Fahrt, Termin, Ereignis-Entscheidung) – die App speichert dann.
+## Nach jeder erfolgreichen Aktion – die App speichert dann.
 signal state_changed
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
-const LocationSystemScript := preload("res://scripts/systems/location_system.gd")
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
-const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
-const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
 const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const CityMapScript := preload("res://scripts/ui/city_map.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
+const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
+const AppointmentsWindowScript := preload("res://scripts/ui/windows/appointments_window.gd")
+const ChannelWindowScript := preload("res://scripts/ui/windows/channel_window.gd")
+const CompanyWindowScript := preload("res://scripts/ui/windows/company_window.gd")
+const LedgerWindowScript := preload("res://scripts/ui/windows/ledger_window.gd")
+const EventWindowScript := preload("res://scripts/ui/windows/event_window.gd")
 
-const RECENT_ENTRY_COUNT := 5
-const RECENT_CHANNEL_COUNT := 5
-const RECENT_COMPANY_COUNT := 5
+const CONFIRM_HINT := " Nochmal tippen, um trotzdem fortzufahren."
 ## Betrag je Tipp auf Einlage/Entnahme.
 const TRANSFER_STEP_CENTS := 10000
-const UPCOMING_APPOINTMENT_COUNT := 2
-## Hat sich die Liste zwischen Antippen und Loslassen weiter bewegt,
-## war es ein Scrollen, kein Tippen – die Aktion startet dann nicht.
-const TAP_SCROLL_TOLERANCE := 12
-const CONFIRM_HINT := " Nochmal tippen, um trotzdem fortzufahren."
+## Kurze Hinweise verschwinden nach dieser Zeit (Echtzeit, nur Anzeige); lange bleiben bis zum Antippen.
+const TOAST_SECONDS := 4.0
+const TOAST_STICKY_LENGTH := 90
+const HUD_RIGHT_WIDTH := 380
+const GAP := 16.0
 
 var _game: GameStateScript
+## Safe-Area-Abstände [links, oben, rechts, unten] in Viewport-Pixeln (von der App).
+var _margins: Array[float] = [24.0, 24.0, 24.0, 24.0]
+var _map: CityMapScript
+var _hud_left: PanelContainer
+var _hud_right: PanelContainer
 var _date_label: Label
 var _clock_label: Label
 var _location_label: Label
 var _balance_label: Label
-var _channel_label: Label
-var _followers_label: Label
-var _growth_label: Label
-## "community"/"reputation" -> Label bzw. ProgressBar
-var _channel_score_labels := {}
-var _channel_score_bars := {}
-var _channel_history: VBoxContainer
 var _company_balance_label: Label
-var _company_panel: VBoxContainer
-var _company_settlements: VBoxContainer
-var _company_history: VBoxContainer
-## Zuletzt gebauter Zustand des Unternehmens-Abschnitts ("none"/"founded"), um nur bei Wechsel neu zu bauen.
-var _company_panel_state := ""
 var _stat_labels := {}
 var _stat_bars := {}
+var _left_bar: VBoxContainer
+var _right_bar: VBoxContainer
+var _company_button: Button
+var _toast: PanelContainer
 var _feedback_label: Label
-## activity_id -> {"button": Button, "reason": Label}
-var _cards := {}
-## format_id -> {"button": Button, "reason": Label, "summary": Label, "quality": Label}
-var _content_cards := {}
-## equipment_id -> {"button": Button, "reason": Label, "title": Label, "next": Label}
-var _equipment_cards := {}
-## company_type_id -> {"button": Button, "reason": Label, "info": Label}
-var _company_cards := {}
-## company_type_id -> {"button": Button, "reason": Label, "info": Label} (Filiale)
-var _branch_cards := {}
-var _activity_title: Label
-var _activity_list: VBoxContainer
-var _activities_location := ""
-var _appointment_list: VBoxContainer
-var _map: CityMapScript
+var _toast_timer: Timer
+var _dim: ColorRect
+var _window: UiWindowScript
+var _window_kind := ""
 var _selected_location := ""
-var _location_name: Label
-var _location_description: Label
-var _location_hours: Label
-var _location_distance: Label
-var _location_activities: Label
-var _travel_button: Button
-var _ledger_list: VBoxContainer
-var _scroll: ScrollContainer
-var _event_panel: PanelContainer
-var _shown_event_id := ""
-var _scroll_at_press := 0
 ## Schlüssel der Aktion, deren Warnung gerade angezeigt wird (z. B. "travel:gym").
 var _confirm_key := ""
 
@@ -95,121 +73,103 @@ func setup(game: GameStateScript) -> void:
 	_game = game
 
 
+## Von der App: Abstände für Notch/Home-Balken. Die Karte bleibt Vollbild.
+func set_safe_margins(margins: Array[float]) -> void:
+	if margins.size() == 4:
+		_margins = margins
+	if is_node_ready():
+		_layout()
+
+
 func _ready() -> void:
 	assert(_game != null, "GameScreen: setup() wurde nicht aufgerufen.")
-	add_theme_constant_override("separation", 16)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_selected_location = _game.locations.get_current()
 
-	add_child(_build_hud())
-
-	_feedback_label = UiStyle.wrapping_label("Wähle eine Aktivität oder fahre zu einem anderen Ort.",
-			UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-	_feedback_label.name = "FeedbackLabel"
-	add_child(_feedback_label)
-
-	_event_panel = UiStyle.card()
-	_event_panel.name = "EventPanel"
-	_event_panel.visible = false
-	add_child(_event_panel)
-
-	var scroll := ScrollContainer.new()
-	scroll.name = "ActivityScroll"
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	add_child(scroll)
-	_scroll = scroll
-
-	var content := VBoxContainer.new()
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("separation", 16)
-	scroll.add_child(content)
-
-	_activity_title = UiStyle.section_label("")
-	content.add_child(_activity_title)
-	_activity_list = _list("ActivityList", 16)
-	content.add_child(_activity_list)
-
-	content.add_child(UiStyle.section_label("Termine"))
-	_appointment_list = _list("AppointmentList", 16)
-	content.add_child(_appointment_list)
-
-	content.add_child(UiStyle.section_label("Stadtkarte · Marbella"))
 	_map = CityMapScript.new()
 	_map.name = "CityMap"
 	_map.setup(_game.locations.get_catalog())
-	_map.pin_down.connect(_remember_scroll)
+	_map.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_map.location_pressed.connect(_on_location_pressed)
-	content.add_child(_map)
-	content.add_child(_build_location_panel())
+	add_child(_map)
 
-	content.add_child(UiStyle.section_label("Kanal"))
-	content.add_child(_build_channel_panel())
-	content.add_child(UiStyle.section_label("Kanal-Verlauf"))
-	_channel_history = _list("ChannelHistory", 8)
-	content.add_child(_channel_history)
+	_hud_left = _build_hud_left()
+	add_child(_hud_left)
+	_hud_right = _build_hud_right()
+	add_child(_hud_right)
 
-	content.add_child(UiStyle.section_label("Unternehmen"))
-	_company_panel = _list("CompanyPanel", 12)
-	content.add_child(_company_panel)
-	content.add_child(UiStyle.section_label("Tagesabschlüsse"))
-	_company_settlements = _list("CompanySettlements", 8)
-	content.add_child(_company_settlements)
-	content.add_child(UiStyle.section_label("Unternehmens-Verlauf"))
-	_company_history = _list("CompanyHistory", 8)
-	content.add_child(_company_history)
+	_left_bar = _side_bar("LeftBar")
+	_left_bar.add_child(_side_button("Termine", "AppointmentsButton", _open_appointments))
+	_left_bar.add_child(_side_button("Kanal", "ChannelButton", _open_channel))
+	_company_button = _side_button("Firma", "CompanyButton", _open_company)
+	_left_bar.add_child(_company_button)
+	_right_bar = _side_bar("RightBar")
+	_right_bar.add_child(_side_button("Buchungen", "LedgerButton", _open_ledger))
+	_right_bar.add_child(_side_button("Menü", "MenuButton", func() -> void: menu_pressed.emit()))
+	_right_bar.add_child(_side_button("Hier", "HereButton", _on_here_pressed))
 
-	content.add_child(UiStyle.section_label("Letzte Buchungen"))
-	_ledger_list = _list("LedgerList", 8)
-	content.add_child(_ledger_list)
+	_toast = UiStyle.hud_panel()
+	_toast.name = "Toast"
+	_toast.gui_input.connect(_on_toast_input)
+	add_child(_toast)
+	_feedback_label = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
+	_feedback_label.name = "FeedbackLabel"
+	_feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast.add_child(_feedback_label)
+	_toast_timer = Timer.new()
+	_toast_timer.one_shot = true
+	_toast_timer.timeout.connect(func() -> void: _toast.visible = false)
+	add_child(_toast_timer)
 
-	var menu_button := UiStyle.button("Menü")
-	menu_button.name = "MenuButton"
-	menu_button.pressed.connect(func() -> void: menu_pressed.emit())
-	add_child(menu_button)
+	_dim = ColorRect.new()
+	_dim.name = "Dim"
+	_dim.color = UiStyle.DIM
+	_dim.visible = false
+	_dim.gui_input.connect(_on_dim_input)
+	add_child(_dim)
 
+	resized.connect(_layout)
+	_show_feedback("Tippe auf ein Gebäude, um zu sehen, was du dort tun kannst.", UiStyle.TEXT)
 	_refresh()
 
 
-func _list(node_name: String, separation: int) -> VBoxContainer:
-	var list := VBoxContainer.new()
-	list.name = node_name
-	list.add_theme_constant_override("separation", separation)
-	return list
+# --- Aufbau -----------------------------------------------------------------------
 
-
-func _build_hud() -> Control:
-	var hud := UiStyle.card()
+func _build_hud_left() -> PanelContainer:
+	var panel := UiStyle.hud_panel()
+	panel.name = "HudLeft"
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	hud.add_child(box)
-
-	var top_row := HBoxContainer.new()
-	box.add_child(top_row)
+	box.add_theme_constant_override("separation", 4)
+	panel.add_child(box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	box.add_child(row)
 	_date_label = UiStyle.label("")
 	_date_label.name = "DateLabel"
-	_date_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_date_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	top_row.add_child(_date_label)
+	row.add_child(_date_label)
 	_clock_label = UiStyle.label("", UiStyle.LARGE_FONT_SIZE)
 	_clock_label.name = "ClockLabel"
-	top_row.add_child(_clock_label)
-
-	_location_label = UiStyle.label("")
+	row.add_child(_clock_label)
+	_location_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
 	_location_label.name = "LocationLabel"
 	box.add_child(_location_label)
+	return panel
 
+
+func _build_hud_right() -> PanelContainer:
+	var panel := UiStyle.hud_panel()
+	panel.name = "HudRight"
+	panel.custom_minimum_size.x = HUD_RIGHT_WIDTH
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	panel.add_child(box)
 	_balance_label = UiStyle.label("")
 	_balance_label.name = "BalanceLabel"
 	box.add_child(_balance_label)
-
 	_company_balance_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
 	_company_balance_label.name = "CompanyBalanceLabel"
 	box.add_child(_company_balance_label)
-
-	_channel_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
-	_channel_label.name = "ChannelLabel"
-	box.add_child(_channel_label)
-
 	for key in PlayerStatsScript.KEYS:
 		var stat_label := UiStyle.label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
 		box.add_child(stat_label)
@@ -218,281 +178,148 @@ func _build_hud() -> Control:
 		bar.min_value = PlayerStatsScript.MIN_VALUE
 		bar.max_value = PlayerStatsScript.MAX_VALUE
 		bar.show_percentage = false
-		bar.custom_minimum_size.y = 14
+		bar.custom_minimum_size.y = 10
 		box.add_child(bar)
 		_stat_bars[key] = bar
-	return hud
-
-
-func _build_channel_panel() -> Control:
-	var panel := UiStyle.card()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
-	_followers_label = UiStyle.label("", UiStyle.LARGE_FONT_SIZE)
-	_followers_label.name = "FollowersLabel"
-	box.add_child(_followers_label)
-	_growth_label = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-	_growth_label.name = "GrowthLabel"
-	box.add_child(_growth_label)
-	for key in ["community", "reputation"]:
-		var label := UiStyle.label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-		box.add_child(label)
-		_channel_score_labels[key] = label
-		var bar := ProgressBar.new()
-		bar.min_value = 0
-		bar.max_value = ChannelSystemScript.MAX_SCORE
-		bar.show_percentage = false
-		bar.custom_minimum_size.y = 14
-		box.add_child(bar)
-		_channel_score_bars[key] = bar
 	return panel
 
 
-func _build_location_panel() -> Control:
-	var panel := UiStyle.card()
-	panel.name = "LocationPanel"
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
-	_location_name = UiStyle.label("")
-	_location_name.name = "LocationName"
-	box.add_child(_location_name)
-	_location_description = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-	box.add_child(_location_description)
-	_location_hours = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
-	_location_hours.name = "LocationHours"
-	box.add_child(_location_hours)
-	_location_distance = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
-	_location_distance.name = "LocationDistance"
-	box.add_child(_location_distance)
-	_location_activities = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-	box.add_child(_location_activities)
-	_travel_button = _scroll_button("Hinfahren", "TravelButton")
-	_travel_button.pressed.connect(_on_travel_pressed)
-	box.add_child(_travel_button)
-	return panel
+func _side_bar(node_name: String) -> VBoxContainer:
+	var bar := VBoxContainer.new()
+	bar.name = node_name
+	bar.add_theme_constant_override("separation", 12)
+	add_child(bar)
+	return bar
 
 
-## Button in der Scroll-Liste: Wischgesten erreichen die ScrollContainer (PASS),
-## und der Scrollstand beim Antippen wird gemerkt.
-func _scroll_button(text: String, node_name: String) -> Button:
-	var button := UiStyle.button(text)
+func _side_button(text: String, node_name: String, action: Callable) -> Button:
+	var button := UiStyle.side_button(text)
 	button.name = node_name
-	button.mouse_filter = Control.MOUSE_FILTER_PASS
-	button.button_down.connect(_remember_scroll)
+	button.pressed.connect(action)
 	return button
 
 
-func _remember_scroll() -> void:
-	_scroll_at_press = _scroll.scroll_vertical
+## Ordnet alles innerhalb der Safe Area an; die Karte füllt den ganzen Bildschirm.
+func _layout() -> void:
+	if not is_node_ready():
+		return
+	var left := _margins[0]
+	var top := _margins[1]
+	var right := size.x - _margins[2]
+	var bottom := size.y - _margins[3]
+
+	_hud_left.reset_size()
+	_hud_left.position = Vector2(left, top)
+	_hud_right.reset_size()
+	_hud_right.position = Vector2(right - _hud_right.size.x, top)
+	var bars_top := top + maxf(_hud_left.size.y, _hud_right.size.y) + GAP
+	_left_bar.reset_size()
+	_left_bar.position = Vector2(left, bars_top)
+	_right_bar.reset_size()
+	_right_bar.position = Vector2(right - _right_bar.size.x, bars_top)
+
+	var toast_width := maxf(minf(900.0, right - left - 2.0 * (UiStyle.SIDE_BUTTON_SIZE.x + GAP)), 200.0)
+	# Umbrechende Labels brauchen eine feste Breite, sonst berechnen sie ihre Höhe für Breite 0.
+	_feedback_label.custom_minimum_size.x = toast_width - 28.0
+	_feedback_label.size = Vector2(toast_width - 28.0, 0.0)
+	_toast.reset_size()
+	_toast.position = Vector2((left + right - _toast.size.x) / 2.0, bottom - _toast.size.y)
+
+	_dim.position = Vector2.ZERO
+	_dim.size = size
+	if _window != null:
+		var width := minf(UiStyle.WINDOW_MAX_WIDTH, right - left - 2.0 * GAP)
+		_window.custom_minimum_size = Vector2(width, bottom - top)
+		_window.size = _window.custom_minimum_size
+		_window.position = Vector2((left + right - width) / 2.0, top)
+
+
+# --- Fenster ----------------------------------------------------------------------
+
+func _open_window(kind: String, content: Control, closable: bool = true) -> void:
+	_close_window()
+	_window_kind = kind
+	_window = UiWindowScript.new(kind, content.call("get_title"), content, closable)
+	_window.close_pressed.connect(_close_window)
+	_dim.visible = true
+	add_child(_window)
+	_layout()
+
+
+func _close_window() -> void:
+	if _window != null:
+		remove_child(_window)
+		_window.queue_free()
+	_window = null
+	_window_kind = ""
+	_dim.visible = false
+
+
+func _on_dim_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and not event.pressed and _window != null and _window.is_closable():
+		_close_window()
+
+
+func _open_location(location_id: String) -> void:
+	_selected_location = location_id
+	var content := LocationWindowScript.new()
+	content.setup(self, _game, location_id)
+	_open_window("location", content)
+	_map.set_state(_game.locations.get_current(), _selected_location)
+
+
+func _open_appointments() -> void:
+	var content := AppointmentsWindowScript.new()
+	content.setup(self, _game)
+	_open_window("appointments", content)
+
+
+func _open_channel() -> void:
+	var content := ChannelWindowScript.new()
+	content.setup(self, _game)
+	_open_window("channel", content)
+
+
+func _open_company() -> void:
+	var content := CompanyWindowScript.new()
+	content.setup(self, _game)
+	_open_window("company", content)
+
+
+func _open_ledger() -> void:
+	var content := LedgerWindowScript.new()
+	content.setup(self, _game)
+	_open_window("ledger", content)
+
+
+func _on_location_pressed(location_id: String) -> void:
+	if _window != null and not _window.is_closable():
+		return  # Ereignis muss zuerst entschieden werden
+	_open_location(location_id)
+
+
+func _on_here_pressed() -> void:
+	var current := _game.locations.get_current()
+	_map.center_on(current)
+	_open_location(current)
+
+
+# --- Buttons in Fenstern ----------------------------------------------------------
+
+## Button in einem Fensterinhalt: Wischgesten erreichen den Scrollbereich (PASS),
+## und der Scrollstand beim Antippen wird gemerkt (Tippen vs. Scrollen).
+func scroll_button(text: String, node_name: String) -> Button:
+	var button := UiStyle.button(text)
+	button.name = node_name
+	button.mouse_filter = Control.MOUSE_FILTER_PASS
+	button.button_down.connect(func() -> void:
+		if _window != null:
+			_window.remember_scroll())
+	return button
 
 
 func _was_scroll() -> bool:
-	return absi(_scroll.scroll_vertical - _scroll_at_press) > TAP_SCROLL_TOLERANCE
-
-
-func _build_activity_card(activity_id: String) -> Control:
-	var definition := _game.activities.get_catalog().get_definition(activity_id)
-	var card := UiStyle.card()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	card.add_child(box)
-
-	box.add_child(UiStyle.label(definition.display_name))
-	if not definition.description.is_empty():
-		box.add_child(UiStyle.wrapping_label(definition.description, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-	box.add_child(UiStyle.wrapping_label(ActivityText.summary(definition), UiStyle.SMALL_FONT_SIZE))
-
-	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
-	reason.visible = false
-	box.add_child(reason)
-
-	var button := _scroll_button("Starten", "StartButton_%s" % activity_id)
-	button.pressed.connect(_on_activity_pressed.bind(activity_id))
-	box.add_child(button)
-
-	_cards[activity_id] = {"button": button, "reason": reason}
-	return card
-
-
-## Karte für ein Content-Format; Wirkung und Qualität werden in _refresh_activities() aktualisiert.
-func _build_content_card(format_id: String) -> Control:
-	var format := _game.content.get_catalog().get_definition(format_id)
-	var card := UiStyle.card()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	card.add_child(box)
-
-	box.add_child(UiStyle.label("%s · Content" % format.display_name))
-	if not format.description.is_empty():
-		box.add_child(UiStyle.wrapping_label(format.description, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-	var summary := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
-	summary.name = "ContentSummary_%s" % format_id
-	box.add_child(summary)
-	var quality := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-	box.add_child(quality)
-
-	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
-	reason.visible = false
-	box.add_child(reason)
-
-	var button := _scroll_button("Produzieren", "ContentButton_%s" % format_id)
-	button.pressed.connect(_on_content_pressed.bind(format_id))
-	box.add_child(button)
-
-	_content_cards[format_id] = {"button": button, "reason": reason, "summary": summary, "quality": quality}
-	return card
-
-
-func _build_equipment_card(equipment_id: String) -> Control:
-	var card := UiStyle.card()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	card.add_child(box)
-	var title := UiStyle.label("")
-	title.name = "EquipmentTitle_%s" % equipment_id
-	box.add_child(title)
-	var next := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
-	box.add_child(next)
-	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
-	reason.visible = false
-	box.add_child(reason)
-	var button := _scroll_button("Kaufen", "EquipmentButton_%s" % equipment_id)
-	button.pressed.connect(_on_equipment_pressed.bind(equipment_id))
-	box.add_child(button)
-	_equipment_cards[equipment_id] = {"button": button, "reason": reason, "title": title, "next": next}
-	return card
-
-
-func _refresh_equipment_card(equipment_id: String) -> void:
-	var definition := _game.equipment.get_catalog().get_definition(equipment_id)
-	var card: Dictionary = _equipment_cards[equipment_id]
-	var level := _game.equipment.get_level(equipment_id)
-	var current_name: String = definition.get_level(level)["name"] if level > 0 else "nichts"
-	card["title"].text = "%s · Stufe %d/%d (%s)" % [definition.display_name, level, definition.max_level(), current_name]
-	var next := _game.equipment.get_next_level(equipment_id)
-	var format_names := PackedStringArray()
-	for format_id in definition.formats:
-		var format := _game.content.get_catalog().get_definition(format_id)
-		format_names.append(format.display_name if format != null else format_id)
-	if next.is_empty():
-		card["next"].text = "Höchste Stufe: +%d %% Qualität für %s." % [definition.get_level(level)["quality_percent"],
-				", ".join(format_names)]
-	else:
-		card["next"].text = "Nächste Stufe: %s · Qualität +%d %% für %s · %s" % [next["name"], next["quality_percent"],
-				", ".join(format_names), LedgerSystemScript.format_cents(next["price_cents"])]
-	var reason := _game.equipment.check_buy(equipment_id)
-	card["button"].visible = not next.is_empty()
-	card["button"].disabled = not reason.is_empty()
-	card["reason"].text = reason
-	card["reason"].visible = not reason.is_empty() and not next.is_empty()
-
-
-## Gründung eines Unternehmens (Phase 4); Übersicht und Konten folgen in Ticket 4.5.
-func _build_company_card(type_id: String) -> Control:
-	var definition := _game.company.get_catalog().get_definition(type_id)
-	var card := UiStyle.card()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	card.add_child(box)
-	box.add_child(UiStyle.label("%s · Unternehmen" % definition.display_name))
-	if not definition.description.is_empty():
-		box.add_child(UiStyle.wrapping_label(definition.description, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-	var info := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
-	info.name = "CompanyInfo_%s" % type_id
-	box.add_child(info)
-	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
-	reason.visible = false
-	box.add_child(reason)
-	var button := _scroll_button("Gründen", "CompanyFoundButton_%s" % type_id)
-	button.pressed.connect(_on_company_found_pressed.bind(type_id))
-	box.add_child(button)
-	_company_cards[type_id] = {"button": button, "reason": reason, "info": info}
-	return card
-
-
-func _refresh_company_card(type_id: String) -> void:
-	var definition := _game.company.get_catalog().get_definition(type_id)
-	var card: Dictionary = _company_cards[type_id]
-	var founded_here := _game.company.is_founded() and _game.company.get_type().id == type_id
-	if founded_here:
-		card["info"].text = "Gegründet · Firmenkonto %s · Auslastung %d · Ruf %d" % [
-				LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY)),
-				_game.company.utilization, _game.company.reputation]
-	else:
-		card["info"].text = "%s · Gebühr %s · Einlage %s aufs Firmenkonto" % [
-				TimeSystemScript.format_duration(definition.founding_minutes),
-				LedgerSystemScript.format_cents(definition.founding_fee_cents),
-				LedgerSystemScript.format_cents(definition.min_deposit_cents)]
-	var reason := _game.company.check_found(type_id)
-	card["button"].visible = not _game.company.is_founded()
-	card["button"].disabled = not reason.is_empty()
-	card["reason"].text = reason
-	card["reason"].visible = not reason.is_empty() and not _game.company.is_founded()
-
-
-## Filiale am zweiten Standort (Ticket 4.4).
-func _build_branch_card(type_id: String) -> Control:
-	var definition := _game.company.get_catalog().get_definition(type_id)
-	var card := UiStyle.card()
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	card.add_child(box)
-	box.add_child(UiStyle.label("%s · Filiale" % definition.branch_display_name))
-	var info := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
-	info.name = "BranchInfo_%s" % type_id
-	box.add_child(info)
-	var reason := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)
-	reason.visible = false
-	box.add_child(reason)
-	var button := _scroll_button("Filiale eröffnen", "BranchOpenButton_%s" % type_id)
-	button.pressed.connect(_on_branch_open_pressed.bind(type_id))
-	box.add_child(button)
-	_branch_cards[type_id] = {"button": button, "reason": reason, "info": info}
-	return card
-
-
-func _refresh_branch_card(type_id: String) -> void:
-	var definition := _game.company.get_catalog().get_definition(type_id)
-	var card: Dictionary = _branch_cards[type_id]
-	var ours := _game.company.is_founded() and _game.company.get_type().id == type_id
-	var is_open := ours and _game.company.is_branch_open()
-	if is_open:
-		card["info"].text = "Geöffnet · +%s Grundumsatz und %s Fixkosten pro Tag" % [
-				LedgerSystemScript.format_cents(definition.branch_base_revenue_per_day_cents),
-				LedgerSystemScript.format_cents(definition.branch_fixed_costs_per_day_cents)]
-	else:
-		card["info"].text = "%s · %s vom Firmenkonto · danach +%s Grundumsatz, %s Fixkosten pro Tag" % [
-				TimeSystemScript.format_duration(definition.branch_opening_minutes),
-				LedgerSystemScript.format_cents(definition.branch_opening_fee_cents),
-				LedgerSystemScript.format_cents(definition.branch_base_revenue_per_day_cents),
-				LedgerSystemScript.format_cents(definition.branch_fixed_costs_per_day_cents)]
-	var reason := _game.company.check_open_branch()
-	card["button"].visible = not is_open
-	card["button"].disabled = not reason.is_empty()
-	card["reason"].text = reason
-	card["reason"].visible = not reason.is_empty() and not is_open
-
-
-func _on_branch_open_pressed(type_id: String) -> void:
-	if _was_scroll():
-		return
-	var definition := _game.company.get_catalog().get_definition(type_id)
-	if not _confirmed("branch:" + type_id, _game.appointments.conflict_warning(definition.branch_opening_minutes)):
-		return
-	var reason := _game.company.open_branch()
-	_after_action(reason, "%s eröffnet" % definition.branch_display_name)
-
-
-func _on_company_found_pressed(type_id: String) -> void:
-	if _was_scroll():
-		return
-	var definition := _game.company.get_catalog().get_definition(type_id)
-	if not _confirmed("company:" + type_id, _game.appointments.conflict_warning(definition.founding_minutes)):
-		return
-	var reason := _game.company.found(type_id)
-	_after_action(reason, "%s gegründet" % definition.display_name)
+	return _window != null and _window.was_scroll()
 
 
 ## true = ausführen. Bei einer Warnung erst beim zweiten Tipp auf dieselbe Aktion.
@@ -505,17 +332,16 @@ func _confirmed(key: String, warning: String) -> bool:
 	return false
 
 
-func _on_activity_pressed(activity_id: String) -> void:
+func on_activity_pressed(activity_id: String) -> void:
 	if _was_scroll():
 		return
 	var definition := _game.activities.get_catalog().get_definition(activity_id)
 	if not _confirmed("activity:" + activity_id, _game.appointments.conflict_warning(definition.duration_minutes)):
 		return
-	var reason := _game.activities.start(activity_id)
-	_after_action(reason, "%s erledigt" % definition.display_name)
+	_after_action(_game.activities.start(activity_id), "%s erledigt" % definition.display_name)
 
 
-func _on_content_pressed(format_id: String) -> void:
+func on_content_pressed(format_id: String) -> void:
 	if _was_scroll():
 		return
 	var format := _game.content.get_catalog().get_definition(format_id)
@@ -531,7 +357,7 @@ func _on_content_pressed(format_id: String) -> void:
 	_after_action(reason, "%s produziert%s" % [format.display_name, result])
 
 
-func _on_equipment_pressed(equipment_id: String) -> void:
+func on_equipment_pressed(equipment_id: String) -> void:
 	if _was_scroll():
 		return
 	var definition := _game.equipment.get_catalog().get_definition(equipment_id)
@@ -544,29 +370,39 @@ func _on_equipment_pressed(equipment_id: String) -> void:
 	_after_action(reason, text)
 
 
-func _on_location_pressed(location_id: String) -> void:
+func on_company_found_pressed(type_id: String) -> void:
 	if _was_scroll():
 		return
-	_selected_location = location_id
-	_refresh()
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	if not _confirmed("company:" + type_id, _game.appointments.conflict_warning(definition.founding_minutes)):
+		return
+	_after_action(_game.company.found(type_id), "%s gegründet" % definition.display_name)
 
 
-func _on_travel_pressed() -> void:
+func on_branch_open_pressed(type_id: String) -> void:
 	if _was_scroll():
 		return
-	var target := _selected_location
-	var warning := _game.appointments.conflict_warning(_game.locations.travel_minutes_to(target))
-	if not _confirmed("travel:" + target, warning):
+	var definition := _game.company.get_catalog().get_definition(type_id)
+	if not _confirmed("branch:" + type_id, _game.appointments.conflict_warning(definition.branch_opening_minutes)):
+		return
+	_after_action(_game.company.open_branch(), "%s eröffnet" % definition.branch_display_name)
+
+
+func on_travel_pressed(location_id: String) -> void:
+	if _was_scroll():
+		return
+	var warning := _game.appointments.conflict_warning(_game.locations.travel_minutes_to(location_id))
+	if not _confirmed("travel:" + location_id, warning):
 		return
 	var origin := _game.locations.get_current()
-	var reason := _game.locations.travel(target)
+	var reason := _game.locations.travel(location_id)
 	if reason.is_empty():
-		_map.play_travel(origin, target)
-	var name_text := _game.locations.get_catalog().get_definition(target).display_name if reason.is_empty() else ""
+		_map.play_travel(origin, location_id)
+	var name_text := _game.locations.get_catalog().get_definition(location_id).display_name if reason.is_empty() else ""
 	_after_action(reason, "Angekommen: %s" % name_text)
 
 
-func _on_attend_pressed(appointment_id: String) -> void:
+func on_attend_pressed(appointment_id: String) -> void:
 	if _was_scroll():
 		return
 	var warning := _game.appointments.conflict_warning(_game.appointments.minutes_to_attend(appointment_id),
@@ -574,11 +410,31 @@ func _on_attend_pressed(appointment_id: String) -> void:
 	if not _confirmed("attend:" + appointment_id, warning):
 		return
 	var title := _game.appointments.get_catalog().get_definition(appointment_id).title
-	var reason := _game.appointments.attend(appointment_id)
-	_after_action(reason, "„%s“ wahrgenommen" % title)
+	_after_action(_game.appointments.attend(appointment_id), "„%s“ wahrgenommen" % title)
 
 
-## Rückmeldung nach einer zeitverbrauchenden Aktion, inklusive verpasster Termine.
+func on_company_transfer_pressed(is_deposit: bool) -> void:
+	if _was_scroll():
+		return
+	var amount := ActivityText.signed_money(TRANSFER_STEP_CENTS)
+	if is_deposit:
+		_after_action(_game.company.deposit(TRANSFER_STEP_CENTS), "Einlage %s ins Unternehmen" % amount)
+	else:
+		_after_action(_game.company.withdraw(TRANSFER_STEP_CENTS), "Entnahme %s aus dem Unternehmen" % amount)
+
+
+func on_event_option_pressed(instance_id: String, option_id: String, option_label: String) -> void:
+	var reason := _game.events.resolve(instance_id, option_id)
+	if reason.is_empty():
+		_show_feedback("„%s“ gewählt." % option_label, UiStyle.TEXT)
+	else:
+		_show_feedback(reason, UiStyle.NEGATIVE)
+	_refresh()
+	if reason.is_empty():
+		state_changed.emit()
+
+
+## Rückmeldung nach einer Aktion, inklusive verpasster Termine und Tagesabschlüsse.
 func _after_action(reason: String, success_text: String) -> void:
 	_confirm_key = ""
 	if reason.is_empty():
@@ -597,12 +453,14 @@ func _after_action(reason: String, success_text: String) -> void:
 		state_changed.emit()
 
 
-## Hinweis in der Rückmeldezeile (z. B. nach dem Laden eines Backups).
+# --- Hinweise ---------------------------------------------------------------------
+
+## Hinweis (z. B. nach dem Laden eines Backups).
 func show_message(text: String) -> void:
 	_show_feedback(text, UiStyle.TEXT)
 
 
-## Fehler in der Rückmeldezeile (z. B. Speichern fehlgeschlagen).
+## Fehler (z. B. Speichern fehlgeschlagen).
 func show_error(text: String) -> void:
 	_show_feedback(text, UiStyle.NEGATIVE)
 
@@ -610,367 +468,51 @@ func show_error(text: String) -> void:
 func _show_feedback(text: String, color: Color) -> void:
 	_feedback_label.text = text
 	_feedback_label.add_theme_color_override("font_color", color)
+	_toast.visible = true
+	if text.length() > TOAST_STICKY_LENGTH or "\n" in text:
+		_toast_timer.stop()  # lange Texte bleiben, bis man sie antippt
+	elif is_inside_tree():
+		_toast_timer.start(TOAST_SECONDS)
+	_layout()
+	_layout.call_deferred()  # nach dem Umbruch des Labels nochmal mit der richtigen Höhe
 
+
+func _on_toast_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and not event.pressed:
+		_toast.visible = false
+
+
+# --- Anzeige ----------------------------------------------------------------------
 
 func _refresh() -> void:
 	_date_label.text = _game.time.format_date()
 	_clock_label.text = _game.time.format_clock()
 	_location_label.text = "Ort: %s" % _game.locations.get_current_definition().display_name
 	_balance_label.text = "Konto: %s" % LedgerSystemScript.format_cents(_game.ledger.get_balance())
-
+	_company_balance_label.visible = _game.company.is_founded()
+	_company_balance_label.text = "Firmenkonto: %s" % LedgerSystemScript.format_cents(
+			_game.ledger.get_balance(LedgerSystemScript.COMPANY))
 	for key in PlayerStatsScript.KEYS:
 		var value := _game.stats.get_value(key)
 		_stat_labels[key].text = "%s %d/%d" % [PlayerStatsScript.LABELS[key], value, PlayerStatsScript.MAX_VALUE]
 		_stat_bars[key].value = value
+	_company_button.visible = _game.company.is_founded()
 
-	_refresh_activities()
-	_refresh_appointments()
-	_refresh_location_panel()
-	_refresh_channel()
-	_refresh_company()
-	_refresh_ledger_list()
-	_refresh_event()
-
-
-func _refresh_activities() -> void:
-	var current := _game.locations.get_current()
-	if current != _activities_location:
-		_activities_location = current
-		_activity_title.text = "Aktivitäten · %s" % _game.locations.get_current_definition().display_name
-		_clear(_activity_list)
-		_cards.clear()
-		_content_cards.clear()
-		_equipment_cards.clear()
-		_company_cards.clear()
-		_branch_cards.clear()
-		var format_ids := _game.content.get_catalog().get_ids_at(current)
-		var ids := _game.activities.get_catalog().get_ids_at(current)
-		var equipment_ids := _game.equipment.get_catalog().get_ids_at(current)
-		var company_ids := _game.company.get_catalog().get_ids_at(current)
-		var branch_ids := _game.company.get_catalog().get_ids_with_branch_at(current)
-		if ids.is_empty() and format_ids.is_empty() and equipment_ids.is_empty() and company_ids.is_empty() \
-				and branch_ids.is_empty():
-			_activity_list.add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		for id in format_ids:
-			_activity_list.add_child(_build_content_card(id))
-		for id in ids:
-			_activity_list.add_child(_build_activity_card(id))
-		if not equipment_ids.is_empty():
-			_activity_list.add_child(UiStyle.section_label("Ausrüstung"))
-		for id in equipment_ids:
-			_activity_list.add_child(_build_equipment_card(id))
-		for id in company_ids:
-			_activity_list.add_child(_build_company_card(id))
-		for id in branch_ids:
-			_activity_list.add_child(_build_branch_card(id))
-
-	for activity_id in _cards:
-		var reason := _game.activities.check(activity_id)
-		var card: Dictionary = _cards[activity_id]
-		card["button"].disabled = not reason.is_empty()
-		card["reason"].text = reason
-		card["reason"].visible = not reason.is_empty()
-
-	for format_id in _content_cards:
-		var format := _game.content.get_catalog().get_definition(format_id)
-		var card: Dictionary = _content_cards[format_id]
-		card["summary"].text = ActivityText.content_summary(format.duration_minutes, _game.content.preview(format_id))
-		card["quality"].text = _game.content.quality_text(format_id)
-		var reason := _game.content.check(format_id)
-		card["button"].disabled = not reason.is_empty()
-		card["reason"].text = reason
-		card["reason"].visible = not reason.is_empty()
-
-	for equipment_id in _equipment_cards:
-		_refresh_equipment_card(equipment_id)
-
-	for type_id in _company_cards:
-		_refresh_company_card(type_id)
-
-	for type_id in _branch_cards:
-		_refresh_branch_card(type_id)
-
-
-func _refresh_appointments() -> void:
-	_clear(_appointment_list)
-	var upcoming := _game.appointments.get_upcoming()
-	if upcoming.is_empty():
-		_appointment_list.add_child(UiStyle.label("Keine anstehenden Termine.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		return
-	for i in mini(upcoming.size(), UPCOMING_APPOINTMENT_COUNT):
-		var definition := upcoming[i]
-		var location := _game.locations.get_catalog().get_definition(definition.location)
-		var card := UiStyle.card()
-		var box := VBoxContainer.new()
-		box.add_theme_constant_override("separation", 8)
-		card.add_child(box)
-		box.add_child(UiStyle.wrapping_label(definition.title))
-		box.add_child(UiStyle.wrapping_label("%s · %s · %s" % [TimeSystemScript.format_stamp(definition.start_minutes),
-				location.display_name, TimeSystemScript.format_duration(definition.duration_minutes)],
-				UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		box.add_child(UiStyle.wrapping_label("Wahrnehmen: %s · Verpasst: %s" % [
-				ActivityText.option_summary(definition.effects, definition.money_cents),
-				ActivityText.option_summary(definition.missed_effects, 0)], UiStyle.SMALL_FONT_SIZE))
-		# Button nur, wenn der Termin jetzt wahrgenommen werden kann – sonst nur der Grund.
-		var reason := _game.appointments.check(definition.id)
-		if not reason.is_empty():
-			box.add_child(UiStyle.wrapping_label(reason, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		else:
-			var button := _scroll_button("Wahrnehmen", "AttendButton_%s" % definition.id)
-			button.pressed.connect(_on_attend_pressed.bind(definition.id))
-			box.add_child(button)
-		_appointment_list.add_child(card)
-
-
-func _refresh_location_panel() -> void:
-	var catalog := _game.locations.get_catalog()
-	if not catalog.has(_selected_location):
+	if not _game.locations.get_catalog().has(_selected_location):
 		_selected_location = _game.locations.get_current()
-	var definition := catalog.get_definition(_selected_location)
 	_map.set_state(_game.locations.get_current(), _selected_location)
 
-	_location_name.text = definition.display_name
-	_location_description.text = definition.description
-	_location_description.visible = not definition.description.is_empty()
-	var now_open := _game.locations.is_open_at(_selected_location, _game.time.get_minutes())
-	_location_hours.text = "Geöffnet: %s · jetzt %s" % [LocationSystemScript.format_hours(definition),
-			"offen" if now_open else "geschlossen"]
+	var pending_id := _game.events.get_next_pending_id()
+	if not pending_id.is_empty():
+		var shown: String = _window.content.get("instance_id") if _window_kind == "event" else ""
+		if shown != pending_id:
+			var content := EventWindowScript.new()
+			content.setup(self, _game, pending_id)
+			_open_window("event", content, false)
+	elif _window_kind == "event":
+		_close_window()
 
-	var names := PackedStringArray()
-	for id in _game.activities.get_catalog().get_ids_at(_selected_location):
-		names.append(_game.activities.get_catalog().get_definition(id).display_name)
-	_location_activities.text = "Hier: %s" % (", ".join(names) if not names.is_empty() else "nichts")
-
-	var reason := _game.locations.check_travel(_selected_location)
-	if _selected_location == _game.locations.get_current():
-		_location_distance.text = "Du bist hier."
-		_travel_button.text = "Hinfahren"
-	else:
-		var tenths := _game.locations.distance_tenths(_game.locations.get_current(), _selected_location)
-		var minutes := _game.locations.travel_minutes_to(_selected_location)
-		_location_distance.text = "%s · %s Fahrt" % [ActivityText.km(tenths), TimeSystemScript.format_duration(minutes)]
-		_travel_button.text = "Hinfahren (%s)" % TimeSystemScript.format_duration(minutes)
-	_travel_button.disabled = not reason.is_empty()
-
-
-func _refresh_event() -> void:
-	var instance_id := _game.events.get_next_pending_id()
-	var pending := _game.events.get_next_pending()
-	_scroll.visible = pending == null
-	_event_panel.visible = pending != null
-	if pending == null:
-		_shown_event_id = ""
-		return
-	if instance_id == _shown_event_id:
-		return
-	_shown_event_id = instance_id
-
-	_clear(_event_panel)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
-	_event_panel.add_child(box)
-	box.add_child(UiStyle.section_label("Ereignis"))
-	box.add_child(UiStyle.wrapping_label(pending.title))
-	box.add_child(UiStyle.wrapping_label(pending.text, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-	for option in pending.options:
-		var channel := _game.events.option_channel_deltas(instance_id, option.id)
-		box.add_child(UiStyle.wrapping_label(ActivityText.option_summary(option.effects, option.money_cents, channel),
-				UiStyle.SMALL_FONT_SIZE))
-		var button := UiStyle.button(option.label)
-		button.name = "EventOption_%s" % option.id
-		button.pressed.connect(_on_event_option_pressed.bind(instance_id, option.id, option.label))
-		box.add_child(button)
-
-
-func _on_event_option_pressed(event_id: String, option_id: String, option_label: String) -> void:
-	var reason := _game.events.resolve(event_id, option_id)
-	if reason.is_empty():
-		_show_feedback("„%s“ gewählt." % option_label, UiStyle.TEXT)
-	else:
-		_show_feedback(reason, UiStyle.NEGATIVE)
-	_refresh()
-	if reason.is_empty():
-		state_changed.emit()
-
-
-func _refresh_channel() -> void:
-	var channel := _game.channel
-	_channel_label.text = "Kanal: %s Follower · Community %d · Ruf %d" % [
-			ActivityText.format_int(channel.followers), channel.community, channel.reputation]
-	_followers_label.text = "%s Follower" % ActivityText.format_int(channel.followers)
-	_growth_label.text = "Wachstumsbremse: %d %% neuer Follower kommen an (Maximum %s)." % [
-			channel.growth_percent(), ActivityText.format_int(ChannelSystemScript.MAX_FOLLOWERS)]
-	for key in _channel_score_labels:
-		var value := channel.get_value(key)
-		_channel_score_labels[key].text = "%s %d/%d" % [ChannelSystemScript.LABELS[key], value, ChannelSystemScript.MAX_SCORE]
-		_channel_score_bars[key].value = value
-
-	_clear(_channel_history)
-	var history := channel.get_history()
-	if history.is_empty():
-		_channel_history.add_child(UiStyle.label("Noch keine Änderungen.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		return
-	var oldest_shown := maxi(history.size() - RECENT_CHANNEL_COUNT, 0)
-	for i in range(history.size() - 1, oldest_shown - 1, -1):
-		var lines := ActivityText.channel_change_text(history[i])
-		var row := VBoxContainer.new()
-		row.add_theme_constant_override("separation", 2)
-		row.add_child(UiStyle.wrapping_label(lines[0], UiStyle.SMALL_FONT_SIZE))
-		row.add_child(UiStyle.wrapping_label(lines[1], UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		_channel_history.add_child(row)
-
-
-func _refresh_company() -> void:
-	var company := _game.company
-	_company_balance_label.visible = company.is_founded()
-	_company_balance_label.text = "Firmenkonto: %s" % LedgerSystemScript.format_cents(
-			_game.ledger.get_balance(LedgerSystemScript.COMPANY))
-
-	var state := "founded" if company.is_founded() else "none"
-	if state != _company_panel_state:
-		_company_panel_state = state
-		_clear(_company_panel)
-		if company.is_founded():
-			_company_panel.add_child(_build_company_overview())
-		else:
-			var hint := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-			hint.name = "CompanyHint"
-			_company_panel.add_child(hint)
-	if company.is_founded():
-		_update_company_overview()
-	else:
-		var names := PackedStringArray()
-		for type_id in company.get_catalog().get_ids():
-			var definition := company.get_catalog().get_definition(type_id)
-			var location := _game.locations.get_catalog().get_definition(definition.found_location)
-			names.append("%s (%s)" % [definition.display_name, location.display_name if location != null else "?"])
-		(_company_panel.find_child("CompanyHint", false, false) as Label).text = \
-				"Noch kein Unternehmen. Gründen möglich: %s." % ", ".join(names)
-
-	_clear(_company_settlements)
-	var settlements := company.get_settlements()
-	if settlements.is_empty():
-		_company_settlements.add_child(UiStyle.label("Noch keine Tagesabschlüsse.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-	for i in range(settlements.size() - 1, maxi(settlements.size() - RECENT_COMPANY_COUNT, 0) - 1, -1):
-		var settlement: Dictionary = settlements[i]
-		var color := UiStyle.TEXT if settlement["paid"] else UiStyle.NEGATIVE
-		_company_settlements.add_child(UiStyle.wrapping_label(settlement["text"], UiStyle.SMALL_FONT_SIZE, color))
-
-	_clear(_company_history)
-	var history := company.get_history()
-	if history.is_empty():
-		_company_history.add_child(UiStyle.label("Noch keine Änderungen.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-	for i in range(history.size() - 1, maxi(history.size() - RECENT_COMPANY_COUNT, 0) - 1, -1):
-		var lines := ActivityText.company_change_text(history[i])
-		var row := VBoxContainer.new()
-		row.add_theme_constant_override("separation", 2)
-		row.add_child(UiStyle.wrapping_label(lines[0], UiStyle.SMALL_FONT_SIZE))
-		if not lines[1].is_empty():
-			row.add_child(UiStyle.wrapping_label(lines[1], UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		_company_history.add_child(row)
-
-
-func _build_company_overview() -> Control:
-	var card := UiStyle.card()
-	var box := VBoxContainer.new()
-	box.name = "CompanyOverview"
-	box.add_theme_constant_override("separation", 8)
-	card.add_child(box)
-	for label_name in ["CompanyName", "CompanyAccount"]:
-		var label := UiStyle.label("", UiStyle.LARGE_FONT_SIZE if label_name == "CompanyName" else UiStyle.FONT_SIZE)
-		label.name = label_name
-		box.add_child(label)
-	for key in ["utilization", "reputation"]:
-		var label := UiStyle.label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-		label.name = "CompanyValue_%s" % key
-		box.add_child(label)
-		var bar := ProgressBar.new()
-		bar.name = "CompanyBar_%s" % key
-		bar.min_value = 0
-		bar.max_value = CompanySystemScript.MAX_SCORE
-		bar.show_percentage = false
-		bar.custom_minimum_size.y = 14
-		box.add_child(bar)
-	for label_name in ["CompanyForecast", "CompanyBranch"]:
-		var label := UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
-		label.name = label_name
-		box.add_child(label)
-	# Untereinander: nebeneinander wären die Texte auf schmalen Geräten breiter als der Bildschirm.
-	var deposit := _scroll_button("%s einlegen (privat → Firma)" % LedgerSystemScript.format_cents(TRANSFER_STEP_CENTS),
-			"CompanyDepositButton")
-	deposit.pressed.connect(_on_company_transfer_pressed.bind(true))
-	box.add_child(deposit)
-	var withdraw := _scroll_button("%s entnehmen (Firma → privat)" % LedgerSystemScript.format_cents(TRANSFER_STEP_CENTS),
-			"CompanyWithdrawButton")
-	withdraw.pressed.connect(_on_company_transfer_pressed.bind(false))
-	box.add_child(withdraw)
-	return card
-
-
-func _update_company_overview() -> void:
-	var company := _game.company
-	var box := _company_panel.find_child("CompanyOverview", true, false) as Control
-	var definition := company.get_type()
-	(box.find_child("CompanyName", false, false) as Label).text = definition.display_name
-	(box.find_child("CompanyAccount", false, false) as Label).text = "Firmenkonto: %s" % \
-			LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY))
-	for key in ["utilization", "reputation"]:
-		var value := company.get_value(key)
-		(box.find_child("CompanyValue_%s" % key, false, false) as Label).text = "%s %d/%d" % [
-				CompanySystemScript.LABELS[key], value, CompanySystemScript.MAX_SCORE]
-		(box.find_child("CompanyBar_%s" % key, false, false) as ProgressBar).value = value
-	var outcome := company.preview_day()
-	(box.find_child("CompanyForecast", false, false) as Label).text = \
-			"Heute erwartet: Umsatz %s · Fixkosten %s · Ergebnis %s (abgerechnet beim Tageswechsel; Auslastung -%d ohne Pflege)" % [
-			ActivityText.signed_money(outcome["revenue_cents"]), ActivityText.signed_money(-outcome["costs_cents"]),
-			ActivityText.signed_money(outcome["revenue_cents"] - outcome["costs_cents"]), definition.utilization_decay_per_day]
-	var branch_label := box.find_child("CompanyBranch", false, false) as Label
-	branch_label.visible = definition.has_branch
-	if definition.has_branch:
-		var location := _game.locations.get_catalog().get_definition(definition.branch_location)
-		var place := location.display_name if location != null else definition.branch_location
-		branch_label.text = ("Filiale %s: geöffnet (%s)" if company.is_branch_open() else "Filiale %s: noch nicht eröffnet (im %s)") \
-				% [definition.branch_display_name, place]
-	var deposit := box.find_child("CompanyDepositButton", true, false) as Button
-	deposit.disabled = not company.check_deposit(TRANSFER_STEP_CENTS).is_empty()
-	var withdraw := box.find_child("CompanyWithdrawButton", true, false) as Button
-	withdraw.disabled = not company.check_withdraw(TRANSFER_STEP_CENTS).is_empty()
-
-
-func _on_company_transfer_pressed(is_deposit: bool) -> void:
-	if _was_scroll():
-		return
-	var amount := ActivityText.signed_money(TRANSFER_STEP_CENTS)
-	if is_deposit:
-		_after_action(_game.company.deposit(TRANSFER_STEP_CENTS), "Einlage %s ins Unternehmen" % amount)
-	else:
-		_after_action(_game.company.withdraw(TRANSFER_STEP_CENTS), "Entnahme %s aus dem Unternehmen" % amount)
-
-
-func _refresh_ledger_list() -> void:
-	_clear(_ledger_list)
-	var entries := _game.ledger.get_entries()
-	if entries.is_empty():
-		_ledger_list.add_child(UiStyle.label("Noch keine Buchungen.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
-		return
-
-	var oldest_shown := maxi(entries.size() - RECENT_ENTRY_COUNT, 0)
-	for i in range(entries.size() - 1, oldest_shown - 1, -1):
-		var entry := entries[i]
-		var row := HBoxContainer.new()
-		var account_mark := " (Firma)" if entry.account == LedgerSystemScript.COMPANY else ""
-		var text := UiStyle.wrapping_label("%s  %s%s" % [TimeSystemScript.format_stamp(entry.time_minutes),
-				entry.description, account_mark],
-				UiStyle.SMALL_FONT_SIZE)
-		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(text)
-		var amount_color := UiStyle.POSITIVE if entry.is_income() else UiStyle.NEGATIVE
-		row.add_child(UiStyle.label(ActivityText.signed_money(entry.amount_cents), UiStyle.SMALL_FONT_SIZE, amount_color))
-		_ledger_list.add_child(row)
-
-
-## Entfernt alle Kinder sofort aus dem Baum und löscht sie später.
-func _clear(container: Node) -> void:
-	for child in container.get_children():
-		container.remove_child(child)
-		child.queue_free()
+	if _window != null:
+		_window.refresh()
+		_window.set_title(_window.content.call("get_title"))
+	_layout()

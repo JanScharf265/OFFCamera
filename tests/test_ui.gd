@@ -53,6 +53,7 @@ func test_click_through_new_game_activity_menu_and_continue() -> void:
 	assert_eq((_find(app, "ClockLabel") as Label).text, "10:20")
 	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 525,00 €")
 	assert_eq(app.game.ledger.get_entries().size(), 1)
+	_press(app, "LedgerButton")
 	assert_eq((_find(app, "LedgerList") as Node).get_child_count(), 1)
 
 	(_find(app, "MenuButton") as Button).pressed.emit()
@@ -79,6 +80,7 @@ func test_disabled_activity_shows_reason() -> void:
 	app.game.stats.apply({"energy": -70})  # 80 -> 10
 	_press(app, "MenuButton")
 	_press(app, "ContinueButton")
+	_press(app, "HereButton")  # Fenster des aktuellen Orts
 	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, true)
 	assert_true(_screen_has_text(app, "Zu wenig Energie (benötigt 20)."), "Grund wird nicht angezeigt")
 
@@ -94,15 +96,16 @@ func test_event_replaces_activities_until_decided() -> void:
 		return
 
 	app.game.time.advance(11 * 60)  # 08:00 -> 19:00
+	_press(app, "HereButton")
 	_press(app, "StartButton_rest")  # 19:00 -> 20:00, Ereignis wird fällig
-	var panel := _find(app, "EventPanel") as Control
-	var scroll := _find(app, "ActivityScroll") as Control
-	assert_eq(panel.visible, true)
-	assert_eq(scroll.visible, false)
+	assert_true(_find(app, "EventPanel") != null, "Ereignis-Fenster fehlt")
+	assert_true(_find(app, "Window_location") == null, "Ereignis muss das Ortsfenster ersetzen")
+	assert_eq((_find(app, "WindowCloseButton") as Button).visible, false)  # erst entscheiden
+	_press(app, "MapPin_studio")  # Karte ist gesperrt, solange das Ereignis offen ist
+	assert_true(_find(app, "EventPanel") != null, "Ereignis darf nicht weggetippt werden")
 
 	_press(app, "EventOption_accept")
-	assert_eq(panel.visible, false)
-	assert_eq(scroll.visible, true)
+	assert_true(_find(app, "EventPanel") == null, "Ereignis-Fenster noch offen")
 	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 530,00 €")
 
 	app.free()
@@ -133,6 +136,7 @@ func test_new_game_with_existing_save_needs_confirmation() -> void:
 	if app == null:
 		return
 	_press(app, "NewGameButton")
+	_press(app, "HereButton")
 	_press(app, "StartButton_rest")  # 08:00 -> 09:00
 	_press(app, "MenuButton")
 
@@ -167,6 +171,8 @@ func test_map_shows_location_and_travel_changes_activities() -> void:
 		return
 	_press(app, "NewGameButton")
 	assert_true(_find(app, "CityMap") != null, "Stadtkarte fehlt")
+	assert_true(_find(app, "StartButton_rest") == null, "Ohne Fenster keine Aktivitäten")
+	_press(app, "MapPin_home")
 	assert_true(_find(app, "StartButton_rest") != null, "Ausruhen fehlt in der Wohnung")
 	assert_true(_find(app, "StartButton_coffee") == null, "Kaffee darf es zu Hause nicht geben")
 
@@ -180,7 +186,7 @@ func test_map_shows_location_and_travel_changes_activities() -> void:
 	_press(app, "TravelButton")
 	assert_eq((_find(app, "ClockLabel") as Label).text, "08:20")
 	assert_eq((_find(app, "LocationLabel") as Label).text, "Ort: Café am Hafen")
-	assert_eq((_find(app, "TravelButton") as Button).disabled, true)
+	assert_eq((_find(app, "TravelButton") as Button).visible, false)  # schon hier
 	assert_true(_find(app, "StartButton_coffee") != null, "Kaffee fehlt am Hafen")
 	assert_true(_find(app, "StartButton_rest") == null, "Ausruhen darf es am Hafen nicht geben")
 	app.free()
@@ -192,6 +198,7 @@ func test_conflict_warning_needs_second_tap() -> void:
 		return
 	_press(app, "NewGameButton")
 	app.game.time.advance(TimeSystemScript.at(1, 13, 30) - app.game.time.get_minutes())
+	_press(app, "HereButton")
 
 	_press(app, "StartButton_rest")  # würde den Termin um 14:00 verpassen lassen
 	assert_eq(app.game.time.format_clock(), "13:30")
@@ -209,11 +216,12 @@ func test_attend_appointment_in_ui() -> void:
 	if app == null:
 		return
 	_press(app, "NewGameButton")
+	_press(app, "AppointmentsButton")
 	assert_true(_find(app, "AttendButton_camera_meeting") == null, "Wahrnehmen darf noch nicht angeboten werden")
 	assert_true(_screen_has_text(app, "Wahrnehmen ab Tag 1 · 13:00 möglich."), "Grund fehlt")
 	_travel(app, "studio")
 	app.game.time.advance(TimeSystemScript.at(1, 13, 30) - app.game.time.get_minutes())
-	_press(app, "MapPin_studio")  # aktualisiert die Anzeige
+	_press(app, "AppointmentsButton")  # öffnet die Termine neu
 	assert_true(_press(app, "AttendButton_camera_meeting"), "Wahrnehmen fehlt vor Ort")
 	assert_eq(app.game.time.format_clock(), "15:00")
 	assert_eq(app.game.appointments.is_attended("camera_meeting"), true)
@@ -226,6 +234,7 @@ func test_buy_equipment_in_studio_raises_quality() -> void:
 	if app == null:
 		return
 	_press(app, "NewGameButton")
+	_press(app, "HereButton")
 	assert_true(_find(app, "EquipmentButton_camera") == null, "Ausrüstung darf es zu Hause nicht geben")
 	_travel(app, "studio")
 	assert_eq((_find(app, "EquipmentTitle_camera") as Label).text, "Kamera · Stufe 0/3 (nichts)")
@@ -243,11 +252,12 @@ func test_random_event_is_decided_in_panel_with_channel_effects() -> void:
 		return
 	_press(app, "NewGameButton")
 	app.game.events._trigger("tech_failure@3")  # wie nach einem Tageswechsel gewürfelt
-	_press(app, "MapPin_home")  # aktualisiert die Anzeige
-	assert_eq((_find(app, "EventPanel") as Control).visible, true)
+	_press(app, "HereButton")
+	_press(app, "StartButton_rest")  # nächste Aktion aktualisiert die Anzeige
+	assert_true(_find(app, "EventPanel") != null, "Ereignis-Fenster fehlt")
 	assert_true(_screen_has_text(app, "Stimmung -5 · Community -4 · Ruf -1"), "Kanal-Folgen fehlen")
 	_press(app, "EventOption_improvise")
-	assert_eq((_find(app, "EventPanel") as Control).visible, false)
+	assert_true(_find(app, "EventPanel") == null, "Ereignis-Fenster noch offen")
 	assert_eq(app.game.channel.community, 46)
 	assert_eq(app.game.events.is_resolved("tech_failure@3"), true)
 	app.free()
@@ -275,10 +285,12 @@ func test_channel_panel_and_history_after_livestream() -> void:
 	if app == null:
 		return
 	_press(app, "NewGameButton")
+	_press(app, "ChannelButton")
 	assert_eq((_find(app, "ChannelLabel") as Label).text, "Kanal: 120 Follower · Community 50 · Ruf 50")
 	assert_true(_screen_has_text(app, "Noch keine Änderungen."), "Leerzustand fehlt")
 	_travel(app, "studio")
 	_press(app, "ContentButton_livestream")
+	_press(app, "ChannelButton")
 	assert_eq((_find(app, "ChannelLabel") as Label).text, "Kanal: 137 Follower · Community 52 · Ruf 50")
 	assert_eq((_find(app, "FollowersLabel") as Label).text, "137 Follower")
 	assert_eq((_find(app, "GrowthLabel") as Label).text, "Wachstumsbremse: 99 % neuer Follower kommen an (Maximum 1.000.000).")
@@ -308,15 +320,18 @@ func test_company_section_before_and_after_founding() -> void:
 		return
 	_press(app, "NewGameButton")
 	assert_eq((_find(app, "CompanyBalanceLabel") as Label).visible, false)
-	assert_true(_screen_has_text(app, "Noch kein Unternehmen. Gründen möglich: Merch-Label (Büro)."), "Hinweis fehlt")
+	assert_eq((_find(app, "CompanyButton") as Button).visible, false)  # erst nach der Gründung
 	_travel(app, "office")
 	_press(app, "CompanyFoundButton_merch_label")
 	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "Firmenkonto: 200,00 €")
+	assert_eq((_find(app, "CompanyButton") as Button).visible, true)
+	_press(app, "CompanyButton")
 	assert_eq((_find(app, "CompanyName") as Label).text, "Merch-Label")
 	assert_eq((_find(app, "CompanyValue_utilization") as Label).text, "Auslastung 50/100")
 	assert_eq((_find(app, "CompanyForecast") as Label).text,
 			"Heute erwartet: Umsatz +15,90 € · Fixkosten -20,00 € · Ergebnis -4,10 € (abgerechnet beim Tageswechsel; Auslastung -3 ohne Pflege)")
 	assert_eq((_find(app, "CompanyBranch") as Label).text, "Filiale Merch-Laden: noch nicht eröffnet (im Ladenlokal)")
+	_press(app, "LedgerButton")
 	assert_true(_screen_contains(app, "Gründung: Merch-Label"), "Buchung fehlt")
 	app.free()
 
@@ -328,12 +343,14 @@ func test_deposit_and_withdraw_buttons_move_money() -> void:
 	_press(app, "NewGameButton")
 	_travel(app, "office")
 	_press(app, "CompanyFoundButton_merch_label")  # privat 150 €, Firma 200 €
+	_press(app, "CompanyButton")
 	_press(app, "CompanyDepositButton")
 	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 50,00 €")
 	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "Firmenkonto: 300,00 €")
 	assert_eq((_find(app, "CompanyDepositButton") as Button).disabled, true)  # nur noch 50 € privat
 	_press(app, "CompanyWithdrawButton")
 	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 150,00 €")
+	_press(app, "LedgerButton")
 	assert_true(_screen_contains(app, "Einlage ins Unternehmen (Firma)"), "Firmenbuchung nicht markiert")
 	app.free()
 
@@ -348,9 +365,12 @@ func test_settlement_appears_in_feedback_and_list() -> void:
 	_press(app, "StartButton_order_stock")         # Auslastung 56, 10:20
 	app.game.time.advance(TimeSystemScript.at(1, 23) - app.game.time.get_minutes())
 	_travel(app, "home")
+	_press(app, "EventOption_decline")  # Ereignis von 20:00 zuerst entscheiden
+	_press(app, "HereButton")
 	_press(app, "StartButton_sleep")  # über Mitternacht -> Tagesabschluss Tag 1
 	var feedback := (_find(app, "FeedbackLabel") as Label).text
 	assert_true("Tagesabschluss Tag 1: Umsatz" in feedback, feedback)
+	_press(app, "CompanyButton")
 	assert_true(_screen_contains(app, "Tag 1: ohne Pflege sinkt die Auslastung"), "Protokoll fehlt")
 	assert_true(_screen_has_text(app, "Auslastung -3"), "Änderung fehlt")
 	app.free()
@@ -379,6 +399,71 @@ func test_project_is_landscape() -> void:
 	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), DisplayServer.SCREEN_SENSOR_LANDSCAPE)
 	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_width"), 1280)
 	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_height"), 720)
+
+
+# --- Querformat-Spielansicht (G2) ------------------------------------------------------
+
+func test_windows_open_one_at_a_time_and_close() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	assert_true(_find(app, "Window_location") == null, "Start ohne Fenster")
+	_press(app, "ChannelButton")
+	assert_true(_find(app, "Window_channel") != null, "Kanal-Fenster fehlt")
+	_press(app, "LedgerButton")
+	assert_true(_find(app, "Window_channel") == null, "Es darf nur ein Fenster offen sein")
+	assert_true(_find(app, "Window_ledger") != null, "Buchungen-Fenster fehlt")
+	_press(app, "WindowCloseButton")
+	assert_true(_find(app, "Window_ledger") == null, "Fenster nicht geschlossen")
+	assert_eq((_find(app, "Dim") as Control).visible, false)
+	app.free()
+
+
+func test_location_window_elsewhere_shows_locked_actions() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "MapPin_studio")
+	assert_eq((_find(app, "WindowTitle") as Label).text, "Studio")
+	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, true)
+	assert_true(_screen_has_text(app, "Nur vor Ort möglich: Studio."), "Grund fehlt")
+	assert_eq((_find(app, "TravelButton") as Button).visible, true)
+	app.free()
+
+
+func test_hud_respects_safe_margins() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	var screen := _find(app, "CityMap").get_parent() as Control
+	screen.call("set_safe_margins", [130.0, 24.0, 130.0, 50.0] as Array[float])
+	var hud_left := _find(app, "HudLeft") as Control
+	var hud_right := _find(app, "HudRight") as Control
+	var left_bar := _find(app, "LeftBar") as Control
+	var map := _find(app, "CityMap") as Control
+	assert_eq(hud_left.position.x, 130.0)
+	assert_true(hud_right.position.x + hud_right.size.x <= screen.size.x - 130.0 + 0.5, "HUD rechts in der Notch")
+	assert_eq(left_bar.position.x, 130.0)
+	assert_eq(map.size, screen.size)  # Karte bleibt Vollbild
+	app.free()
+
+
+func test_long_feedback_stays_until_tapped() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	var screen := _find(app, "CityMap").get_parent()
+	screen.call("show_message", "Kurz.")
+	var timer := screen.find_children("*", "Timer", false, false)[0] as Timer
+	assert_eq(timer.is_stopped(), false)
+	screen.call("show_message", "Erste Zeile\nZweite Zeile")
+	assert_eq(timer.is_stopped(), true)
+	assert_eq((_find(app, "Toast") as Control).visible, true)
+	app.free()
 
 
 func _travel(app: Node, location_id: String) -> void:

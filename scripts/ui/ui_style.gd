@@ -24,6 +24,11 @@ const BUTTON_HEIGHT := 96
 const CORNER_RADIUS := 16
 ## Breite der zentrierten Spalte für Menüs (Querformat).
 const COLUMN_WIDTH := 640
+## Querformat-Spielansicht (G2): Seitenbuttons, Fenster, Hinweise.
+const SIDE_BUTTON_SIZE := Vector2(140, 84)
+const WINDOW_MAX_WIDTH := 980
+const HUD_SURFACE := Color(0.07, 0.07, 0.09, 0.86)
+const DIM := Color(0, 0, 0, 0.55)
 
 
 static func create_theme() -> Theme:
@@ -87,4 +92,32 @@ static func _box(color: Color, padding: int = 16) -> StyleBoxFlat:
 	box.bg_color = color
 	box.set_corner_radius_all(CORNER_RADIUS)
 	box.set_content_margin_all(padding)
+	return box
+
+
+## Halbtransparente Fläche für HUD-Ecken und Hinweise über der Karte.
+static func hud_panel() -> PanelContainer:
+	var result := PanelContainer.new()
+	result.add_theme_stylebox_override("panel", _box(HUD_SURFACE, 14))
+	return result
+
+
+## Kleiner Button am Bildschirmrand (Seitenleiste).
+static func side_button(text: String) -> Button:
+	var result := Button.new()
+	result.text = text
+	result.custom_minimum_size = SIDE_BUTTON_SIZE
+	result.add_theme_font_size_override("font_size", SMALL_FONT_SIZE)
+	for state in ["normal", "hover", "disabled"]:
+		result.add_theme_stylebox_override(state, _box(HUD_SURFACE, 8))
+	for state in ["pressed", "hover_pressed"]:
+		result.add_theme_stylebox_override(state, _box(SURFACE_PRESSED, 8))
+	return result
+
+
+## Hintergrund eines Fensters.
+static func window_box() -> StyleBoxFlat:
+	var box := _box(BACKGROUND, PADDING)
+	box.border_color = SURFACE_PRESSED
+	box.set_border_width_all(2)
 	return box
