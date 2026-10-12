@@ -325,8 +325,8 @@ static func _migrate_7_to_8(game: Dictionary) -> String:
 	var company: Variant = game.get("company")
 	if typeof(company) != TYPE_DICTIONARY:
 		return "Unternehmen fehlt."
-	if company.get("founded") == true:
-		var minutes: Variant = game.get("time", {}).get("minutes")
+	if typeof(company.get("founded")) == TYPE_BOOL and company["founded"]:
+		var minutes: Variant = _saved_minutes(game)
 		if not DataReaderScript.is_whole_number(minutes):
 			return "Zeit fehlt."
 		company["last_settled_day"] = TimeSystemScript.day_of(int(minutes)) - 1
@@ -339,7 +339,7 @@ static func _migrate_8_to_9(game: Dictionary) -> String:
 	var company: Variant = game.get("company")
 	if typeof(company) != TYPE_DICTIONARY:
 		return "Unternehmen fehlt."
-	if company.get("founded") == true:
+	if typeof(company.get("founded")) == TYPE_BOOL and company["founded"]:
 		company["branch_open"] = false
 	return ""
 
@@ -353,7 +353,7 @@ static func _migrate_9_to_10(game: Dictionary) -> String:
 
 ## 10 → 11 (Phase 5): Fristen – leer; vergangene Wochen werden nicht nachberechnet.
 static func _migrate_10_to_11(game: Dictionary) -> String:
-	var minutes: Variant = game.get("time", {}).get("minutes")
+	var minutes: Variant = _saved_minutes(game)
 	if not DataReaderScript.is_whole_number(minutes):
 		return "Zeit fehlt."
 	game["obligations"] = {"last_processed_day": TimeSystemScript.day_of(int(minutes)), "instances": []}
@@ -373,4 +373,10 @@ static func _migrate_11_to_12(game: Dictionary) -> String:
 			if not instance.has(field):
 				instance[field] = ""
 	return ""
+
+
+## Gespeicherte Spielzeit oder null – robust gegen beschädigte Dateien (falscher Typ von "time").
+static func _saved_minutes(game: Dictionary) -> Variant:
+	var time: Variant = game.get("time")
+	return time.get("minutes") if typeof(time) == TYPE_DICTIONARY else null
 

@@ -4,12 +4,16 @@ extends SceneTree
 ## Aufruf auf dem Mac (im Projektordner):
 ##   /Applications/Godot.app/Contents/MacOS/Godot --headless --path . -s res://tests/run_tests.gd
 ## Exit-Code 0 = alle Tests bestanden, 1 = mindestens ein Fehler.
+## Lange Läufe (Phase 6: Rundlauf, Störungen, Messung) liegen in tests/long/ und laufen nur mit
+##   … -s res://tests/run_tests.gd -- --long
+## (siehe README; am Ende jedes Tickets, das das Speichern betrifft, und am Ende einer Phase).
 ##
 ## Skriptfehler (z. B. Zugriff auf null) brechen einen Test ab, ohne dass eine Prüfung fehlschlägt.
 ## Ein eigener Logger (OS.add_logger, Godot ≥ 4.5) zählt sie; tritt während eines Tests einer auf,
 ## gilt der Test als fehlgeschlagen. Gewollte push_error-Meldungen (ERROR_TYPE_ERROR) zählen nicht.
 
 const TEST_DIR := "res://tests/"
+const LONG_TEST_DIR := "res://tests/long/"
 
 
 class ScriptErrorCounter extends Logger:
@@ -31,10 +35,13 @@ class ScriptErrorCounter extends Logger:
 
 
 var _errors := ScriptErrorCounter.new()
+var _dir := TEST_DIR
 
 
 func _initialize() -> void:
 	OS.add_logger(_errors)
+	if "--long" in OS.get_cmdline_user_args():
+		_dir = LONG_TEST_DIR
 	# Erst im ersten Frame starten: In _initialize() hängt root noch nicht im
 	# Baum, eingefügte Knoten bekämen sonst kein _ready() (UI-Tests).
 	process_frame.connect(_run_all, CONNECT_ONE_SHOT)
@@ -46,7 +53,7 @@ func _run_all() -> void:
 
 	for file in _test_files():
 		print("\n%s" % file)
-		var script: GDScript = load(TEST_DIR + file)
+		var script: GDScript = load(_dir + file)
 		if script == null or not script.can_instantiate():
 			print("  FEHLER  Datei konnte nicht geladen werden (Parse-Fehler?)")
 			failed += 1
@@ -75,7 +82,7 @@ func _run_all() -> void:
 
 func _test_files() -> PackedStringArray:
 	var files := PackedStringArray()
-	for file in DirAccess.get_files_at(TEST_DIR):
+	for file in DirAccess.get_files_at(_dir):
 		if file.begins_with("test_") and file.ends_with(".gd"):
 			files.append(file)
 	files.sort()

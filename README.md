@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) in Arbeit: Tickets 6.1–6.3 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) in Arbeit: Tickets 6.1–6.4 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -87,6 +87,18 @@ Nach dem Hinzufügen neuer Grafiken einmal importieren (sonst fehlen sie im Head
 `… --headless --path . --import`
 
 Am Ende steht `N bestanden, M fehlgeschlagen`.
+
+### Lange Tests (Phase 6)
+
+Rundlauf (30 zufällige Spielverläufe à 30 Tage, Speichern/Laden zwischendurch), Störungstest (beschädigte
+Spielstände aller Versionen) und Messung (Größe, Lade-/Speicherzeit nach 60 und 180 Spieltagen):
+
+```sh
+timeout 900 ~/Downloads/Godot.app/Contents/MacOS/Godot --headless --path . -s res://tests/run_tests.gd -- --long
+```
+
+Läuft getrennt von der normalen Suite (die soll unter einer Minute bleiben) – am Ende jedes Tickets, das das
+Speichern betrifft, und am Ende einer Phase.
 
 ### Testspielstände alter Versionen (Phase 6)
 

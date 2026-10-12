@@ -268,7 +268,9 @@ static func migrate_effective_dates(data: Dictionary) -> String:
 			return "Ledger: Buchung ohne Zeit."
 		entry["effective_minutes"] = int(entry["time_minutes"])
 		var reference: Variant = entry.get("reference", "")
-		if entry.get("source") == "company" and typeof(reference) == TYPE_STRING and reference.begins_with("day:") \
+		var source: Variant = entry.get("source")  # beschädigte Dateien: Typ erst prüfen, dann vergleichen
+		if typeof(source) == TYPE_STRING and source == "company" and typeof(reference) == TYPE_STRING \
+				and reference.begins_with("day:") \
 				and reference.substr(4).is_valid_int():
 			entry["effective_minutes"] = TimeSystemScript.at(int(reference.substr(4)), 23, 59)
 	return ""

@@ -271,6 +271,8 @@ Klassen-Cache aktualisiert hat.
 `tests/run_tests.gd` (eigener Mini-Runner, kein Addon) führt alle `tests/test_*.gd` aus.
 Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
 Skriptfehler während eines Tests (eigener Logger über `OS.add_logger`) lassen den Test fehlschlagen.
+Lange Tests (Phase 6) liegen in `tests/long/` (Spiel-Bot `bot.gd`, Rundlauf, Störungen, Messung) und laufen nur mit
+`run_tests.gd -- --long`. Echte Testspielstände aller Versionen: `tests/fixtures/saves/`.
 Headless ist das Fenster nur 64 × 64 – Layout-Tests setzen die Größe selbst. Godot-Läufe immer mit Zeitlimit
 (`timeout`, bei Fensterläufen zusätzlich `--quit-after`).
 

@@ -190,3 +190,33 @@ func test_old_saves_without_header_still_load() -> void:
 	assert_true(_load()["game"] != null, "Stand ohne Kopf lädt nicht")
 	assert_eq(SaveSystemScript.read_meta(PATH), {})
 	SaveSystemScript.delete_save(PATH)
+
+
+## Regressionstests aus dem Störungstest (Ticket 6.4): falsche Typen in alten Ständen führen zu einer
+## verständlichen Ablehnung oder sauberem Laden – nie zu einem Skriptfehler in der Migration.
+func _load_damaged_fixture(version: int, damage: Callable) -> Dictionary:
+	SaveSystemScript.delete_save(PATH)
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/saves/v%d.json" % version))
+	damage.call(data["game"])
+	_write(PATH, JSON.stringify(data))
+	var result := _load()
+	SaveSystemScript.delete_save(PATH)
+	return result
+
+
+func test_wrong_type_of_entry_source_in_old_save() -> void:
+	var result := _load_damaged_fixture(9, func(game: Dictionary) -> void: game["ledger"]["entries"][0]["source"] = 5)
+	assert_true(result["game"] == null, "beschädigte Buchung geladen")
+	assert_true(not String(result["error"]).is_empty(), "Meldung fehlt")
+
+
+func test_wrong_type_of_time_in_old_save() -> void:
+	var result := _load_damaged_fixture(10, func(game: Dictionary) -> void: game["time"] = "zehn Uhr")
+	assert_true(result["game"] == null, "beschädigte Zeit geladen")
+	assert_true("Zeit fehlt" in result["error"], result["error"])
+
+
+func test_wrong_type_of_company_flag_in_old_save() -> void:
+	var result := _load_damaged_fixture(7, func(game: Dictionary) -> void: game["company"]["founded"] = {})
+	assert_true(result["game"] == null, "beschädigtes Unternehmen geladen")
+	assert_true(not String(result["error"]).is_empty(), "Meldung fehlt")

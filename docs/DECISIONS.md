@@ -238,3 +238,15 @@ gebucht und offene nicht, Tagesabschluss/Fristen nicht in der Zukunft). Damit of
 bleiben, speichern Frist-Instanzen Konto, Kategorie und Bezeichnung – Formatversion 12 (erste Anwendung der Regel
 „neue Version = neue echte Testdatei“). Alle echten Altstände v1–v12 bestehen die Prüfung.
 
+## 030 – Lange Tests und Messung
+Entscheidung des Game Directors: Die normale Suite bleibt schnell (Ziel < 1 Minute, derzeit ~2 s); Rundlauf-,
+Störungs- und Lasttests liegen in `tests/long/` und laufen mit eigenem Befehl (`-- --long`, README) am Ende jedes
+Tickets, das das Speichern betrifft, und am Ende jeder Phase. Der Rundlauf nutzt einen Spiel-Bot (`tests/long/bot.gd`),
+der per Seed unter den erlaubten Aktionen wählt; zwei Spiele laufen parallel, eines wird zufällig gespeichert und
+geladen – am Ende müssen beide Stände identisch sein. Der Störungstest beschädigt jede echte Testdatei 60-mal
+(abschneiden, Zeichen ersetzen, Schlüssel löschen, falsche Typen, Listen verdoppeln); er fand 3 Stellen, an denen
+Migrationen Typen nicht prüften (jetzt gehärtet, mit Regressionstests in der normalen Suite).
+Messung (Mac, 12.10.2026): Tag 60 – 62 Buchungen, 46 KB, Speichern 1,2 ms, Laden 1,8 ms; Tag 180 – 750 Buchungen,
+397 KB, Speichern 8 ms, Laden 15 ms. Weit unter dem vereinbarten Schwellwert (1 MB / 100 ms) – keine Verdichtung des
+Ledgers nötig. Notbremse im Test: 5 MB / 1 s.
+
