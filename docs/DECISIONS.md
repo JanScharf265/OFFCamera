@@ -278,3 +278,14 @@ Gefunden: Das Hauptmenü brauchte mit Spielstand-Info ~690 px, mit Fehlermeldung
 ~633 px verfügbar. Lösung: kompakter (Titel 56, Abstände 12, Buttons 84 px ≈ 46 pt) und Menüs in einem Scrollbereich
 als Sicherheitsnetz (Normalfall passt ohne Scrollen, Test prüft beides).
 
+## 034 – Performance und Akku
+Messung im Fensterlauf auf dem Mac (1560 × 720, 12.10.2026), vorher → nachher:
+Ruhezustand 120 → 0 gezeichnete Bilder/s (mit Stromsparmodus); Zeichenaufrufe je Bild 963 → 206 (herausgezoomt);
+Wischen ohne VSync 169 → 206 FPS (Zoom 0,75) bzw. 133 → 179 FPS (Zoom 0,5); Aktion mit Neuaufbau 1,4–1,9 ms;
+Fenster öffnen 0,8–3,8 ms (unkritisch). Maßnahmen: `application/run/low_processor_mode = true` und `max_fps = 60`
+(Entscheidung des Game Directors). Die Standortmarkierung wippte endlos und zwang Godot so, jedes Bild neu zu zeichnen –
+jetzt nur 3 s nach Ankunft, Auswahl oder Laden. Alle Kartengrafiken werden beim Start in einen Texturatlas gepackt
+(`AtlasTexture`-Ausschnitte), damit Godot Zeichenaufrufe bündeln kann; scheitert das Packen (headless gibt es keine
+Bilddaten), bleiben die Einzeltexturen. Die übrigen ~200 Aufrufe kommen v. a. von gezeichneten Flächen (Strand, Wellen,
+Route) zwischen den Kacheln – vorerst ausreichend; Werte auf dem iPhone prüft der gebündelte Test (Gefühl, Wärme).
+

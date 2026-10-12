@@ -222,7 +222,7 @@ iPhone-Test, der die offenen iPhone-Abnahmen von Phase 3–6 und G2 ersetzt, dan
 
 - [x] Ticket 7.1: Aufräumen, ObjectDB-Warnung untersucht – im Spiel kein Leck (gemessen), Ursache sind Kreisverweise in Tests; Wächter-Tests gegen Lecks (334/334 Tests grün)
 - [x] Ticket 7.2: Layout-Tests für 4 Geräteklassen (16:9 bis 19,5:9, mit/ohne Notch); gefunden und behoben: Hauptmenü zu hoch auf Notch-iPhones, Hinweis-Höhe erst ein Bild später korrekt (336/336 Tests grün)
-- [ ] Ticket 7.3: Performance auf dem Mac, Stromsparmodus, 60 FPS
+- [x] Ticket 7.3: Performance auf dem Mac: Ruhezustand 120 → 0 Bilder/s (Stromsparmodus + Markierung wippt nur kurz), Zeichenaufrufe 963 → 206 (Texturatlas), 60 FPS (338/338 Tests grün)
 - [ ] Ticket 7.4: iOS-Build vorbereiten (Version 0.7.0, App-Symbol, Export nach Xcode)
 - [ ] Ticket 7.5: Gebündelter iPhone-Test (Game Director)
 - [ ] Ticket 7.6: Korrekturen aus dem iPhone-Test

@@ -395,6 +395,11 @@ func test_safe_margins_for_notch_left_and_right() -> void:
 	assert_eq(AppScript.safe_margins(Vector2.ZERO, Rect2(), viewport, 24), [24.0, 24.0, 24.0, 24.0] as Array[float])
 
 
+func test_project_saves_battery() -> void:
+	assert_eq(ProjectSettings.get_setting("application/run/low_processor_mode"), true)
+	assert_eq(ProjectSettings.get_setting("application/run/max_fps"), 60)
+
+
 func test_project_is_landscape() -> void:
 	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), DisplayServer.SCREEN_SENSOR_LANDSCAPE)
 	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_width"), 1280)

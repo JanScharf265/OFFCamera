@@ -204,3 +204,16 @@ func _finger(map: CityMapScript, index: int, point: Vector2, pressed: bool) -> v
 	event.position = point
 	event.pressed = pressed
 	map._gui_input(event)
+
+
+## Phase 7: Die Markierung wippt nur kurz – sonst müsste Godot im Stromsparmodus jedes Bild neu zeichnen.
+func test_marker_stops_bobbing_after_a_few_seconds() -> void:
+	var map := _start_map()
+	var marker := map.find_child("LocationMarker", true, false) as Control
+	assert_eq(marker.is_processing(), true)
+	marker._process(CityMapScript.Marker.BOB_SECONDS + 0.1)
+	assert_eq(marker.is_processing(), false)
+	assert_eq(marker.position, marker.base_position)
+	map.set_state("studio", "studio")  # Ankunft: kurz wieder wippen
+	assert_eq(marker.is_processing(), true)
+	map.free()

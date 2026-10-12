@@ -18,6 +18,8 @@ config/name="OFF CAMERA"
 config/description="Singleplayer-Lebens- und Managementsimulation für iPhone."
 config/version="0.0.1"
 run/main_scene="res://scenes/app/app.tscn"
+run/low_processor_mode=true
+run/max_fps=60
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

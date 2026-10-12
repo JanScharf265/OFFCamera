@@ -83,17 +83,34 @@ const CAR_DIRECTIONS := {
 
 ## Wippender Pfeil über dem aktuellen Ort (eigener Knoten, damit die Karte
 ## für die Animation nicht jedes Bild neu zeichnen muss).
+## Wippt nur kurz (BOB_SECONDS) nach restart() und steht dann still: Eine dauernde Bewegung würde
+## Godot zwingen, jedes Bild neu zu zeichnen – der Stromsparmodus wäre wirkungslos (gemessen, Phase 7).
 class Marker extends Control:
 	const SIZE := Vector2(44, 56)
-	var base_position := Vector2.ZERO
+	const BOB_SECONDS := 3.0
+	var base_position := Vector2.ZERO:
+		set(value):
+			base_position = value
+			if not is_processing():
+				position = value
 	var _time := 0.0
 
 	func _ready() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		size = SIZE
+		restart()
+
+	## Kurz wippen lassen (Ankunft, Auswahl, Laden).
+	func restart() -> void:
+		_time = 0.0
+		set_process(true)
 
 	func _process(delta: float) -> void:
 		_time += delta
+		if _time >= BOB_SECONDS:
+			set_process(false)
+			position = base_position
+			return
 		position = base_position + Vector2(0, sin(_time * 4.0) * 6.0)
 
 	func _draw() -> void:
@@ -174,6 +191,8 @@ func set_state(current_id: String, selected_id: String) -> void:
 	_selected = selected_id
 	if moved and not is_traveling():
 		_park_car()
+	if moved and _marker != null:
+		_marker.restart()
 	if is_node_ready():
 		_update_pins()
 		_layout_overlays()
@@ -214,6 +233,8 @@ func finish_travel() -> void:
 		_car_tween = null
 	_park_car()
 	_layout_overlays()
+	if _marker != null:
+		_marker.restart()
 
 
 ## Rasterzelle, in der das Auto gerade steht (gerundet).
@@ -462,6 +483,52 @@ func _load_textures() -> void:
 		_textures[building_name] = _load(BUILDING_DIR + building_name)
 	for direction in CAR_DIRECTIONS.values():
 		_textures["car_" + direction] = _load(VEHICLE_DIR + "taxi_%s" % direction)
+	_pack_atlas()
+
+
+## Packt alle Kartengrafiken in eine gemeinsame Textur und ersetzt die Einträge durch Ausschnitte
+## (AtlasTexture). Grund: Godot bündelt Zeichenaufrufe nur bei gleicher Textur – mit Einzeltexturen
+## waren es ~960 Aufrufe je Bild (gemessen, Phase 7). Klappt das Packen nicht, bleiben die Einzeltexturen.
+const ATLAS_WIDTH := 1024
+const ATLAS_PADDING := 2
+
+func _pack_atlas() -> void:
+	var images := {}
+	for key in _textures:
+		var texture: Texture2D = _textures[key]
+		if texture == null:
+			continue
+		var image := texture.get_image()
+		if image == null or image.is_compressed():
+			return
+		image.convert(Image.FORMAT_RGBA8)
+		images[key] = image
+	# Regal-Packen: Zeilen von links nach rechts, nach Höhe sortiert.
+	var keys := images.keys()
+	keys.sort_custom(func(a, b) -> bool: return images[a].get_height() > images[b].get_height())
+	var regions := {}
+	var x := 0
+	var y := 0
+	var row_height := 0
+	for key in keys:
+		var image: Image = images[key]
+		if x + image.get_width() > ATLAS_WIDTH:
+			x = 0
+			y += row_height + ATLAS_PADDING
+			row_height = 0
+		regions[key] = Rect2i(x, y, image.get_width(), image.get_height())
+		x += image.get_width() + ATLAS_PADDING
+		row_height = maxi(row_height, image.get_height())
+	var atlas_image := Image.create_empty(ATLAS_WIDTH, y + row_height, false, Image.FORMAT_RGBA8)
+	for key in keys:
+		var image: Image = images[key]
+		atlas_image.blit_rect(image, Rect2i(Vector2i.ZERO, image.get_size()), regions[key].position)
+	var atlas := ImageTexture.create_from_image(atlas_image)
+	for key in keys:
+		var part := AtlasTexture.new()
+		part.atlas = atlas
+		part.region = Rect2(regions[key])
+		_textures[key] = part
 
 
 static func _load(path_without_extension: String) -> Texture2D:

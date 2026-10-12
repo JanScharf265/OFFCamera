@@ -250,6 +250,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
     `mouse_filter = STOP`: Wischen verschiebt nur die Karte (ab 12 px kein Tipp mehr), Grenzen = Stadt inkl. Strand.
     `play_travel(von, nach)` animiert ein Taxi entlang der Straßen (Tween, 0,8–2,5 s) und schwenkt die Kamera mit;
     aufgerufen vom GameScreen erst nach erfolgreichem `LocationSystem.travel()`. `LocationMarker` wippt über dem aktuellen Ort.
+  - Beim Start werden alle Kartengrafiken in einen Texturatlas gepackt (`_pack_atlas()`, `AtlasTexture`), damit Godot
+    Zeichenaufrufe bündelt. Die Standortmarkierung wippt nur 3 s nach `restart()` (Stromsparmodus).
   - Gebäudeaussehen je Orts-ID als Tabelle `BUILDINGS`; Grafiken unter `assets/kenney/` (CC0, je mit `License.txt`).
     Fehlt eine Grafik, wird das Teil ausgelassen statt abzustürzen.
 - Kollision mit Termin: erster Tipp zeigt die Warnung, zweiter Tipp auf dieselbe Aktion führt aus.

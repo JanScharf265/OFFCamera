@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) abgeschlossen (332/332 Tests + 3/3 lange Tests, Mac-Fensterlauf); iPhone-Abnahmen gesammelt in Phase 7. Phase 7 (Mobile Politur) in Arbeit: Tickets 7.1–7.2 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) abgeschlossen (332/332 Tests + 3/3 lange Tests, Mac-Fensterlauf); iPhone-Abnahmen gesammelt in Phase 7. Phase 7 (Mobile Politur) in Arbeit: Tickets 7.1–7.3 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
