@@ -97,9 +97,9 @@ in der UI nachvollziehbar, warum sich Werte geändert haben.
 - [x] Ticket 3.5: Karriere-UI: Kanal im HUD, Kanal-Karte mit Wachstumsbremse, Kanal-Verlauf mit Begründungen (196/196 Tests grün)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Content-Karten, Kanal-Karte, Kanal-Verlauf; damals Hochformat)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7 (die frühere Meldung „ok“ war falsch)
+- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5) (die frühere Meldung „ok“ war falsch)
 
-Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
+Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] Neues Spiel: HUD zeigt „Kanal: 120 Follower · Community 50 · Ruf 50“
 - [ ] Zu Hause gibt es „Kurzvideo“, im Studio „Livestream“, „Langes Video“, „Q&A mit der Community“; „Kurzer Stream“ ist weg
 - [ ] Jede Content-Karte zeigt vorher die Wirkung (Zeit, Energie, Stimmung, Follower, Community, Ruf, Geld) und die Qualität mit Anteilen
@@ -124,9 +124,9 @@ die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), n
 - [x] Ticket 4.5: Unternehmens-UI: Firmenkonto im HUD, Unternehmens-Karte mit Prognose, Einlage/Entnahme, Tagesabschlüsse und Unternehmens-Verlauf (246/246 Tests grün)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Gründung, Unternehmens-Karte, Tagesabschluss, Ladenlokal; Hochformat, Fenster seit G2)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
+- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
 
-Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
+Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] Neues Spiel: kein Firmenkonto im HUD; Abschnitt „Unternehmen“ zeigt „Noch kein Unternehmen. Gründen möglich: Merch-Label (Büro).“
 - [ ] Im Büro „Merch-Label gründen“: 1 h, Privatkonto −350 € (150 € Gebühr + 200 € Einlage), HUD zeigt „Firmenkonto: 200,00 €“
 - [ ] Buchungen: Gründung und Einlage sichtbar, Firmenbuchungen mit „(Firma)“ markiert
@@ -154,9 +154,9 @@ bleiben unverändert (siehe DECISIONS 020).
 - [x] G2.4: Icons (Kenney „Game Icons“ + Erweiterung, CC0), Tests, Doku (255/255 Tests grün)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Start, Ortsfenster, Kanal-Fenster, Hinweis, Icons; 1280×720)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
+- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
 
-Abnahme auf dem iPhone (G2, offen – gesammelt in Phase 7):
+Abnahme auf dem iPhone (G2; ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5):
 - [ ] App startet im Querformat, in beiden Richtungen; Drehen des iPhones dreht das Bild mit
 - [ ] Karte füllt den ganzen Bildschirm (auch hinter Notch/Dynamic Island und Home-Balken)
 - [ ] HUD links oben (Tag, Uhrzeit, Ort) und rechts oben (Konto, Firmenkonto, Energie, Stimmung) – nichts von der Notch verdeckt, in beiden Richtungen
@@ -184,9 +184,9 @@ Ereignis nach 3 überfälligen Fristen; erste Fälligkeit Tag 8; kein Game Over.
 - [x] Test-Runner erkennt Skriptfehler (abgebrochene Tests zählen jetzt als fehlgeschlagen)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Karte mit „Fristen (1)“, Fristen-Fenster, Mahnung 90 € offen, Wochenübersicht, Prüfungstermin-Ereignis); dabei gefunden und behoben: linke Seitenleiste ragte mit 4 Buttons aus dem Bild
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
+- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
 
-Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
+Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] In Woche 1 keine Fristen; am ersten Montag (Tag 8) Mieten automatisch bezahlt, Hinweis in der Rückmeldung
 - [ ] Bei zu wenig Geld: „Fristen (n)“ rot, Fristen-Fenster zeigt offenen Betrag und Grund; nach 2 Tagen Mahnung (offener Betrag steigt, Konto unverändert)
 - [ ] „Bezahlen“ bucht Grundbetrag und Mahngebühr; Button danach weg
@@ -208,9 +208,9 @@ Stände aufbewahren), Konsistenzprüfung und einheitliche Regel für entfernte D
 - [x] Lange Tests am Ende der Phase: 3/3 grün (Rundlauf 30 × 30 Tage, Störungstest, Messung Tag 180: 397 KB, Laden 15 ms)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Hauptmenü mit Spielstand-Info, Backup nach defektem Stand, Einstellungen mit aufbewahrter Kopie)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
+- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
 
-Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
+Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] Hauptmenü zeigt unter „Fortsetzen“ Tag, Uhrzeit, Konto und „gespeichert …“ mit richtiger Ortszeit
 - [ ] App mitten im Spiel beenden (wegwischen), neu öffnen: Fortsetzen lädt den letzten Stand ohne Hinweis
 - [ ] Ein Spielstand aus einem früheren Build (Phase 5) lässt sich fortsetzen
@@ -223,9 +223,20 @@ iPhone-Test, der die offenen iPhone-Abnahmen von Phase 3–6 und G2 ersetzt, dan
 - [x] Ticket 7.1: Aufräumen, ObjectDB-Warnung untersucht – im Spiel kein Leck (gemessen), Ursache sind Kreisverweise in Tests; Wächter-Tests gegen Lecks (334/334 Tests grün)
 - [x] Ticket 7.2: Layout-Tests für 4 Geräteklassen (16:9 bis 19,5:9, mit/ohne Notch); gefunden und behoben: Hauptmenü zu hoch auf Notch-iPhones, Hinweis-Höhe erst ein Bild später korrekt (336/336 Tests grün)
 - [x] Ticket 7.3: Performance auf dem Mac: Ruhezustand 120 → 0 Bilder/s (Stromsparmodus + Markierung wippt nur kurz), Zeichenaufrufe 963 → 206 (Texturatlas), 60 FPS (338/338 Tests grün)
-- [ ] Ticket 7.4: iOS-Build vorbereiten (Version 0.7.0, App-Symbol, Export nach Xcode)
-- [ ] Ticket 7.5: Gebündelter iPhone-Test (Game Director)
+- [x] Ticket 7.4: iOS-Build vorbereiten: Version 0.7.0 (Build 7), App-Symbol, Export nach Xcode headless geprüft (Querformat links/rechts, Daten und Grafiken im Paket, Tests/Werkzeuge nicht) (338/338 Tests grün)
+- [ ] Ticket 7.5: Gebündelter iPhone-Test (Game Director) – Checkliste unten
 - [ ] Ticket 7.6: Korrekturen aus dem iPhone-Test
+
+Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von Phase 3–6 und G2):
+- [ ] 1. Starten: App öffnen – das Bild ist quer. iPhone um 180° drehen – das Bild dreht mit, nichts wird von Notch oder Rand verdeckt.
+- [ ] 2. Fortsetzen: Den alten Spielstand vorher NICHT löschen – er ist der Migrationstest. „Fortsetzen“ tippen – das Spiel lädt; oben links Tag und Uhrzeit, oben rechts das Geld.
+- [ ] 3. Karte: Mit einem Finger wischen – die Karte bewegt sich flüssig. Mit zwei Fingern zoomen – dabei öffnet sich kein Fenster.
+- [ ] 4. Fahren: Auf das Gebäude „Studio“ tippen – ein Fenster öffnet sich. „Hinfahren“ tippen – das Taxi fährt, die Uhr springt vor.
+- [ ] 5. Fenster: Im Studio-Fenster die Liste mit dem Finger rauf und runter schieben – dabei startet nichts. Dann bei „Livestream“ auf „Produzieren“ tippen – das Geld oben rechts steigt.
+- [ ] 6. Seitenbuttons: Termine, Fristen, Kanal, Buchungen, Menü nacheinander antippen – jedes Fenster geht auf und mit „Schließen“ wieder zu; alle Buttons sind ganz zu sehen.
+- [ ] 7. Beenden: App ganz schließen (hochwischen, wegschieben), neu öffnen – das Hauptmenü zeigt unter „Fortsetzen“ Tag, Uhrzeit und Geld; nach „Fortsetzen“ ist alles wie vorher.
+- [ ] 8. Flugmodus: einschalten – alles funktioniert gleich.
+- [ ] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
 ## Spätere Phasen
 8. Balancing und mehr Inhalte

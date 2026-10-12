@@ -5,6 +5,7 @@
 - Aufgeräumt: ungenutztes Kartensignal `pin_down` und ungenutzter Getter entfernt (Ticket 7.1)
 - Layout-Tests für typische iPhones im Querformat (16:9 ohne Notch, Notch, Dynamic Island, Grenzfall): HUD, Seitenleisten, Hinweis und alle Fenster in der Safe Area und ohne Überlappung; Menüs passen in die Höhe (Ticket 7.2)
 - Hauptmenü und Einstellungen kompakter (Titel 56 px, Buttons 84 px ≈ 46 pt, Spielstand-Info einzeilig) und in einem Scrollbereich als Sicherheitsnetz – vorher wären auf Notch-iPhones unten Buttons abgeschnitten worden (Ticket 7.2)
+- Version 0.7.0 (Build 7), eigenes Platzhalter-App-Symbol, Werkzeuge vom Export ausgeschlossen; iOS-Export nach Xcode ohne Editor geprüft (Querformat links/rechts, Daten und Grafiken im Paket, Tests nicht) (Ticket 7.4)
 - Akku: Stromsparmodus (Godot zeichnet nur bei Änderungen) und 60 FPS; die Standortmarkierung wippt nur 3 s nach Ankunft/Auswahl – Ruhezustand von 120 auf 0 gezeichnete Bilder pro Sekunde (Mac) (Ticket 7.3)
 - Kartengrafiken beim Start zu einem Texturatlas gepackt: Zeichenaufrufe je Bild von 963 auf 206, Wischen von 133–169 auf 179–206 FPS möglich (Mac) (Ticket 7.3)
 - Hinweis-Leiste hat sofort die richtige Höhe (Umbruch wird erzwungen statt ein Bild später korrigiert) (Ticket 7.2)

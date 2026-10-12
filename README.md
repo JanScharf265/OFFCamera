@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) abgeschlossen (332/332 Tests + 3/3 lange Tests, Mac-Fensterlauf); iPhone-Abnahmen gesammelt in Phase 7. Phase 7 (Mobile Politur) in Arbeit: Tickets 7.1–7.3 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) abgeschlossen (332/332 Tests + 3/3 lange Tests, Mac-Fensterlauf); iPhone-Abnahmen gesammelt in Phase 7. Phase 7 (Mobile Politur): Teil A fertig (7.1–7.4, Build 0.7.0) – als Nächstes der gebündelte iPhone-Test (7.5).** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -71,7 +71,15 @@ Kostenloses Apple-Konto: App läuft nach einigen Tagen ab und muss dann neu inst
 | Xcode hängt bei „Extracting OS library symbols“ | Nur beim ersten Mal pro iOS-Version, einige Minuten warten |
 | „Developer App Certificate is not trusted“ | iPhone: Einstellungen → Allgemein → VPN & Geräteverwaltung → Zertifikat vertrauen |
 
-Godot 4.7 benennt die exportierten Dateien `OFFCamera.ipa.xcodeproj`, `OFFCamera.ipa.xcframework` usw. – das ist normal.
+Export ohne Editor (Phase 7, im Projektordner; erzeugt nur das Xcode-Projekt, signiert nichts):
+
+```sh
+timeout 600 ~/Downloads/Godot.app/Contents/MacOS/Godot --headless --path . --export-release "iOS" exports/ios/OFFCamera.ipa
+```
+
+Das Ergebnis heißt `exports/ios/OFFCamera.xcodeproj` (frühere Exporte hießen `OFFCamera.ipa.xcodeproj` – den alten
+Satz vom 11.10. habe ich nach `exports/ios/_alt_2026-10-11/` verschoben, damit er nicht versehentlich geöffnet wird).
+App-Symbol: `assets/icon/app_icon_1024.png` (neu erzeugen mit `tools/icon/make_icon.gd`).
 Warnungen zu Kamera-/Mikrofon-/Foto-Usage-Descriptions sind harmlos (die App fragt diese Rechte nicht an).
 
 Fehler? Exakte Meldung aus Godot bzw. Xcode kopieren (siehe „Fehlerbericht“ in [`CLAUDE.md`](CLAUDE.md)).

@@ -289,3 +289,14 @@ jetzt nur 3 s nach Ankunft, Auswahl oder Laden. Alle Kartengrafiken werden beim 
 Bilddaten), bleiben die Einzeltexturen. Die übrigen ~200 Aufrufe kommen v. a. von gezeichneten Flächen (Strand, Wellen,
 Route) zwischen den Kacheln – vorerst ausreichend; Werte auf dem iPhone prüft der gebündelte Test (Gefühl, Wärme).
 
+## 035 – iOS-Build 0.7.0 und gebündelter iPhone-Test
+Version 0.7.0, Build 7 (danach zählt jede Phase hoch). App-Symbol: eigenes Platzhalter-Symbol (durchgestrichene Kamera,
+„OFF CAMERA“, Akzentfarbe), 1024 × 1024 ohne Transparenz, erzeugt mit `tools/icon/make_icon.gd` (eigenes Mini-Projekt,
+vom Export ausgeschlossen). Den Godot-Export nach Xcode führt Claude headless aus (nur Projekt, kein Signieren);
+geprüft: `UISupportedInterfaceOrientations` = Landscape links/rechts, `MARKETING_VERSION` 0.7.0, Daten und Grafiken
+im .pck, `tests/` und `tools/` nicht. Bauen, Signieren, Installieren: Game Director in Xcode.
+Die einzelnen iPhone-Checklisten von Phase 3–6 und G2 (~47 Punkte) sind durch EINEN gebündelten Test mit 9 Punkten
+ersetzt (Entscheidung des Game Directors): Er prüft nur Gerät, Touch, Darstellung und Gefühl; Spiellogik und Beträge
+decken die automatischen Tests ab. Der alte Spielstand auf dem iPhone wird vorher nicht gelöscht – er ist der
+Migrationstest (voraussichtlich ein Stand aus dem G1-Build, Spielstand-Version 2 – der letzte Build, der auf dem iPhone lief).
+
