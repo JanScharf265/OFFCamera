@@ -256,7 +256,7 @@ func _refresh_company_card(type_id: String) -> void:
 	var definition = _game.company.get_catalog().get_definition(type_id)
 	var card: Dictionary = _company_cards[type_id]
 	var founded: bool = _game.company.is_founded()
-	if founded and _game.company.get_type().id == type_id:
+	if founded and _game.company.get_type_id() == type_id:
 		card["info"].text = "Gegründet · Firmenkonto %s · Auslastung %d · Ruf %d" % [
 				LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY)),
 				_game.company.utilization, _game.company.reputation]
@@ -290,7 +290,7 @@ func _build_branch_card(type_id: String) -> Control:
 func _refresh_branch_card(type_id: String) -> void:
 	var definition = _game.company.get_catalog().get_definition(type_id)
 	var card: Dictionary = _branch_cards[type_id]
-	var ours: bool = _game.company.is_founded() and _game.company.get_type().id == type_id
+	var ours: bool = _game.company.is_founded() and _game.company.get_type_id() == type_id
 	var is_open: bool = ours and _game.company.is_branch_open()
 	if is_open:
 		card["info"].text = "Geöffnet · +%s Grundumsatz und %s Fixkosten pro Tag" % [

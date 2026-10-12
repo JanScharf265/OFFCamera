@@ -161,13 +161,21 @@ func test_version_6_save_gets_unfounded_company() -> void:
 	SaveSystemScript.delete_save(PATH)
 
 
-func test_restore_rejects_unknown_type() -> void:
+## Phase 6 (Entscheidung 4): Eine entfernte Unternehmensart lehnt den Spielstand nicht mehr ab –
+## das Unternehmen bleibt mit seinen Werten, rechnet aber nicht mehr ab; es gibt einen Hinweis.
+func test_restore_keeps_company_with_removed_type() -> void:
 	var game := _founded()
 	var data := game.company.to_dict()
 	data["type"] = "casino"
 	var other := Helpers.new_game()
-	assert_true("unbekannte Art" in other.company.restore(data), "unbekannte Art akzeptiert")
-	assert_eq(other.company.is_founded(), false)
+	assert_eq(other.company.restore(data), "")
+	assert_eq(other.company.is_founded(), true)
+	assert_eq(other.company.get_type_id(), "casino")
+	assert_true(other.company.get_type() == null, "Art sollte fehlen")
+	assert_eq(other.company.utilization, 50)
+	assert_true("casino" in "; ".join(other.company.restore_notices), "Hinweis fehlt")
+	assert_eq(other.company.preview_day(), {})
+	assert_eq(other.company.check_open_branch(), "Die Unternehmensart gibt es nicht mehr.")
 
 
 # --- Tagesabschluss (Ticket 4.3) ---------------------------------------------------

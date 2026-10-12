@@ -29,6 +29,9 @@ var _catalog: EquipmentCatalogScript
 var _levels := {}
 
 
+## Hinweise des letzten restore() zu entfernten Daten (Phase 6).
+var restore_notices := PackedStringArray()
+
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, locations: LocationSystemScript,
 		catalog: EquipmentCatalogScript) -> void:
 	_time = time
@@ -120,11 +123,15 @@ func restore(data: Dictionary) -> String:
 	if typeof(raw) != TYPE_DICTIONARY:
 		return "Ausrüstung: 'levels' fehlt oder ist kein Objekt."
 	var levels := {}
+	var notices := PackedStringArray()
 	for id in raw:
 		if typeof(id) != TYPE_STRING or not DataReaderScript.is_whole_number(raw[id]) or int(raw[id]) < 0:
 			return "Ausrüstung: ungültige Stufe für '%s'." % id
 		var definition := _catalog.get_definition(id)
 		if definition != null and int(raw[id]) > 0:
 			levels[id] = mini(int(raw[id]), definition.max_level())
+		elif definition == null and int(raw[id]) > 0:
+			notices.append("Die Ausrüstung „%s“ gibt es nicht mehr – sie wurde entfernt." % id)
 	_levels = levels
+	restore_notices = notices
 	return ""

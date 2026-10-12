@@ -88,7 +88,7 @@ func _open_card(instance: Dictionary) -> Control:
 	card.add_child(box)
 	box.add_child(UiStyle.wrapping_label(obligations.get_label(instance["id"])))
 	var details := "Fällig seit %s · %s" % [TimeSystemScript.format_stamp(instance["due_minutes"]),
-			LedgerSystemScript.ACCOUNT_LABELS[definition.account] if definition != null else ""]
+			LedgerSystemScript.ACCOUNT_LABELS[instance["account"]]]
 	box.add_child(UiStyle.wrapping_label(details, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 	var amount := UiStyle.wrapping_label("Offen: %s" % LedgerSystemScript.format_cents(
 			obligations.open_amount(instance["id"])), UiStyle.SMALL_FONT_SIZE)

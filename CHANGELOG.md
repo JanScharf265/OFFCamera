@@ -3,6 +3,9 @@
 ## Unveröffentlicht – Phase 6
 - Echte Testspielstände v1–v11, erzeugt mit dem Code der jeweiligen Commits; jeder lädt bis zur aktuellen Version, behält Zeit, Konten, Ort, Kanal, Ausrüstung, Unternehmen und ist weiterspielbar (Ticket 6.1)
 - Migrationen als Einzelschritte n → n + 1; ein Test verlangt eine Testdatei je Version (Ticket 6.1)
+- Konsistenzprüfung nach dem Laden über System-Grenzen (Zeitstempel, Buchungsnummern, Schutzschlüssel, Zähler für Einlagen/Entnahmen, gebuchte Fristen, Tagesabschlüsse); unstimmige Stände werden wie defekte behandelt und das Backup geladen (Ticket 6.3)
+- Entfernte Daten: Laden mit Hinweis statt Ablehnung – Ort → Startort, Ausrüstung entfernt, Unternehmen ohne Art bleibt (ohne Abschlüsse), offene Frist ohne Definition bleibt bezahlbar, offenes Ereignis ohne Daten entfällt; Hinweise erscheinen nach dem Laden (Ticket 6.3)
+- Spielstand Version 12 mit Migration und echter Testdatei: Frist-Instanzen speichern Konto, Kategorie und Bezeichnung (Ticket 6.3)
 - Robustes Speichern: Kopf mit App-Version, Speicherzeit, Spieltag, Kontostand und Datenkennung; 3 rotierende Backups; .tmp wird nach dem Schreiben geprüft; eine liegengebliebene .tmp wird nur übernommen, wenn sie vollständig lesbar ist und alle Prüfungen besteht, sonst als defekter Stand aufbewahrt (Regressionstest); defekte Stände werden nie überschrieben (höchstens 3 Kopien); kein Speichern während eines Zeitfortschritts (Ticket 6.2)
 
 ## Unveröffentlicht – Phase 5

@@ -202,7 +202,7 @@ Stände aufbewahren), Konsistenzprüfung und einheitliche Regel für entfernte D
 
 - [x] Ticket 6.1: Echte Spielstände v1–v11 aus den damaligen Commits, Migrationen als Einzelschritte, Testdatei-Pflicht je Version (303/303 Tests grün, Suite ~1 s)
 - [x] Ticket 6.2: Robustes Schreiben (Kopf, 3 Backups, gültige .tmp, defekte Stände aufbewahren) (315/315 Tests grün)
-- [ ] Ticket 6.3: Konsistenzprüfung und entfernte Daten
+- [x] Ticket 6.3: Konsistenzprüfung über System-Grenzen, einheitliche Regel für entfernte Daten mit Hinweis, Spielstand Version 12 (Fristen speichern Konto/Kategorie/Bezeichnung) (326/326 Tests grün)
 - [ ] Ticket 6.4: Rundlauf-, Störungs- und Lasttests (langer Lauf mit eigenem Befehl)
 - [ ] Ticket 6.5: Spielstand-Info im Hauptmenü, Fehlerdialog, Abnahme
 

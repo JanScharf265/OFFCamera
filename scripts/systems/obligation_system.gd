@@ -48,6 +48,8 @@ var _instances: Array[Dictionary] = []
 var _last_processed_day := 0
 ## Hinweise seit dem letzten take_notices() (nicht gespeichert).
 var _notices := PackedStringArray()
+## Hinweise des letzten restore() zu entfernten Daten (Phase 6).
+var restore_notices := PackedStringArray()
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
@@ -149,12 +151,9 @@ func check_pay(instance_id: String) -> String:
 		return "Unbekannte Frist: %s" % instance_id
 	if instance["status"] != STATUS_OPEN:
 		return "Diese Frist ist nicht offen."
-	var definition := _catalog.get_definition(instance["obligation"])
-	if definition == null:
-		return "Diese Frist gibt es nicht mehr."
 	var total := open_amount(instance_id)
-	if not _ledger.can_afford(total, definition.account):
-		return "Nicht genug Geld auf dem %s (offen: %s)." % [LedgerSystemScript.ACCOUNT_LABELS[definition.account],
+	if not _ledger.can_afford(total, instance["account"]):
+		return "Nicht genug Geld auf dem %s (offen: %s)." % [LedgerSystemScript.ACCOUNT_LABELS[instance["account"]],
 				LedgerSystemScript.format_cents(total)]
 	return ""
 
@@ -166,9 +165,8 @@ func pay(instance_id: String) -> String:
 		return reason
 	for instance in _instances:
 		if instance["id"] == instance_id:
-			var definition := _catalog.get_definition(instance["obligation"])
-			_book_payment(instance, definition)
-			_notices.append("%s bezahlt: %s." % [_label(definition, instance["due_minutes"]),
+			_book_payment(instance)
+			_notices.append("%s bezahlt: %s." % [instance["label"],
 					LedgerSystemScript.format_cents(-(int(instance["amount_cents"]) + int(instance["fee_cents"])))])
 			return ""
 	return "Unbekannte Frist: %s" % instance_id
@@ -194,6 +192,8 @@ func _create(definition: ObligationDefinitionScript, instance_id: String, due_mi
 	var instance := {
 		"id": instance_id, "obligation": definition.id, "due_minutes": due_minutes, "amount_cents": amount,
 		"fee_cents": 0, "status": STATUS_OPEN, "paid_minutes": -1, "reminded": false,
+		# Phase 6: gespeichert, damit eine offene Frist bezahlbar bleibt, auch wenn ihre Definition entfällt.
+		"account": definition.account, "category": definition.category, "label": _label(definition, due_minutes),
 	}
 	_instances.append(instance)
 	obligation_due.emit(instance_id)
@@ -202,7 +202,7 @@ func _create(definition: ObligationDefinitionScript, instance_id: String, due_mi
 		instance["status"] = STATUS_WAIVED
 		_notices.append("%s: entfällt (kein Gewinn in der Vorwoche)." % label)
 	elif _ledger.can_afford(amount, definition.account):
-		_book_payment(instance, definition)
+		_book_payment(instance)
 		_notices.append("%s automatisch bezahlt: %s." % [label, LedgerSystemScript.format_cents(-amount)])
 	else:
 		_notices.append("%s fällig (%s) – %s reicht nicht. Bitte bezahlen." % [label,
@@ -213,14 +213,14 @@ func _create(definition: ObligationDefinitionScript, instance_id: String, due_mi
 ## Bucht den offenen Betrag einer Instanz und markiert sie bezahlt: Grundbetrag (Wertstellung =
 ## Fälligkeit) und ggf. Mahngebühr (Wertstellung = jetzt). Der Aufrufer hat vorher geprüft, dass das
 ## Konto den ganzen offenen Betrag deckt – danach kann keine der Buchungen mehr scheitern.
-func _book_payment(instance: Dictionary, definition: ObligationDefinitionScript) -> void:
-	var label := _label(definition, instance["due_minutes"])
+func _book_payment(instance: Dictionary) -> void:
+	var label: String = instance["label"]
 	var key := "obligation:%s" % instance["id"]
-	_ledger.post(-int(instance["amount_cents"]), definition.category, label, SOURCE, instance["id"],
-			key, false, definition.account, instance["due_minutes"])
+	_ledger.post(-int(instance["amount_cents"]), instance["category"], label, SOURCE, instance["id"],
+			key, false, instance["account"], instance["due_minutes"])
 	if int(instance["fee_cents"]) > 0:
 		_ledger.post(-int(instance["fee_cents"]), FEE_CATEGORY, "Mahngebühr: %s" % label, SOURCE, instance["id"],
-				key + ":fee", false, definition.account)
+				key + ":fee", false, instance["account"])
 	instance["status"] = STATUS_PAID
 	instance["paid_minutes"] = _time.get_minutes()
 	obligation_paid.emit(instance["id"])
@@ -235,9 +235,7 @@ func _label(definition: ObligationDefinitionScript, due_minutes: int) -> String:
 
 
 func get_label(instance_id: String) -> String:
-	var instance := get_instance(instance_id)
-	var definition := _catalog.get_definition(instance.get("obligation", ""))
-	return _label(definition, instance["due_minutes"]) if definition != null else instance_id
+	return get_instance(instance_id).get("label", instance_id)
 
 
 func _trim() -> void:
@@ -263,6 +261,7 @@ func restore(data: Dictionary) -> String:
 	var reader := DataReaderScript.new()
 	var last_day := reader.int_field(data, "last_processed_day", "Fristen", true)
 	var instances: Array[Dictionary] = []
+	var notices := PackedStringArray()
 	var raw: Variant = data.get("instances")
 	if typeof(raw) != TYPE_ARRAY:
 		reader.errors.append("Fristen: 'instances' fehlt oder ist keine Liste.")
@@ -284,7 +283,11 @@ func restore(data: Dictionary) -> String:
 				"status": reader.string_field(entry, "status", where, true),
 				"paid_minutes": reader.int_field(entry, "paid_minutes", where, true),
 				"reminded": entry["reminded"],
+				"account": reader.string_field(entry, "account", where, false),
+				"category": reader.string_field(entry, "category", where, false),
+				"label": reader.string_field(entry, "label", where, false),
 			}
+			_fill_missing_fields(instance, notices)
 			if instance["status"] not in [STATUS_PAID, STATUS_OPEN, STATUS_WAIVED] \
 					or instance["amount_cents"] < 0 or instance["fee_cents"] < 0:
 				reader.errors.append("%s: Status oder Betrag ungültig." % where)
@@ -298,4 +301,19 @@ func restore(data: Dictionary) -> String:
 	_last_processed_day = last_day
 	_instances = instances
 	_notices = PackedStringArray()
+	restore_notices = notices
 	return ""
+
+
+## Ergänzt Konto/Kategorie/Bezeichnung (leer bei Spielständen vor Version 12) aus den Daten; gibt es die Frist
+## nicht mehr, gelten Privatkonto, Kategorie "obligation" und die ID – offen bleibt sie bezahlbar (Phase 6).
+func _fill_missing_fields(instance: Dictionary, notices: PackedStringArray) -> void:
+	var definition := _catalog.get_definition(instance["obligation"])
+	if definition == null and instance["status"] == STATUS_OPEN:
+		notices.append("Die Frist „%s“ gibt es nicht mehr – sie bleibt offen und bezahlbar." % instance["obligation"])
+	if String(instance["account"]) not in [LedgerSystemScript.PRIVATE, LedgerSystemScript.COMPANY]:
+		instance["account"] = definition.account if definition != null else LedgerSystemScript.PRIVATE
+	if String(instance["category"]).is_empty():
+		instance["category"] = definition.category if definition != null else "obligation"
+	if String(instance["label"]).is_empty():
+		instance["label"] = _label(definition, instance["due_minutes"]) if definition != null else instance["obligation"]

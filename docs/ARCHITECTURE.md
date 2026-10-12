@@ -179,7 +179,7 @@ Stand Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI) 
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 11, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 12, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -192,12 +192,17 @@ Stand Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI) 
 - Migration 6 → 7: Unternehmen `{"founded": false}`.
 - Migration 7 → 8: gegründetes Unternehmen: `last_settled_day` = gespeicherter Tag − 1, `settlements` leer.
 - Migration 8 → 9: gegründetes Unternehmen: `branch_open = false`.
+- Migration 11 → 12: Frist-Instanzen bekommen leere `account`/`category`/`label`; `ObligationSystem.restore()`
+  ergänzt sie aus den Daten oder setzt Ersatzwerte (privat, „obligation“, ID).
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 9 → 10: Wertstellung = Buchungszeit; Tagesabschlüsse (`company`, `day:<t>`) auf Tag t, 23:59.
 - Schreiben (Phase 6): `.tmp` schreiben und wieder einlesen → wenn eine Hauptdatei existiert, Backups rotieren
   (`.bak2` → `.bak3`, `.bak` → `.bak2`, Hauptdatei → `.bak`) → `.tmp` nach `savegame.json`. Nie während eines
   Zeitfortschritts. Kopf `meta` (optional): App-Version, Speicherzeit, Spieltag, Uhrzeit, Privatkonto, `data_id`
   (`GameData.fingerprint`); `read_meta()` liest ihn ohne zu laden.
+- Nach `GameState.restore()` prüft `scripts/core/consistency_check.gd` Regeln über System-Grenzen; Verletzung =
+  wie defekt (aufbewahren, nächstes Backup). Entfernte Daten regeln die Systeme tolerant und melden es über
+  `restore_notices`; `GameState.load_notices()` sammelt sie, das Ladeergebnis enthält `notices`, die App zeigt sie.
 - Laden (Phase 6): gültige liegengebliebene `.tmp` (dann Speichern zu Ende führen), sonst Hauptdatei, `.bak`, `.bak2`,
   `.bak3`. Defekte Dateien → `<name>.corrupt-<zeit>.json` (höchstens 3, `corrupt_files()`), neuere Versionen bleiben
   unberührt. Ergebnis zusätzlich `source` und `corrupt_kept`. Früher: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,

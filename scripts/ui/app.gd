@@ -96,9 +96,13 @@ func continue_game() -> void:
 			show_main_menu(reason if not reason.is_empty() else "Es gibt noch keinen Spielstand.")
 			return
 		game = result["game"]
-		if result["from_backup"]:
-			show_game("Der letzte Spielstand war beschädigt – das Backup wurde geladen.")
-			return
+		var lines := PackedStringArray()
+		if result["from_backup"] or result.get("source", "") == "tmp":
+			lines.append("Der letzte Spielstand war beschädigt – das Backup wurde geladen." if result["from_backup"]
+					else "Das letzte Speichern war unterbrochen – es wurde abgeschlossen.")
+		lines.append_array(result.get("notices", PackedStringArray()))
+		show_game("\n".join(lines))
+		return
 	show_game()
 
 

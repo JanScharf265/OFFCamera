@@ -68,6 +68,8 @@ var _withdrawals := 0
 var _history: Array[ChangeScript] = []
 var _next_number := 1
 var _used_keys := {}
+## Hinweise des letzten restore() zu entfernten Daten (Phase 6).
+var restore_notices := PackedStringArray()
 ## Letzter abgerechneter Tag (Gründungstag − 1 direkt nach der Gründung).
 var _last_settled_day := 0
 var _branch_open := false
@@ -94,7 +96,13 @@ func is_founded() -> bool:
 	return not _type_id.is_empty()
 
 
-## Art des gegründeten Unternehmens oder null.
+## ID der Unternehmensart ("" ohne Unternehmen) – auch wenn es die Art in den Daten nicht mehr gibt.
+func get_type_id() -> String:
+	return _type_id
+
+
+## Art des gegründeten Unternehmens oder null (auch, wenn es die Art in den Daten nicht mehr gibt –
+## dann bleibt das Unternehmen mit seinen Werten, rechnet aber nicht mehr ab; Phase 6).
 func get_type() -> CompanyTypeScript:
 	return _catalog.get_definition(_type_id) if is_founded() else null
 
@@ -111,8 +119,10 @@ func is_branch_open() -> bool:
 ## "" wenn die Filiale jetzt eröffnet werden kann, sonst ein Grund für die Anzeige.
 func check_open_branch() -> String:
 	var definition := get_type()
-	if definition == null:
+	if not is_founded():
 		return "Erst ein Unternehmen gründen (im Büro)."
+	if definition == null:
+		return "Die Unternehmensart gibt es nicht mehr."
 	if not definition.has_branch:
 		return "Für dieses Unternehmen gibt es keine Filiale."
 	if _branch_open:
@@ -373,8 +383,10 @@ func restore(data: Dictionary) -> String:
 	var reader := DataReaderScript.new()
 	var where := "Unternehmen"
 	var type_id := reader.string_field(data, "type", where, true)
+	var notices := PackedStringArray()
 	if not type_id.is_empty() and not _catalog.has(type_id):
-		reader.errors.append("Unternehmen: unbekannte Art '%s'." % type_id)
+		notices.append("Die Unternehmensart „%s“ gibt es nicht mehr – dein Unternehmen bleibt mit seinen Werten, "
+				% type_id + "rechnet aber nicht mehr ab.")
 	var founded_minutes := reader.int_field(data, "founded_minutes", where, true)
 	var values := {}
 	for key in KEYS:
@@ -445,6 +457,7 @@ func restore(data: Dictionary) -> String:
 	if not reader.errors.is_empty():
 		return "; ".join(reader.errors)
 
+	restore_notices = notices
 	_type_id = type_id
 	_founded_minutes = founded_minutes
 	utilization = values["utilization"]
@@ -462,6 +475,7 @@ func restore(data: Dictionary) -> String:
 
 
 func _reset() -> void:
+	restore_notices = PackedStringArray()
 	_type_id = ""
 	_founded_minutes = -1
 	utilization = 0
@@ -481,6 +495,9 @@ func _reset() -> void:
 func on_day_changed(day: int) -> void:
 	var settled_day := day - 1
 	if not is_founded() or settled_day <= _last_settled_day:
+		return
+	if get_type() == null:
+		_last_settled_day = settled_day  # Art entfernt: keine Abschlüsse, aber auch kein Rückstau
 		return
 	_settle(settled_day)
 

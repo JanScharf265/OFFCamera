@@ -28,6 +28,9 @@ var _start_id: String
 var _current: String
 
 
+## Hinweise des letzten restore() zu entfernten Daten (Phase 6), für die Anzeige nach dem Laden.
+var restore_notices := PackedStringArray()
+
 func _init(time: TimeSystemScript, catalog: LocationCatalogScript, start_id: String) -> void:
 	_time = time
 	_catalog = catalog
@@ -140,5 +143,8 @@ func restore(data: Dictionary) -> String:
 	var current: Variant = data.get("current")
 	if typeof(current) != TYPE_STRING or current.is_empty():
 		return "Ort: 'current' fehlt oder ist ungültig."
+	restore_notices = PackedStringArray()
+	if not _catalog.has(current):
+		restore_notices.append("Den Ort „%s“ gibt es nicht mehr – du bist wieder am Startort." % current)
 	_current = current if _catalog.has(current) else _start_id
 	return ""

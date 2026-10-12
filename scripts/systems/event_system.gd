@@ -51,6 +51,8 @@ var _triggered := {}
 var _pending := PackedStringArray()
 ## Instanz-ID -> gewählte option_id
 var _resolved := {}
+## Hinweise des letzten restore() zu entfernten Daten (Phase 6).
+var restore_notices := PackedStringArray()
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
@@ -197,6 +199,7 @@ func restore(data: Dictionary) -> String:
 	var triggered := {}
 	var pending := PackedStringArray()
 	var resolved := {}
+	var notices := PackedStringArray()
 
 	var raw_seed: Variant = data.get("seed")
 	if not DataReaderScript.is_whole_number(raw_seed) or int(raw_seed) < 0:
@@ -222,8 +225,11 @@ func restore(data: Dictionary) -> String:
 			return "Ereignisse: 'pending' passt nicht zu 'triggered'/'resolved'."
 		if get_definition_for(id) != null:
 			pending.append(id)
+		else:
+			notices.append("Das offene Ereignis „%s“ gibt es nicht mehr – es entfällt ohne Folgen." % id)
 
 	_seed = int(raw_seed)
+	restore_notices = notices
 	_triggered = triggered
 	_pending = pending
 	_resolved = resolved

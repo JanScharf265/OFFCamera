@@ -227,3 +227,14 @@ Der Kopf `meta` (App-Version, Speicherzeit, Spieltag, Uhrzeit, Privatkonto, Date
 optional und wird beim Laden nicht gebraucht – deshalb keine neue Formatversion. Gespeichert wird nie während eines
 Zeitfortschritts.
 
+## 029 – Konsistenz und entfernte Daten
+Entscheidungen des Game Directors: Daten, die es nicht mehr gibt, führen nicht zur Ablehnung, sondern zu einem Hinweis
+beim Laden (Ort → Startort, Ausrüstung entfällt, Unternehmen ohne Art bleibt mit Werten und Konto, rechnet aber nicht
+mehr ab – ohne Rückstau, wenn die Art zurückkommt; offene Frist ohne Definition bleibt offen und bezahlbar; offenes
+Ereignis ohne Daten entfällt ohne Folgen). Abgelehnt (und das nächste Backup versucht) wird nur, was Geld, Zeit oder
+Schutzschlüssel unstimmig macht: `ConsistencyCheck` prüft nach dem Laden über System-Grenzen (Zeitstempel ≤ Spielzeit,
+Buchungsnummern, Schutzschlüssel → vorhandene Buchung, Einlage-/Entnahme-Zähler ↔ Umbuchungen, bezahlte Fristen
+gebucht und offene nicht, Tagesabschluss/Fristen nicht in der Zukunft). Damit offene Fristen ohne Definition bezahlbar
+bleiben, speichern Frist-Instanzen Konto, Kategorie und Bezeichnung – Formatversion 12 (erste Anwendung der Regel
+„neue Version = neue echte Testdatei“). Alle echten Altstände v1–v12 bestehen die Prüfung.
+

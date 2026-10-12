@@ -19,8 +19,9 @@ const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
+const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 
-const SAVE_VERSION := 11
+const SAVE_VERSION := 12
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -116,7 +117,8 @@ static func read_meta(path: String = DEFAULT_PATH) -> Dictionary:
 ## Hauptdatei, .bak, .bak2, .bak3. Defekte Dateien werden als .corrupt-<zeit> aufbewahrt und entfernt,
 ## damit sie nie ein gutes Backup verdrängen; Dateien einer neueren Spielversion bleiben unberührt.
 ## Ergebnis: {"game": GameState oder null, "error": String, "from_backup": bool, "source": String,
-##            "corrupt_kept": Array[String]}
+##            "corrupt_kept": Array[String], "notices": PackedStringArray (entfernte Daten)}
+## Nach dem Laden prüft ConsistencyCheck die Regeln über System-Grenzen; unstimmig = wie defekt.
 ## game == null und error == "" bedeutet: Es gibt keinen Spielstand.
 static func load_game(game_data: GameDataScript, path: String = DEFAULT_PATH) -> Dictionary:
 	var kept: Array[String] = []
@@ -235,7 +237,10 @@ static func _load_file(path: String, game_data: GameDataScript) -> Dictionary:
 	var error := game.restore(data["game"])
 	if not error.is_empty():
 		return failed.call("Der Spielstand ist ungültig: %s" % error)
-	return {"game": game, "error": "", "from_backup": false}
+	var problems := ConsistencyCheckScript.check(game)
+	if not problems.is_empty():
+		return failed.call("Der Spielstand ist unstimmig: %s" % "; ".join(problems))
+	return {"game": game, "error": "", "from_backup": false, "notices": game.load_notices()}
 
 
 ## Neue Formatversion: SAVE_VERSION erhöhen, in _run_migration() einen Schritt n → n + 1 ergänzen
@@ -263,6 +268,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		8: return _migrate_8_to_9(game)
 		9: return _migrate_9_to_10(game)
 		10: return _migrate_10_to_11(game)
+		11: return _migrate_11_to_12(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -352,3 +358,19 @@ static func _migrate_10_to_11(game: Dictionary) -> String:
 		return "Zeit fehlt."
 	game["obligations"] = {"last_processed_day": TimeSystemScript.day_of(int(minutes)), "instances": []}
 	return ""
+
+
+## 11 → 12 (Phase 6): Frist-Instanzen speichern Konto, Kategorie und Bezeichnung selbst. Hier leer;
+## ObligationSystem.restore() ergänzt sie aus den Daten (oder Ersatzwerte, wenn die Frist entfallen ist).
+static func _migrate_11_to_12(game: Dictionary) -> String:
+	var obligations: Variant = game.get("obligations")
+	if typeof(obligations) != TYPE_DICTIONARY or typeof(obligations.get("instances")) != TYPE_ARRAY:
+		return "Fristen fehlen."
+	for instance in obligations["instances"]:
+		if typeof(instance) != TYPE_DICTIONARY:
+			return "Frist-Instanz ungültig."
+		for field in ["account", "category", "label"]:
+			if not instance.has(field):
+				instance[field] = ""
+	return ""
+

@@ -44,7 +44,8 @@ func _ready() -> void:
 
 
 func get_title() -> String:
-	return _game.company.get_type().display_name if _game.company.is_founded() else "Unternehmen"
+	var definition = _game.company.get_type()
+	return definition.display_name if definition != null else "Unternehmen"
 
 
 func refresh() -> void:
@@ -114,6 +115,14 @@ func _update_overview() -> void:
 	var company = _game.company
 	var definition = company.get_type()
 	var box := _overview.find_child("CompanyOverview", true, false) as Control
+	if definition == null:  # Art in den Daten entfernt (Phase 6): nur Konto und Werte zeigen
+		(box.find_child("CompanyName", false, false) as Label).text = "Unternehmen (%s)" % company.get_type_id()
+		(box.find_child("CompanyForecast", false, false) as Label).text = \
+				"Diese Unternehmensart gibt es nicht mehr – keine Tagesabschlüsse."
+		(box.find_child("CompanyBranch", false, false) as Label).visible = false
+		(box.find_child("CompanyAccount", false, false) as Label).text = "Firmenkonto: %s" % \
+				LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY))
+		return
 	(box.find_child("CompanyName", false, false) as Label).text = definition.display_name
 	(box.find_child("CompanyAccount", false, false) as Label).text = "Firmenkonto: %s" % \
 			LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY))

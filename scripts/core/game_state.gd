@@ -117,3 +117,12 @@ func restore(saved: Dictionary) -> String:
 	if error.is_empty():
 		error = obligations.restore(saved["obligations"])
 	return error
+
+
+## Hinweise des letzten restore() zu Daten, die es nicht mehr gibt (Phase 6) – zum Anzeigen nach dem Laden.
+func load_notices() -> PackedStringArray:
+	var notices := PackedStringArray()
+	for system in [locations, equipment, events, company, obligations]:
+		notices.append_array(system.restore_notices)
+	return notices
+
