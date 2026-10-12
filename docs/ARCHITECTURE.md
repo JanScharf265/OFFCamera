@@ -185,6 +185,7 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Tickets 
   Stimmung), `LeftBar` (Termine, Kanal, Firma – erst nach der Gründung) und `RightBar` (Buchungen, Menü, Hier),
   unten der Hinweis `Toast` (`FeedbackLabel`; kurze Texte ca. 4 s, lange/mehrzeilige bleiben bis zum Antippen).
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
+  Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,
   Tippen vs. Scrollen: > 12 px Bewegung zwischen Antippen und Loslassen = Scrollen). Inhalte mit `setup()`,
   `get_title()`, `refresh()`: `location_window.gd` (Details, „Hinfahren“, Content, Aktivitäten, Ausrüstung,

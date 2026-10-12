@@ -136,7 +136,7 @@ Abnahme auf dem iPhone:
 - [ ] Spielstand aus Phase 3 lässt sich fortsetzen (alle Buchungen auf dem Privatkonto, kein Unternehmen)
 - [ ] Alles per Touch bedienbar und scrollbar, nichts verdeckt oder abgeschnitten
 
-## Grafik-Ticket G2 – Querformat, Karte als Hauptbildschirm ← in Arbeit
+## Grafik-Ticket G2 – Querformat, Karte als Hauptbildschirm ← in Abnahme
 Grundsatzentscheidung des Game Directors (12.10.2026), vor Phase 5: Querformat (beide Richtungen), isometrische
 Stadtkarte im Vollbild, HUD in den oberen Ecken, Icon-Buttons an den Seiten öffnen Fenster, Gebäude antippen öffnet
 das Fenster des Orts. Safe Area (Notch seitlich, Home-Balken unten). Nur Darstellung – Spiellogik, Daten und Spielstand
@@ -145,9 +145,22 @@ bleiben unverändert (siehe DECISIONS 020).
 - [x] G2.1: Querformat und Grundgerüst (Projekteinstellungen, Safe Area je Bildschirm, Hauptmenü/Einstellungen) (248/248 Tests grün; Spielansicht bis G2.2 noch als schmale Spalte)
 - [x] G2.2 + G2.3 (zusammen umgesetzt, damit jeder Stand spielbar bleibt): Karte als Vollbild, HUD, Seitenleisten,
   Hinweise, Zoom; Fenster für Ort, Termine, Kanal, Unternehmen, Buchungen, Ereignis (255/255 Tests grün)
-- [ ] G2.4: Icons, Tests, Doku
+- [x] G2.4: Icons (Kenney „Game Icons“ + Erweiterung, CC0), Tests, Doku (255/255 Tests grün)
 - [ ] Im Editor durchgespielt
-- [ ] iPhone-Abnahme (zusammen mit der offenen Phase-4-Abnahme)
+- [ ] iPhone-Abnahme (zusammen mit der offenen Phase-4-Abnahme oben)
+
+Abnahme auf dem iPhone (G2):
+- [ ] App startet im Querformat, in beiden Richtungen; Drehen des iPhones dreht das Bild mit
+- [ ] Karte füllt den ganzen Bildschirm (auch hinter Notch/Dynamic Island und Home-Balken)
+- [ ] HUD links oben (Tag, Uhrzeit, Ort) und rechts oben (Konto, Firmenkonto, Energie, Stimmung) – nichts von der Notch verdeckt, in beiden Richtungen
+- [ ] Seitenbuttons mit Icon und Text (Termine, Kanal, Buchungen, Menü, Hier; Firma erst nach der Gründung) gut treffbar
+- [ ] Gebäude oder Schild antippen öffnet das Fenster des Orts; an fremden Orten sind Aktionen sichtbar, aber gesperrt mit Grund; „Hinfahren“ fährt hin und das Fenster zeigt danach die Aktionen frei
+- [ ] Wischen verschiebt die Karte; Zwei-Finger-Geste zoomt (0,5–1,0) ohne versehentlich einen Ort zu öffnen
+- [ ] Fenster: Liste im Fenster scrollt per Wischen, ohne versehentlich etwas auszulösen; „Schließen“ und Tipp neben das Fenster schließen
+- [ ] Ereignis erscheint als Fenster ohne „Schließen“; Karte reagiert erst nach der Entscheidung wieder
+- [ ] Hinweise unten: kurze verschwinden nach ein paar Sekunden, lange (z. B. Tagesabschluss) bleiben bis zum Antippen
+- [ ] Hauptmenü und Einstellungen im Querformat bedienbar
+- [ ] „Fortsetzen“ nach Neustart: Spielstand unverändert (Spiellogik/Spielstand wurden nicht geändert)
 
 ## Phase 5 – Finanzen, Fristen, Behördenereignisse
 

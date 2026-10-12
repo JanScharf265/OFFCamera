@@ -40,6 +40,17 @@ const TOAST_SECONDS := 4.0
 const TOAST_STICKY_LENGTH := 90
 const HUD_RIGHT_WIDTH := 380
 const GAP := 16.0
+## Icons (Kenney „Game Icons“, CC0). Fehlt eine Datei, bleibt der Button ohne Icon.
+const ICON_DIR := "res://assets/kenney/game-icons/"
+const ICON_EXPANSION_DIR := "res://assets/kenney/game-icons-expansion/"
+const ICONS := {
+	"AppointmentsButton": ICON_EXPANSION_DIR + "flag.png",
+	"ChannelButton": ICON_DIR + "video.png",
+	"CompanyButton": ICON_DIR + "shoppingCart.png",
+	"LedgerButton": ICON_EXPANSION_DIR + "coin.png",
+	"MenuButton": ICON_DIR + "menuList.png",
+	"HereButton": ICON_DIR + "target.png",
+}
 
 var _game: GameStateScript
 ## Safe-Area-Abstände [links, oben, rechts, unten] in Viewport-Pixeln (von der App).
@@ -193,7 +204,7 @@ func _side_bar(node_name: String) -> VBoxContainer:
 
 
 func _side_button(text: String, node_name: String, action: Callable) -> Button:
-	var button := UiStyle.side_button(text)
+	var button := UiStyle.side_button(text, ICONS.get(node_name, ""))
 	button.name = node_name
 	button.pressed.connect(action)
 	return button

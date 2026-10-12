@@ -5,6 +5,7 @@
 - Stadtkarte als Vollbild-Hauptbildschirm; HUD in den oberen Ecken (Zeit/Tag/Ort, Konten, Energie, Stimmung); Seitenbuttons Termine, Kanal, Firma, Buchungen, Menü, Hier; Hinweise unten (G2.2)
 - Fenster statt langer Liste: Gebäude antippen öffnet den Ort (Aktionen an fremden Orten gesperrt mit Grund), Fenster für Termine, Kanal, Unternehmen, Buchungen (Filter privat/Firma); Ereignisse als Fenster, das zuerst entschieden werden muss (G2.3)
 - Zoom 0,5–1,0 per Zwei-Finger-Geste, Trackpad oder Mausrad (G2.2)
+- Icons für die Seitenbuttons und „Schließen“: Kenney „Game Icons“ und „Game Icons Expansion“ (CC0) unter `assets/kenney/` (G2.4)
 - Safe Area als eigene, getestete Berechnung; Bildschirme können die volle Fläche nutzen und bekommen die Abstände (Notch seitlich, Home-Balken) geliefert; Menüs als zentrierte Spalte (G2.1)
 
 ## Unveröffentlicht – Phase 4

@@ -25,7 +25,8 @@ const CORNER_RADIUS := 16
 ## Breite der zentrierten Spalte für Menüs (Querformat).
 const COLUMN_WIDTH := 640
 ## Querformat-Spielansicht (G2): Seitenbuttons, Fenster, Hinweise.
-const SIDE_BUTTON_SIZE := Vector2(140, 84)
+const SIDE_BUTTON_SIZE := Vector2(140, 96)
+const SIDE_ICON_SIZE := 40
 const WINDOW_MAX_WIDTH := 980
 const HUD_SURFACE := Color(0.07, 0.07, 0.09, 0.86)
 const DIM := Color(0, 0, 0, 0.55)
@@ -102,10 +103,15 @@ static func hud_panel() -> PanelContainer:
 	return result
 
 
-## Kleiner Button am Bildschirmrand (Seitenleiste).
-static func side_button(text: String) -> Button:
+## Kleiner Button am Bildschirmrand (Seitenleiste), optional mit Icon über dem Text.
+static func side_button(text: String, icon_path: String = "") -> Button:
 	var result := Button.new()
 	result.text = text
+	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+		result.icon = load(icon_path) as Texture2D
+		result.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		result.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		result.add_theme_constant_override("icon_max_width", SIDE_ICON_SIZE)
 	result.custom_minimum_size = SIDE_BUTTON_SIZE
 	result.add_theme_font_size_override("font_size", SMALL_FONT_SIZE)
 	for state in ["normal", "hover", "disabled"]:

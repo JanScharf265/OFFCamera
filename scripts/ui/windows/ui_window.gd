@@ -35,9 +35,11 @@ func _init(kind: String, title: String, window_content: Control, closable: bool 
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_title.clip_text = true
 	header.add_child(_title)
-	_close_button = UiStyle.side_button("Schließen")
+	_close_button = UiStyle.side_button("Schließen", "res://assets/kenney/game-icons/cross.png")
+	_close_button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+	_close_button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_close_button.name = "WindowCloseButton"
-	_close_button.custom_minimum_size = Vector2(160, 72)
+	_close_button.custom_minimum_size = Vector2(200, 72)
 	_close_button.visible = closable
 	_close_button.pressed.connect(func() -> void: close_pressed.emit())
 	header.add_child(_close_button)

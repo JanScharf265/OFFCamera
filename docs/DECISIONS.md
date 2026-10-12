@@ -146,5 +146,7 @@ Stimmung rechts oben. Icon-Buttons an den Seiten (links Termine, Kanal, Unterneh
 öffnen Fenster; Gebäude antippen öffnet das Fenster des Orts (Aktionen sichtbar, aber gesperrt mit Grund, wenn man
 woanders ist; „Hinfahren“ oben). Immer nur ein Fenster, mittig, Karte abgedunkelt. Ereignisse als Fenster, die zuerst
 entschieden werden müssen. Rückmeldungen als Hinweis unten (ca. 4 s; lange Texte bleiben bis zum Antippen).
-Zwei-Finger-Zoom begrenzt auf 0,5–1,0. Icons: Kenney „Game Icons“ (CC0) mit kurzem Text. Spiellogik, Daten und
+Zwei-Finger-Zoom begrenzt auf 0,5–1,0. Icons: Kenney „Game Icons“ und „Game Icons Expansion“ (CC0) mit kurzem Text;
+für „Termine“ gibt es kein Kalender-Icon, daher eine Fahne. G2.2 und G2.3 wurden zusammen umgesetzt, damit jeder
+Commit spielbar bleibt (ohne Fenster wären Aktivitäten nach dem Vollbild-Umbau nicht erreichbar gewesen). Spiellogik, Daten und
 Spielstand bleiben unverändert. Phase-4-Abnahme bleibt offen und wird nach G2 im neuen Layout nachgeholt.
