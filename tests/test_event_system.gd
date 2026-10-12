@@ -108,7 +108,7 @@ func test_unknown_option_keeps_event_open() -> void:
 func test_unaffordable_option_is_rejected_and_event_stays_open() -> void:
 	var game := _new_game([_event("evt", 20)])
 	game.time.advance(12 * 60)
-	assert_eq(game.events.resolve("evt", "pay"), "Nicht genug Geld (kostet 1.000,00 €).")
+	assert_eq(game.events.resolve("evt", "pay"), "Nicht genug Geld auf dem Privatkonto (kostet 1.000,00 €).")
 	assert_eq(game.ledger.get_balance(), 50000)
 	assert_eq(game.events.has_pending(), true)
 

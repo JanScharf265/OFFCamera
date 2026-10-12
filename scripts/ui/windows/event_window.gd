@@ -25,8 +25,7 @@ func _ready() -> void:
 	add_child(UiStyle.wrapping_label(definition.text, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 	for option in definition.options:
 		var channel: Dictionary = _game.events.option_channel_deltas(instance_id, option.id)
-		add_child(UiStyle.wrapping_label(ActivityText.option_summary(option.effects, option.money_cents, channel),
-				UiStyle.SMALL_FONT_SIZE))
+		add_child(UiStyle.wrapping_label(ActivityText.event_option_summary(option, channel), UiStyle.SMALL_FONT_SIZE))
 		var button := UiStyle.button(option.label)
 		button.name = "EventOption_%s" % option.id
 		var option_id: String = option.id

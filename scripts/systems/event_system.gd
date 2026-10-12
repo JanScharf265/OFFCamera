@@ -15,8 +15,9 @@ extends RefCounted
 ## es gibt keinen Würfel-Zustand außer dem gespeicherten Seed.
 ##
 ## Entscheiden: resolve(instanz_id, option_id) wendet die Folgen an
-## (Geld -> LedgerSystem mit idempotency_key "event:<instanz>", Werte -> PlayerStats,
-## Kanal -> ChannelSystem mit Begründung) und schließt das Ereignis. Keine Spielzeit.
+## (Geld -> LedgerSystem auf dem Konto der Option mit idempotency_key "event:<instanz>", Werte -> PlayerStats,
+## Kanal -> ChannelSystem und Unternehmen -> CompanySystem, je mit Begründung), schließt das Ereignis und
+## stellt zuletzt die Uhr um `minutes` vor (Phase 5, z. B. Prüfungstermin; sonst keine Spielzeit).
 ##
 ## Weil nur time_advanced/day_changed auslösen, wird beim Laden nichts erneut ausgelöst;
 ## die Schutzschlüssel verhindern zusätzlich Doppelbuchungen.
@@ -35,7 +36,11 @@ signal event_resolved(event_id: String, option_id: String)
 
 const INSTANCE_SEPARATOR := "@"
 
+var _time: TimeSystemScript
 var _ledger: LedgerSystemScript
+## Welt für Bedingungen und Folgen (Phase 5), per set_world() gesetzt; ohne sie gelten 0/nein.
+var _company
+var _obligations
 var _stats: PlayerStatsScript
 var _channel: ChannelSystemScript
 var _catalog: EventCatalogScript
@@ -50,12 +55,36 @@ var _resolved := {}
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
 		channel: ChannelSystemScript, catalog: EventCatalogScript, p_seed: int) -> void:
+	_time = time
 	_ledger = ledger
 	_stats = stats
 	_channel = channel
 	_catalog = catalog
 	_seed = p_seed
 	time.time_advanced.connect(_on_time_advanced)
+
+
+## Phase 5: Unternehmen und Fristen für Bedingungen (offene Fristen, gegründet, Vorwochen-Gewinn)
+## und Folgen (Firmenkonto, Unternehmenswerte). Wird vom GameState nach dem Aufbau gesetzt.
+func set_world(company, obligations) -> void:
+	_company = company
+	_obligations = obligations
+
+
+## Werte für die Bedingungen von Zufallsereignissen beim aktuellen Stand.
+func condition_values() -> Dictionary:
+	var founded: bool = _company != null and _company.is_founded()
+	var profit := 0
+	var week := TimeSystemScript.week_of(_time.get_minutes())
+	if founded and week > 1:  # in Woche 1 gibt es keine Vorwoche
+		profit = _ledger.summarize(LedgerSystemScript.COMPANY, TimeSystemScript.week_start(week - 1),
+				TimeSystemScript.week_start(week))["net_cents"]
+	return {
+		"followers": _channel.followers, "community": _channel.community, "reputation": _channel.reputation,
+		"open_obligations": _obligations.count_open() if _obligations != null else 0,
+		"company_founded": 1 if founded else 0,
+		"last_week_profit_cents": profit,
+	}
 
 
 func get_seed() -> int:
@@ -119,13 +148,20 @@ func resolve(instance_id: String, option_id: String) -> String:
 	var option := definition.get_option(option_id)
 	if option == null:
 		return "Unbekannte Auswahl: %s" % option_id
-	if option.money_cents < 0 and not _ledger.can_afford(-option.money_cents):
-		return "Nicht genug Geld (kostet %s)." % LedgerSystemScript.format_cents(-option.money_cents)
+	if option.money_cents < 0 and not _ledger.can_afford(-option.money_cents, option.account):
+		return "Nicht genug Geld auf dem %s (kostet %s)." % [LedgerSystemScript.ACCOUNT_LABELS[option.account],
+				LedgerSystemScript.format_cents(-option.money_cents)]
+	if option.account == LedgerSystemScript.COMPANY and option.money_cents != 0 \
+			and (_company == null or not _company.is_founded()):
+		return "Dafür braucht es ein Unternehmen."
+	if option.minutes > 0 and _time.is_advancing():
+		return "Gerade läuft bereits ein Zeitfortschritt." 
 
 	var key := "event:%s" % instance_id
 	var reason := "%s: %s" % [definition.title, option.label]
 	if option.money_cents != 0:
-		var entry := _ledger.post(option.money_cents, option.category, reason, "event", instance_id, key)
+		var entry := _ledger.post(option.money_cents, option.category, reason, "event", instance_id, key,
+				false, option.account)
 		if entry == null:
 			push_error("EventSystem: Buchung für Ereignis '%s' abgelehnt (Grund %d)." % [instance_id, _ledger.last_rejection])
 			return "Die Buchung ist fehlgeschlagen."
@@ -133,10 +169,15 @@ func resolve(instance_id: String, option_id: String) -> String:
 	var deltas := _raw_channel_deltas(option)
 	if not deltas.is_empty():
 		_channel.apply(deltas, "event", reason, instance_id, key)
+	if not option.company.is_empty() and _company != null:
+		_company.apply(option.company, "event", reason, instance_id, key)
 
 	_pending.remove_at(_pending.find(instance_id))
 	_resolved[instance_id] = option_id
 	event_resolved.emit(instance_id, option_id)
+	# Zeit zuletzt: Ein Zeitfortschritt kann weitere Ereignisse auslösen – das entschiedene ist dann schon zu.
+	if option.minutes > 0:
+		_time.advance(option.minutes)
 	return ""
 
 
@@ -232,10 +273,13 @@ func on_day_changed(day: int) -> void:
 func _is_eligible(definition: EventDefinitionScript, day: int) -> bool:
 	if day < definition.from_day:
 		return false
-	var values := {"followers": _channel.followers, "community": _channel.community,
-			"reputation": _channel.reputation}
+	var values := condition_values()
 	for key in definition.conditions:
 		var limit: int = definition.conditions[key]
+		if key == "company_founded":
+			if values["company_founded"] != limit:
+				return false
+			continue
 		var value: int = values[key.substr(4)]
 		if key.begins_with("min_") and value < limit:
 			return false

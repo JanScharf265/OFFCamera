@@ -187,3 +187,14 @@ mit Begründung im Unternehmens-Protokoll). Offene Fristen werden nicht später 
 bezahlt – nur mit dem ganzen offenen Betrag. Beim Bezahlen entstehen zwei Buchungen: Grundbetrag (Wertstellung =
 Fälligkeit, zählt zur Woche der Frist) und Mahngebühr (Wertstellung = Zahltag). Kein Game Over.
 
+## 025 – Behördenereignisse
+Fiktive Ereignisse ohne reale Rechtslogik; Folgen nur als abstrakte Spielwerte (Gebühren, Spielzeit, Stimmung, Ruf).
+Sie nutzen die bestehenden Zufallsereignisse (Seed, Abklingzeit, höchstens eins pro Tag) mit neuen Bedingungen:
+`min_/max_open_obligations`, `company_founded` (1/0), `min_last_week_profit_cents`. Das feste, regelbasierte Ereignis
+„Vollstreckungsankündigung“ (Entscheidung des Game Directors) ist ein Datensatz mit Chance 100 %, Bedingung
+≥ 3 offene Fristen, höchster Priorität und 7 Tagen Abklingzeit – dadurch sicher und ohne Sonderlogik. Weil der
+DayCycle Fristen vor Ereignissen verarbeitet, zählen am selben Tageswechsel neu offene Fristen schon mit.
+Optionen können jetzt `account` (Firmenkonto), `minutes` (Spielzeit, wird nach dem Schließen des Ereignisses
+vorgestellt) und `company` (Auslastung/Ruf) haben. Jedes Ereignis braucht mindestens eine Option ohne Kosten, damit es
+auch ohne Geld entscheidbar ist (Katalog lehnt es sonst ab).
+

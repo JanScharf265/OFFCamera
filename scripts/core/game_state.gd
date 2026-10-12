@@ -63,6 +63,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	activities = ActivitySystemScript.new(time, ledger, stats, locations, company, data.activities)
 	content = ContentSystemScript.new(time, ledger, stats, locations, channel, equipment, data.formats)
 	obligations = ObligationSystemScript.new(time, ledger, stats, company, data.obligations)
+	events.set_world(company, obligations)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, obligations, events])
 

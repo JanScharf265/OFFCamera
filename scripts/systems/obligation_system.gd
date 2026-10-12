@@ -106,6 +106,8 @@ func amount_for(definition: ObligationDefinitionScript, due_minutes: int) -> int
 	if not definition.uses_profit():
 		return definition.fixed_cents
 	var week := TimeSystemScript.week_of(due_minutes)
+	if week <= 1:
+		return 0  # keine Vorwoche
 	var summary := _ledger.summarize(definition.account, TimeSystemScript.week_start(week - 1),
 			TimeSystemScript.week_start(week))
 	var profit: int = summary["net_cents"]

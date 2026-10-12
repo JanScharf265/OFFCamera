@@ -62,5 +62,70 @@
 			{ "id": "ride_wave", "label": "Welle nutzen und nachlegen", "effects": { "energy": -10, "mood": 8 }, "channel": { "followers": 100, "followers_percent": 20 } },
 			{ "id": "stay_calm", "label": "Gelassen bleiben", "effects": { "mood": 4 }, "channel": { "followers_percent": 8 } }
 		]
+	},
+	{
+		"id": "enforcement_notice",
+		"title": "Vollstreckungsankündigung",
+		"text": "Die Stadtkasse kündigt an, offene Beträge einzutreiben. Ein strenger Brief – mehr erst einmal nicht.",
+		"priority": 10,
+		"trigger": { "random": { "chance_percent": 100, "from_day": 8, "cooldown_days": 7, "conditions": { "min_open_obligations": 3 } } },
+		"options": [
+			{ "id": "acknowledge", "label": "Zur Kenntnis nehmen", "effects": { "mood": -10 }, "company": { "reputation": -5 } },
+			{ "id": "payment_plan", "label": "Zahlungsplan anfragen (1 h)", "minutes": 60, "effects": { "mood": -5 } }
+		]
+	},
+	{
+		"id": "trade_inspection",
+		"title": "Gewerbekontrolle",
+		"text": "Eine Kontrolle der Stadtverwaltung möchte die Unterlagen deines Labels sehen.",
+		"priority": 4,
+		"trigger": { "random": { "chance_percent": 8, "from_day": 8, "cooldown_days": 10, "conditions": { "company_founded": 1 } } },
+		"options": [
+			{ "id": "show_documents", "label": "Unterlagen zeigen (1 h)", "minutes": 60, "company": { "reputation": 2 } },
+			{ "id": "postpone", "label": "Später nachreichen", "effects": { "mood": -2 }, "company": { "reputation": -3 } }
+		]
+	},
+	{
+		"id": "back_claim",
+		"title": "Nachforderung der Stadtkasse",
+		"text": "Für die letzte Woche fordert die Stadtkasse einen kleinen Betrag nach.",
+		"priority": 3,
+		"trigger": { "random": { "chance_percent": 15, "from_day": 8, "cooldown_days": 14, "conditions": { "company_founded": 1, "min_last_week_profit_cents": 5000 } } },
+		"options": [
+			{ "id": "pay", "label": "Bezahlen (Firmenkonto)", "money_cents": -4000, "category": "levy", "account": "company", "company": { "reputation": 1 } },
+			{ "id": "object", "label": "Einspruch einlegen (1 h 30 min)", "minutes": 90, "effects": { "mood": -3 } }
+		]
+	},
+	{
+		"id": "audit_appointment",
+		"title": "Prüfungstermin",
+		"text": "Wegen offener Fristen bittet die Stadtkasse zu einem Gespräch.",
+		"priority": 5,
+		"trigger": { "random": { "chance_percent": 20, "from_day": 8, "cooldown_days": 7, "conditions": { "company_founded": 1, "min_open_obligations": 1 } } },
+		"options": [
+			{ "id": "attend", "label": "Termin wahrnehmen (2 h)", "minutes": 120, "effects": { "energy": -10 }, "company": { "reputation": 3 } },
+			{ "id": "postpone", "label": "Verschieben", "effects": { "mood": -3 }, "company": { "reputation": -4 } }
+		]
+	},
+	{
+		"id": "noise_complaint",
+		"title": "Lärmbeschwerde am Studio",
+		"text": "Die Nachbarn im Studiohaus beschweren sich über laute Streams.",
+		"priority": 1,
+		"trigger": { "random": { "chance_percent": 6, "from_day": 4, "cooldown_days": 12, "conditions": { "min_followers": 200 } } },
+		"options": [
+			{ "id": "soundproofing", "label": "Schallschutz kaufen", "money_cents": -3000, "category": "equipment", "channel": { "community": 2 } },
+			{ "id": "quieter", "label": "Leiser streamen", "channel": { "community": -3 } }
+		]
+	},
+	{
+		"id": "funding_notice",
+		"title": "Förderbescheid",
+		"text": "Ein fiktives Förderprogramm der Stadt unterstützt junge Labels ohne offene Fristen.",
+		"priority": 2,
+		"trigger": { "random": { "chance_percent": 5, "from_day": 8, "cooldown_days": 21, "conditions": { "company_founded": 1, "max_open_obligations": 0 } } },
+		"options": [
+			{ "id": "accept", "label": "Annehmen", "money_cents": 10000, "category": "funding", "account": "company", "company": { "reputation": 2 } }
+		]
 	}
 ]

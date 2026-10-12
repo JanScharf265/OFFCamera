@@ -14,3 +14,9 @@ var effects: Dictionary
 ## Änderungen am Kanal (Phase 3): followers (absolut), followers_percent (vom aktuellen Stand),
 ## community, reputation – z. B. {"followers_percent": -5, "reputation": -6}.
 var channel: Dictionary
+## Konto für money_cents (Phase 5): "private" (Standard) oder "company".
+var account := "private"
+## Spielzeit, die die Entscheidung kostet (Phase 5, z. B. ein Prüfungstermin); 0 = keine.
+var minutes := 0
+## Änderungen am Unternehmen (Phase 5): utilization, reputation – wirken nur mit Unternehmen.
+var company: Dictionary

@@ -179,7 +179,7 @@ Ereignis nach 3 überfälligen Fristen; erste Fälligkeit Tag 8; kein Game Over.
 - [x] Ticket 5.1: Wertstellung je Buchung, Wochenauswertung, fester Tageswechsel-Ablauf (DayCycle), Spielstand Version 10 (264/264 Tests grün)
 - [x] Ticket 5.2: Fristen als Daten (ObligationSystem), automatisch bezahlen; Spielstand Version 11 (275/275 Tests grün)
 - [x] Ticket 5.3: Überfällig, Mahngebühr im offenen Betrag (gebucht erst beim Bezahlen), Bezahlen von Hand (283/283 Tests grün)
-- [ ] Ticket 5.4: Behördenereignisse (Zufall mit Bedingungen + festes Ereignis nach 3 überfälligen Fristen)
+- [x] Ticket 5.4: Behördenereignisse (6 fiktive Ereignisse, neue Bedingungen, Optionen mit Konto/Zeit/Unternehmen, festes Ereignis nach 3 überfälligen Fristen) (294/294 Tests grün)
 - [ ] Ticket 5.5: Finanz-UI (Fristen, Wochenübersicht, HUD-Hinweis), Abnahme per Tests + Mac-Fensterlauf
 
 ## Spätere Phasen

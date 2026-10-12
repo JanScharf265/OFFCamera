@@ -45,7 +45,8 @@ func test_real_events_load() -> void:
 	for definition in catalog.get_all():
 		if definition.is_random:
 			random_ids.append(definition.id)
-	assert_eq(random_ids, PackedStringArray(["brand_deal", "shitstorm", "raid", "tech_failure", "viral_short"]))
+	assert_eq(random_ids, PackedStringArray(["brand_deal", "shitstorm", "raid", "tech_failure", "viral_short",
+			"enforcement_notice", "trade_inspection", "back_claim", "audit_appointment", "noise_complaint", "funding_notice"]))
 
 
 func test_catalog_rejects_invalid_random_triggers() -> void:
@@ -149,7 +150,8 @@ func test_option_preview_matches_result() -> void:
 
 func test_money_of_random_event_is_booked_once_per_instance() -> void:
 	var option := {"id": "pay", "label": "Zahlen", "money_cents": -1000, "category": "repair"}
-	var game := _game([_random("bill", 100, {}, [option])])
+	var free := {"id": "ignore", "label": "Ignorieren"}  # jedes Ereignis braucht eine Option ohne Kosten
+	var game := _game([_random("bill", 100, {}, [option, free])])
 	_play_to_day(game, 4)
 	var entries := game.ledger.get_entries_by_category("repair")
 	assert_eq(entries.size(), 3)

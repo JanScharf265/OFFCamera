@@ -92,6 +92,10 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
 - Optionen können zusätzlich `channel` {followers, followers_percent, community, reputation} haben →
   `channel.apply()` mit Begründung „<Titel>: <Option>“. `option_channel_deltas()` liefert die Vorschau (nach Bremse).
 - Gespeichert zusätzlich: `seed`.
+- Phase 5: `set_world(company, obligations)` (vom GameState) liefert für Bedingungen `condition_values()`:
+  offene Fristen, `company_founded` (1/0), Vorwochen-Gewinn des Firmenkontos (in Woche 1: 0). Neue Optionsfelder
+  `account` (Geld auf Privat-/Firmenkonto), `minutes` (Spielzeit nach dem Schließen), `company` (über
+  `CompanySystem.apply()` mit Begründung). Katalog verlangt je Ereignis eine Option ohne Kosten.
 
 ### Termine (`data/appointments/appointments.json`, `AppointmentCatalog`, `AppointmentSystem`)
 - Daten: `id`, `title`, optional `description`, `location`, `start` {`day`, `hour`, optional `minute`},

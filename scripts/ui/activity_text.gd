@@ -43,6 +43,21 @@ static func company_parts(deltas: Dictionary) -> PackedStringArray:
 	return parts
 
 
+## Alle Folgen einer Ereignis-Option für die Anzeige (Phase 5: plus Unternehmen, Dauer, Firmenkonto),
+## z. B. "1 h · Ruf (Firma) +2" oder "-40,00 € (Firmenkonto) · Ruf (Firma) +1".
+static func event_option_summary(option, channel: Dictionary) -> String:
+	var parts := PackedStringArray()
+	if option.minutes > 0:
+		parts.append(TimeSystemScript.format_duration(option.minutes))
+	parts.append_array(effect_parts(option.effects, 0))
+	parts.append_array(channel_parts(channel))
+	parts.append_array(company_parts(option.company))
+	if option.money_cents != 0:
+		var money := signed_money(option.money_cents)
+		parts.append(money + " (Firmenkonto)" if option.account == "company" else money)
+	return " · ".join(parts) if not parts.is_empty() else "Keine Folgen"
+
+
 ## Folgen einer Ereignis-Option, z. B. "Stimmung +5 · +30,00 €" oder "Keine Folgen".
 ## channel = bereits berechnete Kanaländerung (EventSystem.option_channel_deltas()).
 static func option_summary(effects: Dictionary, money_cents: int, channel: Dictionary = {}) -> String:

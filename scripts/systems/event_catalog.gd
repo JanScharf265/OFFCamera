@@ -8,8 +8,10 @@ extends RefCounted
 ##   trigger {day >= 1, hour 0–23, minute 0–59 (optional)}
 ##     oder Zufall (Phase 3): trigger {"random": {chance_percent 1–100, from_day ≥ 2 (optional, Standard 2),
 ##       cooldown_days ≥ 0 (optional), max_times ≥ 0 (optional, 0 = unbegrenzt),
-##       conditions (optional) {min_/max_ followers|community|reputation}}},
-##   options [ {id, label, money_cents?, category?, effects?, channel?}, … ] (mindestens eine)
+##       conditions (optional) {min_/max_ followers|community|reputation, min_/max_open_obligations,
+##         company_founded (1/0), min_last_week_profit_cents}}},
+##   options [ {id, label, money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
+##     (mindestens eine, davon mindestens eine ohne Kosten)
 ##     channel {followers?, followers_percent?, community?, reputation?} – ganze Zahlen
 
 const EventDefinitionScript := preload("res://scripts/models/event_definition.gd")
@@ -18,9 +20,14 @@ const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
 const DEFAULT_PATH := "res://data/events/events.json"
-const CONDITION_KEYS := ["min_followers", "max_followers", "min_community", "max_community",
+## Kanal (Phase 3) und Welt (Phase 5): offene Fristen, Unternehmen gegründet (company_founded 1/0),
+## Gewinn der Vorwoche auf dem Firmenkonto.
+const CONDITION_KEYS := ["min_open_obligations", "max_open_obligations", "company_founded",
+		"min_last_week_profit_cents", "min_followers", "max_followers", "min_community", "max_community",
 		"min_reputation", "max_reputation"]
 const OPTION_CHANNEL_KEYS := ["followers", "followers_percent", "community", "reputation"]
+const OPTION_COMPANY_KEYS := ["utilization", "reputation"]
+const ACCOUNTS := ["private", "company"]
 
 var errors: PackedStringArray = []
 
@@ -113,6 +120,11 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> EventDefini
 				continue
 			definition.options.append(option)
 
+	var has_free_option := false
+	for option in definition.options:
+		has_free_option = has_free_option or option.money_cents >= 0
+	if not definition.options.is_empty() and not has_free_option:
+		reader.errors.append("%s: braucht mindestens eine Option ohne Kosten (sonst nicht entscheidbar ohne Geld)." % where)
 	return definition if reader.errors.size() == error_count else null
 
 
@@ -138,6 +150,24 @@ func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> E
 				reader.errors.append("%s: 'channel' enthält ungültigen Wert '%s'." % [where, key])
 			elif int(channel[key]) != 0:
 				option.channel[key] = int(channel[key])
+	option.account = reader.string_field(entry, "account", where, false)
+	if option.account.is_empty():
+		option.account = "private"
+	elif option.account not in ACCOUNTS:
+		reader.errors.append("%s: 'account' muss \"private\" oder \"company\" sein." % where)
+	option.minutes = reader.int_field(entry, "minutes", where, false)
+	if option.minutes < 0:
+		reader.errors.append("%s: 'minutes' darf nicht negativ sein." % where)
+	option.company = {}
+	var company: Variant = entry.get("company", {})
+	if typeof(company) != TYPE_DICTIONARY:
+		reader.errors.append("%s: 'company' muss ein Objekt sein." % where)
+	else:
+		for key in company:
+			if key not in OPTION_COMPANY_KEYS or not DataReaderScript.is_whole_number(company[key]):
+				reader.errors.append("%s: 'company' enthält ungültigen Wert '%s'." % [where, key])
+			elif int(company[key]) != 0:
+				option.company[key] = int(company[key])
 	return option if reader.errors.size() == error_count else null
 
 

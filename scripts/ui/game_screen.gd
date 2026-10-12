@@ -435,14 +435,8 @@ func on_company_transfer_pressed(is_deposit: bool) -> void:
 
 
 func on_event_option_pressed(instance_id: String, option_id: String, option_label: String) -> void:
-	var reason := _game.events.resolve(instance_id, option_id)
-	if reason.is_empty():
-		_show_feedback("„%s“ gewählt." % option_label, UiStyle.TEXT)
-	else:
-		_show_feedback(reason, UiStyle.NEGATIVE)
-	_refresh()
-	if reason.is_empty():
-		state_changed.emit()
+	# Wie jede Aktion: Optionen mit Spielzeit (Phase 5) können Tagesabschlüsse/Fristen auslösen.
+	_after_action(_game.events.resolve(instance_id, option_id), "„%s“ gewählt" % option_label)
 
 
 ## Rückmeldung nach einer Aktion, inklusive verpasster Termine und Tagesabschlüsse.
