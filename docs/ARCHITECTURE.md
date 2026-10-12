@@ -217,7 +217,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - `app.gd` (Hauptszene): Theme, Safe Area (nur auf Mobilgeräten, in Viewport-Koordinaten umgerechnet;
   `safe_margins()` statisch und getestet). Querformat (G2): Bildschirme mit `set_safe_margins(abstände)`
   bekommen die volle Fläche (z. B. Vollbild-Karte), alle anderen liegen als zentrierte Spalte
-  (`UiStyle.COLUMN_WIDTH`) innerhalb der Safe Area,
+  (`UiStyle.COLUMN_WIDTH`) in einem Scrollbereich (`MenuScroll`) innerhalb der Safe Area,
   hält die laufende `GameState`-Sitzung und wechselt zwischen `main_menu.gd` und `game_screen.gd`.
 - UI wird im Code aus Containern gebaut (keine festen Pixelpositionen). Farben/Größen in `ui_style.gd`,
   Texte für Aktivitäten/Beträge in `activity_text.gd`.
@@ -275,7 +275,7 @@ Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
 Skriptfehler während eines Tests (eigener Logger über `OS.add_logger`) lassen den Test fehlschlagen.
 Lange Tests (Phase 6) liegen in `tests/long/` (Spiel-Bot `bot.gd`, Rundlauf, Störungen, Messung) und laufen nur mit
 `run_tests.gd -- --long`. Echte Testspielstände aller Versionen: `tests/fixtures/saves/`.
-Headless ist das Fenster nur 64 × 64 – Layout-Tests setzen die Größe selbst. Godot-Läufe immer mit Zeitlimit
+Headless ist das Fenster nur 64 × 64 – Layout-Tests stellen Geräte nach (`tests/layout_helper.gd`, `test_layout.gd`). Godot-Läufe immer mit Zeitlimit
 (`timeout`, bei Fensterläufen zusätzlich `--quit-after`).
 
 ## Geplante Verantwortlichkeiten (ab Phase 1)

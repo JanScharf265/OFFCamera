@@ -266,3 +266,15 @@ mit Bezug auf das Spiel an dessen eigene Signale hängen (Kreisverweis RefCounte
 Directors: nur dokumentieren, nicht umbauen. `tests/test_memory.gd` wacht darüber, dass das Spiel frei bleibt.
 Ein vermuteter Fix (Tweens der Karte beim Verlassen beenden) zeigte keine Wirkung und wurde verworfen.
 
+## 033 – Layout-Tests mit nachgestellten Geräten
+Headless ist das Fenster 64 × 64 und es gibt kein „nächstes Bild“; Layout-Tests stellen deshalb Größe und Safe Area
+selbst ein (`tests/layout_helper.gd`, `App.apply_margins()`): iPhone SE 16:9 ohne Notch (1280 × 720), iPhone 13/14 mit
+Notch (1558 × 720, seitlich 47 pt, unten 21 pt), iPhone 15/16 Pro Max mit Dynamic Island (1560 × 720, 59 pt / 21 pt),
+Grenzfall schmal + große Ränder. Punktmaße umgerechnet mit 720 / Bildschirmhöhe in Punkten.
+Umbrechende Labels melden ihre Mindesthöhe für die Breite, die sie gerade haben (anfangs ~1 px → tausende Pixel), bis
+ein Container sie im nächsten Bild sortiert. Abhilfe ohne Zusatzbild: Breite setzen, `get_line_count()` (erzwingt den
+Umbruch), `update_minimum_size()`. Die Hinweis-Leiste macht das jetzt immer; Tests nutzen `settle_labels()`.
+Gefunden: Das Hauptmenü brauchte mit Spielstand-Info ~690 px, mit Fehlermeldung ~807 px – auf Notch-iPhones sind nur
+~633 px verfügbar. Lösung: kompakter (Titel 56, Abstände 12, Buttons 84 px ≈ 46 pt) und Menüs in einem Scrollbereich
+als Sicherheitsnetz (Normalfall passt ohne Scrollen, Test prüft beides).
+

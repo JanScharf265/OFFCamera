@@ -433,25 +433,6 @@ func test_location_window_elsewhere_shows_locked_actions() -> void:
 	app.free()
 
 
-func test_hud_respects_safe_margins() -> void:
-	var app := _start_app()
-	if app == null:
-		return
-	_press(app, "NewGameButton")
-	var screen := _find(app, "CityMap").get_parent() as Control
-	screen.size = Vector2(1280, 720)  # headless ist das Fenster nur 64 × 64
-	screen.call("set_safe_margins", [130.0, 24.0, 130.0, 50.0] as Array[float])
-	var hud_left := _find(app, "HudLeft") as Control
-	var hud_right := _find(app, "HudRight") as Control
-	var left_bar := _find(app, "LeftBar") as Control
-	var map := _find(app, "CityMap") as Control
-	assert_eq(hud_left.position.x, 130.0)
-	assert_true(hud_right.position.x + hud_right.size.x <= screen.size.x - 130.0 + 0.5, "HUD rechts in der Notch")
-	assert_eq(left_bar.position.x, 130.0)
-	assert_eq(map.size, screen.size)  # Karte bleibt Vollbild
-	app.free()
-
-
 func test_long_feedback_stays_until_tapped() -> void:
 	var app := _start_app()
 	if app == null:
@@ -530,26 +511,6 @@ func test_ledger_window_shows_week_summary() -> void:
 	var week2 := (_find(app, "LedgerWeek_2_private") as Label).text
 	assert_eq(week2, "Woche 2 (läuft) · Privatkonto: Einnahmen 0,00 € · Ausgaben -40,00 € · Ergebnis -40,00 €")
 	assert_true(_find(app, "LedgerWeek_1_private") != null, "Vorwoche fehlt")
-	app.free()
-
-
-## Regressionstest (Fensterlauf Phase 5): Mit Unternehmen hat die linke Leiste 4 Buttons – sie muss
-## vollständig über dem unteren Rand der Safe Area bleiben, auch mit Notch-Abständen.
-func test_side_bars_fit_on_screen_with_company() -> void:
-	var app := _start_app()
-	if app == null:
-		return
-	_press(app, "NewGameButton")
-	_travel(app, "office")
-	_press(app, "CompanyFoundButton_merch_label")
-	var screen := _find(app, "CityMap").get_parent() as Control
-	screen.size = Vector2(1280, 720)  # headless ist das Fenster nur 64 × 64
-	screen.call("set_safe_margins", [130.0, 24.0, 130.0, 50.0] as Array[float])
-	for bar_name in ["LeftBar", "RightBar"]:
-		var bar := _find(app, bar_name) as Control
-		assert_true(bar.position.y + bar.size.y <= screen.size.y - 50.0 + 0.5,
-				"%s ragt unten heraus: %s" % [bar_name, bar.position.y + bar.size.y])
-	assert_eq((_find(app, "CompanyButton") as Button).visible, true)
 	app.free()
 
 

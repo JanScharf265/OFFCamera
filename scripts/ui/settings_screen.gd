@@ -22,7 +22,7 @@ var _confirming := false
 
 func _ready() -> void:
 	alignment = BoxContainer.ALIGNMENT_CENTER
-	add_theme_constant_override("separation", 24)
+	add_theme_constant_override("separation", 12)
 
 	var title := UiStyle.label("Einstellungen", UiStyle.LARGE_FONT_SIZE)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -29,9 +29,9 @@ var _confirming := false
 
 func _ready() -> void:
 	alignment = BoxContainer.ALIGNMENT_CENTER
-	add_theme_constant_override("separation", 16)
+	add_theme_constant_override("separation", 12)
 
-	var title := UiStyle.label("OFF CAMERA", UiStyle.TITLE_FONT_SIZE)
+	var title := UiStyle.label("OFF CAMERA", UiStyle.MENU_TITLE_FONT_SIZE)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
 
@@ -45,12 +45,10 @@ func _ready() -> void:
 		message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		add_child(message_label)
 
-	var spacer := Control.new()
-	spacer.custom_minimum_size.y = 8
-	add_child(spacer)
 
 	if continue_available:
 		var continue_button := UiStyle.button("Fortsetzen")
+		continue_button.custom_minimum_size.y = UiStyle.MENU_BUTTON_HEIGHT
 		continue_button.name = "ContinueButton"
 		continue_button.pressed.connect(func() -> void: continue_pressed.emit())
 		add_child(continue_button)
@@ -61,11 +59,13 @@ func _ready() -> void:
 			add_child(info)
 
 	_new_game_button = UiStyle.button(NEW_GAME_TEXT)
+	_new_game_button.custom_minimum_size.y = UiStyle.MENU_BUTTON_HEIGHT
 	_new_game_button.name = "NewGameButton"
 	_new_game_button.pressed.connect(_on_new_game_pressed)
 	add_child(_new_game_button)
 
 	var settings_button := UiStyle.button("Einstellungen")
+	settings_button.custom_minimum_size.y = UiStyle.MENU_BUTTON_HEIGHT
 	settings_button.name = "SettingsButton"
 	settings_button.pressed.connect(func() -> void: settings_pressed.emit())
 	add_child(settings_button)

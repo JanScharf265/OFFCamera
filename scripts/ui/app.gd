@@ -152,18 +152,29 @@ func _set_screen(screen: Control) -> void:
 	if _screen != null:
 		# Sofort aus dem Baum nehmen, erst später löschen – der alte Bildschirm
 		# kann gerade noch das Signal senden, das diesen Wechsel ausgelöst hat.
-		_screen.get_parent().remove_child(_screen)
-		_screen.queue_free()
+		var holder := _screen.get_parent()
+		# Menüs hängen in Scrollbereich + Zentrierung – den ganzen Rahmen entfernen.
+		var outer: Node = holder.get_parent() if holder is CenterContainer else _screen
+		outer.get_parent().remove_child(outer)
+		outer.queue_free()
 	_screen = screen
 	if screen.has_method("set_safe_margins"):
 		screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_full_area.add_child(screen)
 		screen.call("set_safe_margins", _margins)
 	else:
-		# Menüs: zentrierte Spalte mit begrenzter Breite.
-		screen.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		# Menüs: zentrierte Spalte mit begrenzter Breite – in einem Scrollbereich als Sicherheitsnetz,
+		# falls sie auf einem Gerät einmal nicht in die Höhe passen (Phase 7).
 		screen.custom_minimum_size.x = maxf(screen.custom_minimum_size.x, UiStyle.COLUMN_WIDTH)
-		_safe_area.add_child(screen)
+		var scroll := ScrollContainer.new()
+		scroll.name = "MenuScroll"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		var center := CenterContainer.new()
+		center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		center.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		scroll.add_child(center)
+		center.add_child(screen)
+		_safe_area.add_child(scroll)
 
 
 func _show_error(message: String) -> void:
@@ -179,8 +190,13 @@ func _update_safe_area() -> void:
 	if OS.has_feature("mobile"):
 		window_size = Vector2(DisplayServer.window_get_size())
 		safe = Rect2(DisplayServer.get_display_safe_area())
-	_margins = safe_margins(window_size, safe, get_viewport_rect().size, UiStyle.PADDING)
+	apply_margins(safe_margins(window_size, safe, get_viewport_rect().size, UiStyle.PADDING))
 
+
+## Wendet Abstände [links, oben, rechts, unten] an: Rahmen der Menüs und Spielansicht.
+## (Auch von den Layout-Tests aufgerufen, um Geräte mit Notch nachzustellen.)
+func apply_margins(margins: Array[float]) -> void:
+	_margins = margins
 	_safe_area.add_theme_constant_override("margin_left", roundi(_margins[0]))
 	_safe_area.add_theme_constant_override("margin_top", roundi(_margins[1]))
 	_safe_area.add_theme_constant_override("margin_right", roundi(_margins[2]))
@@ -204,7 +220,7 @@ static func safe_margins(window_size: Vector2, safe: Rect2, viewport_size: Vecto
 	return margins
 
 
-## Kurzinfo aus dem Spielstand-Kopf, z. B. "Tag 9 · Di, 08:00 · 400,00 € · gespeichert 12.10.2026, 14:03".
+## Kurzinfo aus dem Spielstand-Kopf, z. B. "Tag 9 · Di, 08:00 · 400,00 € · gespeichert 12.10., 14:03".
 ## "" ohne Kopf (ältere Spielstände) – dann zeigt das Menü nur „Fortsetzen“.
 static func save_info_text(meta: Dictionary) -> String:
 	if meta.is_empty() or not meta.has("day_label"):
@@ -216,7 +232,6 @@ static func save_info_text(meta: Dictionary) -> String:
 		# Gerätezeit nur für die Anzeige – mit der Spielzeit hat sie nichts zu tun.
 		var local := int(meta["saved_at_unix"]) + int(Time.get_time_zone_from_system().get("bias", 0)) * 60
 		var date := Time.get_datetime_dict_from_unix_time(local)
-		text += " · gespeichert %02d.%02d.%04d, %02d:%02d" % [date["day"], date["month"], date["year"],
-				date["hour"], date["minute"]]
+		text += " · gespeichert %02d.%02d., %02d:%02d" % [date["day"], date["month"], date["hour"], date["minute"]]
 	return text
 

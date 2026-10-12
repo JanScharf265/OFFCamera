@@ -3,6 +3,9 @@
 ## Unveröffentlicht – Phase 7
 - Warnung „ObjectDB instances leaked at exit“ untersucht: im Spiel kein Leck (0 Objekte pro neuem Spiel, Laden, App-Durchgang), Ursache sind Kreisverweise in Tests; Wächter-Tests `test_memory.gd` (Ticket 7.1)
 - Aufgeräumt: ungenutztes Kartensignal `pin_down` und ungenutzter Getter entfernt (Ticket 7.1)
+- Layout-Tests für typische iPhones im Querformat (16:9 ohne Notch, Notch, Dynamic Island, Grenzfall): HUD, Seitenleisten, Hinweis und alle Fenster in der Safe Area und ohne Überlappung; Menüs passen in die Höhe (Ticket 7.2)
+- Hauptmenü und Einstellungen kompakter (Titel 56 px, Buttons 84 px ≈ 46 pt, Spielstand-Info einzeilig) und in einem Scrollbereich als Sicherheitsnetz – vorher wären auf Notch-iPhones unten Buttons abgeschnitten worden (Ticket 7.2)
+- Hinweis-Leiste hat sofort die richtige Höhe (Umbruch wird erzwungen statt ein Bild später korrigiert) (Ticket 7.2)
 
 ## Unveröffentlicht – Phase 6
 - Echte Testspielstände v1–v11, erzeugt mit dem Code der jeweiligen Commits; jeder lädt bis zur aktuellen Version, behält Zeit, Konten, Ort, Kanal, Ausrüstung, Unternehmen und ist weiterspielbar (Ticket 6.1)

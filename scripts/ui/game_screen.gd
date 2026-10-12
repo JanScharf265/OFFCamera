@@ -235,9 +235,13 @@ func _layout() -> void:
 	_right_bar.position = Vector2(right - _right_bar.size.x, top + _hud_right.size.y + GAP)
 
 	var toast_width := maxf(minf(900.0, right - left - 2.0 * (UiStyle.SIDE_BUTTON_SIZE.x + GAP)), 200.0)
-	# Umbrechende Labels brauchen eine feste Breite, sonst berechnen sie ihre Höhe für Breite 0.
+	# Umbrechende Labels berechnen ihre Mindesthöhe für die Breite, die sie gerade haben (anfangs ~1 px →
+	# riesig). Breite setzen, Umbruch erzwingen (get_line_count) und Mindestgröße neu berechnen lassen –
+	# dann stimmt die Höhe sofort, nicht erst ein Bild später (gemessen in Phase 7).
 	_feedback_label.custom_minimum_size.x = toast_width - 28.0
 	_feedback_label.size = Vector2(toast_width - 28.0, 0.0)
+	_feedback_label.get_line_count()
+	_feedback_label.update_minimum_size()
 	_toast.reset_size()
 	_toast.position = Vector2((left + right - _toast.size.x) / 2.0, bottom - _toast.size.y)
 
@@ -500,7 +504,6 @@ func _show_feedback(text: String, color: Color) -> void:
 	elif is_inside_tree():
 		_toast_timer.start(TOAST_SECONDS)
 	_layout()
-	_layout.call_deferred()  # nach dem Umbruch des Labels nochmal mit der richtigen Höhe
 
 
 func _on_toast_input(event: InputEvent) -> void:
