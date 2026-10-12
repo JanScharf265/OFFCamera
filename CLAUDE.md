@@ -1,6 +1,6 @@
 # OFF CAMERA – Regeln für Claude Code
 
-Godot 4 + GDScript, Ziel nur iOS/iPhone (Hochformat, Touch, offline). Der Nutzer ist Game Director
+Godot 4 + GDScript, Ziel nur iOS/iPhone (Querformat, Touch, offline; Stadtkarte als Hauptbildschirm, Safe Area beachten). Der Nutzer ist Game Director
 und entscheidet über Umfang und Prioritäten. Spiel ist fiktional; illegale Aktivitäten bleiben
 abstrakte Spielwerte – keine realen Anleitungen (Geldwäsche, Steuerhinterziehung, Ermittlungsumgehung).
 

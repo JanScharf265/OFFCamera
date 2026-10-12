@@ -107,7 +107,7 @@ Abnahme auf dem iPhone:
 - [x] Spielstand aus Phase 2 lässt sich fortsetzen (Kanal mit Startwerten, keine Ausrüstung)
 - [x] Alles per Touch bedienbar und scrollbar, nichts verdeckt
 
-## Phase 4 – Fiktionales Unternehmen und zweiter Standort ← in Abnahme
+## Phase 4 – Fiktionales Unternehmen und zweiter Standort ← umgesetzt, Abnahme offen (nach G2 im neuen Layout)
 Merch- und Lifestyle-Label (Follower treiben den Umsatz), getrennte Konten privat/Firma im einen Ledger,
 Tagesabschluss beim Tageswechsel, zweiter Standort als Filiale in Marbella, Management vor Ort (ohne Pflege sinkt
 die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), noch keine Mitarbeitenden.
@@ -136,8 +136,22 @@ Abnahme auf dem iPhone:
 - [ ] Spielstand aus Phase 3 lässt sich fortsetzen (alle Buchungen auf dem Privatkonto, kein Unternehmen)
 - [ ] Alles per Touch bedienbar und scrollbar, nichts verdeckt oder abgeschnitten
 
+## Grafik-Ticket G2 – Querformat, Karte als Hauptbildschirm ← in Arbeit
+Grundsatzentscheidung des Game Directors (12.10.2026), vor Phase 5: Querformat (beide Richtungen), isometrische
+Stadtkarte im Vollbild, HUD in den oberen Ecken, Icon-Buttons an den Seiten öffnen Fenster, Gebäude antippen öffnet
+das Fenster des Orts. Safe Area (Notch seitlich, Home-Balken unten). Nur Darstellung – Spiellogik, Daten und Spielstand
+bleiben unverändert (siehe DECISIONS 020).
+
+- [ ] G2.1: Querformat und Grundgerüst (Projekteinstellungen, Safe Area je Bildschirm, Hauptmenü/Einstellungen)
+- [ ] G2.2: Karte als Vollbild, HUD, Seitenleisten, Hinweise, Zwei-Finger-Zoom
+- [ ] G2.3: Fenster (Ort, Termine, Kanal, Unternehmen, Buchungen, Ereignis)
+- [ ] G2.4: Icons, Tests, Doku
+- [ ] Im Editor durchgespielt
+- [ ] iPhone-Abnahme (zusammen mit der offenen Phase-4-Abnahme)
+
+## Phase 5 – Finanzen, Fristen, Behördenereignisse
+
 ## Spätere Phasen
-5. Finanzen, Fristen, Behördenereignisse
 6. Save/Load-Stabilisierung und Migration
 7. Mobile Politur und Performance
 8. Balancing und mehr Inhalte

@@ -4,7 +4,7 @@
 Für eine 2D-Management-UI auf dem iPhone ist der Compatibility-Renderer die einfachste und robusteste Wahl.
 Keine aufwendigen Effekte nötig. Kann später geändert werden, falls es einen konkreten Grund gibt.
 
-## 002 – Hochformat, 720×1280 Basisauflösung
+## 002 – Hochformat, 720×1280 Basisauflösung (abgelöst durch 020)
 `display/window/handheld/orientation = portrait`, Stretch-Modus `canvas_items` mit Aspect `expand`,
 damit sich die UI an verschiedene iPhone-Seitenverhältnisse anpasst. Die Editor-Fenstergröße ist auf
 405×720 verkleinert, damit das Testfenster auf den Mac-Bildschirm passt.
@@ -47,79 +47,10 @@ Kollision = eine Aktion würde über den Beginn eines offenen Termins hinauslauf
 führt aus. Termine vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe – so bestraft die
 Migration eines alten Spielstands keine Termine, die es damals noch nicht gab.
 
-## 019 – Zweiter Standort und Management
-Der zweite Standort ist ein neuer Ort „Ladenlokal“ an der Promenade (Entscheidung 2a). Er ist von Anfang an auf
-der Karte; die Filiale „Merch-Laden“ wird dort eröffnet (Kosten vom Firmenkonto, Spielzeit) und bringt danach
-eigenen Grundumsatz und eigene Fixkosten in den Tagesabschluss – dieselbe Formel, keine Sonderlogik.
-Pflege vor Ort sind normale Aktivitäten mit `requires` („company“/„branch“) und `company`-Effekten, damit neue
-Management-Aktionen nur Daten brauchen. Die Wirkung steht mit Begründung (Name der Aktivität) im
-Unternehmens-Protokoll. „Merch im Stream zeigen“ ist die Verbindung Kanal → Unternehmen (Entscheidung 7).
-Gebäude der Filiale: Kenney `buildingTiles_020` (grüne Markise, zur Unterscheidung vom Café mit roter Markise).
-
-## 018 – Tagesabschluss
-Abgerechnet wird der Vortag beim Tageswechsel (`day_changed`) – kein Zeitfortschritt im Hintergrund, der Gründungstag
-zählt als erster (Teil-)Tag. Umsatz = (Grundumsatz + Follower × Anteil / 1000) × Auslastung % × (100 + (Ruf − 50) / 2) %,
-ganzzahlig abgerundet; Fixkosten fest je Art. Das Firmenkonto wird nie negativ (Entscheidung des Game Directors):
-reicht es nicht, entfallen die Fixkosten dieses Tages und der Ruf des Unternehmens sinkt (Platzhalter: 5). Ohne Pflege
-sinkt die Auslastung täglich (Platzhalter: 3); Pflege vor Ort kommt mit Ticket 4.4. Zeitstempel der Buchungen ist der
-Zeitpunkt der Abrechnung (Ende des Zeitfortschritts), wie bei Ereignissen. Jeder Tag höchstens einmal
-(`last_settled_day` + Schutzschlüssel `company:day:<tag>:…`). Migration von Version 7: frühere Tage werden nicht
-nachträglich abgerechnet. Zu Spielbeginn macht das Label ohne Pflege leicht Verlust (Platzhalterzahlen, Phase 8).
-
-## 017 – Unternehmen gründen
-Das Merch-Label wird im Büro (Coworking) gegründet und verkauft zunächst online; die Filiale (Ticket 4.4) ist der
-physische zweite Standort. Gründung kostet Spielzeit (1 h), eine Gebühr vom Privatkonto und eine Mindesteinlage
-(Umbuchung). Es gibt höchstens ein Unternehmen. Auslastung und Ruf des Unternehmens sind 0–100 und ändern sich
-nur mit Begründung im Unternehmens-Protokoll (gleiches Eintragsmodell wie das Kanal-Protokoll). Einlage und
-Entnahme kosten keine Spielzeit; ihre Schutzschlüssel zählen fortlaufend (Zähler im Spielstand), damit jede
-Umbuchung eindeutig ist. Alle Zahlen sind Platzhalter fürs Balancing.
-
-## 016 – Konten im einen Ledger
-Privat- und Firmenkonto liegen im selben LedgerSystem (Entscheidung des Game Directors): jede Buchung hat ein
-Feld `account`, Kontostände und Überziehungsschutz gelten je Konto, Buchungs-IDs und Schutzschlüssel sind
-gemeinsam. Bestehende Aufrufe buchen ohne Angabe auf das Privatkonto. Umbuchung = genau zwei Buchungen
-(Kategorie `transfer`, gemeinsame Referenz = Schlüssel, Schutzschlüssel `<schlüssel>|out` und `<schlüssel>|in`);
-alles wird vorher geprüft, danach können beide Hälften nicht mehr scheitern. Beim Laden wird abgelehnt, wenn
-von einer Umbuchung nur eine Hälfte da ist. `|` statt `:`, weil `:` und `@` in anderen Schlüsseln vorkommen
-und z. B. ein Ereignis mit der ID `in` sonst wie eine Umbuchungshälfte aussähe.
-Migration auf Version 6: alter Startwert wird Startwert des Privatkontos, Firmenkonto beginnt bei 0, alle
-bisherigen Buchungen gehören zum Privatkonto.
-
-## 015 – Zufallsereignisse mit festem Seed
-Gewürfelt wird nur beim Tageswechsel (`day_changed`), nicht pro Aktion – so hängt der Verlauf nicht davon ab,
-wie man den Tag in Aktionen aufteilt. Wurf = FNV-1a 32 Bit von "<seed>|<tag>|<id>" modulo 100: zustandslos,
-plattformunabhängig, selbst implementiert (nicht `String.hash()`, das sich mit der Engine ändern könnte).
-Gespeichert wird nur der Seed; Abklingzeit und Anzahl ergeben sich aus den ausgelösten Instanzen (`<id>@<tag>`).
-Höchstens ein Zufallsereignis pro Tag (Priorität, dann ID), damit es nicht stapelt. Alle Zufallsereignisse
-frühestens ab Tag 3 – die ersten Tage bleiben ruhig. Neues Spiel: zufälliger Seed; alte Spielstände: Seed 1.
-Prozentuale Follower-Änderungen werden beim Entscheiden vom aktuellen Stand berechnet; Zuwächse laufen durch
-die Wachstumsbremse. Bedingungen prüfen den Kanal zum Zeitpunkt des Würfelns.
-
-## 014 – Ausrüstung
-Drei Teile (Kamera, Mikrofon, Licht) mit je drei Stufen, Kauf nur im Studio und nur Stufe für Stufe, ohne
-Spielzeit. Der Qualitätsbonus gilt für die erreichte Stufe (nicht aufsummiert) und nur für die Formate des Teils.
-Jede Stufe wird höchstens einmal bezahlt (Schutzschlüssel `equipment:<id>:<stufe>`). Kein Verschleiß, kein
-Wiederverkauf. Preise und Boni sind Platzhalter fürs Balancing. Fehlt ein Teil später in den Daten, wird es beim
-Laden ignoriert; eine zu hohe Stufe wird auf das Maximum gesetzt, statt den Spielstand abzulehnen.
-
-## 013 – Content-Formate exakt berechnet
-Zufall nur bei Ereignissen (Entscheidung des Game Directors); Content-Ergebnisse sind exakt und werden vor dem
-Produzieren angezeigt. Qualität = 100 % + Ausrüstung (014) + (Community − 50) / 2, mindestens 10 %.
-Follower-Zuwachs und Einnahme haben einen Grundwert plus einen Anteil je 1.000 Follower, beides × Qualität;
-der Follower-Anteil wächst also mit der Reichweite, die Wachstumsbremse (012) begrenzt ihn. Community und Ruf
-ändern sich um feste Werte des Formats. Ganzzahlig, abgerundet. Ein Livestream bringt zu Spielbeginn exakt
-25,00 € wie früher der „Kurze Stream“. Das ContentSystem hat keinen eigenen Spielstand: Der Schutzschlüssel
-`content:<format>:<startminute>` ist eindeutig, weil jede Produktion Zeit kostet.
-Formate sind eigene Daten (nicht Aktivitäten), weil sie zusätzlich Kanal und reichweitenabhängige Einnahmen haben.
-
-## 012 – Kanalprofil und Wachstumsbremse
-Reichweite ist eine Followerzahl (Entscheidung des Game Directors), Community-Stimmung und Ruf sind 0–100.
-Wachstumsbremse: Follower-Zuwächse × (1.000.000 − aktuell) / 1.000.000, kaufmännisch gerundet; harte Grenze
-1.000.000. Damit flacht Wachstum ab (logistisch, sobald Zuwächse mit der Reichweite steigen) und endet am Maximum.
-Verluste wirken ungebremst. Jede Änderung ist ein Protokolleintrag mit gewünschter und tatsächlicher Änderung,
-Quelle und Begründung – so kann die UI erklären, warum sich ein Wert geändert hat. Gespeichert werden die
-letzten 200 Einträge; IDs zählen weiter. Optionaler Schutzschlüssel gegen doppelte Anwendung wie im Ledger.
-Startwerte (120 Follower, 50, 50) sind Platzhalter fürs Balancing (Phase 8).
+## 010 – Migration Version 1 → 2
+Ein Spielstand aus Phase 1 beginnt in der Wohnung; `since_minutes` = gespeicherte Spielzeit.
+Ein gespeicherter Ort, den es in den Daten nicht mehr gibt, fällt auf die Wohnung zurück statt den
+Spielstand abzulehnen.
 
 ## 011 – Grafiken und isometrische Karte (G1)
 Kenney „Isometric Tiles“ City, Buildings und Vehicles (CC0, kenney.nl): gleicher Stil und gleiche Kachelgröße,
@@ -132,7 +63,88 @@ Reisezeit und Entfernung bleiben Luftlinie aus dem LocationSystem; die Fahrstrec
 Die Fahranimation läuft erst nach der Buchung der Fahrzeit und ändert keinen Spielzustand.
 Wischen auf der Karte verschiebt nur die Karte (Variante 1 des Game Directors); die Seite scrollt außerhalb.
 
-## 010 – Migration Version 1 → 2
-Ein Spielstand aus Phase 1 beginnt in der Wohnung; `since_minutes` = gespeicherte Spielzeit.
-Ein gespeicherter Ort, den es in den Daten nicht mehr gibt, fällt auf die Wohnung zurück statt den
-Spielstand abzulehnen.
+## 012 – Kanalprofil und Wachstumsbremse
+Reichweite ist eine Followerzahl (Entscheidung des Game Directors), Community-Stimmung und Ruf sind 0–100.
+Wachstumsbremse: Follower-Zuwächse × (1.000.000 − aktuell) / 1.000.000, kaufmännisch gerundet; harte Grenze
+1.000.000. Damit flacht Wachstum ab (logistisch, sobald Zuwächse mit der Reichweite steigen) und endet am Maximum.
+Verluste wirken ungebremst. Jede Änderung ist ein Protokolleintrag mit gewünschter und tatsächlicher Änderung,
+Quelle und Begründung – so kann die UI erklären, warum sich ein Wert geändert hat. Gespeichert werden die
+letzten 200 Einträge; IDs zählen weiter. Optionaler Schutzschlüssel gegen doppelte Anwendung wie im Ledger.
+Startwerte (120 Follower, 50, 50) sind Platzhalter fürs Balancing (Phase 8).
+
+## 013 – Content-Formate exakt berechnet
+Zufall nur bei Ereignissen (Entscheidung des Game Directors); Content-Ergebnisse sind exakt und werden vor dem
+Produzieren angezeigt. Qualität = 100 % + Ausrüstung (014) + (Community − 50) / 2, mindestens 10 %.
+Follower-Zuwachs und Einnahme haben einen Grundwert plus einen Anteil je 1.000 Follower, beides × Qualität;
+der Follower-Anteil wächst also mit der Reichweite, die Wachstumsbremse (012) begrenzt ihn. Community und Ruf
+ändern sich um feste Werte des Formats. Ganzzahlig, abgerundet. Ein Livestream bringt zu Spielbeginn exakt
+25,00 € wie früher der „Kurze Stream“. Das ContentSystem hat keinen eigenen Spielstand: Der Schutzschlüssel
+`content:<format>:<startminute>` ist eindeutig, weil jede Produktion Zeit kostet.
+Formate sind eigene Daten (nicht Aktivitäten), weil sie zusätzlich Kanal und reichweitenabhängige Einnahmen haben.
+
+## 014 – Ausrüstung
+Drei Teile (Kamera, Mikrofon, Licht) mit je drei Stufen, Kauf nur im Studio und nur Stufe für Stufe, ohne
+Spielzeit. Der Qualitätsbonus gilt für die erreichte Stufe (nicht aufsummiert) und nur für die Formate des Teils.
+Jede Stufe wird höchstens einmal bezahlt (Schutzschlüssel `equipment:<id>:<stufe>`). Kein Verschleiß, kein
+Wiederverkauf. Preise und Boni sind Platzhalter fürs Balancing. Fehlt ein Teil später in den Daten, wird es beim
+Laden ignoriert; eine zu hohe Stufe wird auf das Maximum gesetzt, statt den Spielstand abzulehnen.
+
+## 015 – Zufallsereignisse mit festem Seed
+Gewürfelt wird nur beim Tageswechsel (`day_changed`), nicht pro Aktion – so hängt der Verlauf nicht davon ab,
+wie man den Tag in Aktionen aufteilt. Wurf = FNV-1a 32 Bit von "<seed>|<tag>|<id>" modulo 100: zustandslos,
+plattformunabhängig, selbst implementiert (nicht `String.hash()`, das sich mit der Engine ändern könnte).
+Gespeichert wird nur der Seed; Abklingzeit und Anzahl ergeben sich aus den ausgelösten Instanzen (`<id>@<tag>`).
+Höchstens ein Zufallsereignis pro Tag (Priorität, dann ID), damit es nicht stapelt. Alle Zufallsereignisse
+frühestens ab Tag 3 – die ersten Tage bleiben ruhig. Neues Spiel: zufälliger Seed; alte Spielstände: Seed 1.
+Prozentuale Follower-Änderungen werden beim Entscheiden vom aktuellen Stand berechnet; Zuwächse laufen durch
+die Wachstumsbremse. Bedingungen prüfen den Kanal zum Zeitpunkt des Würfelns.
+
+## 016 – Konten im einen Ledger
+Privat- und Firmenkonto liegen im selben LedgerSystem (Entscheidung des Game Directors): jede Buchung hat ein
+Feld `account`, Kontostände und Überziehungsschutz gelten je Konto, Buchungs-IDs und Schutzschlüssel sind
+gemeinsam. Bestehende Aufrufe buchen ohne Angabe auf das Privatkonto. Umbuchung = genau zwei Buchungen
+(Kategorie `transfer`, gemeinsame Referenz = Schlüssel, Schutzschlüssel `<schlüssel>|out` und `<schlüssel>|in`);
+alles wird vorher geprüft, danach können beide Hälften nicht mehr scheitern. Beim Laden wird abgelehnt, wenn
+von einer Umbuchung nur eine Hälfte da ist. `|` statt `:`, weil `:` und `@` in anderen Schlüsseln vorkommen
+und z. B. ein Ereignis mit der ID `in` sonst wie eine Umbuchungshälfte aussähe.
+Migration auf Version 6: alter Startwert wird Startwert des Privatkontos, Firmenkonto beginnt bei 0, alle
+bisherigen Buchungen gehören zum Privatkonto.
+
+## 017 – Unternehmen gründen
+Das Merch-Label wird im Büro (Coworking) gegründet und verkauft zunächst online; die Filiale (Ticket 4.4) ist der
+physische zweite Standort. Gründung kostet Spielzeit (1 h), eine Gebühr vom Privatkonto und eine Mindesteinlage
+(Umbuchung). Es gibt höchstens ein Unternehmen. Auslastung und Ruf des Unternehmens sind 0–100 und ändern sich
+nur mit Begründung im Unternehmens-Protokoll (gleiches Eintragsmodell wie das Kanal-Protokoll). Einlage und
+Entnahme kosten keine Spielzeit; ihre Schutzschlüssel zählen fortlaufend (Zähler im Spielstand), damit jede
+Umbuchung eindeutig ist. Alle Zahlen sind Platzhalter fürs Balancing.
+
+## 018 – Tagesabschluss
+Abgerechnet wird der Vortag beim Tageswechsel (`day_changed`) – kein Zeitfortschritt im Hintergrund, der Gründungstag
+zählt als erster (Teil-)Tag. Umsatz = (Grundumsatz + Follower × Anteil / 1000) × Auslastung % × (100 + (Ruf − 50) / 2) %,
+ganzzahlig abgerundet; Fixkosten fest je Art. Das Firmenkonto wird nie negativ (Entscheidung des Game Directors):
+reicht es nicht, entfallen die Fixkosten dieses Tages und der Ruf des Unternehmens sinkt (Platzhalter: 5). Ohne Pflege
+sinkt die Auslastung täglich (Platzhalter: 3); Pflege vor Ort kommt mit Ticket 4.4. Zeitstempel der Buchungen ist der
+Zeitpunkt der Abrechnung (Ende des Zeitfortschritts), wie bei Ereignissen. Jeder Tag höchstens einmal
+(`last_settled_day` + Schutzschlüssel `company:day:<tag>:…`). Migration von Version 7: frühere Tage werden nicht
+nachträglich abgerechnet. Zu Spielbeginn macht das Label ohne Pflege leicht Verlust (Platzhalterzahlen, Phase 8).
+
+## 019 – Zweiter Standort und Management
+Der zweite Standort ist ein neuer Ort „Ladenlokal“ an der Promenade (Entscheidung 2a). Er ist von Anfang an auf
+der Karte; die Filiale „Merch-Laden“ wird dort eröffnet (Kosten vom Firmenkonto, Spielzeit) und bringt danach
+eigenen Grundumsatz und eigene Fixkosten in den Tagesabschluss – dieselbe Formel, keine Sonderlogik.
+Pflege vor Ort sind normale Aktivitäten mit `requires` („company“/„branch“) und `company`-Effekten, damit neue
+Management-Aktionen nur Daten brauchen. Die Wirkung steht mit Begründung (Name der Aktivität) im
+Unternehmens-Protokoll. „Merch im Stream zeigen“ ist die Verbindung Kanal → Unternehmen (Entscheidung 7).
+Gebäude der Filiale: Kenney `buildingTiles_020` (grüne Markise, zur Unterscheidung vom Café mit roter Markise).
+
+## 020 – Querformat, Karte als Hauptbildschirm (G2)
+Grundsatzentscheidung des Game Directors (12.10.2026), löst 002 ab: Das Spiel läuft im Querformat (beide Richtungen,
+`display/window/handheld/orientation = 4` = Sensor-Querformat), Basisauflösung 1280×720, Stretch `canvas_items`/`expand`.
+Die isometrische Stadtkarte ist der Hauptbildschirm im Vollbild (auch unter Notch und Home-Balken); HUD und Buttons
+liegen innerhalb der Safe Area. HUD wie in Aufbauspielen: Zeit/Tag/Ort links oben, Geld (privat, Firma), Energie und
+Stimmung rechts oben. Icon-Buttons an den Seiten (links Termine, Kanal, Unternehmen; rechts Buchungen, Menü, „Hier“)
+öffnen Fenster; Gebäude antippen öffnet das Fenster des Orts (Aktionen sichtbar, aber gesperrt mit Grund, wenn man
+woanders ist; „Hinfahren“ oben). Immer nur ein Fenster, mittig, Karte abgedunkelt. Ereignisse als Fenster, die zuerst
+entschieden werden müssen. Rückmeldungen als Hinweis unten (ca. 4 s; lange Texte bleiben bis zum Antippen).
+Zwei-Finger-Zoom begrenzt auf 0,5–1,0. Icons: Kenney „Game Icons“ (CC0) mit kurzem Text. Spiellogik, Daten und
+Spielstand bleiben unverändert. Phase-4-Abnahme bleibt offen und wird nach G2 im neuen Layout nachgeholt.
