@@ -197,7 +197,9 @@ Stand Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI) 
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.
-- Neue Formatversion: `SAVE_VERSION` erhöhen und in `_migrate()` einen Schritt ergänzen.
+- Neue Formatversion: `SAVE_VERSION` erhöhen, in `_run_migration()` einen Schritt n → n + 1 ergänzen und eine
+  echte Testdatei `tests/fixtures/saves/v<neu>.json` anlegen (Erzeuger `tests/fixtures/make_save.gd`, README).
+  `tests/test_save_fixtures.gd` lädt alle Versionen, prüft Kernwerte und spielt eine Woche weiter.
 - Bekannte Grenze: Ein Ereignis, das erst nach dem Speichern zu den Daten hinzukommt und dessen
   Zeitpunkt schon vorbei ist, wird in diesem Spielstand nie ausgelöst.
 

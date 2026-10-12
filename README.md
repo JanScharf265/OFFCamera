@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 (Finanzen, Fristen, Behördenereignisse) abgeschlossen nach Abnahmeregel (Tests + Mac-Fensterlauf, 298/298 Tests grün); iPhone-Abnahme gesammelt in Phase 7.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) in Arbeit: Ticket 6.1 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -86,7 +86,22 @@ cd ~/Developer/OFFCamera
 Nach dem Hinzufügen neuer Grafiken einmal importieren (sonst fehlen sie im Headless-Lauf):
 `… --headless --path . --import`
 
-Am Ende steht `N bestanden, M fehlgeschlagen`. ERROR-Zeilen direkt nach
+Am Ende steht `N bestanden, M fehlgeschlagen`.
+
+### Testspielstände alter Versionen (Phase 6)
+
+`tests/fixtures/saves/v<N>.json` sind echte Spielstände, erzeugt mit dem Code des Commits, in dem Version N aktuell
+war; `v<N>.expect.json` hält die Kernwerte. Neu erzeugen (z. B. nach einer neuen Formatversion, im Projektordner):
+
+```sh
+OUT=/tmp/offcamera-saves; mkdir -p "$OUT/hist" "$OUT/v11"
+git archive <commit> | tar -x -C "$OUT/hist"            # alter Stand, kein Worktree nötig
+timeout 120 ~/Downloads/Godot.app/Contents/MacOS/Godot --headless --path "$OUT/hist" \
+  -s "$PWD/tests/fixtures/make_save.gd" -- "$OUT/v11"
+cp "$OUT/v11/save.json" tests/fixtures/saves/v11.json; cp "$OUT/v11/expect.json" tests/fixtures/saves/v11.expect.json
+```
+
+Für die aktuelle Version statt `--path "$OUT/hist"` einfach `--path .`. Ein Test verlangt eine Datei je Version. ERROR-Zeilen direkt nach
 „(die folgende ERROR-Meldung ist erwartet)“ sind beabsichtigt.
 
 ## Spielstand

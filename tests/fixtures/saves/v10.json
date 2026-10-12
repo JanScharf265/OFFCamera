@@ -1,0 +1,277 @@
+{
+	"game": {
+		"appointments": {
+			"attended": [],
+			"missed": [
+				"camera_meeting",
+				"gym_trial"
+			],
+			"since_minutes": 480
+		},
+		"channel": {
+			"community": 52,
+			"followers": 137,
+			"history": [
+				{
+					"applied": {
+						"community": 2,
+						"followers": 17
+					},
+					"id": "ch_000001",
+					"reason": "Livestream · Qualität 100 %",
+					"reference": "livestream",
+					"requested": {
+						"community": 2,
+						"followers": 17
+					},
+					"source": "content",
+					"time_minutes": 500
+				}
+			],
+			"next_number": 2,
+			"reputation": 50,
+			"used_keys": {
+				"content:livestream:500": "ch_000001"
+			}
+		},
+		"company": {
+			"branch_open": false,
+			"deposits": 1,
+			"founded": true,
+			"founded_minutes": 635,
+			"history": [
+				{
+					"applied": {},
+					"id": "co_000001",
+					"reason": "Gegründet: Merch-Label (Auslastung 50, Ruf 50)",
+					"reference": "merch_label",
+					"requested": {},
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"applied": {
+						"utilization": 6
+					},
+					"id": "co_000002",
+					"reason": "Ware nachbestellen",
+					"reference": "order_stock",
+					"requested": {
+						"utilization": 6
+					},
+					"source": "activity",
+					"time_minutes": 695
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000003",
+					"reason": "Tag 1: ohne Pflege sinkt die Auslastung",
+					"reference": "day:1",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 3360
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000004",
+					"reason": "Tag 2: ohne Pflege sinkt die Auslastung",
+					"reference": "day:2",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 3360
+				}
+			],
+			"last_settled_day": 2,
+			"next_number": 5,
+			"reputation": 50,
+			"settlements": [
+				{
+					"costs_cents": 2000,
+					"day": 1,
+					"paid": true,
+					"revenue_cents": 1794,
+					"text": "Tag 1: Umsatz +17,94 € (30,00 € + 2,05 € Reichweite · Auslastung 56 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -2,06 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 2,
+					"paid": true,
+					"revenue_cents": 1698,
+					"text": "Tag 2: Umsatz +16,98 € (30,00 € + 2,05 € Reichweite · Auslastung 53 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -3,02 €"
+				}
+			],
+			"type": "merch_label",
+			"used_keys": {
+				"company:day:1:decay": "co_000003",
+				"company:day:2:decay": "co_000004"
+			},
+			"utilization": 50,
+			"withdrawals": 0
+		},
+		"equipment": {
+			"levels": {
+				"camera": 1
+			}
+		},
+		"events": {
+			"pending": [],
+			"resolved": {
+				"first_brand_request": "accept"
+			},
+			"seed": 12345,
+			"triggered": [
+				"first_brand_request"
+			]
+		},
+		"ledger": {
+			"entries": [
+				{
+					"account": "private",
+					"amount_cents": 2500,
+					"category": "creator",
+					"description": "Livestream",
+					"effective_minutes": 500,
+					"id": "tx_000001",
+					"reference": "livestream",
+					"source": "content",
+					"time_minutes": 500
+				},
+				{
+					"account": "private",
+					"amount_cents": -12000,
+					"category": "equipment",
+					"description": "Kamera: Webcam HD",
+					"effective_minutes": 620,
+					"id": "tx_000002",
+					"reference": "camera:1",
+					"source": "equipment",
+					"time_minutes": 620
+				},
+				{
+					"account": "private",
+					"amount_cents": -15000,
+					"category": "company",
+					"description": "Gründung: Merch-Label",
+					"effective_minutes": 635,
+					"id": "tx_000003",
+					"reference": "merch_label",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "private",
+					"amount_cents": -20000,
+					"category": "transfer",
+					"description": "Einlage bei Gründung",
+					"effective_minutes": 635,
+					"id": "tx_000004",
+					"reference": "company:deposit:1",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "company",
+					"amount_cents": 20000,
+					"category": "transfer",
+					"description": "Einlage bei Gründung",
+					"effective_minutes": 635,
+					"id": "tx_000005",
+					"reference": "company:deposit:1",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "private",
+					"amount_cents": 3000,
+					"category": "creator",
+					"description": "Anfrage einer kleinen Marke: Zusagen",
+					"effective_minutes": 1200,
+					"id": "tx_000006",
+					"reference": "first_brand_request",
+					"source": "event",
+					"time_minutes": 1200
+				},
+				{
+					"account": "company",
+					"amount_cents": 1794,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 1",
+					"effective_minutes": 1439,
+					"id": "tx_000007",
+					"reference": "day:1",
+					"source": "company",
+					"time_minutes": 3360
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 1",
+					"effective_minutes": 1439,
+					"id": "tx_000008",
+					"reference": "day:1",
+					"source": "company",
+					"time_minutes": 3360
+				},
+				{
+					"account": "company",
+					"amount_cents": 1698,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 2",
+					"effective_minutes": 2879,
+					"id": "tx_000009",
+					"reference": "day:2",
+					"source": "company",
+					"time_minutes": 3360
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 2",
+					"effective_minutes": 2879,
+					"id": "tx_000010",
+					"reference": "day:2",
+					"source": "company",
+					"time_minutes": 3360
+				}
+			],
+			"next_number": 11,
+			"opening_balances": {
+				"company": 0,
+				"private": 50000
+			},
+			"used_keys": {
+				"company:day:1:costs": "tx_000008",
+				"company:day:1:revenue": "tx_000007",
+				"company:day:2:costs": "tx_000010",
+				"company:day:2:revenue": "tx_000009",
+				"company:deposit:1|in": "tx_000005",
+				"company:deposit:1|out": "tx_000004",
+				"company:found:fee": "tx_000003",
+				"content:livestream:500": "tx_000001",
+				"equipment:camera:1": "tx_000002",
+				"event:first_brand_request": "tx_000006"
+			}
+		},
+		"location": {
+			"current": "office"
+		},
+		"stats": {
+			"energy": 55,
+			"mood": 52
+		},
+		"time": {
+			"minutes": 3360
+		}
+	},
+	"version": 10
+}

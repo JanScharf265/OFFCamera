@@ -9,8 +9,9 @@ extends RefCounted
 ## Laden: Hauptdatei; ist sie defekt oder fehlt sie, das Backup. Eine fehlende
 ## Datei ist kein Fehler (= noch kein Spielstand).
 ##
-## Versionen: SAVE_VERSION erhöhen, wenn sich das Format ändert, und in
-## _migrate() einen Schritt von der alten zur neuen Version ergänzen.
+## Versionen: SAVE_VERSION erhöhen, wenn sich das Format ändert, in _run_migration() einen
+## Schritt von der alten zur neuen Version ergänzen und eine echte Testdatei
+## tests/fixtures/saves/v<neu>.json anlegen (Erzeuger: tests/fixtures/make_save.gd).
 ## Spielstände aus einer neueren Version werden abgelehnt.
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
@@ -114,58 +115,38 @@ static func _load_file(path: String, game_data: GameDataScript) -> Dictionary:
 
 ## Hebt ältere Formate schrittweise auf SAVE_VERSION an (ändert `data` direkt).
 ## "" = ok, sonst Fehlertext.
+## Neue Formatversion: SAVE_VERSION erhöhen, in _run_migration() einen Schritt n → n + 1 ergänzen
+## und eine echte Testdatei tests/fixtures/saves/v<neu>.json anlegen (siehe tests/test_save_fixtures.gd).
+
+## Hebt ältere Formate schrittweise auf SAVE_VERSION an (ändert `data` direkt).
+## "" = ok, sonst Fehlertext.
 static func _migrate(data: Dictionary, version: int) -> String:
-	if version < 2:
-		var error := _migrate_1_to_2(data["game"])
+	for step in range(version, SAVE_VERSION):
+		var error := _run_migration(step, data["game"])
 		if not error.is_empty():
 			return error
-	if version < 3:
-		_migrate_2_to_3(data["game"])
-	if version < 4:
-		data["game"]["equipment"] = {"levels": {}}
-	if version < 5:
-		if typeof(data["game"].get("events")) != TYPE_DICTIONARY:
-			return "Ereignisse fehlen."
-		data["game"]["events"]["seed"] = MIGRATED_SEED
-	if version < 6:
-		if typeof(data["game"].get("ledger")) != TYPE_DICTIONARY:
-			return "Ledger fehlt."
-		var ledger_error := LedgerSystemScript.migrate_single_account(data["game"]["ledger"])
-		if not ledger_error.is_empty():
-			return ledger_error
-	if version < 7:
-		data["game"]["company"] = {"founded": false}
-	if version < 8:
-		var company: Variant = data["game"].get("company")
-		if typeof(company) != TYPE_DICTIONARY:
-			return "Unternehmen fehlt."
-		if company.get("founded") == true:
-			var minutes: Variant = data["game"].get("time", {}).get("minutes")
-			if not DataReaderScript.is_whole_number(minutes):
-				return "Zeit fehlt."
-			# Der laufende Tag wird beim nächsten Tageswechsel abgerechnet, frühere nicht nachträglich.
-			company["last_settled_day"] = TimeSystemScript.day_of(int(minutes)) - 1
-			company["settlements"] = []
-	if version < 9:
-		var company: Dictionary = data["game"]["company"]
-		if company.get("founded") == true:
-			company["branch_open"] = false
-	if version < 10:
-		var effective_error := LedgerSystemScript.migrate_effective_dates(data["game"]["ledger"])
-		if not effective_error.is_empty():
-			return effective_error
-	if version < 11:
-		# Fristen beginnen beim nächsten Tageswechsel – vergangene Wochen werden nicht nachberechnet.
-		var minutes: Variant = data["game"].get("time", {}).get("minutes")
-		if not DataReaderScript.is_whole_number(minutes):
-			return "Zeit fehlt."
-		data["game"]["obligations"] = {"last_processed_day": TimeSystemScript.day_of(int(minutes)), "instances": []}
 	data["version"] = SAVE_VERSION
 	return ""
 
 
-## Version 2 (Phase 2): Ort und Termine kommen dazu. Ein alter Spielstand beginnt
-## in der Wohnung; Termine, die vor dem Ladezeitpunkt lagen, entfallen ohne Strafe.
+## Ein Schritt: hebt `game` von Version `step` auf `step` + 1 (ändert es direkt). "" = ok, sonst Fehlertext.
+static func _run_migration(step: int, game: Dictionary) -> String:
+	match step:
+		1: return _migrate_1_to_2(game)
+		2: return _migrate_2_to_3(game)
+		3: return _migrate_3_to_4(game)
+		4: return _migrate_4_to_5(game)
+		5: return _migrate_5_to_6(game)
+		6: return _migrate_6_to_7(game)
+		7: return _migrate_7_to_8(game)
+		8: return _migrate_8_to_9(game)
+		9: return _migrate_9_to_10(game)
+		10: return _migrate_10_to_11(game)
+	return "Kein Migrationsschritt von Version %d." % step
+
+
+## 1 → 2 (Phase 2): Ort und Termine kommen dazu. Ein alter Spielstand beginnt in der Wohnung;
+## Termine, die vor dem Ladezeitpunkt lagen, entfallen ohne Strafe.
 static func _migrate_1_to_2(game: Dictionary) -> String:
 	var time: Variant = game.get("time")
 	if typeof(time) != TYPE_DICTIONARY or not DataReaderScript.is_whole_number(time.get("minutes")):
@@ -177,16 +158,76 @@ static func _migrate_1_to_2(game: Dictionary) -> String:
 	return ""
 
 
-## Version 3 (Phase 3): Kanalprofil kommt dazu – Startwerte, leeres Protokoll.
-## Version 4 (Phase 3): Ausrüstung kommt dazu – nichts gekauft (direkt in _migrate()).
-## Version 5 (Phase 3): Seed für Zufallsereignisse (MIGRATED_SEED, direkt in _migrate()).
-## Version 6 (Phase 4): Konten im Ledger – alte Buchungen gehören zum Privatkonto
-##   (LedgerSystem.migrate_single_account()).
-## Version 7 (Phase 4): Unternehmen – noch nicht gegründet (direkt in _migrate()).
-## Version 8 (Phase 4): Tagesabschluss – gegründete Unternehmen rechnen ab dem laufenden Tag ab.
-## Version 9 (Phase 4): Filiale – bei gegründeten Unternehmen noch nicht eröffnet.
-## Version 10 (Phase 5): Wertstellung je Buchung (LedgerSystem.migrate_effective_dates()).
-## Version 11 (Phase 5): Fristen – leer, ab dem nächsten Tageswechsel.
-static func _migrate_2_to_3(game: Dictionary) -> void:
+## 2 → 3 (Phase 3): Kanalprofil mit Startwerten, leeres Protokoll.
+static func _migrate_2_to_3(game: Dictionary) -> String:
 	game["channel"] = ChannelSystemScript.initial_dict(GameStateScript.START_FOLLOWERS,
 			GameStateScript.START_COMMUNITY, GameStateScript.START_REPUTATION)
+	return ""
+
+
+## 3 → 4 (Phase 3): Ausrüstung – nichts gekauft.
+static func _migrate_3_to_4(game: Dictionary) -> String:
+	game["equipment"] = {"levels": {}}
+	return ""
+
+
+## 4 → 5 (Phase 3): Seed für Zufallsereignisse (MIGRATED_SEED).
+static func _migrate_4_to_5(game: Dictionary) -> String:
+	if typeof(game.get("events")) != TYPE_DICTIONARY:
+		return "Ereignisse fehlen."
+	game["events"]["seed"] = MIGRATED_SEED
+	return ""
+
+
+## 5 → 6 (Phase 4): Konten im Ledger – alte Buchungen gehören zum Privatkonto.
+static func _migrate_5_to_6(game: Dictionary) -> String:
+	if typeof(game.get("ledger")) != TYPE_DICTIONARY:
+		return "Ledger fehlt."
+	return LedgerSystemScript.migrate_single_account(game["ledger"])
+
+
+## 6 → 7 (Phase 4): Unternehmen – noch nicht gegründet.
+static func _migrate_6_to_7(game: Dictionary) -> String:
+	game["company"] = {"founded": false}
+	return ""
+
+
+## 7 → 8 (Phase 4): Tagesabschluss – gegründete Unternehmen rechnen ab dem laufenden Tag ab,
+## frühere Tage nicht nachträglich.
+static func _migrate_7_to_8(game: Dictionary) -> String:
+	var company: Variant = game.get("company")
+	if typeof(company) != TYPE_DICTIONARY:
+		return "Unternehmen fehlt."
+	if company.get("founded") == true:
+		var minutes: Variant = game.get("time", {}).get("minutes")
+		if not DataReaderScript.is_whole_number(minutes):
+			return "Zeit fehlt."
+		company["last_settled_day"] = TimeSystemScript.day_of(int(minutes)) - 1
+		company["settlements"] = []
+	return ""
+
+
+## 8 → 9 (Phase 4): Filiale – bei gegründeten Unternehmen noch nicht eröffnet.
+static func _migrate_8_to_9(game: Dictionary) -> String:
+	var company: Variant = game.get("company")
+	if typeof(company) != TYPE_DICTIONARY:
+		return "Unternehmen fehlt."
+	if company.get("founded") == true:
+		company["branch_open"] = false
+	return ""
+
+
+## 9 → 10 (Phase 5): Wertstellung je Buchung (LedgerSystem.migrate_effective_dates()).
+static func _migrate_9_to_10(game: Dictionary) -> String:
+	if typeof(game.get("ledger")) != TYPE_DICTIONARY:
+		return "Ledger fehlt."
+	return LedgerSystemScript.migrate_effective_dates(game["ledger"])
+
+
+## 10 → 11 (Phase 5): Fristen – leer; vergangene Wochen werden nicht nachberechnet.
+static func _migrate_10_to_11(game: Dictionary) -> String:
+	var minutes: Variant = game.get("time", {}).get("minutes")
+	if not DataReaderScript.is_whole_number(minutes):
+		return "Zeit fehlt."
+	game["obligations"] = {"last_processed_day": TimeSystemScript.day_of(int(minutes)), "instances": []}
+	return ""

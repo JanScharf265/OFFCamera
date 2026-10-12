@@ -1,0 +1,163 @@
+{
+	"game": {
+		"appointments": {
+			"attended": [],
+			"missed": [
+				"camera_meeting",
+				"gym_trial"
+			],
+			"since_minutes": 480
+		},
+		"channel": {
+			"community": 52,
+			"followers": 137,
+			"history": [
+				{
+					"applied": {
+						"community": 2,
+						"followers": 17
+					},
+					"id": "ch_000001",
+					"reason": "Livestream · Qualität 100 %",
+					"reference": "livestream",
+					"requested": {
+						"community": 2,
+						"followers": 17
+					},
+					"source": "content",
+					"time_minutes": 500
+				}
+			],
+			"next_number": 2,
+			"reputation": 50,
+			"used_keys": {
+				"content:livestream:500": "ch_000001"
+			}
+		},
+		"company": {
+			"deposits": 1,
+			"founded": true,
+			"founded_minutes": 635,
+			"history": [
+				{
+					"applied": {},
+					"id": "co_000001",
+					"reason": "Gegründet: Merch-Label (Auslastung 50, Ruf 50)",
+					"reference": "merch_label",
+					"requested": {},
+					"source": "company",
+					"time_minutes": 635
+				}
+			],
+			"next_number": 2,
+			"reputation": 50,
+			"type": "merch_label",
+			"used_keys": {},
+			"utilization": 50,
+			"withdrawals": 0
+		},
+		"equipment": {
+			"levels": {
+				"camera": 1
+			}
+		},
+		"events": {
+			"pending": [],
+			"resolved": {
+				"first_brand_request": "accept"
+			},
+			"seed": 12345,
+			"triggered": [
+				"first_brand_request"
+			]
+		},
+		"ledger": {
+			"entries": [
+				{
+					"account": "private",
+					"amount_cents": 2500,
+					"category": "creator",
+					"description": "Livestream",
+					"id": "tx_000001",
+					"reference": "livestream",
+					"source": "content",
+					"time_minutes": 500
+				},
+				{
+					"account": "private",
+					"amount_cents": -12000,
+					"category": "equipment",
+					"description": "Kamera: Webcam HD",
+					"id": "tx_000002",
+					"reference": "camera:1",
+					"source": "equipment",
+					"time_minutes": 620
+				},
+				{
+					"account": "private",
+					"amount_cents": -15000,
+					"category": "company",
+					"description": "Gründung: Merch-Label",
+					"id": "tx_000003",
+					"reference": "merch_label",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "private",
+					"amount_cents": -20000,
+					"category": "transfer",
+					"description": "Einlage bei Gründung",
+					"id": "tx_000004",
+					"reference": "company:deposit:1",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "company",
+					"amount_cents": 20000,
+					"category": "transfer",
+					"description": "Einlage bei Gründung",
+					"id": "tx_000005",
+					"reference": "company:deposit:1",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "private",
+					"amount_cents": 3000,
+					"category": "creator",
+					"description": "Anfrage einer kleinen Marke: Zusagen",
+					"id": "tx_000006",
+					"reference": "first_brand_request",
+					"source": "event",
+					"time_minutes": 1200
+				}
+			],
+			"next_number": 7,
+			"opening_balances": {
+				"company": 0,
+				"private": 50000
+			},
+			"used_keys": {
+				"company:deposit:1|in": "tx_000005",
+				"company:deposit:1|out": "tx_000004",
+				"company:found:fee": "tx_000003",
+				"content:livestream:500": "tx_000001",
+				"equipment:camera:1": "tx_000002",
+				"event:first_brand_request": "tx_000006"
+			}
+		},
+		"location": {
+			"current": "office"
+		},
+		"stats": {
+			"energy": 60,
+			"mood": 52
+		},
+		"time": {
+			"minutes": 3360
+		}
+	},
+	"version": 7
+}

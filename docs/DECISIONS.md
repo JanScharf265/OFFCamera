@@ -207,3 +207,12 @@ Der Test-Runner registriert einen Logger (`OS.add_logger`, `ERROR_TYPE_SCRIPT`):
 Layout-Tests setzen die Bildschirmgröße selbst (headless ist das Fenster nur 64 × 64).
 Godot-Läufe immer mit Zeitlimit (`--quit-after` und `timeout`), nachdem ein Fensterlauf hängen geblieben war.
 
+## 027 – Echte Altstände als Testdateien
+Entscheidung des Game Directors: Migrationen werden mit echten Spielständen geprüft, nicht mit aus dem heutigen
+Format nachgebauten. Für jede Version N wird der Commit, in dem N aktuell war, per `git archive` in einen temporären
+Ordner entpackt (kein Worktree, keine Änderung am Repo) und dort mit `tests/fixtures/make_save.gd` headless eine kurze
+Spielsitzung gespeichert. Die Dateien liegen in `tests/fixtures/saves/` (je ca. 10 KB). Wer `SAVE_VERSION` erhöht,
+legt eine Testdatei der neuen Version an – ein Test verlangt sie. Migrationen sind Einzelschritte n → n + 1
+(`SaveSystem._run_migration()`). In Version 1 hieß der Aufruf noch `GameState.new(Kataloge)`; der Erzeuger kennt das.
+Die normale Testsuite soll schnell bleiben (Ziel < 1 Minute, derzeit ~1 s); lange Läufe kommen in 6.4 getrennt.
+

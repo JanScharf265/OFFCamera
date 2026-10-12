@@ -1,0 +1,59 @@
+{
+	"game": {
+		"appointments": {
+			"attended": [],
+			"missed": [
+				"camera_meeting",
+				"gym_trial"
+			],
+			"since_minutes": 480
+		},
+		"events": {
+			"pending": [],
+			"resolved": {
+				"first_brand_request": "accept"
+			},
+			"triggered": [
+				"first_brand_request"
+			]
+		},
+		"ledger": {
+			"entries": [
+				{
+					"amount_cents": 2500,
+					"category": "creator",
+					"description": "Kurzer Stream",
+					"id": "tx_000001",
+					"reference": "stream_short",
+					"source": "activity",
+					"time_minutes": 500
+				},
+				{
+					"amount_cents": 3000,
+					"category": "creator",
+					"description": "Anfrage einer kleinen Marke: Zusagen",
+					"id": "tx_000002",
+					"reference": "first_brand_request",
+					"source": "event",
+					"time_minutes": 1200
+				}
+			],
+			"next_number": 3,
+			"opening_balance_cents": 50000,
+			"used_keys": {
+				"event:first_brand_request": "tx_000002"
+			}
+		},
+		"location": {
+			"current": "studio"
+		},
+		"stats": {
+			"energy": 60,
+			"mood": 52
+		},
+		"time": {
+			"minutes": 3360
+		}
+	},
+	"version": 2
+}

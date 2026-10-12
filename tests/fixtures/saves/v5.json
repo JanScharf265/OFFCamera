@@ -1,0 +1,102 @@
+{
+	"game": {
+		"appointments": {
+			"attended": [],
+			"missed": [
+				"camera_meeting",
+				"gym_trial"
+			],
+			"since_minutes": 480
+		},
+		"channel": {
+			"community": 52,
+			"followers": 137,
+			"history": [
+				{
+					"applied": {
+						"community": 2,
+						"followers": 17
+					},
+					"id": "ch_000001",
+					"reason": "Livestream · Qualität 100 %",
+					"reference": "livestream",
+					"requested": {
+						"community": 2,
+						"followers": 17
+					},
+					"source": "content",
+					"time_minutes": 500
+				}
+			],
+			"next_number": 2,
+			"reputation": 50,
+			"used_keys": {
+				"content:livestream:500": "ch_000001"
+			}
+		},
+		"equipment": {
+			"levels": {
+				"camera": 1
+			}
+		},
+		"events": {
+			"pending": [],
+			"resolved": {
+				"first_brand_request": "accept"
+			},
+			"seed": 12345,
+			"triggered": [
+				"first_brand_request"
+			]
+		},
+		"ledger": {
+			"entries": [
+				{
+					"amount_cents": 2500,
+					"category": "creator",
+					"description": "Livestream",
+					"id": "tx_000001",
+					"reference": "livestream",
+					"source": "content",
+					"time_minutes": 500
+				},
+				{
+					"amount_cents": -12000,
+					"category": "equipment",
+					"description": "Kamera: Webcam HD",
+					"id": "tx_000002",
+					"reference": "camera:1",
+					"source": "equipment",
+					"time_minutes": 620
+				},
+				{
+					"amount_cents": 3000,
+					"category": "creator",
+					"description": "Anfrage einer kleinen Marke: Zusagen",
+					"id": "tx_000003",
+					"reference": "first_brand_request",
+					"source": "event",
+					"time_minutes": 1200
+				}
+			],
+			"next_number": 4,
+			"opening_balance_cents": 50000,
+			"used_keys": {
+				"content:livestream:500": "tx_000001",
+				"equipment:camera:1": "tx_000002",
+				"event:first_brand_request": "tx_000003"
+			}
+		},
+		"location": {
+			"current": "studio"
+		},
+		"stats": {
+			"energy": 60,
+			"mood": 52
+		},
+		"time": {
+			"minutes": 3360
+		}
+	},
+	"version": 5
+}

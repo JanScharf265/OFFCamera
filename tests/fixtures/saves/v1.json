@@ -1,0 +1,39 @@
+{
+	"game": {
+		"events": {
+			"pending": [],
+			"resolved": {
+				"first_brand_request": "accept"
+			},
+			"triggered": [
+				"first_brand_request"
+			]
+		},
+		"ledger": {
+			"entries": [
+				{
+					"amount_cents": 3000,
+					"category": "creator",
+					"description": "Anfrage einer kleinen Marke: Zusagen",
+					"id": "tx_000001",
+					"reference": "first_brand_request",
+					"source": "event",
+					"time_minutes": 1200
+				}
+			],
+			"next_number": 2,
+			"opening_balance_cents": 50000,
+			"used_keys": {
+				"event:first_brand_request": "tx_000001"
+			}
+		},
+		"stats": {
+			"energy": 80,
+			"mood": 65
+		},
+		"time": {
+			"minutes": 3360
+		}
+	},
+	"version": 1
+}

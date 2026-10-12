@@ -195,8 +195,18 @@ Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
 - [ ] Behördenereignisse erscheinen als Fenster mit Dauer/Ruf/Firmenkonto in den Folgen; ab 3 offenen Fristen sicher die Vollstreckungsankündigung
 - [ ] Seitenleisten mit 4 Buttons vollständig sichtbar, in beiden Querformat-Richtungen
 
+## Phase 6 – Save/Load-Stabilisierung und Migration ← in Arbeit
+Echte Altstände aller Versionen als Testdateien, robustes Schreiben (Kopf, 3 Backups, gültige .tmp übernehmen, defekte
+Stände aufbewahren), Konsistenzprüfung und einheitliche Regel für entfernte Daten, Rundlauf-/Störungs-/Lasttests
+(langer Lauf getrennt), Spielstand-Info im Hauptmenü. Spiellogik unverändert.
+
+- [x] Ticket 6.1: Echte Spielstände v1–v11 aus den damaligen Commits, Migrationen als Einzelschritte, Testdatei-Pflicht je Version (303/303 Tests grün, Suite ~1 s)
+- [ ] Ticket 6.2: Robustes Schreiben (Kopf, 3 Backups, gültige .tmp, defekte Stände aufbewahren)
+- [ ] Ticket 6.3: Konsistenzprüfung und entfernte Daten
+- [ ] Ticket 6.4: Rundlauf-, Störungs- und Lasttests (langer Lauf mit eigenem Befehl)
+- [ ] Ticket 6.5: Spielstand-Info im Hauptmenü, Fehlerdialog, Abnahme
+
 ## Spätere Phasen
-6. Save/Load-Stabilisierung und Migration
 7. Mobile Politur und Performance – inklusive der gesammelten iPhone-Abnahmen von Phase 3, Phase 4 und G2
    (Checklisten oben) und aller folgenden Phasen
 8. Balancing und mehr Inhalte

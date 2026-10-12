@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht – Phase 6
+- Echte Testspielstände v1–v11, erzeugt mit dem Code der jeweiligen Commits; jeder lädt bis zur aktuellen Version, behält Zeit, Konten, Ort, Kanal, Ausrüstung, Unternehmen und ist weiterspielbar (Ticket 6.1)
+- Migrationen als Einzelschritte n → n + 1; ein Test verlangt eine Testdatei je Version (Ticket 6.1)
+
 ## Unveröffentlicht – Phase 5
 - Wertstellung je Buchung: Tagesabschlüsse gehören zum abgerechneten Tag (23:59), nicht zum Zeitpunkt der Abrechnung; Wochenauswertung je Konto ohne Umbuchungen (Ticket 5.1)
 - Fester Ablauf am Tageswechsel (DayCycle): erst Tagesabschluss, dann Fristen, dann Ereignisse (Ticket 5.1)
