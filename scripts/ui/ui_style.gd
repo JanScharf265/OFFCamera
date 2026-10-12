@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## Gemeinsame Farben, Größen und Bausteine für die UI.
-## Größen beziehen sich auf die 720 px breite Basisauflösung
+## Größen beziehen sich auf die 720 px hohe Basisauflösung im Querformat (1280 × 720)
 ## (ca. 1,8 Bildpunkte pro iOS-Punkt – 96 px ≈ 53 pt Touch-Höhe).
 
 const BACKGROUND := Color(0.07, 0.07, 0.09)
@@ -22,6 +22,8 @@ const LARGE_FONT_SIZE := 44
 const TITLE_FONT_SIZE := 72
 const BUTTON_HEIGHT := 96
 const CORNER_RADIUS := 16
+## Breite der zentrierten Spalte für Menüs (Querformat).
+const COLUMN_WIDTH := 640
 
 
 static func create_theme() -> Theme:

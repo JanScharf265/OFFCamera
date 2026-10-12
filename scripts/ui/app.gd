@@ -1,6 +1,10 @@
 extends Control
 
 ## Wurzel der App: Theme, Safe Area, Bildschirmwechsel und Speichern.
+##
+## Querformat (G2): Bildschirme mit set_safe_margins() (z. B. die Spielansicht mit Vollbild-Karte)
+## bekommen die ganze Fläche und die Safe-Area-Abstände geliefert; alle anderen liegen in einem
+## Rahmen innerhalb der Safe Area (Notch links oder rechts, Home-Balken unten).
 ## Hält die aktuelle Spielsitzung (GameState) – dafür ist kein Autoload nötig.
 ##
 ## Automatisch gespeichert wird: beim Start eines neuen Spiels, nach jeder
@@ -24,7 +28,11 @@ var game: GameStateScript
 
 var _data: GameDataScript
 var _safe_area: MarginContainer
+## Für Bildschirme, die selbst mit der Safe Area umgehen (volle Fläche).
+var _full_area: Control
 var _screen: Control
+## Aktuelle Abstände [links, oben, rechts, unten] in Viewport-Pixeln (inkl. Grundabstand).
+var _margins: Array[float] = []
 
 
 func _ready() -> void:
@@ -35,8 +43,16 @@ func _ready() -> void:
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
 
+	_full_area = Control.new()
+	_full_area.name = "FullArea"
+	_full_area.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_full_area.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_full_area)
+
 	_safe_area = MarginContainer.new()
+	_safe_area.name = "SafeArea"
 	_safe_area.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_safe_area.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_safe_area)
 	get_viewport().size_changed.connect(_update_safe_area)
 	_update_safe_area()
@@ -126,10 +142,18 @@ func _set_screen(screen: Control) -> void:
 	if _screen != null:
 		# Sofort aus dem Baum nehmen, erst später löschen – der alte Bildschirm
 		# kann gerade noch das Signal senden, das diesen Wechsel ausgelöst hat.
-		_safe_area.remove_child(_screen)
+		_screen.get_parent().remove_child(_screen)
 		_screen.queue_free()
 	_screen = screen
-	_safe_area.add_child(screen)
+	if screen.has_method("set_safe_margins"):
+		screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_full_area.add_child(screen)
+		screen.call("set_safe_margins", _margins)
+	else:
+		# Menüs: zentrierte Spalte mit begrenzter Breite.
+		screen.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		screen.custom_minimum_size.x = maxf(screen.custom_minimum_size.x, UiStyle.COLUMN_WIDTH)
+		_safe_area.add_child(screen)
 
 
 func _show_error(message: String) -> void:
@@ -139,24 +163,32 @@ func _show_error(message: String) -> void:
 
 
 ## Ränder = Grundabstand + Safe Area (Notch, Dynamic Island, Home-Indikator).
-## Die Safe Area kommt in Bildschirmpixeln und wird in Viewport-Koordinaten umgerechnet.
 func _update_safe_area() -> void:
-	var left := float(UiStyle.PADDING)
-	var top := float(UiStyle.PADDING)
-	var right := float(UiStyle.PADDING)
-	var bottom := float(UiStyle.PADDING)
-
+	var window_size := Vector2.ZERO
+	var safe := Rect2()
 	if OS.has_feature("mobile"):
-		var window_size := Vector2(DisplayServer.window_get_size())
-		var safe := Rect2(DisplayServer.get_display_safe_area())
-		if window_size.x > 0 and window_size.y > 0:
-			var to_viewport := get_viewport_rect().size / window_size
-			left += maxf(safe.position.x, 0.0) * to_viewport.x
-			top += maxf(safe.position.y, 0.0) * to_viewport.y
-			right += maxf(window_size.x - safe.end.x, 0.0) * to_viewport.x
-			bottom += maxf(window_size.y - safe.end.y, 0.0) * to_viewport.y
+		window_size = Vector2(DisplayServer.window_get_size())
+		safe = Rect2(DisplayServer.get_display_safe_area())
+	_margins = safe_margins(window_size, safe, get_viewport_rect().size, UiStyle.PADDING)
 
-	_safe_area.add_theme_constant_override("margin_left", roundi(left))
-	_safe_area.add_theme_constant_override("margin_top", roundi(top))
-	_safe_area.add_theme_constant_override("margin_right", roundi(right))
-	_safe_area.add_theme_constant_override("margin_bottom", roundi(bottom))
+	_safe_area.add_theme_constant_override("margin_left", roundi(_margins[0]))
+	_safe_area.add_theme_constant_override("margin_top", roundi(_margins[1]))
+	_safe_area.add_theme_constant_override("margin_right", roundi(_margins[2]))
+	_safe_area.add_theme_constant_override("margin_bottom", roundi(_margins[3]))
+	if _screen != null and _screen.has_method("set_safe_margins"):
+		_screen.call("set_safe_margins", _margins)
+
+
+## Abstände [links, oben, rechts, unten] in Viewport-Pixeln: Grundabstand + Bereich außerhalb der
+## Safe Area. Die Safe Area kommt in Bildschirmpixeln und wird in Viewport-Koordinaten umgerechnet.
+## Ohne gültige Fenstergröße (Desktop, Tests) nur der Grundabstand.
+static func safe_margins(window_size: Vector2, safe: Rect2, viewport_size: Vector2, padding: float) -> Array[float]:
+	var margins: Array[float] = [padding, padding, padding, padding]
+	if window_size.x <= 0 or window_size.y <= 0 or safe.size.x <= 0 or safe.size.y <= 0:
+		return margins
+	var to_viewport := viewport_size / window_size
+	margins[0] += maxf(safe.position.x, 0.0) * to_viewport.x
+	margins[1] += maxf(safe.position.y, 0.0) * to_viewport.y
+	margins[2] += maxf(window_size.x - safe.end.x, 0.0) * to_viewport.x
+	margins[3] += maxf(window_size.y - safe.end.y, 0.0) * to_viewport.y
+	return margins

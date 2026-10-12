@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht – Grafik-Ticket G2 (Querformat)
+- Querformat in beide Richtungen, Basisauflösung 1280×720 (G2.1)
+- Safe Area als eigene, getestete Berechnung; Bildschirme können die volle Fläche nutzen und bekommen die Abstände (Notch seitlich, Home-Balken) geliefert; Menüs als zentrierte Spalte (G2.1)
+
 ## Unveröffentlicht – Phase 4
 - LedgerSystem mit Konten „privat“ und „Firma“: Kontostand und Überziehungsschutz je Konto; Umbuchungen (Einlage/Entnahme) als zwei verknüpfte Buchungen, nie halb (Ticket 4.1)
 - Spielstand Version 6 mit Migration: alte Buchungen gehören zum Privatkonto (Ticket 4.1)

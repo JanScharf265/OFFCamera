@@ -173,7 +173,10 @@ Stand Phase 4 (Tickets 4.1–4.5 umgesetzt, Abnahme ausstehend: Konten, Unterneh
   Zeitpunkt schon vorbei ist, wird in diesem Spielstand nie ausgelöst.
 
 ### UI (`scenes/app/app.tscn`, `scripts/ui/`)
-- `app.gd` (Hauptszene): Theme, Safe Area (nur auf Mobilgeräten, in Viewport-Koordinaten umgerechnet),
+- `app.gd` (Hauptszene): Theme, Safe Area (nur auf Mobilgeräten, in Viewport-Koordinaten umgerechnet;
+  `safe_margins()` statisch und getestet). Querformat (G2): Bildschirme mit `set_safe_margins(abstände)`
+  bekommen die volle Fläche (z. B. Vollbild-Karte), alle anderen liegen als zentrierte Spalte
+  (`UiStyle.COLUMN_WIDTH`) innerhalb der Safe Area,
   hält die laufende `GameState`-Sitzung und wechselt zwischen `main_menu.gd` und `game_screen.gd`.
 - UI wird im Code aus Containern gebaut (keine festen Pixelpositionen). Farben/Größen in `ui_style.gd`,
   Texte für Aktivitäten/Beträge in `activity_text.gd`.

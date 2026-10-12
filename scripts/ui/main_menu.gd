@@ -24,13 +24,13 @@ var _confirming := false
 
 func _ready() -> void:
 	alignment = BoxContainer.ALIGNMENT_CENTER
-	add_theme_constant_override("separation", 24)
+	add_theme_constant_override("separation", 16)
 
 	var title := UiStyle.label("OFF CAMERA", UiStyle.TITLE_FONT_SIZE)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
 
-	var subtitle := UiStyle.label("Prototyp · Phase 2", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+	var subtitle := UiStyle.label("Prototyp", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(subtitle)
 
@@ -41,7 +41,7 @@ func _ready() -> void:
 		add_child(message_label)
 
 	var spacer := Control.new()
-	spacer.custom_minimum_size.y = 48
+	spacer.custom_minimum_size.y = 8
 	add_child(spacer)
 
 	if continue_available:

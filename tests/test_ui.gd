@@ -356,6 +356,31 @@ func test_settlement_appears_in_feedback_and_list() -> void:
 	app.free()
 
 
+## Querformat (G2.1): Beispielwerte wie ein iPhone mit Notch, 2556 × 1179 Pixel quer.
+func test_safe_margins_for_notch_left_and_right() -> void:
+	var window := Vector2(2556, 1179)
+	var viewport := Vector2(1560, 720)  # Stretch "expand": Höhe 720, Breite folgt dem Seitenverhältnis
+	var scale := viewport.x / window.x
+	# Notch links (177 px), Home-Balken unten (63 px).
+	var left := AppScript.safe_margins(window, Rect2(177, 0, 2556 - 177 - 177, 1179 - 63), viewport, 24)
+	assert_true(absf(left[0] - (24 + 177 * scale)) < 0.01, str(left))
+	assert_eq(left[1], 24.0)
+	assert_true(absf(left[2] - (24 + 177 * scale)) < 0.01, "iOS hält beide Seiten frei: %s" % [left])
+	assert_true(absf(left[3] - (24 + 63 * viewport.y / window.y)) < 0.01, str(left))
+	# Gedreht (Notch rechts): nur die Seite wechselt, die Abstände bleiben symmetrisch berechnet.
+	var right := AppScript.safe_margins(window, Rect2(0, 0, 2556 - 177, 1179 - 63), viewport, 24)
+	assert_eq(right[0], 24.0)
+	assert_true(absf(right[2] - (24 + 177 * scale)) < 0.01, str(right))
+	# Ohne Gerät (Desktop/Tests): nur der Grundabstand.
+	assert_eq(AppScript.safe_margins(Vector2.ZERO, Rect2(), viewport, 24), [24.0, 24.0, 24.0, 24.0] as Array[float])
+
+
+func test_project_is_landscape() -> void:
+	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), DisplayServer.SCREEN_SENSOR_LANDSCAPE)
+	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_width"), 1280)
+	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_height"), 720)
+
+
 func _travel(app: Node, location_id: String) -> void:
 	_press(app, "MapPin_%s" % location_id)
 	_press(app, "TravelButton")

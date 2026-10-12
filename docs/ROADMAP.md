@@ -142,7 +142,7 @@ Stadtkarte im Vollbild, HUD in den oberen Ecken, Icon-Buttons an den Seiten öff
 das Fenster des Orts. Safe Area (Notch seitlich, Home-Balken unten). Nur Darstellung – Spiellogik, Daten und Spielstand
 bleiben unverändert (siehe DECISIONS 020).
 
-- [ ] G2.1: Querformat und Grundgerüst (Projekteinstellungen, Safe Area je Bildschirm, Hauptmenü/Einstellungen)
+- [x] G2.1: Querformat und Grundgerüst (Projekteinstellungen, Safe Area je Bildschirm, Hauptmenü/Einstellungen) (248/248 Tests grün; Spielansicht bis G2.2 noch als schmale Spalte)
 - [ ] G2.2: Karte als Vollbild, HUD, Seitenleisten, Hinweise, Zwei-Finger-Zoom
 - [ ] G2.3: Fenster (Ort, Termine, Kanal, Unternehmen, Buchungen, Ereignis)
 - [ ] G2.4: Icons, Tests, Doku
