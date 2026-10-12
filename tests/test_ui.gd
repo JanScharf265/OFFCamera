@@ -439,6 +439,7 @@ func test_hud_respects_safe_margins() -> void:
 		return
 	_press(app, "NewGameButton")
 	var screen := _find(app, "CityMap").get_parent() as Control
+	screen.size = Vector2(1280, 720)  # headless ist das Fenster nur 64 × 64
 	screen.call("set_safe_margins", [130.0, 24.0, 130.0, 50.0] as Array[float])
 	var hud_left := _find(app, "HudLeft") as Control
 	var hud_right := _find(app, "HudRight") as Control
@@ -463,6 +464,92 @@ func test_long_feedback_stays_until_tapped() -> void:
 	screen.call("show_message", "Erste Zeile\nZweite Zeile")
 	assert_eq(timer.is_stopped(), true)
 	assert_eq((_find(app, "Toast") as Control).visible, true)
+	app.free()
+
+
+# --- Finanzen und Fristen (Phase 5) ------------------------------------------------------
+
+## Neues Spiel, Privatkonto auf 50 €, dann bis Montag (Tag 8): Wohnungsmiete bleibt offen.
+func _app_with_open_rent() -> AppScript:
+	var app := _start_app()
+	if app == null:
+		return null
+	_press(app, "NewGameButton")
+	app.game.ledger.post(-45000, "test", "Ausgabe für Test", "test")
+	app.game.appointments.restore({"since_minutes": 99999, "attended": [], "missed": []})
+	app.game.time.advance(TimeSystemScript.at(7, 22) - app.game.time.get_minutes())
+	while app.game.events.has_pending():
+		var instance: String = app.game.events.get_next_pending_id()
+		app.game.events.resolve(instance, app.game.events.get_definition_for(instance).options[-1].id)
+	_press(app, "HereButton")
+	_press(app, "StartButton_sleep")  # über Mitternacht -> Montag, Tag 8
+	while app.game.events.has_pending():
+		var instance: String = app.game.events.get_next_pending_id()
+		_press(app, "EventOption_%s" % app.game.events.get_definition_for(instance).options[-1].id)
+	return app
+
+
+func test_obligations_button_shows_open_count_and_pay_works() -> void:
+	var app := _app_with_open_rent()
+	if app == null:
+		return
+	assert_eq((_find(app, "ObligationsButton") as Button).text, "Fristen (1)")
+	assert_true("Miete Wohnung (Woche 2) fällig" in (_find(app, "FeedbackLabel") as Label).text,
+			(_find(app, "FeedbackLabel") as Label).text)
+	_press(app, "ObligationsButton")
+	assert_eq((_find(app, "ObligationAmount_rent_home_8") as Label).text, "Offen: 80,00 €")
+	assert_eq((_find(app, "ObligationPayButton_rent_home_8") as Button).disabled, true)  # nur 10 €
+	app.game.ledger.post(10000, "test", "Einnahme für Test", "test")
+	_press(app, "ObligationsButton")  # neu öffnen
+	assert_eq((_find(app, "ObligationPayButton_rent_home_8") as Button).disabled, false)
+	_press(app, "ObligationPayButton_rent_home_8")
+	assert_eq((_find(app, "ObligationsButton") as Button).text, "Fristen")
+	assert_true("Miete Wohnung (Woche 2) bezahlt: -80,00 €." in (_find(app, "FeedbackLabel") as Label).text,
+			(_find(app, "FeedbackLabel") as Label).text)
+	assert_true(_screen_has_text(app, "Keine offenen Fristen."), "Leerzustand fehlt")
+	app.free()
+
+
+func test_reminder_fee_is_shown_as_open_not_booked() -> void:
+	var app := _app_with_open_rent()
+	if app == null:
+		return
+	app.game.time.advance(TimeSystemScript.at(11, 8) - app.game.time.get_minutes())  # Mahnung
+	_press(app, "ObligationsButton")
+	assert_eq((_find(app, "ObligationAmount_rent_home_8") as Label).text, "Offen: 90,00 €")
+	assert_true(_screen_has_text(app, "davon Mahngebühr 10,00 € (wird erst beim Bezahlen gebucht)"), "Hinweis fehlt")
+	assert_eq(app.game.ledger.get_entries_by_category("reminder_fee").size(), 0)
+	app.free()
+
+
+func test_ledger_window_shows_week_summary() -> void:
+	var app := _app_with_open_rent()
+	if app == null:
+		return
+	_press(app, "LedgerButton")
+	var week2 := (_find(app, "LedgerWeek_2_private") as Label).text
+	assert_eq(week2, "Woche 2 (läuft) · Privatkonto: Einnahmen 0,00 € · Ausgaben -40,00 € · Ergebnis -40,00 €")
+	assert_true(_find(app, "LedgerWeek_1_private") != null, "Vorwoche fehlt")
+	app.free()
+
+
+## Regressionstest (Fensterlauf Phase 5): Mit Unternehmen hat die linke Leiste 4 Buttons – sie muss
+## vollständig über dem unteren Rand der Safe Area bleiben, auch mit Notch-Abständen.
+func test_side_bars_fit_on_screen_with_company() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_travel(app, "office")
+	_press(app, "CompanyFoundButton_merch_label")
+	var screen := _find(app, "CityMap").get_parent() as Control
+	screen.size = Vector2(1280, 720)  # headless ist das Fenster nur 64 × 64
+	screen.call("set_safe_margins", [130.0, 24.0, 130.0, 50.0] as Array[float])
+	for bar_name in ["LeftBar", "RightBar"]:
+		var bar := _find(app, bar_name) as Control
+		assert_true(bar.position.y + bar.size.y <= screen.size.y - 50.0 + 0.5,
+				"%s ragt unten heraus: %s" % [bar_name, bar.position.y + bar.size.y])
+	assert_eq((_find(app, "CompanyButton") as Button).visible, true)
 	app.free()
 
 

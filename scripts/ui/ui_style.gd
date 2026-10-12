@@ -25,8 +25,11 @@ const CORNER_RADIUS := 16
 ## Breite der zentrierten Spalte für Menüs (Querformat).
 const COLUMN_WIDTH := 640
 ## Querformat-Spielansicht (G2): Seitenbuttons, Fenster, Hinweise.
-const SIDE_BUTTON_SIZE := Vector2(140, 96)
-const SIDE_ICON_SIZE := 40
+## 4 Buttons je Seite müssen unter das HUD passen (720 px hoch, Safe Area). Gemessen (Godot 4.7):
+## Mindesthöhe eines Seitenbuttons = Icon-Größe (icon_max_width) + 84 px für Text und Rand –
+## mit 28 px also 112 px; 4 × 112 + 3 × 8 = 472 px (Test test_side_bars_fit_on_screen_with_company).
+const SIDE_BUTTON_SIZE := Vector2(140, 84)
+const SIDE_ICON_SIZE := 28
 const WINDOW_MAX_WIDTH := 980
 const HUD_SURFACE := Color(0.07, 0.07, 0.09, 0.86)
 const DIM := Color(0, 0, 0, 0.55)

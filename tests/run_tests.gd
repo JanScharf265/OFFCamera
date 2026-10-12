@@ -4,11 +4,37 @@ extends SceneTree
 ## Aufruf auf dem Mac (im Projektordner):
 ##   /Applications/Godot.app/Contents/MacOS/Godot --headless --path . -s res://tests/run_tests.gd
 ## Exit-Code 0 = alle Tests bestanden, 1 = mindestens ein Fehler.
+##
+## Skriptfehler (z. B. Zugriff auf null) brechen einen Test ab, ohne dass eine Prüfung fehlschlägt.
+## Ein eigener Logger (OS.add_logger, Godot ≥ 4.5) zählt sie; tritt während eines Tests einer auf,
+## gilt der Test als fehlgeschlagen. Gewollte push_error-Meldungen (ERROR_TYPE_ERROR) zählen nicht.
 
 const TEST_DIR := "res://tests/"
 
 
+class ScriptErrorCounter extends Logger:
+	var count := 0
+	var last_message := ""
+	var _mutex := Mutex.new()
+
+	func _log_error(_function: String, file: String, line: int, code: String, rationale: String,
+			_editor_notify: bool, error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+		if error_type != ERROR_TYPE_SCRIPT:
+			return
+		_mutex.lock()
+		count += 1
+		last_message = "%s (%s:%d)" % [rationale if not rationale.is_empty() else code, file.get_file(), line]
+		_mutex.unlock()
+
+	func _log_message(_message: String, _error: bool) -> void:
+		pass
+
+
+var _errors := ScriptErrorCounter.new()
+
+
 func _initialize() -> void:
+	OS.add_logger(_errors)
 	# Erst im ersten Frame starten: In _initialize() hängt root noch nicht im
 	# Baum, eingefügte Knoten bekämen sonst kein _ready() (UI-Tests).
 	process_frame.connect(_run_all, CONNECT_ONE_SHOT)
@@ -28,7 +54,10 @@ func _run_all() -> void:
 
 		for method in _test_methods(script):
 			var test_case = script.new()
+			var errors_before := _errors.count
 			test_case.call(method)
+			if _errors.count > errors_before:
+				test_case.failures.append("Skriptfehler im Test (abgebrochen): %s" % _errors.last_message)
 			if test_case.assertion_count == 0:
 				test_case.failures.append("keine Prüfung ausgeführt – abgebrochen?")
 			if test_case.failures.is_empty():

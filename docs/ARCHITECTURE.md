@@ -1,6 +1,6 @@
 # Architektur
 
-Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, Unternehmen, Tagesabschluss, Filiale, Management), Phase 3 (Kanal, Content, Ausrüstung, Zufallsereignisse) und Phase 2 + G1 (Orte, isometrische Stadtkarte, Reisezeit, Termine). Abnahme: Phase 1, 2 und G1 auf dem iPhone; Phase 3, 4 und G2 per Tests + Mac-Fensterlauf, iPhone-Abnahme gesammelt in Phase 7 (DECISIONS 021).
+Stand Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI) auf Basis von G2 (Querformat, Karte als Hauptbildschirm) und Phase 4 (Konten, Unternehmen, Tagesabschluss, Filiale, Management), Phase 3 (Kanal, Content, Ausrüstung, Zufallsereignisse) und Phase 2 + G1 (Orte, isometrische Stadtkarte, Reisezeit, Termine). Abnahme: Phase 1, 2 und G1 auf dem iPhone; Phase 3, 4, G2 und 5 per Tests + Mac-Fensterlauf, iPhone-Abnahme gesammelt in Phase 7 (DECISIONS 021).
 
 ## Umgesetzt
 
@@ -211,7 +211,7 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
   Texte für Aktivitäten/Beträge in `activity_text.gd`.
 - Spielansicht im Querformat (G2, `game_screen.gd`): Stadtkarte im Vollbild (auch unter Notch/Home-Balken),
   darüber innerhalb der Safe Area: `HudLeft` (Tag, Uhrzeit, Ort), `HudRight` (Konto, Firmenkonto, Energie,
-  Stimmung), `LeftBar` (Termine, Kanal, Firma – erst nach der Gründung) und `RightBar` (Buchungen, Menü, Hier),
+  Stimmung), `LeftBar` (Termine, Fristen – rot mit Anzahl bei offenen Fristen, Kanal, Firma – erst nach der Gründung) und `RightBar` (Buchungen, Menü, Hier),
   unten der Hinweis `Toast` (`FeedbackLabel`; kurze Texte ca. 4 s, lange/mehrzeilige bleiben bis zum Antippen).
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
@@ -219,8 +219,9 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
   Tippen vs. Scrollen: > 12 px Bewegung zwischen Antippen und Loslassen = Scrollen). Inhalte mit `setup()`,
   `get_title()`, `refresh()`: `location_window.gd` (Details, „Hinfahren“, Content, Aktivitäten, Ausrüstung,
   Gründung, Filiale – an fremden Orten sichtbar, aber gesperrt mit dem Grund aus `check()`),
-  `appointments_window.gd`, `channel_window.gd` (Kanal + Verlauf), `company_window.gd` (Unternehmen,
-  Tagesabschlüsse, Verlauf, Einlage/Entnahme), `ledger_window.gd` (Buchungen, Filter alle/privat/Firma),
+  `appointments_window.gd`, `obligations_window.gd` (Fristen: offen/Mahngebühr/Bezahlen, nächste Fälligkeiten),
+  `channel_window.gd` (Kanal + Verlauf), `company_window.gd` (Unternehmen,
+  Tagesabschlüsse, Verlauf, Einlage/Entnahme), `ledger_window.gd` (Wochenübersicht je Konto nach Wertstellung, Buchungen, Filter alle/privat/Firma),
   `event_window.gd` (offenes Ereignis, nicht schließbar). Immer nur ein Fenster, Karte dahinter abgedunkelt
   (`Dim`, Tippen schließt). Aktionen laufen über öffentliche Handler des GameScreens (`on_activity_pressed()` …),
   der nach jeder Aktion `_refresh()` aufruft (HUD, Karte, offenes Fenster, Ereignis) – nicht über System-Signale.
@@ -257,6 +258,9 @@ Klassen-Cache aktualisiert hat.
 ## Tests
 `tests/run_tests.gd` (eigener Mini-Runner, kein Addon) führt alle `tests/test_*.gd` aus.
 Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
+Skriptfehler während eines Tests (eigener Logger über `OS.add_logger`) lassen den Test fehlschlagen.
+Headless ist das Fenster nur 64 × 64 – Layout-Tests setzen die Größe selbst. Godot-Läufe immer mit Zeitlimit
+(`timeout`, bei Fensterläufen zusätzlich `--quit-after`).
 
 ## Geplante Verantwortlichkeiten (ab Phase 1)
 

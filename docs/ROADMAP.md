@@ -169,7 +169,7 @@ Abnahme auf dem iPhone (G2, offen – gesammelt in Phase 7):
 - [ ] Hauptmenü und Einstellungen im Querformat bedienbar
 - [ ] „Fortsetzen“ nach Neustart: Spielstand unverändert (Spiellogik/Spielstand wurden nicht geändert)
 
-## Phase 5 – Finanzen, Fristen, Behördenereignisse ← in Arbeit
+## Phase 5 – Finanzen, Fristen, Behördenereignisse ✅ (12.10.2026, Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
 Fiktive, abstrakte Spielwerte – keine realen Steuer- oder Rechtsregeln. Wertstellung je Buchung, Spielwoche Mo–So,
 wöchentliche Fristen (Miete Wohnung 80 €, Miete Studio 40 € vom Privatkonto; Stadtabgabe 15 % vom positiven
 Wochengewinn vom Firmenkonto), automatisch bezahlt wenn gedeckt, sonst überfällig; Mahngebühr erhöht den offenen
@@ -180,7 +180,20 @@ Ereignis nach 3 überfälligen Fristen; erste Fälligkeit Tag 8; kein Game Over.
 - [x] Ticket 5.2: Fristen als Daten (ObligationSystem), automatisch bezahlen; Spielstand Version 11 (275/275 Tests grün)
 - [x] Ticket 5.3: Überfällig, Mahngebühr im offenen Betrag (gebucht erst beim Bezahlen), Bezahlen von Hand (283/283 Tests grün)
 - [x] Ticket 5.4: Behördenereignisse (6 fiktive Ereignisse, neue Bedingungen, Optionen mit Konto/Zeit/Unternehmen, festes Ereignis nach 3 überfälligen Fristen) (294/294 Tests grün)
-- [ ] Ticket 5.5: Finanz-UI (Fristen, Wochenübersicht, HUD-Hinweis), Abnahme per Tests + Mac-Fensterlauf
+- [x] Ticket 5.5: Finanz-UI: Fristen-Fenster (offen, Mahngebühr, Bezahlen, nächste Fälligkeiten), Seitenbutton „Fristen (n)“ rot bei offenen Fristen, Wochenübersicht im Buchungen-Fenster (298/298 Tests grün)
+- [x] Test-Runner erkennt Skriptfehler (abgebrochene Tests zählen jetzt als fehlgeschlagen)
+- [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Karte mit „Fristen (1)“, Fristen-Fenster, Mahnung 90 € offen, Wochenübersicht, Prüfungstermin-Ereignis); dabei gefunden und behoben: linke Seitenleiste ragte mit 4 Buttons aus dem Bild
+- [ ] Im Editor durchgespielt – offen
+- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
+
+Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
+- [ ] In Woche 1 keine Fristen; am ersten Montag (Tag 8) Mieten automatisch bezahlt, Hinweis in der Rückmeldung
+- [ ] Bei zu wenig Geld: „Fristen (n)“ rot, Fristen-Fenster zeigt offenen Betrag und Grund; nach 2 Tagen Mahnung (offener Betrag steigt, Konto unverändert)
+- [ ] „Bezahlen“ bucht Grundbetrag und Mahngebühr; Button danach weg
+- [ ] Stadtabgabe nur mit Unternehmen und nur bei Gewinn der Vorwoche; vom Firmenkonto
+- [ ] Wochenübersicht im Buchungen-Fenster passt zu den Buchungen (Tagesabschluss zählt zum abgerechneten Tag)
+- [ ] Behördenereignisse erscheinen als Fenster mit Dauer/Ruf/Firmenkonto in den Folgen; ab 3 offenen Fristen sicher die Vollstreckungsankündigung
+- [ ] Seitenleisten mit 4 Buttons vollständig sichtbar, in beiden Querformat-Richtungen
 
 ## Spätere Phasen
 6. Save/Load-Stabilisierung und Migration

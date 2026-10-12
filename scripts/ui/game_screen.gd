@@ -2,7 +2,7 @@ extends Control
 
 ## Spielansicht im Querformat (G2): die isometrische Stadtkarte im Vollbild, darüber
 ## HUD-Ecken (links oben Tag/Uhrzeit/Ort, rechts oben Konten, Energie, Stimmung),
-## Seitenbuttons (links Termine, Kanal, Unternehmen; rechts Buchungen, Menü, Hier),
+## Seitenbuttons (links Termine, Fristen, Kanal, Unternehmen; rechts Buchungen, Menü, Hier),
 ## eine Hinweis-Leiste unten und höchstens ein Fenster (scripts/ui/windows/).
 ## Gebäude antippen öffnet das Fenster des Orts. Ein offenes Ereignis erscheint als
 ## Fenster, das zuerst entschieden werden muss.
@@ -31,6 +31,7 @@ const ChannelWindowScript := preload("res://scripts/ui/windows/channel_window.gd
 const CompanyWindowScript := preload("res://scripts/ui/windows/company_window.gd")
 const LedgerWindowScript := preload("res://scripts/ui/windows/ledger_window.gd")
 const EventWindowScript := preload("res://scripts/ui/windows/event_window.gd")
+const ObligationsWindowScript := preload("res://scripts/ui/windows/obligations_window.gd")
 
 const CONFIRM_HINT := " Nochmal tippen, um trotzdem fortzufahren."
 ## Betrag je Tipp auf Einlage/Entnahme.
@@ -45,8 +46,9 @@ const ICON_DIR := "res://assets/kenney/game-icons/"
 const ICON_EXPANSION_DIR := "res://assets/kenney/game-icons-expansion/"
 const ICONS := {
 	"AppointmentsButton": ICON_EXPANSION_DIR + "flag.png",
+	"ObligationsButton": ICON_DIR + "warning.png",
 	"ChannelButton": ICON_DIR + "video.png",
-	"CompanyButton": ICON_DIR + "shoppingCart.png",
+	"CompanyButton": ICON_DIR + "cart.png",
 	"LedgerButton": ICON_EXPANSION_DIR + "coin.png",
 	"MenuButton": ICON_DIR + "menuList.png",
 	"HereButton": ICON_DIR + "target.png",
@@ -68,6 +70,7 @@ var _stat_bars := {}
 var _left_bar: VBoxContainer
 var _right_bar: VBoxContainer
 var _company_button: Button
+var _obligations_button: Button
 var _toast: PanelContainer
 var _feedback_label: Label
 var _toast_timer: Timer
@@ -111,6 +114,8 @@ func _ready() -> void:
 
 	_left_bar = _side_bar("LeftBar")
 	_left_bar.add_child(_side_button("Termine", "AppointmentsButton", _open_appointments))
+	_obligations_button = _side_button("Fristen", "ObligationsButton", _open_obligations)
+	_left_bar.add_child(_obligations_button)
 	_left_bar.add_child(_side_button("Kanal", "ChannelButton", _open_channel))
 	_company_button = _side_button("Firma", "CompanyButton", _open_company)
 	_left_bar.add_child(_company_button)
@@ -198,7 +203,7 @@ func _build_hud_right() -> PanelContainer:
 func _side_bar(node_name: String) -> VBoxContainer:
 	var bar := VBoxContainer.new()
 	bar.name = node_name
-	bar.add_theme_constant_override("separation", 12)
+	bar.add_theme_constant_override("separation", 8)
 	add_child(bar)
 	return bar
 
@@ -223,11 +228,11 @@ func _layout() -> void:
 	_hud_left.position = Vector2(left, top)
 	_hud_right.reset_size()
 	_hud_right.position = Vector2(right - _hud_right.size.x, top)
-	var bars_top := top + maxf(_hud_left.size.y, _hud_right.size.y) + GAP
+	# Jede Leiste beginnt unter ihrem eigenen HUD-Block (rechts ist er mit Firmenkonto höher).
 	_left_bar.reset_size()
-	_left_bar.position = Vector2(left, bars_top)
+	_left_bar.position = Vector2(left, top + _hud_left.size.y + GAP)
 	_right_bar.reset_size()
-	_right_bar.position = Vector2(right - _right_bar.size.x, bars_top)
+	_right_bar.position = Vector2(right - _right_bar.size.x, top + _hud_right.size.y + GAP)
 
 	var toast_width := maxf(minf(900.0, right - left - 2.0 * (UiStyle.SIDE_BUTTON_SIZE.x + GAP)), 200.0)
 	# Umbrechende Labels brauchen eine feste Breite, sonst berechnen sie ihre Höhe für Breite 0.
@@ -283,6 +288,12 @@ func _open_appointments() -> void:
 	var content := AppointmentsWindowScript.new()
 	content.setup(self, _game)
 	_open_window("appointments", content)
+
+
+func _open_obligations() -> void:
+	var content := ObligationsWindowScript.new()
+	content.setup(self, _game)
+	_open_window("obligations", content)
 
 
 func _open_channel() -> void:
@@ -424,6 +435,14 @@ func on_attend_pressed(appointment_id: String) -> void:
 	_after_action(_game.appointments.attend(appointment_id), "„%s“ wahrgenommen" % title)
 
 
+func on_obligation_pay_pressed(instance_id: String) -> void:
+	if _was_scroll():
+		return
+	var reason := _game.obligations.pay(instance_id)
+	# Erfolg: Der Hinweis des Systems („… bezahlt: -80,00 €.“) kommt über _after_action dazu.
+	_after_action(reason, "Frist bezahlt")
+
+
 func on_company_transfer_pressed(is_deposit: bool) -> void:
 	if _was_scroll():
 		return
@@ -504,6 +523,11 @@ func _refresh() -> void:
 		_stat_labels[key].text = "%s %d/%d" % [PlayerStatsScript.LABELS[key], value, PlayerStatsScript.MAX_VALUE]
 		_stat_bars[key].value = value
 	_company_button.visible = _game.company.is_founded()
+	var open_count := _game.obligations.count_open()
+	_obligations_button.text = "Fristen (%d)" % open_count if open_count > 0 else "Fristen"
+	for state in ["normal", "hover"]:
+		_obligations_button.add_theme_stylebox_override(state,
+				UiStyle.flat_box(UiStyle.ACCENT if open_count > 0 else UiStyle.HUD_SURFACE, 8))
 
 	if not _game.locations.get_catalog().has(_selected_location):
 		_selected_location = _game.locations.get_current()

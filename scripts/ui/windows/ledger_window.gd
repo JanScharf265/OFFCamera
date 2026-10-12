@@ -17,6 +17,7 @@ var _game
 var _filter := ""
 var _balances: Label
 var _list: VBoxContainer
+var _weeks: VBoxContainer
 var _filter_buttons := {}
 
 
@@ -31,6 +32,12 @@ func _ready() -> void:
 	_balances = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
 	_balances.name = "LedgerBalances"
 	add_child(_balances)
+	add_child(UiStyle.section_label("Wochenübersicht (nach Wertstellung, ohne Umbuchungen)"))
+	_weeks = VBoxContainer.new()
+	_weeks.name = "LedgerWeeks"
+	_weeks.add_theme_constant_override("separation", 4)
+	add_child(_weeks)
+	add_child(UiStyle.section_label("Buchungen"))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	add_child(row)
@@ -62,6 +69,7 @@ func refresh() -> void:
 	_balances.text = text
 	for filter_id in _filter_buttons:
 		_filter_buttons[filter_id].set_pressed_no_signal(filter_id == _filter)
+	_refresh_weeks()
 
 	for child in _list.get_children():
 		_list.remove_child(child)
@@ -82,3 +90,28 @@ func refresh() -> void:
 		var amount_color := UiStyle.POSITIVE if entry.is_income() else UiStyle.NEGATIVE
 		row.add_child(UiStyle.label(ActivityText.signed_money(entry.amount_cents), UiStyle.SMALL_FONT_SIZE, amount_color))
 		_list.add_child(row)
+
+
+## Diese und letzte Woche je Konto: Einnahmen, Ausgaben, Ergebnis (Umbuchungen getrennt).
+func _refresh_weeks() -> void:
+	for child in _weeks.get_children():
+		_weeks.remove_child(child)
+		child.queue_free()
+	var week := TimeSystemScript.week_of(_game.time.get_minutes())
+	var accounts := [LedgerSystemScript.PRIVATE]
+	if _game.company.is_founded():
+		accounts.append(LedgerSystemScript.COMPANY)
+	for shown_week in [week, week - 1]:
+		if shown_week < 1:
+			continue
+		for account in accounts:
+			var summary: Dictionary = _game.ledger.summarize(account, TimeSystemScript.week_start(shown_week),
+					TimeSystemScript.week_start(shown_week + 1))
+			var label := UiStyle.wrapping_label("Woche %d%s · %s: Einnahmen %s · Ausgaben %s · Ergebnis %s" % [
+					shown_week, " (läuft)" if shown_week == week else "", LedgerSystemScript.ACCOUNT_LABELS[account],
+					ActivityText.signed_money(summary["income_cents"]), ActivityText.signed_money(summary["expense_cents"]),
+					ActivityText.signed_money(summary["net_cents"])], UiStyle.SMALL_FONT_SIZE,
+					UiStyle.TEXT if shown_week == week else UiStyle.MUTED)
+			label.name = "LedgerWeek_%d_%s" % [shown_week, account]
+			_weeks.add_child(label)
+

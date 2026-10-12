@@ -198,3 +198,12 @@ Optionen können jetzt `account` (Firmenkonto), `minutes` (Spielzeit, wird nach 
 vorgestellt) und `company` (Auslastung/Ruf) haben. Jedes Ereignis braucht mindestens eine Option ohne Kosten, damit es
 auch ohne Geld entscheidbar ist (Katalog lehnt es sonst ab).
 
+## 026 – Finanz-UI und Test-Runner
+Fristen bekommen einen eigenen Seitenbutton (links, unter „Termine“), rot mit Anzahl bei offenen Fristen; die
+Wochenübersicht steht im Buchungen-Fenster statt in einem eigenen Fenster, damit die Seitenleisten nicht überladen
+werden. Knotennamen mit Instanz-IDs ersetzen „@“ durch „_“ (Godot erlaubt kein „@“ in Knotennamen).
+Der Test-Runner registriert einen Logger (`OS.add_logger`, `ERROR_TYPE_SCRIPT`): Ein Skriptfehler während eines Tests
+(z. B. Zugriff auf null) lässt den Test fehlschlagen – vorher zählte er als bestanden, sobald vorher eine Prüfung lief.
+Layout-Tests setzen die Bildschirmgröße selbst (headless ist das Fenster nur 64 × 64).
+Godot-Läufe immer mit Zeitlimit (`--quit-after` und `timeout`), nachdem ein Fensterlauf hängen geblieben war.
+
