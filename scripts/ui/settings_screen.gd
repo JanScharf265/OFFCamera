@@ -13,6 +13,8 @@ const CONFIRM_TEXT := "Wirklich löschen? Nochmal tippen"
 ## Vor dem Einfügen in den Baum setzen.
 var has_save := false
 var message := ""
+## Anzahl aufbewahrter defekter Spielstände (Phase 6).
+var corrupt_count := 0
 
 var _delete_button: Button
 var _confirming := false
@@ -32,6 +34,13 @@ func _ready() -> void:
 	status.name = "SaveStatusLabel"
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(status)
+	if corrupt_count > 0:
+		var corrupt := UiStyle.wrapping_label(
+				"Aufbewahrte defekte Spielstände: %d (werden mit „Spielstand löschen“ entfernt)." % corrupt_count,
+				UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+		corrupt.name = "CorruptCountLabel"
+		corrupt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		add_child(corrupt)
 
 	if not message.is_empty():
 		var message_label := UiStyle.wrapping_label(message, UiStyle.SMALL_FONT_SIZE)
@@ -41,7 +50,7 @@ func _ready() -> void:
 
 	_delete_button = UiStyle.button(DELETE_TEXT)
 	_delete_button.name = "DeleteSaveButton"
-	_delete_button.disabled = not has_save
+	_delete_button.disabled = not has_save and corrupt_count == 0
 	_delete_button.pressed.connect(_on_delete_pressed)
 	add_child(_delete_button)
 

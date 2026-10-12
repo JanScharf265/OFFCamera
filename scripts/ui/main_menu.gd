@@ -17,6 +17,11 @@ const CONFIRM_TEXT := "Wirklich neu beginnen? Nochmal tippen"
 var continue_available := false
 ## Hinweis- oder Fehlertext unter dem Titel (z. B. beschädigter Spielstand).
 var message := ""
+## „Neues Spiel“ braucht einen zweiten Tipp, wenn dabei etwas verloren gehen könnte – ein Spiel oder
+## aufbewahrte defekte Spielstände (Phase 6). Standard: wie continue_available.
+var confirm_new_game := false
+## Kurzinfo zum Spielstand unter „Fortsetzen“ (Phase 6), z. B. "Tag 9 · Di, 08:00 · 400,00 € · gespeichert …".
+var save_info := ""
 
 var _new_game_button: Button
 var _confirming := false
@@ -49,6 +54,11 @@ func _ready() -> void:
 		continue_button.name = "ContinueButton"
 		continue_button.pressed.connect(func() -> void: continue_pressed.emit())
 		add_child(continue_button)
+		if not save_info.is_empty():
+			var info := UiStyle.wrapping_label(save_info, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+			info.name = "SaveInfoLabel"
+			info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			add_child(info)
 
 	_new_game_button = UiStyle.button(NEW_GAME_TEXT)
 	_new_game_button.name = "NewGameButton"
@@ -69,7 +79,7 @@ func _ready() -> void:
 
 ## Gibt es schon ein Spiel, braucht "Neues Spiel" einen zweiten Tipp.
 func _on_new_game_pressed() -> void:
-	if continue_available and not _confirming:
+	if (continue_available or confirm_new_game) and not _confirming:
 		_confirming = true
 		_new_game_button.text = CONFIRM_TEXT
 		return

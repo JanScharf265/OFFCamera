@@ -106,7 +106,10 @@ static func read_meta(path: String = DEFAULT_PATH) -> Dictionary:
 	for candidate in [path] + _backup_paths(path):
 		if not FileAccess.file_exists(candidate):
 			continue
-		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(candidate))
+		var json := JSON.new()  # parse() statt parse_string(): kein Fehler im Log bei kaputten Dateien
+		if json.parse(FileAccess.get_file_as_string(candidate)) != OK:
+			continue
+		var data: Variant = json.data
 		if typeof(data) == TYPE_DICTIONARY and typeof(data.get("meta")) == TYPE_DICTIONARY:
 			return data["meta"]
 	return {}

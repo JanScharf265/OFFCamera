@@ -1,6 +1,6 @@
 # Architektur
 
-Stand Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI) auf Basis von G2 (Querformat, Karte als Hauptbildschirm) und Phase 4 (Konten, Unternehmen, Tagesabschluss, Filiale, Management), Phase 3 (Kanal, Content, Ausrüstung, Zufallsereignisse) und Phase 2 + G1 (Orte, isometrische Stadtkarte, Reisezeit, Termine). Abnahme: Phase 1, 2 und G1 auf dem iPhone; Phase 3, 4, G2 und 5 per Tests + Mac-Fensterlauf, iPhone-Abnahme gesammelt in Phase 7 (DECISIONS 021).
+Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange Tests) auf Basis von Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI), G2 (Querformat, Karte als Hauptbildschirm) und Phase 4 (Konten, Unternehmen, Tagesabschluss, Filiale, Management), Phase 3 (Kanal, Content, Ausrüstung, Zufallsereignisse) und Phase 2 + G1 (Orte, isometrische Stadtkarte, Reisezeit, Termine). Abnahme: Phase 1, 2 und G1 auf dem iPhone; Phase 3, 4, G2, 5 und 6 per Tests + Mac-Fensterlauf, iPhone-Abnahme gesammelt in Phase 7 (DECISIONS 021).
 
 ## Umgesetzt
 
@@ -258,9 +258,11 @@ Stand Phase 5 (Wertstellung, DayCycle, Fristen, Behördenereignisse, Finanz-UI) 
 - Automatisch gespeichert wird beim Start eines neuen Spiels, nach jeder erfolgreichen Aktion
   (`GameScreen.state_changed`), beim Wechsel ins Menü und bei `NOTIFICATION_APPLICATION_PAUSED`,
   `…_FOCUS_OUT` und `NOTIFICATION_WM_CLOSE_REQUEST`. Speicherfehler erscheinen als Hinweis.
-- Hauptmenü: „Fortsetzen“ (Sitzung im Speicher oder Spielstand auf dem Gerät), „Neues Spiel“
+- Hauptmenü: „Fortsetzen“ mit Kurzinfo aus dem Spielstand-Kopf (`SaveInfoLabel`, `App.save_info_text()`),
+  „Neues Spiel“
   (zweiter Tipp nötig, wenn ein Spiel existiert), „Einstellungen“ (`settings_screen.gd`:
-  Spielstand löschen mit zweitem Tipp).
+  Spielstand löschen mit zweitem Tipp; Anzahl aufbewahrter defekter Stände). Nach dem Laden zeigt die Spielansicht
+  Hinweise (Backup geladen, Speichern abgeschlossen, entfernte Daten).
 
 ### Konvention: Verweise zwischen Skripten
 Skripte referenzieren einander über `const X := preload("res://…")` statt über `class_name`.

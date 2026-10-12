@@ -195,7 +195,7 @@ Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
 - [ ] Behördenereignisse erscheinen als Fenster mit Dauer/Ruf/Firmenkonto in den Folgen; ab 3 offenen Fristen sicher die Vollstreckungsankündigung
 - [ ] Seitenleisten mit 4 Buttons vollständig sichtbar, in beiden Querformat-Richtungen
 
-## Phase 6 – Save/Load-Stabilisierung und Migration ← in Arbeit
+## Phase 6 – Save/Load-Stabilisierung und Migration ✅ (12.10.2026, Tests + lange Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
 Echte Altstände aller Versionen als Testdateien, robustes Schreiben (Kopf, 3 Backups, gültige .tmp übernehmen, defekte
 Stände aufbewahren), Konsistenzprüfung und einheitliche Regel für entfernte Daten, Rundlauf-/Störungs-/Lasttests
 (langer Lauf getrennt), Spielstand-Info im Hauptmenü. Spiellogik unverändert.
@@ -204,7 +204,17 @@ Stände aufbewahren), Konsistenzprüfung und einheitliche Regel für entfernte D
 - [x] Ticket 6.2: Robustes Schreiben (Kopf, 3 Backups, gültige .tmp, defekte Stände aufbewahren) (315/315 Tests grün)
 - [x] Ticket 6.3: Konsistenzprüfung über System-Grenzen, einheitliche Regel für entfernte Daten mit Hinweis, Spielstand Version 12 (Fristen speichern Konto/Kategorie/Bezeichnung) (326/326 Tests grün)
 - [x] Ticket 6.4: Rundlauf-, Störungs- und Lasttests (langer Lauf `-- --long`, ~5 s); 3 Stellen gehärtet, die bei beschädigten Dateien Skriptfehler auslösten (329/329 + 3/3 lange Tests grün)
-- [ ] Ticket 6.5: Spielstand-Info im Hauptmenü, Fehlerdialog, Abnahme
+- [x] Ticket 6.5: Spielstand-Info im Hauptmenü, Hinweise zu defekten Ständen, Anzeige in den Einstellungen (332/332 Tests grün)
+- [x] Lange Tests am Ende der Phase: 3/3 grün (Rundlauf 30 × 30 Tage, Störungstest, Messung Tag 180: 397 KB, Laden 15 ms)
+- [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Hauptmenü mit Spielstand-Info, Backup nach defektem Stand, Einstellungen mit aufbewahrter Kopie)
+- [ ] Im Editor durchgespielt – offen
+- [ ] iPhone-Abnahme – offen, gesammelt in Phase 7
+
+Abnahme auf dem iPhone (offen – gesammelt in Phase 7):
+- [ ] Hauptmenü zeigt unter „Fortsetzen“ Tag, Uhrzeit, Konto und „gespeichert …“ mit richtiger Ortszeit
+- [ ] App mitten im Spiel beenden (wegwischen), neu öffnen: Fortsetzen lädt den letzten Stand ohne Hinweis
+- [ ] Ein Spielstand aus einem früheren Build (Phase 5) lässt sich fortsetzen
+- [ ] Speichern bei wenig freiem Speicher bzw. im Flugmodus funktioniert (alles lokal)
 
 ## Spätere Phasen
 7. Mobile Politur und Performance – u. a. Warnung „124 ObjectDB instances leaked at exit“ am Ende des Testlaufs

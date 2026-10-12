@@ -553,6 +553,65 @@ func test_side_bars_fit_on_screen_with_company() -> void:
 	app.free()
 
 
+# --- Spielstand im Menü und defekte Stände (Phase 6) -------------------------------------
+
+func test_main_menu_shows_save_info() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "HereButton")
+	_press(app, "StartButton_rest")  # 09:00, gespeichert
+	_press(app, "MenuButton")
+	var info := (_find(app, "SaveInfoLabel") as Label).text
+	assert_true(info.begins_with("Tag 1 · Mo, 09:00 · 500,00 € · gespeichert "), info)
+	app.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
+func test_corrupt_save_loads_backup_and_says_so() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "HereButton")
+	_press(app, "StartButton_rest")  # zweites Speichern -> Backup vorhanden
+	app.free()
+	var file := FileAccess.open(TEST_SAVE_PATH, FileAccess.WRITE)
+	file.store_string("{ kaputt")
+	file.close()
+	var restarted := _start_app(true)
+	_press(restarted, "ContinueButton")
+	var feedback := (_find(restarted, "FeedbackLabel") as Label).text
+	assert_true("Backup wurde geladen, die defekte Datei aufbewahrt" in feedback, feedback)
+	assert_eq(SaveSystemScript.corrupt_files(TEST_SAVE_PATH).size(), 1)
+	restarted.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
+func test_unloadable_save_keeps_copies_when_starting_new_game() -> void:
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+	var file := FileAccess.open(TEST_SAVE_PATH, FileAccess.WRITE)
+	file.store_string("kaputt")
+	file.close()
+	var app := _start_app(true)
+	_press(app, "ContinueButton")
+	assert_true(_screen_contains(app, "Die defekte Datei wurde aufbewahrt."), "Hinweis fehlt")
+	var kept := SaveSystemScript.corrupt_files(TEST_SAVE_PATH)
+	assert_eq(kept.size(), 1)
+	_press(app, "NewGameButton")
+	_press(app, "NewGameButton")  # zweiter Tipp, weil es einen (defekten) Stand gab
+	assert_true(app.game != null, "neues Spiel nicht gestartet")
+	assert_eq(FileAccess.get_file_as_string(kept[0]), "kaputt")  # nicht überschrieben
+	_press(app, "MenuButton")
+	_press(app, "SettingsButton")
+	assert_true(_screen_contains(app, "Aufbewahrte defekte Spielstände: 1"), "Anzeige in den Einstellungen fehlt")
+	_press(app, "DeleteSaveButton")
+	_press(app, "DeleteSaveButton")
+	assert_eq(SaveSystemScript.corrupt_files(TEST_SAVE_PATH).size(), 0)
+	app.free()
+
+
 func _travel(app: Node, location_id: String) -> void:
 	_press(app, "MapPin_%s" % location_id)
 	_press(app, "TravelButton")

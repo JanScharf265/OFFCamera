@@ -14,6 +14,7 @@ extends Control
 const GameStateScript := preload("res://scripts/core/game_state.gd")
 const GameDataScript := preload("res://scripts/core/game_data.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
+const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const MainMenuScript := preload("res://scripts/ui/main_menu.gd")
 const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
 const SettingsScreenScript := preload("res://scripts/ui/settings_screen.gd")
@@ -74,6 +75,8 @@ func show_main_menu(message: String = "") -> void:
 	_save_game()
 	var menu := MainMenuScript.new()
 	menu.continue_available = game != null or SaveSystemScript.has_save(save_path)
+	menu.save_info = save_info_text(SaveSystemScript.read_meta(save_path))
+	menu.confirm_new_game = not SaveSystemScript.corrupt_files(save_path).is_empty()
 	menu.message = message
 	menu.new_game_pressed.connect(start_new_game)
 	menu.continue_pressed.connect(continue_game)
@@ -93,13 +96,15 @@ func continue_game() -> void:
 		var result := SaveSystemScript.load_game(_data, save_path)
 		if result["game"] == null:
 			var reason: String = result["error"]
+			if not result.get("corrupt_kept", []).is_empty():
+				reason += "\nDie defekte Datei wurde aufbewahrt. Mit „Neues Spiel“ kannst du neu beginnen."
 			show_main_menu(reason if not reason.is_empty() else "Es gibt noch keinen Spielstand.")
 			return
 		game = result["game"]
 		var lines := PackedStringArray()
 		if result["from_backup"] or result.get("source", "") == "tmp":
-			lines.append("Der letzte Spielstand war beschädigt – das Backup wurde geladen." if result["from_backup"]
-					else "Das letzte Speichern war unterbrochen – es wurde abgeschlossen.")
+			lines.append("Der letzte Spielstand war beschädigt – das Backup wurde geladen, die defekte Datei aufbewahrt."
+					if result["from_backup"] else "Das letzte Speichern war unterbrochen – es wurde abgeschlossen.")
 		lines.append_array(result.get("notices", PackedStringArray()))
 		show_game("\n".join(lines))
 		return
@@ -119,6 +124,7 @@ func show_game(message: String = "") -> void:
 func show_settings(message: String = "") -> void:
 	var settings := SettingsScreenScript.new()
 	settings.has_save = game != null or SaveSystemScript.has_save(save_path)
+	settings.corrupt_count = SaveSystemScript.corrupt_files(save_path).size()
 	settings.message = message
 	settings.delete_save_pressed.connect(_delete_save)
 	settings.back_pressed.connect(show_main_menu)
@@ -196,3 +202,21 @@ static func safe_margins(window_size: Vector2, safe: Rect2, viewport_size: Vecto
 	margins[2] += maxf(window_size.x - safe.end.x, 0.0) * to_viewport.x
 	margins[3] += maxf(window_size.y - safe.end.y, 0.0) * to_viewport.y
 	return margins
+
+
+## Kurzinfo aus dem Spielstand-Kopf, z. B. "Tag 9 · Di, 08:00 · 400,00 € · gespeichert 12.10.2026, 14:03".
+## "" ohne Kopf (ältere Spielstände) – dann zeigt das Menü nur „Fortsetzen“.
+static func save_info_text(meta: Dictionary) -> String:
+	if meta.is_empty() or not meta.has("day_label"):
+		return ""
+	var text := "%s, %s" % [meta.get("day_label", ""), meta.get("clock", "")]
+	if meta.has("private_balance_cents"):
+		text += " · %s" % LedgerSystemScript.format_cents(int(meta["private_balance_cents"]))
+	if int(meta.get("saved_at_unix", 0)) > 0:
+		# Gerätezeit nur für die Anzeige – mit der Spielzeit hat sie nichts zu tun.
+		var local := int(meta["saved_at_unix"]) + int(Time.get_time_zone_from_system().get("bias", 0)) * 60
+		var date := Time.get_datetime_dict_from_unix_time(local)
+		text += " · gespeichert %02d.%02d.%04d, %02d:%02d" % [date["day"], date["month"], date["year"],
+				date["hour"], date["minute"]]
+	return text
+

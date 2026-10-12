@@ -250,3 +250,11 @@ Messung (Mac, 12.10.2026): Tag 60 – 62 Buchungen, 46 KB, Speichern 1,2 ms, Lad
 397 KB, Speichern 8 ms, Laden 15 ms. Weit unter dem vereinbarten Schwellwert (1 MB / 100 ms) – keine Verdichtung des
 Ledgers nötig. Notbremse im Test: 5 MB / 1 s.
 
+## 031 – Spielstand im Hauptmenü
+Unter „Fortsetzen“ steht eine Kurzinfo aus dem Spielstand-Kopf (`SaveSystem.read_meta()`, ohne zu laden): Spieltag,
+Uhrzeit, Privatkonto, Speicherzeit in Ortszeit des Geräts (nur Anzeige, keine Spielzeit). Ältere Stände ohne Kopf zeigen
+nur „Fortsetzen“. Defekte Stände: Das Laden nimmt automatisch das nächste gültige Backup („Backup laden“ ist damit
+implizit) und sagt, dass die defekte Datei aufbewahrt wurde; ist gar nichts ladbar, verweist das Menü auf „Neues Spiel“,
+das dann einen zweiten Tipp braucht, und die aufbewahrten Kopien bleiben unberührt. „Spielstand löschen“ entfernt auch
+die aufbewahrten Kopien. `read_meta()` liest mit `JSON.new().parse()`, damit kaputte Dateien keine Engine-Fehler loggen.
+
