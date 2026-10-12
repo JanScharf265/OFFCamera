@@ -456,6 +456,8 @@ func _after_action(reason: String, success_text: String) -> void:
 					ActivityText.option_summary(definition.missed_effects, 0)]
 		for settlement in _game.company.take_settlement_notices():
 			text += "\nTagesabschluss %s" % settlement
+		for notice in _game.obligations.take_notices():
+			text += "\n%s" % notice
 		_show_feedback(text, UiStyle.TEXT)
 	else:
 		_show_feedback(reason, UiStyle.NEGATIVE)

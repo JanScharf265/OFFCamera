@@ -149,6 +149,7 @@ func test_company_survives_save_and_load_and_counters_continue() -> void:
 func test_version_6_save_gets_unfounded_company() -> void:
 	var saved := Helpers.new_game().to_dict()
 	saved.erase("company")
+	saved.erase("obligations")
 	SaveSystemScript.delete_save(PATH)
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify({"version": 6, "game": saved}))

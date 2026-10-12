@@ -183,6 +183,7 @@ func test_version_4_save_gets_fixed_seed() -> void:
 	var saved := game.to_dict()
 	saved["events"].erase("seed")
 	saved.erase("company")
+	saved.erase("obligations")
 	SaveSystemScript.delete_save(PATH)
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify({"version": 4, "game": Helpers.with_single_account_ledger(saved)}))

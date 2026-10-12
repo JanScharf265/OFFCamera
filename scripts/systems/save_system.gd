@@ -20,7 +20,7 @@ const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
-const SAVE_VERSION := 10
+const SAVE_VERSION := 11
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -154,6 +154,12 @@ static func _migrate(data: Dictionary, version: int) -> String:
 		var effective_error := LedgerSystemScript.migrate_effective_dates(data["game"]["ledger"])
 		if not effective_error.is_empty():
 			return effective_error
+	if version < 11:
+		# Fristen beginnen beim nächsten Tageswechsel – vergangene Wochen werden nicht nachberechnet.
+		var minutes: Variant = data["game"].get("time", {}).get("minutes")
+		if not DataReaderScript.is_whole_number(minutes):
+			return "Zeit fehlt."
+		data["game"]["obligations"] = {"last_processed_day": TimeSystemScript.day_of(int(minutes)), "instances": []}
 	data["version"] = SAVE_VERSION
 	return ""
 
@@ -180,6 +186,7 @@ static func _migrate_1_to_2(game: Dictionary) -> String:
 ## Version 8 (Phase 4): Tagesabschluss – gegründete Unternehmen rechnen ab dem laufenden Tag ab.
 ## Version 9 (Phase 4): Filiale – bei gegründeten Unternehmen noch nicht eröffnet.
 ## Version 10 (Phase 5): Wertstellung je Buchung (LedgerSystem.migrate_effective_dates()).
+## Version 11 (Phase 5): Fristen – leer, ab dem nächsten Tageswechsel.
 static func _migrate_2_to_3(game: Dictionary) -> void:
 	game["channel"] = ChannelSystemScript.initial_dict(GameStateScript.START_FOLLOWERS,
 			GameStateScript.START_COMMUNITY, GameStateScript.START_REPUTATION)

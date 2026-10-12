@@ -1,0 +1,37 @@
+[
+	{
+		"id": "rent_home",
+		"display_name": "Miete Wohnung",
+		"account": "private",
+		"category": "rent",
+		"schedule": { "weekday": "Mo", "first_day": 8 },
+		"amount": { "fixed_cents": 8000 },
+		"grace_days": 2,
+		"reminder_fee_cents": 1000,
+		"overdue_effects": { "mood": -5 }
+	},
+	{
+		"id": "rent_studio",
+		"display_name": "Miete Studio",
+		"account": "private",
+		"category": "rent",
+		"schedule": { "weekday": "Mo", "first_day": 8 },
+		"amount": { "fixed_cents": 4000 },
+		"grace_days": 2,
+		"reminder_fee_cents": 500,
+		"overdue_effects": { "mood": -5 }
+	},
+	{
+		"id": "city_levy",
+		"display_name": "Stadtabgabe",
+		"description": "Fiktive wöchentliche Abgabe an die Stadtkasse: ein fester Anteil vom positiven Wochengewinn des Unternehmens.",
+		"account": "company",
+		"category": "levy",
+		"requires": "company",
+		"schedule": { "weekday": "Mo", "first_day": 8 },
+		"amount": { "profit_percent": 15 },
+		"grace_days": 2,
+		"reminder_fee_cents": 1500,
+		"overdue_company_effects": { "reputation": -5 }
+	}
+]

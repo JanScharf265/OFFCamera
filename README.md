@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 (Finanzen, Fristen) in Arbeit: Ticket 5.1 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 (Finanzen, Fristen) in Arbeit: Tickets 5.1–5.2 fertig.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
@@ -110,6 +110,7 @@ data/appointments/   Feste Termine als JSON
 data/content/        Content-Formate als JSON (Phase 3)
 data/equipment/      Ausrüstung mit Stufen als JSON (Phase 3)
 data/company/        Unternehmensarten als JSON (Phase 4)
+data/obligations/    Fristen (Mieten, fiktive Stadtabgabe) als JSON (Phase 5)
 scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht, Stadtkarte, windows/ (Fenster) – zeigen nur an, keine Spielregeln
 assets/kenney/       Grafiken aus Kenney-CC0-Paketen (nur benutzte Dateien, je mit License.txt)
 tests/               Tests + Runner (nicht im iOS-Export)

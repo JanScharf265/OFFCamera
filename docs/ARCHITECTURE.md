@@ -39,7 +39,7 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
 
 ### DayCycle (`scripts/core/day_cycle.gd`, Phase 5)
 - Einziger Empfänger von `TimeSystem.day_changed` für Tageslogik. Ruft je neuem Tag in fester Reihenfolge
-  `on_day_changed(tag)` auf: Unternehmen (Tagesabschluss) → Fristen (ab 5.2) → Ereignisse (Zufall). Signal
+  `on_day_changed(tag)` auf: Unternehmen (Tagesabschluss) → Fristen → Ereignisse (Zufall). Signal
   `day_processed(tag)` danach. Spielwoche: `TimeSystem.week_of()` / `week_start()` (Mo–So, Tag 1 = Montag).
 
 ### GameState (`scripts/core/game_state.gd`)
@@ -159,8 +159,19 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
   `last_settled_day`, `settlements`, `branch_open`.
 - UI (vorläufig): Karte „Merch-Label · Unternehmen“ im Büro mit „Gründen“ bzw. Kurzstatus.
 
+### Fristen (`data/obligations/obligations.json`, `ObligationCatalog`, `ObligationSystem`, Phase 5)
+- Daten: `id`, `display_name`, `description`, `account`, `category`, `requires` („company“), `schedule` {`weekday`,
+  `first_day` ≥ 2}, `amount` {`fixed_cents`} oder {`profit_percent`}, `grace_days`, `reminder_fee_cents`,
+  `overdue_effects`, `overdue_company_effects`.
+- `on_day_changed(tag)` (vom DayCycle, nach dem Tagesabschluss): für jede Frist mit passendem Wochentag ab
+  `first_day` genau eine Instanz `<frist>@<tag>` (fällig Tag 00:00). Betrag fest oder Prozent vom positiven
+  Vorwochen-Ergebnis (`LedgerSystem.summarize`); 0 € → Status `waived`. Gedeckt → sofort gebucht (Quelle
+  `obligation`, Schutzschlüssel `obligation:<instanz>`, Wertstellung = Fälligkeit, Status `paid`), sonst `open`.
+- `get_instances()`, `get_open()`, `open_amount()`, `take_notices()` (Hinweise je einmal für die Rückmeldung).
+- Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
+
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 10, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 11, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -173,6 +184,7 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
 - Migration 6 → 7: Unternehmen `{"founded": false}`.
 - Migration 7 → 8: gegründetes Unternehmen: `last_settled_day` = gespeicherter Tag − 1, `settlements` leer.
 - Migration 8 → 9: gegründetes Unternehmen: `branch_open = false`.
+- Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 9 → 10: Wertstellung = Buchungszeit; Tagesabschlüsse (`company`, `day:<t>`) auf Tag t, 23:59.
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
@@ -253,6 +265,7 @@ Tests sind per `exclude_filter` vom iOS-Export ausgeschlossen.
 | `ContentSystem` | Prüfen, Berechnen und Produzieren von Content |
 | `EquipmentSystem` | Ausrüstungsstufen, Kauf, Qualitätsbonus |
 | `CompanySystem` | Unternehmen: Gründung, Auslastung, Ruf, Einlage/Entnahme |
+| `ObligationSystem` | Fristen: Fälligkeit, Betrag, Zahlung, offen/überfällig |
 | `SaveSystem` | versionierter lokaler Spielstand |
 
 UI-Szenen lesen Zustand und rufen Systeme auf; sie ändern Werte nie direkt.
@@ -264,7 +277,7 @@ Systeme melden Änderungen über Signale (z. B. `time_advanced`, `day_changed`, 
 assets/   kenney/ (CC0-Grafiken)
 scenes/   app/, menus/, hud/, …
 scripts/  core/, systems/, models/, ui/
-data/     activities/, locations/, events/, appointments/, content/, equipment/, company/
+data/     activities/, locations/, events/, appointments/, content/, equipment/, company/, obligations/
 tests/
 ```
 

@@ -14,6 +14,7 @@ const AppointmentCatalogScript := preload("res://scripts/systems/appointment_cat
 const ContentFormatCatalogScript := preload("res://scripts/systems/content_format_catalog.gd")
 const EquipmentCatalogScript := preload("res://scripts/systems/equipment_catalog.gd")
 const CompanyTypeCatalogScript := preload("res://scripts/systems/company_type_catalog.gd")
+const ObligationCatalogScript := preload("res://scripts/systems/obligation_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -25,6 +26,7 @@ var appointments := AppointmentCatalogScript.new()
 var formats := ContentFormatCatalogScript.new()
 var equipment := EquipmentCatalogScript.new()
 var company_types := CompanyTypeCatalogScript.new()
+var obligations := ObligationCatalogScript.new()
 
 var errors: PackedStringArray = []
 
@@ -32,7 +34,7 @@ var errors: PackedStringArray = []
 ## Lädt alle Standarddateien und prüft die Verweise. false = errors beschreibt alles.
 func load_all() -> bool:
 	errors.clear()
-	for catalog in [activities, events, locations, appointments, formats, equipment, company_types]:
+	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 	if errors.is_empty():

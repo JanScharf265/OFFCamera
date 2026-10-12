@@ -198,6 +198,7 @@ func _version_1_text(minutes: int) -> String:
 	game.erase("channel")
 	game.erase("equipment")
 	game.erase("company")
+	game.erase("obligations")
 	game["time"]["minutes"] = minutes
 	return JSON.stringify({"version": 1, "game": Helpers.with_single_account_ledger(game)})
 
@@ -261,6 +262,7 @@ func _version_2_text() -> String:
 	game.erase("channel")
 	game.erase("equipment")
 	game.erase("company")
+	game.erase("obligations")
 	return JSON.stringify({"version": 2, "game": Helpers.with_single_account_ledger(game)})
 
 
@@ -299,6 +301,7 @@ func test_version_3_is_migrated_without_equipment() -> void:
 	var game := _played_game().to_dict()
 	game.erase("equipment")
 	game.erase("company")
+	game.erase("obligations")
 	_write(JSON.stringify({"version": 3, "game": Helpers.with_single_account_ledger(game)}))
 	var result := _load()
 	var loaded: GameStateScript = result["game"]

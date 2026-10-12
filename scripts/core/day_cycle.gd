@@ -4,7 +4,7 @@ extends RefCounted
 ## TimeSystem.day_changed hören (Reihenfolge = Reihenfolge der Verbindungen), ruft der
 ## DayCycle sie für jeden neuen Tag in dieser Reihenfolge auf:
 ##   1. Tagesabschluss des Unternehmens (Vortag)
-##   2. Fristen (ab Ticket 5.2)
+##   2. Fristen (ObligationSystem)
 ##   3. Zufalls- und Behördenereignisse
 ## So sehen Fristen den fertigen Tagesabschluss und Ereignisse den Stand nach den Fristen.
 ## Überspringt ein Zeitfortschritt mehrere Tage, läuft der Ablauf für jeden Tag einzeln (aufsteigend).

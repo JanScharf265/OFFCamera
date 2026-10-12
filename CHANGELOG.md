@@ -4,6 +4,8 @@
 - Wertstellung je Buchung: Tagesabschlüsse gehören zum abgerechneten Tag (23:59), nicht zum Zeitpunkt der Abrechnung; Wochenauswertung je Konto ohne Umbuchungen (Ticket 5.1)
 - Fester Ablauf am Tageswechsel (DayCycle): erst Tagesabschluss, dann Fristen, dann Ereignisse (Ticket 5.1)
 - Spielstand Version 10 mit Migration: Wertstellung nachgetragen, alte Tagesabschlüsse auf ihren Tag korrigiert (Ticket 5.1)
+- Fristen als Daten (ObligationSystem): Miete Wohnung 80 €/Woche und Miete Studio 40 €/Woche vom Privatkonto, fiktive Stadtabgabe 15 % vom positiven Wochengewinn vom Firmenkonto; fällig montags ab Tag 8, automatisch bezahlt wenn gedeckt, sonst offen; Hinweise in der Rückmeldung (Ticket 5.2)
+- Spielstand Version 11 (Fristen) mit Migration von Version 10 (Ticket 5.2)
 
 ## Unveröffentlicht – Grafik-Ticket G2 (Querformat)
 - Querformat in beide Richtungen, Basisauflösung 1280×720 (G2.1)

@@ -169,3 +169,12 @@ Umbuchungen zählen nicht als Gewinn/Verlust. Am Tageswechsel ruft der `DayCycle
 Reihenfolge auf (Tagesabschluss → Fristen → Ereignisse), statt sich auf die Reihenfolge von Signal-Verbindungen zu
 verlassen. Migration auf Version 10 trägt die Wertstellung nach (Tagesabschlüsse über ihre Referenz `day:<t>`).
 
+## 023 – Fristen
+Entscheidungen des Game Directors (12.10.2026): wöchentliche Fristen, fällig montags 00:00, erste Fälligkeit Tag 8.
+Miete Wohnung 80 € und Miete Studio 40 € vom Privatkonto; „Stadtabgabe“ (fiktiv) 15 % vom positiven Ergebnis der
+Vorwoche auf dem Firmenkonto (nach Wertstellung, ohne Umbuchungen), nur mit Unternehmen; ohne Gewinn entfällt sie.
+Automatisch bezahlt, wenn das Konto reicht (Wertstellung = Fälligkeit); sonst bleibt die Frist offen. Fristen sind
+Daten (`data/obligations/`); jede Fälligkeit ist eine Instanz `<frist>@<tag>` und entsteht genau einmal
+(`last_processed_day`). Migration auf Version 11: vergangene Wochen werden nicht nachberechnet.
+Alles abstrakte Spielwerte – keine realen Steuer- oder Rechtsregeln.
+
