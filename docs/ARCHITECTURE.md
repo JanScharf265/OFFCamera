@@ -14,6 +14,9 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
   Das EventSystem (Ticket 5) verarbeitet fällige Ereignisse im Intervall `(from, to]`.
 
 ### LedgerSystem (`scripts/systems/ledger_system.gd`, Modell `scripts/models/ledger_entry.gd`)
+- Wertstellung (Phase 5): `effective_minutes` je Buchung (Standard = Buchungszeit, nie in der Zukunft);
+  `summarize(konto, von, bis)` summiert nach Wertstellung: Einnahmen, Ausgaben, Ergebnis ohne Umbuchungen,
+  Umbuchungen getrennt.
 - Konten (Phase 4): `private` und `company` im selben Ledger; jede Buchung hat `account`. `post(…, account)`,
   `get_balance(account)`, `can_afford(betrag, account)`, `recalculate_balance(account)`,
   `get_entries_for_account(account)` – ohne Angabe jeweils das Privatkonto.
@@ -33,6 +36,11 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
 - Hält alle Datenkataloge (Aktivitäten, Ereignisse, Orte, Termine). `load_all()` lädt alle Dateien und
   prüft Verweise (Aktivität/Termin → Ort, Startort `home`). Einmal beim App-Start geladen, danach nur gelesen.
   Tests überschreiben einzelne Kataloge mit `load_data()`.
+
+### DayCycle (`scripts/core/day_cycle.gd`, Phase 5)
+- Einziger Empfänger von `TimeSystem.day_changed` für Tageslogik. Ruft je neuem Tag in fester Reihenfolge
+  `on_day_changed(tag)` auf: Unternehmen (Tagesabschluss) → Fristen (ab 5.2) → Ereignisse (Zufall). Signal
+  `day_processed(tag)` danach. Spielwoche: `TimeSystem.week_of()` / `week_start()` (Mo–So, Tag 1 = Montag).
 
 ### GameState (`scripts/core/game_state.gd`)
 - Bündelt die Systeme einer Spielsitzung (kein Autoload). `GameState.new(game_data)` = neues Spiel
@@ -77,7 +85,7 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
   Ablehnung mit Text, Ereignis bleibt offen.
 - Laden eines Spielstands (Ticket 6) löst nichts erneut aus, weil nur `time_advanced`/`day_changed` auslösen.
 - Zufallsereignisse (Phase 3): `trigger` {`random`: {`chance_percent` 1–100, `from_day` ≥ 2, `cooldown_days`,
-  `max_times`, `conditions` {min_/max_ followers|community|reputation}}}. Bei `day_changed(tag)` wird je Kandidat
+  `max_times`, `conditions` {min_/max_ followers|community|reputation}}}. Beim Tageswechsel (über den DayCycle) wird je Kandidat
   (Priorität, dann ID) geprüft: Tag ≥ from_day, Bedingungen, Abklingzeit, max_times, dann
   `roll(tag, id)` = FNV-1a("seed|tag|id") % 100 < Chance. Höchstens eins pro Tag. Instanz-ID `<id>@<tag>`;
   Ledger-/Kanal-Schutzschlüssel `event:<instanz>`. Seed kommt vom GameState (neues Spiel zufällig, Tests fest).
@@ -152,7 +160,7 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
 - UI (vorläufig): Karte „Merch-Label · Unternehmen“ im Büro mit „Gründen“ bzw. Kurzstatus.
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 9, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 10, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -165,6 +173,7 @@ Stand G2 (Querformat, Karte als Hauptbildschirm) auf Basis von Phase 4 (Konten, 
 - Migration 6 → 7: Unternehmen `{"founded": false}`.
 - Migration 7 → 8: gegründetes Unternehmen: `last_settled_day` = gespeicherter Tag − 1, `settlements` leer.
 - Migration 8 → 9: gegründetes Unternehmen: `branch_open = false`.
+- Migration 9 → 10: Wertstellung = Buchungszeit; Tagesabschlüsse (`company`, `day:<t>`) auf Tag t, 23:59.
 - Schreiben: `.tmp` schreiben → bisherigen Stand nach `.bak` → `.tmp` nach `savegame.json`.
 - Laden: Hauptdatei, sonst Backup. Fehlende Datei = kein Spielstand (kein Fehler). Beschädigt,
   ungültig oder neuere Version → verständliche Meldung, nichts wird übernommen.

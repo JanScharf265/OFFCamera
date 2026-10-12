@@ -42,6 +42,17 @@ static func day_of(minutes: int) -> int:
 	return minutes / MINUTES_PER_DAY + 1
 
 
+## Spielwoche (Phase 5): Mo–So, Tag 1–7 = Woche 1, Tag 8–14 = Woche 2 … (Tag 1 ist ein Montag).
+@warning_ignore("integer_division")
+static func week_of(minutes: int) -> int:
+	return (day_of(minutes) - 1) / DAYS_PER_WEEK + 1
+
+
+## Beginn einer Spielwoche (Montag 00:00) in Minuten.
+static func week_start(week: int) -> int:
+	return at((week - 1) * DAYS_PER_WEEK + 1, 0)
+
+
 func get_minutes() -> int:
 	return _minutes
 

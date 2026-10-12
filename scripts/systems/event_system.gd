@@ -55,7 +55,6 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStat
 	_channel = channel
 	_catalog = catalog
 	_seed = p_seed
-	time.day_changed.connect(_on_day_changed)
 	time.time_advanced.connect(_on_time_advanced)
 
 
@@ -216,7 +215,8 @@ func _raw_channel_deltas(option: EventOptionScript) -> Dictionary:
 	return deltas
 
 
-func _on_day_changed(day: int) -> void:
+## Vom DayCycle aufgerufen (nach Tagesabschluss und Fristen): würfelt die Zufallsereignisse des Tages.
+func on_day_changed(day: int) -> void:
 	var candidates: Array[EventDefinitionScript] = []
 	for definition in _catalog.get_all():
 		if definition.is_random:

@@ -18,6 +18,7 @@ const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const ContentSystemScript := preload("res://scripts/systems/content_system.gd")
 const EquipmentSystemScript := preload("res://scripts/systems/equipment_system.gd")
 const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
+const DayCycleScript := preload("res://scripts/core/day_cycle.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -40,6 +41,7 @@ var channel: ChannelSystemScript
 var content: ContentSystemScript
 var equipment: EquipmentSystemScript
 var company: CompanySystemScript
+var day_cycle: DayCycleScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -58,6 +60,8 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	company = CompanySystemScript.new(time, ledger, locations, channel, data.company_types)
 	activities = ActivitySystemScript.new(time, ledger, stats, locations, company, data.activities)
 	content = ContentSystemScript.new(time, ledger, stats, locations, channel, equipment, data.formats)
+	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → (Fristen) → Ereignisse.
+	day_cycle = DayCycleScript.new(time, [company, events])
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).

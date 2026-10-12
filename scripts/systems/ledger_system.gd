@@ -15,6 +15,8 @@ extends RefCounted
 ## - Umbuchung (transfer) zwischen Konten = genau zwei Buchungen mit gemeinsamer
 ##   Referenz und den Schutzschlüsseln "<schlüssel>|out" / "<schlüssel>|in".
 ##   Erst wird alles geprüft, dann beide gebucht – nie nur eine Hälfte.
+## - Wertstellung (Phase 5): jede Buchung hat zusätzlich effective_minutes (Standard = Buchungszeit).
+##   Sie darf nicht in der Zukunft liegen. Fristen und Zeiträume (summarize) rechnen nur damit.
 ## Abgelehnte Buchungen ändern nichts, senden keine Signale und setzen
 ## last_rejection auf den Grund.
 
@@ -58,9 +60,9 @@ func _init(time: TimeSystemScript, opening_balance_cents: int = 0) -> void:
 ## Bucht einen Betrag auf ein Konto. Gibt die neue Buchung zurück oder null bei Ablehnung.
 func post(amount_cents: int, category: String, description: String, source: String,
 		reference: String = "", idempotency_key: String = "",
-		allow_negative: bool = false, account: String = PRIVATE) -> LedgerEntryScript:
+		allow_negative: bool = false, account: String = PRIVATE, effective_minutes: int = -1) -> LedgerEntryScript:
 	if amount_cents == 0 or category.is_empty() or description.is_empty() or source.is_empty() \
-			or account not in ACCOUNTS:
+			or account not in ACCOUNTS or effective_minutes > _time.get_minutes():
 		push_error("LedgerSystem: ungültige Buchung (Betrag %d, Kategorie '%s', Beschreibung '%s', Quelle '%s', Konto '%s')."
 				% [amount_cents, category, description, source, account])
 		last_rejection = Rejection.INVALID
@@ -71,7 +73,8 @@ func post(amount_cents: int, category: String, description: String, source: Stri
 	if amount_cents < 0 and not allow_negative and _balances[account] + amount_cents < 0:
 		last_rejection = Rejection.INSUFFICIENT_FUNDS
 		return null
-	return _book(amount_cents, category, description, source, reference, idempotency_key, account)
+	return _book(amount_cents, category, description, source, reference, idempotency_key, account,
+			effective_minutes)
 
 
 ## Umbuchung zwischen zwei Konten (z. B. Einlage privat -> Firma). Gibt beide Buchungen
@@ -126,6 +129,23 @@ func get_entries_for_account(account: String) -> Array[LedgerEntryScript]:
 	return result
 
 
+## Summen eines Kontos für Buchungen mit Wertstellung in [from_minutes, to_minutes):
+## {income_cents, expense_cents (≤ 0), net_cents = Einnahmen + Ausgaben ohne Umbuchungen,
+##  transfer_in_cents, transfer_out_cents (≤ 0)}. Umbuchungen zählen nicht als Gewinn oder Verlust.
+func summarize(account: String, from_minutes: int, to_minutes: int) -> Dictionary:
+	var result := {"income_cents": 0, "expense_cents": 0, "net_cents": 0, "transfer_in_cents": 0,
+			"transfer_out_cents": 0}
+	for entry in _entries:
+		if entry.account != account or entry.effective_minutes < from_minutes or entry.effective_minutes >= to_minutes:
+			continue
+		if entry.category == TRANSFER_CATEGORY:
+			result["transfer_in_cents" if entry.amount_cents > 0 else "transfer_out_cents"] += entry.amount_cents
+		else:
+			result["income_cents" if entry.amount_cents > 0 else "expense_cents"] += entry.amount_cents
+	result["net_cents"] = result["income_cents"] + result["expense_cents"]
+	return result
+
+
 func get_entries_by_category(category: String) -> Array[LedgerEntryScript]:
 	var result: Array[LedgerEntryScript] = []
 	for entry in _entries:
@@ -149,7 +169,7 @@ func to_dict() -> Dictionary:
 		entries.append({
 			"id": entry.id, "time_minutes": entry.time_minutes, "amount_cents": entry.amount_cents,
 			"category": entry.category, "description": entry.description, "source": entry.source,
-			"reference": entry.reference, "account": entry.account,
+			"reference": entry.reference, "account": entry.account, "effective_minutes": entry.effective_minutes,
 		})
 	return {
 		"opening_balances": _opening.duplicate(),
@@ -195,7 +215,8 @@ func restore(data: Dictionary) -> String:
 			var source := reader.string_field(raw, "source", where, true)
 			var reference := reader.string_field(raw, "reference", where, false)
 			var account := reader.string_field(raw, "account", where, true)
-			if amount == 0 or time_minutes < 0:
+			var effective := reader.int_field(raw, "effective_minutes", where, true)
+			if amount == 0 or time_minutes < 0 or effective < 0:
 				reader.errors.append("%s: Betrag 0 oder negative Zeit." % where)
 			if not account.is_empty() and account not in ACCOUNTS:
 				reader.errors.append("%s: unbekanntes Konto '%s'." % [where, account])
@@ -204,7 +225,7 @@ func restore(data: Dictionary) -> String:
 			if reader.errors.size() == error_count:
 				ids[id] = true
 				entries.append(LedgerEntryScript.new(id, time_minutes, amount, category, description, source,
-						reference, account))
+						reference, account, effective))
 
 	var used_keys := {}
 	var raw_keys: Variant = data.get("used_keys", {})
@@ -237,6 +258,22 @@ func restore(data: Dictionary) -> String:
 	return ""
 
 
+## Ergänzt die Wertstellung für Spielstände vor Version 10: = Buchungszeit; Tagesabschlüsse
+## (Quelle "company", Referenz "day:<t>") gehören zum abgerechneten Tag, 23:59. Ändert `data` direkt.
+static func migrate_effective_dates(data: Dictionary) -> String:
+	if typeof(data.get("entries")) != TYPE_ARRAY:
+		return "Ledger: Buchungen fehlen."
+	for entry in data["entries"]:
+		if typeof(entry) != TYPE_DICTIONARY or not DataReaderScript.is_whole_number(entry.get("time_minutes")):
+			return "Ledger: Buchung ohne Zeit."
+		entry["effective_minutes"] = int(entry["time_minutes"])
+		var reference: Variant = entry.get("reference", "")
+		if entry.get("source") == "company" and typeof(reference) == TYPE_STRING and reference.begins_with("day:") \
+				and reference.substr(4).is_valid_int():
+			entry["effective_minutes"] = TimeSystemScript.at(int(reference.substr(4)), 23, 59)
+	return ""
+
+
 ## Wandelt einen Ledger-Stand von Spielstand-Version ≤ 5 (ein Konto) um: Startwert wird
 ## Privatkonto-Startwert, alle Buchungen gehören zum Privatkonto. Ändert `data` direkt.
 static func migrate_single_account(data: Dictionary) -> String:
@@ -253,9 +290,9 @@ static func migrate_single_account(data: Dictionary) -> String:
 
 
 func _book(amount_cents: int, category: String, description: String, source: String,
-		reference: String, idempotency_key: String, account: String) -> LedgerEntryScript:
+		reference: String, idempotency_key: String, account: String, effective_minutes: int = -1) -> LedgerEntryScript:
 	var entry := LedgerEntryScript.new("tx_%06d" % _next_number, _time.get_minutes(), amount_cents,
-			category, description, source, reference, account)
+			category, description, source, reference, account, effective_minutes)
 	_next_number += 1
 	_entries.append(entry)
 	if not idempotency_key.is_empty():

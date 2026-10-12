@@ -169,7 +169,18 @@ Abnahme auf dem iPhone (G2, offen – gesammelt in Phase 7):
 - [ ] Hauptmenü und Einstellungen im Querformat bedienbar
 - [ ] „Fortsetzen“ nach Neustart: Spielstand unverändert (Spiellogik/Spielstand wurden nicht geändert)
 
-## Phase 5 – Finanzen, Fristen, Behördenereignisse ← als Nächstes (Plan folgt)
+## Phase 5 – Finanzen, Fristen, Behördenereignisse ← in Arbeit
+Fiktive, abstrakte Spielwerte – keine realen Steuer- oder Rechtsregeln. Wertstellung je Buchung, Spielwoche Mo–So,
+wöchentliche Fristen (Miete Wohnung 80 €, Miete Studio 40 € vom Privatkonto; Stadtabgabe 15 % vom positiven
+Wochengewinn vom Firmenkonto), automatisch bezahlt wenn gedeckt, sonst überfällig; Mahngebühr erhöht den offenen
+Betrag (gebucht erst beim Bezahlen), Kulanz 2 Tage, Stimmung/Ruf −5; Behördenereignisse zufällig mit Seed plus festes
+Ereignis nach 3 überfälligen Fristen; erste Fälligkeit Tag 8; kein Game Over.
+
+- [x] Ticket 5.1: Wertstellung je Buchung, Wochenauswertung, fester Tageswechsel-Ablauf (DayCycle), Spielstand Version 10 (264/264 Tests grün)
+- [ ] Ticket 5.2: Fristen als Daten (ObligationSystem), automatisch bezahlen
+- [ ] Ticket 5.3: Überfällig, Mahngebühr im offenen Betrag, Bezahlen von Hand
+- [ ] Ticket 5.4: Behördenereignisse (Zufall mit Bedingungen + festes Ereignis nach 3 überfälligen Fristen)
+- [ ] Ticket 5.5: Finanz-UI (Fristen, Wochenübersicht, HUD-Hinweis), Abnahme per Tests + Mac-Fensterlauf
 
 ## Spätere Phasen
 6. Save/Load-Stabilisierung und Migration

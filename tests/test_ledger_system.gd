@@ -299,6 +299,7 @@ func test_migrate_single_account_assigns_private() -> void:
 				"description": "Marke", "source": "event", "reference": "x"},
 		]}
 	assert_eq(LedgerSystemScript.migrate_single_account(old), "")
+	assert_eq(LedgerSystemScript.migrate_effective_dates(old), "")  # wie die Kette bis Version 10
 	var ledger := _make_ledger(0)
 	assert_eq(ledger.restore(old), "")
 	assert_eq(ledger.get_balance("private"), 55500)

@@ -159,3 +159,13 @@ Die iPhone-Abnahme (Touch, Safe Area, Ausrichtung, Export) wird gesammelt in Pha
 die Checklisten „Abnahme auf dem iPhone“ bleiben bis dahin offen. Nie eine iPhone- oder Editor-Prüfung als erledigt
 eintragen, die nicht gemeldet wurde.
 
+## 022 – Wertstellung und fester Tageswechsel-Ablauf
+Tagesabschluss-Buchungen tragen als Buchungszeit das Ende des Zeitfortschritts (z. B. Tag 8, 07:00 nach dem
+Schlafen). Für Fristen und Zeiträume wäre das falsch: Der Abschluss von Tag 7 landete in Woche 2. Deshalb hat jede
+Buchung zusätzlich `effective_minutes` (Wertstellung; Standard = Buchungszeit, nie in der Zukunft); Tagesabschlüsse
+werden auf den abgerechneten Tag, 23:59 gestellt. Fristen und Auswertungen (`LedgerSystem.summarize()`) rechnen nur
+mit der Wertstellung; die Buchungszeit zeigt weiter, wann etwas verbucht wurde. Spielwoche = Mo–So (Tag 1 ist Montag).
+Umbuchungen zählen nicht als Gewinn/Verlust. Am Tageswechsel ruft der `DayCycle` die Systeme in fester, getesteter
+Reihenfolge auf (Tagesabschluss → Fristen → Ereignisse), statt sich auf die Reihenfolge von Signal-Verbindungen zu
+verlassen. Migration auf Version 10 trägt die Wertstellung nach (Tagesabschlüsse über ihre Referenz `day:<t>`).
+

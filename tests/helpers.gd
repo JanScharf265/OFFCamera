@@ -31,4 +31,5 @@ static func with_single_account_ledger(game: Dictionary) -> Dictionary:
 	ledger.erase("opening_balances")
 	for entry in ledger["entries"]:
 		entry.erase("account")
+		entry.erase("effective_minutes")
 	return game

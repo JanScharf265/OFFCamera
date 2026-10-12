@@ -18,7 +18,7 @@ extends RefCounted
 ## Änderungen an Auslastung/Ruf nur über apply() – mit Begründung im Unternehmens-Protokoll
 ## (gleiches Eintragsmodell wie das Kanal-Protokoll).
 ##
-## Tagesabschluss (Ticket 4.3): bei day_changed(tag) wird der Vortag abgerechnet – nur dann,
+## Tagesabschluss (Ticket 4.3): beim Tageswechsel (über den DayCycle) wird der Vortag abgerechnet – nur dann,
 ## kein Zeitfortschritt im Hintergrund. Exakt und ganzzahlig (abgerundet):
 ##   Grundlage = base_revenue + Follower × revenue_per_1000 / 1000
 ##   Umsatz    = Grundlage × Auslastung / 100 × (100 + (Ruf − 50) / 2) / 100
@@ -84,7 +84,6 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, locations: Locati
 	_locations = locations
 	_channel = channel
 	_catalog = catalog
-	time.day_changed.connect(_on_day_changed)
 
 
 func get_catalog() -> CompanyTypeCatalogScript:
@@ -478,7 +477,8 @@ func _reset() -> void:
 	_new_settlements.clear()
 
 
-func _on_day_changed(day: int) -> void:
+## Vom DayCycle aufgerufen (feste Reihenfolge am Tageswechsel): rechnet den Vortag ab.
+func on_day_changed(day: int) -> void:
 	var settled_day := day - 1
 	if not is_founded() or settled_day <= _last_settled_day:
 		return
@@ -490,17 +490,19 @@ func _settle(day: int) -> void:
 	var outcome := preview_day()
 	var prefix := "company:day:%d" % day
 	var reference := "day:%d" % day
+	# Wertstellung = abgerechneter Tag, 23:59 – nicht der Zeitpunkt der Abrechnung (Fristen, Wochen).
+	var effective := TimeSystemScript.at(day, 23, 59)
 	var revenue: int = outcome["revenue_cents"]
 	var costs: int = outcome["costs_cents"]
 	if revenue > 0:
 		_ledger.post(revenue, "sales", "Tagesumsatz Tag %d" % day, SOURCE, reference, prefix + ":revenue",
-				false, LedgerSystemScript.COMPANY)
+				false, LedgerSystemScript.COMPANY, effective)
 	var paid := true
 	if costs > 0:
 		paid = _ledger.can_afford(costs, LedgerSystemScript.COMPANY)
 		if paid:
 			_ledger.post(-costs, "fixed_costs", "Fixkosten Tag %d" % day, SOURCE, reference, prefix + ":costs",
-					false, LedgerSystemScript.COMPANY)
+					false, LedgerSystemScript.COMPANY, effective)
 	var branch_text := ""
 	if outcome["branch_cents"] > 0:
 		branch_text = " + %s Filiale" % LedgerSystemScript.format_cents(outcome["branch_cents"])

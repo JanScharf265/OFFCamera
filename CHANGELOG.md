@@ -1,5 +1,10 @@
 # Changelog
 
+## Unveröffentlicht – Phase 5
+- Wertstellung je Buchung: Tagesabschlüsse gehören zum abgerechneten Tag (23:59), nicht zum Zeitpunkt der Abrechnung; Wochenauswertung je Konto ohne Umbuchungen (Ticket 5.1)
+- Fester Ablauf am Tageswechsel (DayCycle): erst Tagesabschluss, dann Fristen, dann Ereignisse (Ticket 5.1)
+- Spielstand Version 10 mit Migration: Wertstellung nachgetragen, alte Tagesabschlüsse auf ihren Tag korrigiert (Ticket 5.1)
+
 ## Unveröffentlicht – Grafik-Ticket G2 (Querformat)
 - Querformat in beide Richtungen, Basisauflösung 1280×720 (G2.1)
 - Stadtkarte als Vollbild-Hauptbildschirm; HUD in den oberen Ecken (Zeit/Tag/Ort, Konten, Energie, Stimmung); Seitenbuttons Termine, Kanal, Firma, Buchungen, Menü, Hier; Hinweise unten (G2.2)
