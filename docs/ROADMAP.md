@@ -253,13 +253,19 @@ echte Testdatei und eine Migration.
 - [x] G3.3 Schriftzug „OFF CAMERA“ (Variante 1 „Kino“): Bebas Neue (OFL, `assets/fonts/bebas_neue/`), Baustein `scripts/ui/logo.gd` im Hauptmenü, Startbild `assets/splash/splash.png` (Erzeuger `tools/splash/make_splash.gd`) als Boot-Splash und iOS-Launch-Screen; Export geprüft; Mac-Fensterlauf mit Screenshot (341/341 Tests grün)
 
 ### G4 – UI-Layout (mehr Karte)
-- [ ] G4.1 Layout-Mockup als Screenshot aus einem Fensterlauf (HUD-Leiste, runde Seitenbuttons rechts, Kachel-Fenster) → Freigabe
-- [ ] G4.2 Querformat fest auf EINE Richtung: Dynamic Island links (`project.godot` Ausrichtung, im exportierten Info.plist prüfen); Layout-Tests mit Rand nur links; Richtung prüft der Game Director beim nächsten iPhone-Build mit einem Blick
-- [ ] G4.3 HUD als schmale Leiste oben (neu `scripts/ui/hud_bar.gd`, `game_screen.gd`); Plätze für Schwarzgeld/Hitze, sichtbar erst wenn es sie gibt
-- [ ] G4.4 7 runde Seitenbuttons + Menü, alle rechts (Leben: Kalender, Fristen, Kanal; Geschäft: Organisation, Aufträge, Firma, Buchungen; Buttons ohne Funktion bleiben bis U verborgen), Kreis 64 px, unsichtbare Tippfläche mind. 84 px, Mini-Beschriftung, Zählerpunkt als Bauteil, Menü klein in der Ecke; links nur schmale Elemente (neu `scripts/ui/side_button.gd`, `game_screen.gd`)
-- [ ] G4.5 Ortsfenster als Kachel-Raster, 3–4 Spalten, ca. 85 % Breite (neu `scripts/ui/activity_tile.gd`, `windows/location_window.gd`, `activity_text.gd`)
+- [x] G4.1 Layout-Mockup (`tools/mockup/g4_1_karte.png`, `g4_1_ortsfenster.png`, Erzeuger `tools/mockup/g4_mockup.gd`) – freigegeben 13.10.2026 inkl. 2 Button-Spalten rechts, mit 5 Änderungen (in G4.3–G4.5 eingetragen)
+- [x] G4.2 Querformat fest auf EINE Richtung: `display/window/handheld/orientation = 2` („umgekehrt“) → im Export nur `UIInterfaceOrientationLandscapeRight` (Home-Seite rechts = Insel links); rechter Rand: Safe Area wie von iOS gemeldet (keine Sonderregel), offen für den nächsten iPhone-Test (341/341 Tests grün)
+- [ ] G4.3 HUD als schmale Leiste oben (neu `scripts/ui/hud_bar.gd`, `game_screen.gd`); Plätze für Schwarzgeld/Hitze, sichtbar erst wenn es sie gibt; Energie und Stimmung als Balken MIT Zahl, Stimmung mit Smiley-Icon (kein Stern)
+- [ ] G4.4 7 runde Seitenbuttons + Menü, alle rechts (Leben: Kalender, Fristen, Kanal; Geschäft: Organisation, Aufträge, Firma, Buchungen; Buttons ohne Funktion bleiben bis U verborgen), in 2 Spalten (Leben | Geschäft) auf dezentem Gruppen-Hintergrund, Kreis 64 px, unsichtbare Tippfläche mind. 84 px, Mini-Beschriftung, Zählerpunkt als Bauteil, Menü als Zahnrad in der HUD-Leiste; links nur „Hier“; Kalender-Icon = echtes Kalender-Symbol (Kenney, sonst eigenes einfaches Symbol) (neu `scripts/ui/side_button.gd`, `game_screen.gd`)
+- [ ] G4.5 Ortsfenster als Kachel-Raster, 3–4 Spalten, ca. 85 % Breite; jede Kachel mit fest reservierter Hinweiszeile (Start-Buttons auf einer Höhe); Käufe (sofort, ohne Spielzeit) mit eigenem Button-Stil (z. B. Rahmen-Button) (neu `scripts/ui/activity_tile.gd`, `windows/location_window.gd`, `activity_text.gd`)
 - [ ] G4.6 Reiter statt Scrollen, wenn ein Ort mehr Kacheln hat als ins Raster passen (Reiter-Zuordnung als Daten)
 - [ ] G4.7 Layout-Tests für die 4 Geräteklassen aus 7.2 umstellen, neuer Test „Tippflächen ≥ 84 px (≈ 44 pt)“ (`tests/test_layout*.gd`, `tests/layout_helper.gd`)
+
+Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
+- [ ] Dynamic Island liegt links, App dreht beim Umdrehen des iPhones NICHT mit (G4.2)
+- [ ] Rechter Rand: Wie viel Abstand hält die Bedienung rechts ein (gleich wie links = iOS meldet die Safe Area symmetrisch)? Nichts in den abgerundeten Ecken (G4.2)
+- [ ] Startbild: Springt der Schriftzug beim Übergang vom iOS-Launch-Screen zum Godot-Startbild in der Größe? (G3.3)
+- [ ] App-Symbol auf dem Homescreen gut erkennbar, auch in der Suche/Einstellungen (G3.2)
 
 ### G5 – Hinweise und Komfort
 - [ ] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, neu `scripts/core/settings.gd`): Schalter Kalender automatisch, Vibration; Einstellungsseite erweitern

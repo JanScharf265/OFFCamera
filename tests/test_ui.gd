@@ -400,8 +400,10 @@ func test_project_saves_battery() -> void:
 	assert_eq(ProjectSettings.get_setting("application/run/max_fps"), 60)
 
 
+## G4.2: EINE feste Querformat-Richtung – „umgekehrt“ ergibt im iOS-Export UIInterfaceOrientationLandscapeRight
+## (Home-Seite rechts, Dynamic Island links; Entscheidung 038).
 func test_project_is_landscape() -> void:
-	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), DisplayServer.SCREEN_SENSOR_LANDSCAPE)
+	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), DisplayServer.SCREEN_REVERSE_LANDSCAPE)
 	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_width"), 1280)
 	assert_eq(ProjectSettings.get_setting("display/window/size/viewport_height"), 720)
 

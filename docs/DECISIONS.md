@@ -362,3 +362,23 @@ Baustein gerendert (`tools/splash/make_splash.gd`, 2560 × 1440, Hintergrund = `
 (Export geprüft: SplashImage = splash.png, Hintergrundfarbe 0,07/0,07/0,09). Offen fürs iPhone: Der Launch-Screen
 zeigt das Bild zentriert in Originalgröße (@2x/@3x), der Schriftzug kann daher kurz anders groß sein als im
 Godot-Startbild – beim nächsten iPhone-Build ansehen.
+
+## 042 – Layout-Mockup freigegeben (G4.1)
+Freigegeben am 13.10.2026: schmale HUD-Leiste oben, 7 runde Buttons rechts in ZWEI Spalten (Leben | Geschäft;
+7 × 84 px untereinander passen nicht unter die Leiste), Menü als Zahnrad in der Leiste, links nur „Hier“,
+Ortsfenster mit Reitern und 4-spaltigem Kachel-Raster zwischen Insel und Button-Spalten. Änderungen des Game
+Directors für den Umbau: (1) Energie/Stimmung mit Zahl neben dem Balken, (2) Stimmung mit Smiley statt Stern
+(Stern ist mit Ruf/Qualität verwechselbar), (3) feste Hinweiszeile in jeder Kachel, damit alle Start-Buttons auf
+einer Höhe liegen, (4) Käufe (sofort, keine Spielzeit) mit eigenem Button-Stil, (5) echtes Kalender-Symbol.
+
+## 043 – Feste Querformat-Richtung und rechter Rand (G4.2)
+`display/window/handheld/orientation = 2` (SCREEN_REVERSE_LANDSCAPE). Geprüft im headless-Export: Die Info.plist
+erlaubt auf dem iPhone nur `UIInterfaceOrientationLandscapeRight` (mit 0 = „Querformat“ wäre es LandscapeLeft).
+Laut Apple liegt bei LandscapeRight die Home-Seite rechts, die Oberkante des Geräts – und damit die Dynamic
+Island – links. (Für iPad trägt Godot die Gegenrichtung ein; irrelevant, wir zielen nur auf iPhone.) Ob das auf
+dem Gerät stimmt, prüft der Game Director beim nächsten iPhone-Build mit einem Blick.
+Rechter Rand: keine Sonderregel. Das Spiel hält die Safe Area je Seite genau so ein, wie iOS sie meldet
+(`App.safe_margins`, war schon für ungleiche Seiten getestet). Meldet iOS rechts denselben Abstand wie links,
+bleibt rechts ungenutzter Platz, dafür nichts in den abgerundeten Ecken. Ob wir rechts weniger Abstand nehmen
+dürfen, entscheiden wir nach dem iPhone-Test (Punkt in der ROADMAP). Das Mockup rechnete rechts mit 48 px; mit
+symmetrischer Safe Area rücken die Button-Spalten etwa 75 px nach links (Ortsfenster entsprechend schmaler).

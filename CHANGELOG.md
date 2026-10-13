@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Feste Querformat-Richtung: Dynamic Island links, Bedienung rechts – die App dreht nicht mehr mit (Ticket G4.2)
+- Layout-Mockup für das neue HUD, runde Buttons und Kachel-Ortsfenster (Ticket G4.1)
 - Schriftzug „OFF CAMERA“ (Bebas Neue, OFL) im Hauptmenü statt Titel + „Prototyp“; gleiches Bild als Startbild (Boot-Splash und iOS-Launch-Screen) auf der UI-Hintergrundfarbe (Ticket G3.3)
 - Neues App-Symbol „Halbes Objektiv“ in allen iOS-Größen, für kleine Größen (bis 87 px) vereinfacht; Test prüft Größe und fehlende Transparenz aller Icons im Export-Preset (Ticket G3.2)
 - Drei App-Icon-Entwürfe (SVG) mit Vorschau in 1024 px und 60 px auf hellem und dunklem Hintergrund (Ticket G3.1)

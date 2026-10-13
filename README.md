@@ -137,7 +137,7 @@ Einstellungen → Spielstand löschen.
 ## Projektstruktur
 
 ```
-project.godot        Projektkonfiguration (Querformat, GL-Compatibility-Renderer)
+project.godot        Projektkonfiguration (Querformat fest „umgekehrt“ = Dynamic Island links, GL-Compatibility-Renderer)
 scenes/app/          Hauptszene app.tscn
 scripts/core/        GameState (eine Spielsitzung), GameData (alle Datenkataloge)
 scripts/systems/     Spielsysteme (Zeit, Ledger, Orte, Aktivitäten, Ereignisse, Termine, Kanal, Content, Ausrüstung, Unternehmen, Speichern, Datenprüfung)
