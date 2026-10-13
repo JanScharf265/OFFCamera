@@ -341,3 +341,11 @@ entfällt (keine Fehler); die Layout-Wünsche vom iPhone gehen in G4/G5 auf. Nac
 Dateien aus `exports/` ins .pck gepackt. Jetzt liegt eine `.gdignore` in `exports/` und `tools/`, und `exports/*`
 steht zusätzlich im `exclude_filter` (geprüft: 0 Einträge aus `exports/` im neuen .pck). Code-Signatur im Preset:
 „Apple Development“ (Team-ID nur in den lokalen Export-Zugangsdaten, nicht im Repo).
+
+## 040 – App-Symbol „Halbes Objektiv“
+Wahl des Game Directors aus drei Entwürfen (G3.1): Entwurf A, ein Objektiv – links im Licht (magenta), rechts im
+Schatten. Zwei SVG-Quellen: `app_icon.svg` mit allen Details für Größen ab 114 px, `app_icon_small.svg` vereinfacht
+für 40–87 px (Ring 96 statt 60 px dick und größer, kein Glanzlicht und kein Hintergrund-Leuchten, Glas einfarbig,
+Pupille größer, Schattenhälfte heller – im Vergleich bei 40/60 px auf schwarzem Homescreen sonst kaum sichtbar).
+Jede Größe wird direkt aus dem SVG gerendert (`Image.load_svg_from_string` mit Skalierung) statt verkleinert, ohne
+Alpha gespeichert. Varianten für dunkles/getöntes iOS-Erscheinungsbild (`_dark`, `_tinted`) bleiben vorerst leer.

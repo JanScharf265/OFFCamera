@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (als Nächstes G3.2 nach Wahl des Icons)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (als Nächstes G3.3)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -249,7 +249,7 @@ echte Testdatei und eine Migration.
 
 ### G3 – App-Icon und Logo
 - [x] G3.1 Drei Icon-Entwürfe als SVG + Vorschau-PNG (1024 px und 60 px, heller und dunkler Homescreen) in `tools/icon/drafts/`, Erzeuger `tools/icon/make_previews.gd` (A Halbes Objektiv, B REC im Schatten, C OC-Monogramm) → Wahl des Game Directors offen
-- [ ] G3.2 Gewähltes Icon: Quelle `assets/icon/app_icon.svg`, alle iOS-Größen daraus erzeugen, in `export_presets.cfg` eintragen, Export prüfen
+- [x] G3.2 Icon „Halbes Objektiv“: Quellen `assets/icon/app_icon.svg` + vereinfacht `app_icon_small.svg` (bis 87 px), 15 iOS-Größen erzeugt, alle 17 Icon-Plätze im Export-Preset belegt; Export headless geprüft (Xcode-Projekt enthält genau diese Dateien); Test `test_app_icon.gd` (340/340 Tests grün)
 - [ ] G3.3 Freie Schrift (OFL, Lizenz unter `assets/fonts/`) + Schriftzug „OFF CAMERA“ als SVG; Hauptmenü (`scripts/ui/main_menu.gd`) und Startbild (Boot-Splash/Launch-Screen) in derselben Farbwelt
 
 ### G4 – UI-Layout (mehr Karte)

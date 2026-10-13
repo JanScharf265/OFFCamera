@@ -79,7 +79,8 @@ timeout 600 ~/Downloads/Godot.app/Contents/MacOS/Godot --headless --path . --exp
 
 Das Ergebnis heißt `exports/ios/OFFCamera.xcodeproj` (frühere Exporte hießen `OFFCamera.ipa.xcodeproj` – den alten
 Satz vom 11.10. habe ich nach `exports/ios/_alt_2026-10-11/` verschoben, damit er nicht versehentlich geöffnet wird).
-App-Symbol: `assets/icon/app_icon_1024.png` (neu erzeugen mit `tools/icon/make_icon.gd`).
+App-Symbol: Quellen `assets/icon/app_icon.svg` (ab 114 px) und `assets/icon/app_icon_small.svg` (bis 87 px); alle iOS-Größen
+`assets/icon/app_icon_<px>.png` erzeugt `tools/icon/make_icon.gd` (Befehl in der Datei), danach `--import`.
 Warnungen zu Kamera-/Mikrofon-/Foto-Usage-Descriptions sind harmlos (die App fragt diese Rechte nicht an).
 
 Fehler? Exakte Meldung aus Godot bzw. Xcode kopieren (siehe „Fehlerbericht“ in [`CLAUDE.md`](CLAUDE.md)).
