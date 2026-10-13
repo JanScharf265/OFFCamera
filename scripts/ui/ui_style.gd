@@ -44,24 +44,27 @@ const TOUCH_SIZE := 84.0
 const ROUND_BUTTON_BORDER := Color(1, 1, 1, 0.14)
 const ROUND_CAPTION_FONT_SIZE := 15
 const BADGE := Color("#FF3B5C")
-## Ortsfenster als Kachel-Raster (G4.5).
+## Ortsfenster als Kachel-Raster (G4.5, Lesbarkeit G4.5b). Mindestschrift für Lesetext: 21 px ≈ 11 pt auf allen
+## iPhones (720 / Bildschirmhöhe in Punkten, z. B. SE: 1,92 px/pt; Pro Max: 1,67 px/pt).
 const WARNING := Color("#F2C14E")
 const PURCHASE_TEXT := Color("#FF8FA3")
+const MIN_READ_FONT_SIZE := 21
 const TILE_PADDING := 10
-const TILE_TITLE_FONT_SIZE := 20
-const TILE_FONT_SIZE := 16
-const TILE_ICON_SIZE := 18
-const TILE_HINT_HEIGHT := 16.0
+const TILE_TITLE_FONT_SIZE := 23
+const TILE_FONT_SIZE := 21
+const TILE_ICON_SIZE := 22
 ## Ortsfenster: kleinerer Innenabstand, damit zwei Kachel-Reihen ohne Scrollen passen.
-const COMPACT_WINDOW_PADDING := 12
-const TILE_BUTTON_HEIGHT := 74.0  # ≈ 44 pt
+const COMPACT_WINDOW_PADDING := 8
+const COMPACT_TITLE_FONT_SIZE := 34
+## Kachel-Buttons (G4.5b): sichtbar 56 px, Tippfläche TOUCH_SIZE (84 px) – der unsichtbare Teil reicht nach oben
+## in die Hinweiszeile. Gesperrte Buttons zeigen die volle Höhe (Platz für den Sperrgrund in zwei Zeilen).
+const TILE_BUTTON_VISIBLE := 56.0
 const TILE_BUTTON_FONT_SIZE := 22
-const TILE_REASON_FONT_SIZE := 16
-const TILE_GAP := 12
+const TILE_GAP := 10
+const TILE_ROW_GAP := 8
 ## Mindestbreite einer Kachel: daraus ergibt sich die Spaltenzahl (höchstens 4).
 const TILE_MIN_WIDTH := 220.0
 const TILE_MAX_COLUMNS := 4
-const TRAVEL_BUTTON_WIDTH := 240.0
 ## HUD-Leiste oben (G4.3): Abstand der Elemente und kleine Beschriftung über den Beträgen.
 const HUD_GAP := 18
 const HUD_CAPTION_FONT_SIZE := 15
@@ -165,17 +168,32 @@ static func window_box(padding: int = PADDING) -> StyleBoxFlat:
 	return box
 
 
-## Button für Käufe (sofort, ohne Spielzeit – G4.5): Rahmen statt Fläche, damit man ihn von Aktivitäten
-## (kosten Spielzeit) unterscheidet.
-static func style_purchase_button(target: Button) -> void:
-	var normal := _box(SURFACE, 12)
-	normal.border_color = ACCENT
-	normal.set_border_width_all(2)
-	var pressed := _box(ACCENT_PRESSED, 12)
+## Kachel-Button (G4.5b): Tippfläche = ganzer Button (TOUCH_SIZE hoch), gezeichnet wird nur der untere Teil
+## (TILE_BUTTON_VISIBLE) – über negative expand_margin_top; der Text sitzt mittig im sichtbaren Teil.
+## Gesperrt: volle Höhe, damit der Sperrgrund Platz hat. purchase = Käufe (sofort, ohne Spielzeit, G4.5):
+## Rahmen statt Fläche, damit man sie von Aktivitäten (kosten Spielzeit) unterscheidet.
+static func style_tile_button(target: Button, purchase: bool = false) -> void:
+	var hidden := TOUCH_SIZE - TILE_BUTTON_VISIBLE
+	var normal := _low_box(SURFACE if purchase else ACCENT, hidden)
+	if purchase:
+		normal.border_color = ACCENT
+		normal.set_border_width_all(2)
+	var pressed := _low_box(ACCENT_PRESSED, hidden)
 	for state in ["normal", "hover"]:
 		target.add_theme_stylebox_override(state, normal)
 	for state in ["pressed", "hover_pressed"]:
 		target.add_theme_stylebox_override(state, pressed)
-	target.add_theme_stylebox_override("disabled", _box(DISABLED, 12))
-	for color_name in ["font_color", "font_hover_color", "font_focus_color"]:
-		target.add_theme_color_override(color_name, PURCHASE_TEXT)
+	target.add_theme_stylebox_override("disabled", _box(DISABLED, 8))
+	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	if purchase:
+		for color_name in ["font_color", "font_hover_color", "font_focus_color"]:
+			target.add_theme_color_override(color_name, PURCHASE_TEXT)
+	target.custom_minimum_size.y = TOUCH_SIZE
+
+
+static func _low_box(color: Color, hidden: float) -> StyleBoxFlat:
+	var box := _box(color, 8)
+	box.expand_margin_top = -hidden
+	box.content_margin_top = hidden + 4.0
+	box.content_margin_bottom = 4.0
+	return box

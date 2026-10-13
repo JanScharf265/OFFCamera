@@ -236,7 +236,9 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   die Button-Spalten; Infos und „Hinfahren“ in der Titelzeile (`take_header_extra()`, von `ui_window.gd` eingebaut),
   darunter ein `GridContainer` mit 3–4 Spalten (`set_available_width()` vom GameScreen). Jede Kachel: Name,
   „Dauer · Ende HH:MM“ (`ActivityText.duration_with_end`), Wirkungs-Chips (`ActivityText.effect_chips`), feste
-  Hinweiszeile, Button mit Sperrgrund; Käufe mit Rahmen-Button (`UiStyle.style_purchase_button`).
+  Hinweiszeile, Button mit Sperrgrund; Käufe mit Rahmen-Button. G4.5b: Kachel-Buttons (`UiStyle.style_tile_button`)
+  sind 84 px hoch (Tippfläche), gezeichnet werden nur die unteren 56 px (negative `expand_margin_top`); Hinweiszeile
+  und Button liegen übereinander im `ActionArea`. Lesetext ≥ `UiStyle.MIN_READ_FONT_SIZE` (21 px).
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,

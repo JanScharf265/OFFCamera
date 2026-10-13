@@ -3,7 +3,10 @@ extends PanelContainer
 ## Kachel im Ortsfenster (G4.5): Name, Zeile für Zeit („2 h · Ende 10:20“), Wirkungen als Symbol + Zahl
 ## (grün = gut, rot = Kosten, grau = neutral), eine fest reservierte Hinweiszeile (z. B. Terminkonflikt) und
 ## unten der Button. Ist die Aktion gesperrt, steht der Grund im Button. Käufe (sofort, ohne Spielzeit) haben
-## einen eigenen Button-Stil (UiStyle.style_purchase_button). Zeigt nur an.
+## einen eigenen Button-Stil (UiStyle.style_tile_button). Zeigt nur an.
+## G4.5b: Der Button ist sichtbar 56 px hoch, seine Tippfläche 84 px – sie reicht unsichtbar nach oben über die
+## Hinweiszeile (beide liegen im „ActionArea“). Gesperrt füllt der Button die volle Höhe (Platz für den Grund),
+## die Hinweiszeile tritt dann zurück.
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
@@ -27,7 +30,10 @@ func _init(key: String, title: String, action_button: Button, action_text: Strin
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_theme_stylebox_override("panel", UiStyle.flat_box(UiStyle.SURFACE, UiStyle.TILE_PADDING))
+	var panel := UiStyle.flat_box(UiStyle.SURFACE, UiStyle.TILE_PADDING)
+	panel.content_margin_top = UiStyle.TILE_PADDING - 2
+	panel.content_margin_bottom = UiStyle.TILE_PADDING - 2
+	add_theme_stylebox_override("panel", panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 2)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -42,30 +48,40 @@ func _init(key: String, title: String, action_button: Button, action_text: Strin
 	_effects = HFlowContainer.new()
 	_effects.name = "TileEffects_%s" % key
 	_effects.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_effects.add_theme_constant_override("h_separation", 12)
+	_effects.add_theme_constant_override("h_separation", 8)
 	_effects.add_theme_constant_override("v_separation", 0)
 	box.add_child(_effects)
 	_info = UiStyle.wrapping_label("", UiStyle.TILE_FONT_SIZE, UiStyle.MUTED)
 	_info.visible = false
 	box.add_child(_info)
-	# Hinweiszeile ist immer da (auch leer), damit alle Buttons auf einer Höhe liegen.
-	_hint = _line("", UiStyle.TILE_FONT_SIZE, UiStyle.WARNING)
-	_hint.name = "TileHint_%s" % key
-	_hint.custom_minimum_size.y = UiStyle.TILE_HINT_HEIGHT
-	box.add_child(_hint)
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(spacer)
 
+	# Unten: Hinweiszeile (immer reserviert, damit alle Buttons auf einer Höhe liegen) und darüberliegend die
+	# 84-px-Tippfläche des Buttons, von der nur die unteren 56 px gezeichnet werden.
+	var action_area := Control.new()
+	action_area.name = "ActionArea"
+	action_area.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(action_area)
+	_hint = _line("", UiStyle.TILE_FONT_SIZE, UiStyle.WARNING)
+	_hint.name = "TileHint_%s" % key
+	var hint_height := _hint.get_minimum_size().y
+	_hint.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_hint.offset_bottom = hint_height
+	action_area.add_child(_hint)
+	action_area.custom_minimum_size.y = maxf(UiStyle.TOUCH_SIZE, hint_height + 4.0 + UiStyle.TILE_BUTTON_VISIBLE)
+
 	button = action_button
 	_action_text = action_text
 	button.text = action_text
-	button.custom_minimum_size.y = UiStyle.TILE_BUTTON_HEIGHT
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	if is_purchase:
-		UiStyle.style_purchase_button(button)
-	box.add_child(button)
+	button.add_theme_font_size_override("font_size", UiStyle.TILE_BUTTON_FONT_SIZE)
+	UiStyle.style_tile_button(button, is_purchase)
+	button.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	button.offset_top = -UiStyle.TOUCH_SIZE
+	action_area.add_child(button)
 
 
 ## Name eines Infotexts (z. B. "CompanyInfo_merch_label"), falls Tests/Anzeige ihn brauchen.
@@ -110,7 +126,8 @@ func set_reason(reason: String) -> void:
 	button.disabled = not reason.is_empty()
 	button.text = _action_text if reason.is_empty() else reason
 	button.add_theme_font_size_override("font_size",
-			UiStyle.TILE_REASON_FONT_SIZE if not reason.is_empty() else UiStyle.TILE_BUTTON_FONT_SIZE)
+			UiStyle.MIN_READ_FONT_SIZE if not reason.is_empty() else UiStyle.TILE_BUTTON_FONT_SIZE)
+	_hint.visible = reason.is_empty()  # gesperrt: Der Button nutzt die volle Höhe für den Grund
 
 
 func _line(text: String, font_size: int, color: Color) -> Label:
@@ -126,7 +143,7 @@ func _chip(effect: Dictionary) -> HBoxContainer:
 	var color := UiStyle.POSITIVE if tone == TONE_GOOD else (UiStyle.NEGATIVE if tone == TONE_COST else UiStyle.MUTED)
 	var chip := HBoxContainer.new()
 	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	chip.add_theme_constant_override("separation", 4)
+	chip.add_theme_constant_override("separation", 3)
 	var icon_path: String = effect.get("icon", "")
 	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
 		var icon := TextureRect.new()

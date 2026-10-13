@@ -44,6 +44,7 @@ func _init(kind: String, title: String, window_content: Control, closable: bool 
 		add_theme_stylebox_override("panel", UiStyle.window_box(UiStyle.COMPACT_WINDOW_PADDING))
 		_title.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		_title.clip_text = false
+		_title.add_theme_font_size_override("font_size", UiStyle.COMPACT_TITLE_FONT_SIZE)
 		extra.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header.add_child(extra)
 	# Rund wie die Buttons der Spielansicht (G4.5): Kreis 56 px, Tippfläche 84 px.

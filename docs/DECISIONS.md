@@ -421,3 +421,17 @@ Rahmen-Button statt der vollen Akzentfarbe. Die Gründungs-Kachel zeigt Gebühr 
 Offen: (1) Im „Grenzfall“ (kein echtes Gerät) braucht das Studio mit 3 Spalten 3 Reihen und scrollt – die Reiter aus
 G4.6 lösen das. (2) Die Kachel-Buttons sind 74 px hoch, wie im Mockup: ≈ 44 pt nur auf dem Pro Max, ≈ 40 pt auf
 13/14 und ≈ 38 pt auf dem SE – klären in G4.7 (84 px kostet eine Reihe oder Reiter).
+
+## 047 – Lesbarkeit der Kacheln (G4.5b)
+Mindestschrift für Lesetext 21 px ≈ 11 pt auf allen iPhones (720 / Bildschirmhöhe in Punkten: SE 1,92 px/pt, Pro Max
+1,67 px/pt). Kachel-Namen 23 px, Lesetext und Sperrgründe 21 px, Button-Text 22 px; Ortsname im Ortsfenster 34 px.
+Kachel-Buttons: sichtbar 56 px, Tippfläche 84 px – der Button ist 84 px hoch, die Styleboxen zeichnen mit negativer
+`expand_margin_top` nur den unteren Teil; der unsichtbare Teil liegt über der Hinweiszeile (Tipps dort starten die
+Aktion). Gesperrte Buttons zeigen die volle Höhe für den Sperrgrund (bis 2–3 Zeilen); die Hinweiszeile tritt dann
+zurück. Wirkungen alle als Symbol + Zahl (Follower: Person, Community: Gruppe, Ruf: Stern, Auslastung: Balken; Kenney
+„Game Icons“, CC0) – erklärt werden sie im Tutorial (Paket T). Platz ohne kleinere Schrift: Öffnungszeiten und
+Entfernung in 2 Zeilen, Ortsbeschreibung nur noch im Tooltip (später Lexikon), Innenabstände 8 px, Reihenabstand 8 px,
+Chip-Abstand 8 px. Abweichungen vom Auftrag: (1) Konflikt-Hinweis „⚠ Verpasst: 14:00“ statt „… Termin 14:00“ –
+gemessen 257 px, die Kacheln sind 222–248 px breit. (2) „Q&A mit der Community“ stand in `data/content/formats.json`
+(nicht activities.json) – dort umbenannt. Bekannt offen: Im „Grenzfall“ (3 Spalten, kein echtes Gerät) passen Studio
+und Büro nicht ohne Scrollen und die Titelzeile zeigt „…“ – kommt mit den Reitern in G4.6.

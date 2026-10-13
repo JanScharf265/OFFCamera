@@ -10,8 +10,11 @@ const AppScript := preload("res://scripts/ui/app.gd")
 const Helpers := preload("res://tests/helpers.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
 const SAVE_PATH := "user://test_layout_save.json"
+## Orte, die im „Grenzfall“ bis zu den Reitern (G4.6) scrollen dürfen.
+const GRENZFALL_UNTIL_TABS := ["studio", "office"]
 const LONG_TEXT := "Tagesabschluss Tag 12: Umsatz +123,45 € (30,00 € + 40,00 € Filiale + 18,00 € Reichweite · Auslastung 88 % · Ruf +5 %) · Fixkosten -45,00 € · Ergebnis +78,45 €\nMiete Wohnung (Woche 3) automatisch bezahlt: -80,00 €.\nMahnung: Stadtabgabe (für Woche 2) – offen jetzt 25,00 € (+15,00 € Mahngebühr)."
 
 
@@ -198,6 +201,8 @@ func test_location_windows_fit_without_scrolling() -> void:
 		var app := _app()
 		var screen := _busy_game(app)
 		var game = app.get("game")
+		# 12:40: längere Aktionen ließen den Termin um 14:00 verpassen → Hinweiszeilen mit Konflikt prüfen.
+		game.time.advance(TimeSystemScript.at(1, 12, 40) - game.time.get_minutes())
 		for location_id in game.locations.get_catalog().get_ids():
 			_press(app, "MapPin_%s" % location_id)
 			Layout.apply(app, device)
@@ -224,16 +229,40 @@ func test_location_windows_fit_without_scrolling() -> void:
 			var columns: int = content.call("get_columns")
 			assert_true(columns >= 3 and columns <= 4, "%s: %d Spalten" % [tag, columns])
 			var needed := content.get_combined_minimum_size().y
-			# Der „Grenzfall“ (kein echtes Gerät, schmal + große Ränder) hat nur 3 Spalten: Das Studio (7 Kacheln)
-			# braucht dort 3 Reihen und passt erst mit den Reitern aus G4.6 ohne Scrollen.
-			if not (device.begins_with("Grenzfall") and location_id == "studio"):
+			# Der „Grenzfall“ (kein echtes Gerät, schmal + große Ränder) hat nur 3 Spalten: Studio (7 Kacheln) und
+			# Büro (4 Kacheln, mit 21-px-Schrift aus G4.5b) brauchen dort mehr Höhe und passen erst mit den Reitern
+			# aus G4.6 ohne Scrollen. Alle echten Geräteklassen: ohne Ausnahme.
+			if not (device.begins_with("Grenzfall") and location_id in GRENZFALL_UNTIL_TABS):
 				assert_true(needed <= scroll.size.y + 0.5, "%s: braucht %d px, sichtbar %d – müsste scrollen" % [tag,
 						needed, scroll.size.y])
+			# G4.5b: Tippfläche jedes Kachel-Buttons ≥ 84 px, Lesetext ≥ 21 px, Namen und Hinweise nicht abgeschnitten.
+			for node in window.find_children("*", "Button", true, false):
+				var button := node as Button
+				if button.visible and button.name != "WindowCloseButton":
+					assert_true(button.size.y >= UiStyle.TOUCH_SIZE - 0.5, "%s: Tippfläche %s nur %d px" % [tag,
+							button.name, button.size.y])
+					assert_true(button.get_theme_font_size("font_size") >= UiStyle.MIN_READ_FONT_SIZE,
+							"%s: Schrift %s zu klein" % [tag, button.name])
+			for node in window.find_children("*", "Label", true, false):
+				var label := node as Label
+				if label.name == "WindowTitle" or not label.is_visible_in_tree():
+					continue
+				assert_true(label.get_theme_font_size("font_size") >= UiStyle.MIN_READ_FONT_SIZE,
+						"%s: „%s“ in %d px" % [tag, label.text, label.get_theme_font_size("font_size")])
+				var name_text := String(label.name)
+				# Kachel-Namen und Hinweise: auf allen Klassen; Titelzeile (Zeiten, Entfernung): auf echten Geräten –
+				# im „Grenzfall“ darf sie „…“ zeigen.
+				var header_line := name_text in ["LocationHours", "LocationDistance"]
+				if name_text.begins_with("TileTitle_") or name_text.begins_with("TileHint_") \
+						or (header_line and not device.begins_with("Grenzfall")):
+					var font := label.get_theme_font("font")
+					var width := font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
+							label.get_theme_font_size("font_size")).x
+					assert_true(width <= label.size.x + 0.5, "%s: „%s“ abgeschnitten (%d > %d px)" % [tag, label.text,
+							width, label.size.x])
 			var tops := {}
 			for tile in content.find_child("TileGrid", true, false).get_children():
 				var tile_control := tile as Control
-				var button: Button = (tile_control.get_child(0) as Control).get_child(-1)
-				assert_true(button.custom_minimum_size.y >= UiStyle.TILE_BUTTON_HEIGHT, "%s: Button zu klein" % tag)
 				var row := roundi(tile_control.position.y)
 				var bottom := tile_control.position.y + tile_control.size.y
 				if tops.has(row):

@@ -73,7 +73,7 @@
 	},
 	{
 		"id": "merch_shoutout",
-		"display_name": "Merch im Stream zeigen",
+		"display_name": "Merch zeigen",
 		"description": "Eine halbe Stunde die neue Kollektion in die Kamera halten.",
 		"location": "studio",
 		"duration_minutes": 30,

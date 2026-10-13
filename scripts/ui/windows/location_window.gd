@@ -19,7 +19,6 @@ var location_id := ""
 
 var _screen
 var _game
-var _location_description: Label
 var _location_hours: Label
 var _location_distance: Label
 var _travel_button: Button
@@ -54,7 +53,7 @@ func _ready() -> void:
 	_grid.name = "TileGrid"
 	_grid.columns = UiStyle.TILE_MAX_COLUMNS
 	_grid.add_theme_constant_override("h_separation", UiStyle.TILE_GAP)
-	_grid.add_theme_constant_override("v_separation", UiStyle.TILE_GAP)
+	_grid.add_theme_constant_override("v_separation", UiStyle.TILE_ROW_GAP)
 	_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	add_child(_grid)
 
@@ -122,10 +121,14 @@ func refresh() -> void:
 
 ## Hinweis, wenn die Aktion einen Termin verpassen ließe (Termine aus dem AppointmentSystem).
 func _conflict_hint(minutes: int) -> String:
-	var titles := PackedStringArray()
+	# Kurz (G4.5b): nur die Uhrzeit, z. B. „⚠ Verpasst: 14:00“ – „Termin“ passt in 21 px nicht in die Kachel.
+	# Den vollen Namen nennt die Warnung beim Start.
+	var times := PackedStringArray()
 	for definition in _game.appointments.get_conflicts(minutes):
-		titles.append("„%s“ %s" % [definition.title, TimeSystemScript.format_stamp(definition.start_minutes).get_slice(" · ", 1)])
-	return CONFLICT_PREFIX + ", ".join(titles) if not titles.is_empty() else ""
+		times.append(TimeSystemScript.format_stamp(definition.start_minutes).get_slice(" · ", 1))
+	if times.is_empty():
+		return ""
+	return CONFLICT_PREFIX + ", ".join(times)
 
 
 func _tile(key: String, title: String, button_name: String, action_text: String, is_purchase: bool,
@@ -145,33 +148,35 @@ func _build_details() -> Control:
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_theme_constant_override("separation", 2)
 	row.add_child(info)
+	# Zwei Zeilen (G4.5b, spart Höhe für die Kacheln): Öffnungszeiten, Entfernung. Die Beschreibung des Orts steht
+	# nur noch im Tooltip des Fensterinhalts (später im Lexikon, Paket T).
 	_location_hours = _info_line("LocationHours", UiStyle.TEXT)
 	info.add_child(_location_hours)
 	_location_distance = _info_line("LocationDistance", UiStyle.MUTED)
 	info.add_child(_location_distance)
-	_location_description = _info_line("LocationDescription", UiStyle.MUTED)
-	info.add_child(_location_description)
 	_travel_button = _screen.scroll_button("Hinfahren", "TravelButton")
-	_travel_button.custom_minimum_size = Vector2(UiStyle.TRAVEL_BUTTON_WIDTH, UiStyle.TILE_BUTTON_HEIGHT)
 	_travel_button.add_theme_font_size_override("font_size", UiStyle.TILE_BUTTON_FONT_SIZE)
+	UiStyle.style_tile_button(_travel_button)
+	_travel_button.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE * 2.0, UiStyle.TOUCH_SIZE)
 	_travel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_travel_button.pressed.connect(func() -> void: _screen.on_travel_pressed(location_id))
 	row.add_child(_travel_button)
 	return row
 
 
+## Volle Breite der Info-Spalte; „…“ nur als Notfall, damit die Titelzeile das Fenster nie verbreitert
+## (der Layout-Test prüft, dass auf echten Geräten nichts abgeschnitten wird).
 func _info_line(node_name: String, color: Color) -> Label:
 	var line := UiStyle.label("", UiStyle.TILE_FONT_SIZE, color)
 	line.name = node_name
 	line.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	line.clip_text = true
+	line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return line
 
 
 func _refresh_details() -> void:
 	var definition = _game.locations.get_catalog().get_definition(location_id)
-	_location_description.text = definition.description
-	_location_description.visible = not definition.description.is_empty()
+	tooltip_text = definition.description
 	var now_open: bool = _game.locations.is_open_at(location_id, _game.time.get_minutes())
 	_location_hours.text = "Geöffnet: %s · jetzt %s" % [LocationSystemScript.format_hours(definition),
 			"offen" if now_open else "geschlossen"]
@@ -235,7 +240,7 @@ func _refresh_equipment_card(equipment_id: String) -> void:
 
 func _build_company_card(type_id: String) -> Control:
 	var definition = _game.company.get_catalog().get_definition(type_id)
-	var tile := _tile(type_id, "%s gründen" % definition.display_name, "CompanyFoundButton_%s" % type_id, "Gründen",
+	var tile := _tile(type_id, definition.display_name, "CompanyFoundButton_%s" % type_id, "Gründen",
 			false, func() -> void: _screen.on_company_found_pressed(type_id))
 	tile.tooltip_text = definition.description
 	tile.info_label("CompanyInfo_%s" % type_id)

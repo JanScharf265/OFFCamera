@@ -12,6 +12,15 @@ const COMPANY_SHORT_LABELS := {"utilization": "Auslastung", "reputation": "Ruf (
 ## Symbole der Kachel-Chips (G4.5).
 const STAT_ICONS := {"energy": "res://assets/icons/bolt.svg", "mood": "res://assets/icons/smiley.svg"}
 const MONEY_ICON := "res://assets/kenney/game-icons-expansion/coin.png"
+const CHANNEL_ICONS := {
+	"followers": "res://assets/kenney/game-icons/singleplayer.png",
+	"community": "res://assets/kenney/game-icons/multiplayer.png",
+	"reputation": "res://assets/kenney/game-icons/star.png",
+}
+const COMPANY_ICONS := {
+	"utilization": "res://assets/kenney/game-icons/barsVertical.png",
+	"reputation": "res://assets/kenney/game-icons/star.png",
+}
 
 
 ## Betrag mit Vorzeichen, z. B. "+25,00 €" / "-15,00 €".
@@ -178,17 +187,18 @@ static func effect_chips(effects: Dictionary, money_cents: int, channel: Diction
 		var change: int = effects.get(key, 0)
 		if change != 0:
 			chips.append(chip("%+d" % change, change, STAT_ICONS[key]))
+	# G4.5b: Kanal- und Firmenwerte nur als Symbol + Zahl (erklärt im Tutorial, Paket T).
 	var followers: int = channel.get("followers", 0)
 	if followers != 0:
-		chips.append(chip("%s Follower" % signed_int(followers), followers))
+		chips.append(chip(signed_int(followers), followers, CHANNEL_ICONS["followers"]))
 	for key in ["community", "reputation"]:
 		var change: int = channel.get(key, 0)
 		if change != 0:
-			chips.append(chip("%s %+d" % [CHANNEL_SHORT_LABELS[key], change], change))
+			chips.append(chip("%+d" % change, change, CHANNEL_ICONS[key]))
 	for key in ["utilization", "reputation"]:
 		var change: int = company.get(key, 0)
 		if change != 0:
-			chips.append(chip("%s %+d" % [COMPANY_SHORT_LABELS[key], change], change))
+			chips.append(chip("%+d" % change, change, COMPANY_ICONS[key]))
 	if money_cents != 0:
 		chips.append(chip(signed_money(money_cents), money_cents, MONEY_ICON))
 	return chips

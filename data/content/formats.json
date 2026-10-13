@@ -31,7 +31,7 @@
 	},
 	{
 		"id": "community_qa",
-		"display_name": "Q&A mit der Community",
+		"display_name": "Community-Q&A",
 		"description": "Eine Stunde Fragen aus dem Chat beantworten.",
 		"location": "studio",
 		"duration_minutes": 60,
