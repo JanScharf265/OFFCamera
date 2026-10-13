@@ -238,5 +238,73 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [ ] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [ ] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
+## Neue Ausrichtung (Entwurf – wartet auf Freigabe des Game Directors)
+Grundlage: `docs/VISION.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
+das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
+Jedes Ticket = eine Sitzung: Tests grün, Mac-Fensterlauf mit Screenshots, Doku, Commit.
+Ab T bekommt jede neue Mechanik im selben Ticket ihr Tutorial. Jede neue Spielstand-Version bekommt eine
+echte Testdatei und eine Migration.
+
+### G3 – App-Icon und Logo
+- [ ] G3.1 Drei Icon-Entwürfe als SVG (`assets/icon/drafts/`) + Vorschau-PNG (1024 px und 60 px, heller und dunkler Homescreen) – Erzeuger in `tools/icon/` → Game Director wählt
+- [ ] G3.2 Gewähltes Icon: Quelle `assets/icon/app_icon.svg`, alle iOS-Größen daraus erzeugen, in `export_presets.cfg` eintragen, Export prüfen
+- [ ] G3.3 Freie Schrift (OFL, Lizenz unter `assets/fonts/`) + Schriftzug „OFF CAMERA“ als SVG; Hauptmenü (`scripts/ui/main_menu.gd`) und Startbild (Boot-Splash/Launch-Screen) in derselben Farbwelt
+
+### G4 – UI-Layout (mehr Karte)
+- [ ] G4.1 Layout-Mockup als Screenshot aus einem Fensterlauf (HUD-Leiste, runde Seitenbuttons, Kachel-Fenster) → Freigabe
+- [ ] G4.2 HUD als schmale Leiste oben (neu `scripts/ui/hud_bar.gd`, `game_screen.gd`); Plätze für Schwarzgeld/Hitze, sichtbar erst wenn es sie gibt
+- [ ] G4.3 Runde Seitenbuttons mit Mini-Beschriftung, Gruppen Leben/Geschäft, Menü in der Ecke, Zählerpunkt als Bauteil (neu `scripts/ui/side_button.gd`, `game_screen.gd`)
+- [ ] G4.4 Ortsfenster als Kachel-Raster, 3–4 Spalten, ca. 85 % Breite (neu `scripts/ui/activity_tile.gd`, `windows/location_window.gd`, `activity_text.gd`)
+- [ ] G4.5 Reiter statt Scrollen, wenn ein Ort mehr Kacheln hat als ins Raster passen (Reiter-Zuordnung als Daten)
+- [ ] G4.6 Layout-Tests für die 4 Geräteklassen aus 7.2 umstellen, neuer Test „Touch-Ziele ≥ 44 pt“ (`tests/test_layout*.gd`, `tests/layout_helper.gd`)
+
+### G5 – Hinweise und Komfort
+- [ ] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, neu `scripts/core/settings.gd`): Schalter Kalender automatisch, Vibration; Einstellungsseite erweitern
+- [ ] G5.2 Dynamic Island: zuerst Mini-Test auf dem iPhone, ob Godot die Drehrichtung meldet (siehe offene Fragen); dann Button-Leisten auf die Seite ohne Insel, Tests mit Safe Area links/rechts (`app.gd`, `game_screen.gd`)
+- [ ] G5.3 „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl (Termine, Fristen); Daten dafür aus einer Systemabfrage, nicht aus der UI (neu `scripts/core/day_plan.gd`, neu `windows/calendar_window.gd` statt `appointments_window.gd`)
+- [ ] G5.4 Kalender öffnet sich bei Tagesbeginn genau einmal (abschaltbar); Reihenfolge Ereignis → Kalender; Spielstand Version 13 + Testdatei
+- [ ] G5.5 Konflikt-Popup statt „zweimal tippen“ (Ende der Aktion, betroffener Termin, „Trotzdem starten“/„Abbrechen“) für Aktivitäten und Fahrten (nutzt `AppointmentSystem.get_conflicts`)
+- [ ] G5.6 Kachel-Vorschau „Ende HH:MM“ + Wirkungen; Aktion „Warten bis Terminbeginn“ (über das TimeSystem)
+- [ ] G5.7 Erinnerung ≤ 30 Spielminuten vor einem Termin (Termin, Ort, Fahrzeit), genau einmal je Termin; Spielstand Version 14 + Testdatei
+- [ ] G5.8 Kombi-Button „Hinfahren und starten“ mit Konfliktprüfung für die Gesamtzeit (Fahrt + Aktion)
+- [ ] G5.9 Rote Zählerpunkte mit Zahl (Termine heute, fällige Fristen, offene Ereignisse); Zählungen kommen aus den Systemen
+- [ ] G5.10 Vibration (`Input.vibrate_handheld`) bei Warnungen und großen Geldänderungen, mit Schalter; Wirkung nur auf dem iPhone prüfbar
+
+### T – Tutorial-System
+- [ ] T.1 Datenformat `data/tutorials/tutorials.json` (ID, Auslöser, Text, UI-Element, Reihenfolge, Voraussetzungen) + Katalog mit Prüfung (neu `scripts/models/tutorial_definition.gd`, `scripts/systems/tutorial_catalog.gd`)
+- [ ] T.2 TutorialSystem: Auslöser, jedes Tutorial genau einmal, gesehene IDs im Spielstand (neue Version + Migration + Testdatei), kostet keine Spielzeit
+- [ ] T.3 Anzeige: abdunkeln, Rahmen/Pfeil am UI-Element (stabile UI-IDs), „Verstanden“; feste Reihenfolge Ereignis → Kalender → Tutorial (neu `scripts/ui/tutorial_overlay.gd`)
+- [ ] T.4 Einstellungen „Tutorials an/aus“ und „Tutorials zurücksetzen“; Fenster „Hilfe/Lexikon“ mit allen gesehenen Erklärungen
+- [ ] T.5 Texte Grundlagen: Karte, Wischen/Zoomen, Gebäude antippen, Hinfahren, Aktivitäten, Energie/Stimmung, Kalender, Erinnerungen, Ereignisse, Speichern/Fortsetzen
+- [ ] T.6 Texte Karriere und Firma: Kanal/Content/Ausrüstung, Firma gründen/Einlage/Entnahme, Tagesabschluss, Fristen/Mahnung, Buchungen/Wochenübersicht
+- [ ] T.7 Abdeckungstest (jede Mechanik-ID hat ein Tutorial) + Layout-Test der Texte auf den 4 Geräteklassen; Regel in `CLAUDE.md`
+
+### U – Unterwelt (Hauptspiel; jedes Ticket mit Tutorial, Daten unter `data/underworld/`)
+- [ ] U.1 Schwarzgeld als drittes Konto im einen Ledger (`ledger_system.gd`, `consistency_check.gd`, Buchungen-Fenster); Spielstand-Version + Testdatei
+- [ ] U.2 Organisation: Name, Respekt, Hitze 0–100 (sinkt bei Ruhe), Stabilität (neu `scripts/systems/organisation_system.gd`); Schritt im DayCycle; Spielstand-Version
+- [ ] U.3 Einstiegs-Ereignis (neues Spiel und alte Spielstände), Namenseingabe, Fenster „Organisation“ + Seitenbutton
+- [ ] U.4 Story-Aufträge als Datenkette + Fenster + roter Punkt (neu `mission_system.gd`); erster Auftrag „Erster Deal“
+- [ ] U.5 Produkte als Daten (Gras, Haschisch, Koks, Pillen: Einkaufspreis, Verkaufspreis, Qualität, Hitze je Einheit – nur Spielwerte)
+- [ ] U.6 Erfundener Lieferant: Einkauf auf Vorkasse, Bestand, Lieferung kann platzen (Seed)
+- [ ] U.7 Lieferant auf Kredit: Schulden als einmalige Fristen im ObligationSystem, Druck-Ereignisse
+- [ ] U.8 Standorte als Daten (Felder nach Leitfaden 9.3), erstes Versteck, Gebäude auf der Karte (Kenney CC0, `city_layout.gd`, `city_map.gd`), laufende Kosten
+- [ ] U.9 Verkaufen als Aktion (Zeit, Schwarzgeld, Hitze) – erster Deal abgeschlossen
+- [ ] U.10 Crew 1: Rollen als Daten, Bewerber (Seed), einstellen/feuern, Löhne im Tageswechsel
+- [ ] U.11 Crew 2: Dealer verkaufen täglich (Unterwelt-Abrechnung im DayCycle), Können/Loyalität/Gier, befördern
+- [ ] U.12 Gebiete als Daten (Viertel mit Nachfrage, Polizeipräsenz, Rivaleneinfluss) + Karten-Overlay
+- [ ] U.13 Gebiete übernehmen, halten, verlieren
+- [ ] U.14 2–3 erfundene Rivalen-Gangs: Stärke, Aggression, Gebiete; Konflikt, Verhandlung, Waffenstillstand (Gewalt nur als Text und Folgen)
+- [ ] U.15 Crew-Folgen: Verhaftung, Verrat, Spitzel, Abwerbung (Ereignisse)
+- [ ] U.16 Waschen über Tarnfirmen als reine Spielmechanik (Gebühr %, Tageslimit, Risiko) – Merch-Label
+- [ ] U.17 Schwarzgeld ausgeben: eingeschränkt bzw. erhöht Hitze
+- [ ] U.18 Weitere Standorte: Verkaufspunkt, Lager, Club (auch Tarnfirma), Produktion („X Einheiten/Tag“), Liegeplatz am Hafen; ausbauen
+- [ ] U.19 Polizei 1: Beobachtung → Ermittlung nach Hitze, verbunden mit den Behördenereignissen aus Phase 5
+- [ ] U.20 Polizei 2: Razzia (Folgen für Standorte, Bestand, Schwarzgeld – als Buchung)
+- [ ] U.21 Justiz: Festnahme, Optionen (Anwalt, Bestechung, stillhalten, Crew opfern, kooperieren), Kaution, Prozess, Haft als Spieltage
+- [ ] U.22 Doppelleben: Kanal senkt Hitze-Anstieg leicht, Bekanntheit erhöht Aufmerksamkeit, Ereignisse Paparazzi/Leak/Gerüchte/Skandal
+- [ ] U.23 Beziehungen: erste Figuren als Daten mit Vertrauen/Wissen und Ereignissen
+- [ ] U.24 Tageswechsel komplett (Abrechnung → Hitze → Fristen → Ereignisse → Kalender), Bot und lange Tests um die Unterwelt erweitern
+- [ ] U.25 HUD und Seitenbuttons final, Abnahme Paket U
+
 ## Spätere Phasen
 8. Balancing und mehr Inhalte
