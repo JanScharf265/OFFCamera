@@ -81,6 +81,8 @@ Das Ergebnis heißt `exports/ios/OFFCamera.xcodeproj` (frühere Exporte hießen 
 Satz vom 11.10. habe ich nach `exports/ios/_alt_2026-10-11/` verschoben, damit er nicht versehentlich geöffnet wird).
 App-Symbol: Quellen `assets/icon/app_icon.svg` (ab 114 px) und `assets/icon/app_icon_small.svg` (bis 87 px); alle iOS-Größen
 `assets/icon/app_icon_<px>.png` erzeugt `tools/icon/make_icon.gd` (Befehl in der Datei), danach `--import`.
+Startbild (Boot-Splash und iOS-Launch-Screen): `assets/splash/splash.png`, gerendert aus dem Schriftzug (`scripts/ui/logo.gd`)
+mit `tools/splash/make_splash.gd` (braucht ein Fenster; Befehl in der Datei).
 Warnungen zu Kamera-/Mikrofon-/Foto-Usage-Descriptions sind harmlos (die App fragt diese Rechte nicht an).
 
 Fehler? Exakte Meldung aus Godot bzw. Xcode kopieren (siehe „Fehlerbericht“ in [`CLAUDE.md`](CLAUDE.md)).
@@ -150,6 +152,9 @@ data/company/        Unternehmensarten als JSON (Phase 4)
 data/obligations/    Fristen (Mieten, fiktive Stadtabgabe) als JSON (Phase 5)
 scripts/ui/          UI: App-Wurzel, Hauptmenü, Spielansicht, Stadtkarte, windows/ (Fenster) – zeigen nur an, keine Spielregeln
 assets/kenney/       Grafiken aus Kenney-CC0-Paketen (nur benutzte Dateien, je mit License.txt)
+assets/fonts/        Freie Schriften (OFL) mit Lizenztext (G3.3: Bebas Neue für den Schriftzug)
+assets/icon/         App-Symbol (SVG-Quellen + alle iOS-Größen)
+assets/splash/       Startbild
 tests/               Tests + Runner (nicht im iOS-Export)
 docs/                Roadmap, Architektur, Entscheidungen
 ```

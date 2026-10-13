@@ -9,6 +9,7 @@ signal continue_pressed
 signal settings_pressed
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const LogoScript := preload("res://scripts/ui/logo.gd")
 
 const NEW_GAME_TEXT := "Neues Spiel"
 const CONFIRM_TEXT := "Wirklich neu beginnen? Nochmal tippen"
@@ -31,13 +32,9 @@ func _ready() -> void:
 	alignment = BoxContainer.ALIGNMENT_CENTER
 	add_theme_constant_override("separation", 12)
 
-	var title := UiStyle.label("OFF CAMERA", UiStyle.MENU_TITLE_FONT_SIZE)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(title)
-
-	var subtitle := UiStyle.label("Prototyp", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(subtitle)
+	var logo := LogoScript.new()
+	logo.font_size = UiStyle.MENU_LOGO_FONT_SIZE
+	add_child(logo)
 
 	if not message.is_empty():
 		var message_label := UiStyle.wrapping_label(message, UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE)

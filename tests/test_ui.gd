@@ -521,6 +521,23 @@ func test_ledger_window_shows_week_summary() -> void:
 
 # --- Spielstand im Menü und defekte Stände (Phase 6) -------------------------------------
 
+## Ticket G3.3: Schriftzug im Hauptmenü mit der freien Schrift, Startbild eingetragen.
+func test_main_menu_shows_logo() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	var off := _find(app, "Off") as Label
+	var camera := _find(app, "Camera") as Label
+	assert_true(off != null and camera != null, "Schriftzug fehlt")
+	if off != null and camera != null:
+		assert_eq(off.text + " " + camera.text, "OFF CAMERA")
+		var font := off.get_theme_font("font") as FontVariation
+		assert_true(font != null and font.base_font.resource_path.ends_with("BebasNeue-Regular.ttf"), "falsche Schrift")
+	assert_true(FileAccess.file_exists("res://assets/fonts/bebas_neue/OFL.txt"), "Schriftlizenz fehlt")
+	assert_eq(ProjectSettings.get_setting("application/boot_splash/image"), "res://assets/splash/splash.png")
+	app.free()
+
+
 func test_main_menu_shows_save_info() -> void:
 	var app := _start_app()
 	if app == null:

@@ -349,3 +349,16 @@ für 40–87 px (Ring 96 statt 60 px dick und größer, kein Glanzlicht und kein
 Pupille größer, Schattenhälfte heller – im Vergleich bei 40/60 px auf schwarzem Homescreen sonst kaum sichtbar).
 Jede Größe wird direkt aus dem SVG gerendert (`Image.load_svg_from_string` mit Skalierung) statt verkleinert, ohne
 Alpha gespeichert. Varianten für dunkles/getöntes iOS-Erscheinungsbild (`_dark`, `_tinted`) bleiben vorerst leer.
+
+## 041 – Schriftzug und Startbild
+Wahl des Game Directors aus zwei Varianten (G3.3): „Kino“ – Bebas Neue (SIL OFL 1.1, Lizenz in
+`assets/fonts/bebas_neue/OFL.txt`), „OFF“ Neon-Magenta mit weichem radialem Leuchten, „CAMERA“ hell. Verworfen:
+„Marke“ (Objektiv + Archivo Black); Unbounded schied vorher aus, weil sein „E“ eine gewollte Kerbe hat, die neben
+dem „M“ wie ein Fehler aussah. Der Schriftzug ist ein UI-Baustein (`scripts/ui/logo.gd`), nicht ein Bild, damit er
+in jeder Größe scharf bleibt; nur die übrige UI behält die Standardschrift. Das Startbild wird aus genau diesem
+Baustein gerendert (`tools/splash/make_splash.gd`, 2560 × 1440, Hintergrund = `UiStyle.BACKGROUND`), damit der
+Übergang Startbild → Menü ruhig ist. Eingetragen als `application/boot_splash/image` (Godot-Startbild, Stretch
+„Keep“) und über `storyboard/image_scale_mode = 0` („wie Startbild“) automatisch als iOS-Launch-Screen
+(Export geprüft: SplashImage = splash.png, Hintergrundfarbe 0,07/0,07/0,09). Offen fürs iPhone: Der Launch-Screen
+zeigt das Bild zentriert in Originalgröße (@2x/@3x), der Schriftzug kann daher kurz anders groß sein als im
+Godot-Startbild – beim nächsten iPhone-Build ansehen.

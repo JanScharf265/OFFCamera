@@ -221,6 +221,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   hält die laufende `GameState`-Sitzung und wechselt zwischen `main_menu.gd` und `game_screen.gd`.
 - UI wird im Code aus Containern gebaut (keine festen Pixelpositionen). Farben/Größen in `ui_style.gd`,
   Texte für Aktivitäten/Beträge in `activity_text.gd`.
+- Schriftzug „OFF CAMERA“ (G3.3): Baustein `logo.gd` (Bebas Neue, OFL) im Hauptmenü; dasselbe Bild als Startbild
+  (`assets/splash/splash.png`, erzeugt von `tools/splash/make_splash.gd`).
 - Spielansicht im Querformat (G2, `game_screen.gd`): Stadtkarte im Vollbild (auch unter Notch/Home-Balken),
   darüber innerhalb der Safe Area: `HudLeft` (Tag, Uhrzeit, Ort), `HudRight` (Konto, Firmenkonto, Energie,
   Stimmung), `LeftBar` (Termine, Fristen – rot mit Anzahl bei offenen Fristen, Kanal, Firma – erst nach der Gründung) und `RightBar` (Buchungen, Menü, Hier),

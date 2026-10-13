@@ -25,8 +25,9 @@ const CORNER_RADIUS := 16
 ## Breite der zentrierten Spalte für Menüs (Querformat).
 const COLUMN_WIDTH := 640
 ## Querformat-Menüs (Phase 7): kompakter Titel und Buttons (84 px ≈ 46 pt, über Apples 44 pt).
-const MENU_TITLE_FONT_SIZE := 56
 const MENU_BUTTON_HEIGHT := 84
+## Schriftzug „OFF CAMERA“ im Hauptmenü (G3.3, ersetzt Titel + „Prototyp“).
+const MENU_LOGO_FONT_SIZE := 96
 ## Querformat-Spielansicht (G2): Seitenbuttons, Fenster, Hinweise.
 ## 4 Buttons je Seite müssen unter das HUD passen (720 px hoch, Safe Area). Gemessen (Godot 4.7):
 ## Mindesthöhe eines Seitenbuttons = Icon-Größe (icon_max_width) + 84 px für Text und Rand –
