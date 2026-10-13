@@ -85,7 +85,7 @@ Grafiken aus frei nutzbaren (CC0) Asset-Paketen, später austauschbar.
 - [x] Im Editor durchgespielt (Wischen mit der Maus, Tippen auf Gebäude/Schilder)
 - [x] iPhone-Abnahme: Wischen flüssig, Tippen trifft, Seite scrollt außerhalb der Karte, Notch/Home-Balken frei
 
-## Phase 3 – Streamer-/Creator-Karriere ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
+## Phase 3 – Streamer-/Creator-Karriere ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme im gebündelten Test 7.5 ✅)
 Kanalprofil (Follower, Community-Stimmung, Ruf) mit Grenzen und Wachstumsbremse, Content-Formate als Daten,
 Einnahmen nur über das Ledger, Equipment-Upgrades, zufällige regelbasierte Karriere-Ereignisse mit festem Seed,
 in der UI nachvollziehbar, warum sich Werte geändert haben.
@@ -97,7 +97,7 @@ in der UI nachvollziehbar, warum sich Werte geändert haben.
 - [x] Ticket 3.5: Karriere-UI: Kanal im HUD, Kanal-Karte mit Wachstumsbremse, Kanal-Verlauf mit Begründungen (196/196 Tests grün)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Content-Karten, Kanal-Karte, Kanal-Verlauf; damals Hochformat)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5) (die frühere Meldung „ok“ war falsch)
+- [x] iPhone-Abnahme – gebündelter iPhone-Test (Ticket 7.5) ok, 13.10.2026 (die frühere Meldung „ok“ war falsch)
 
 Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] Neues Spiel: HUD zeigt „Kanal: 120 Follower · Community 50 · Ruf 50“
@@ -112,7 +112,7 @@ Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ti
 - [ ] Spielstand aus Phase 2 lässt sich fortsetzen (Kanal mit Startwerten, keine Ausrüstung)
 - [ ] Alles per Touch bedienbar und scrollbar, nichts verdeckt
 
-## Phase 4 – Fiktionales Unternehmen und zweiter Standort ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
+## Phase 4 – Fiktionales Unternehmen und zweiter Standort ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme im gebündelten Test 7.5 ✅)
 Merch- und Lifestyle-Label (Follower treiben den Umsatz), getrennte Konten privat/Firma im einen Ledger,
 Tagesabschluss beim Tageswechsel, zweiter Standort als Filiale in Marbella, Management vor Ort (ohne Pflege sinkt
 die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), noch keine Mitarbeitenden.
@@ -124,7 +124,7 @@ die Auslastung langsam), Firmenkonto nie negativ (unbezahlte Tage kosten Ruf), n
 - [x] Ticket 4.5: Unternehmens-UI: Firmenkonto im HUD, Unternehmens-Karte mit Prognose, Einlage/Entnahme, Tagesabschlüsse und Unternehmens-Verlauf (246/246 Tests grün)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Gründung, Unternehmens-Karte, Tagesabschluss, Ladenlokal; Hochformat, Fenster seit G2)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
+- [x] iPhone-Abnahme – gebündelter iPhone-Test (Ticket 7.5) ok, 13.10.2026
 
 Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] Neues Spiel: kein Firmenkonto im HUD; Abschnitt „Unternehmen“ zeigt „Noch kein Unternehmen. Gründen möglich: Merch-Label (Büro).“
@@ -142,7 +142,7 @@ Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ti
 - [ ] Spielstand aus Phase 3 lässt sich fortsetzen (alle Buchungen auf dem Privatkonto, kein Unternehmen)
 - [ ] Alles per Touch bedienbar und scrollbar, nichts verdeckt oder abgeschnitten
 
-## Grafik-Ticket G2 – Querformat, Karte als Hauptbildschirm ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
+## Grafik-Ticket G2 – Querformat, Karte als Hauptbildschirm ✅ (Tests + Mac-Fensterlauf; iPhone-Abnahme im gebündelten Test 7.5 ✅)
 Grundsatzentscheidung des Game Directors (12.10.2026), vor Phase 5: Querformat (beide Richtungen), isometrische
 Stadtkarte im Vollbild, HUD in den oberen Ecken, Icon-Buttons an den Seiten öffnen Fenster, Gebäude antippen öffnet
 das Fenster des Orts. Safe Area (Notch seitlich, Home-Balken unten). Nur Darstellung – Spiellogik, Daten und Spielstand
@@ -154,7 +154,7 @@ bleiben unverändert (siehe DECISIONS 020).
 - [x] G2.4: Icons (Kenney „Game Icons“ + Erweiterung, CC0), Tests, Doku (255/255 Tests grün)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Start, Ortsfenster, Kanal-Fenster, Hinweis, Icons; 1280×720)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
+- [x] iPhone-Abnahme – gebündelter iPhone-Test (Ticket 7.5) ok, 13.10.2026
 
 Abnahme auf dem iPhone (G2; ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5):
 - [ ] App startet im Querformat, in beiden Richtungen; Drehen des iPhones dreht das Bild mit
@@ -169,7 +169,7 @@ Abnahme auf dem iPhone (G2; ersetzt durch den gebündelten iPhone-Test, Phase 7 
 - [ ] Hauptmenü und Einstellungen im Querformat bedienbar
 - [ ] „Fortsetzen“ nach Neustart: Spielstand unverändert (Spiellogik/Spielstand wurden nicht geändert)
 
-## Phase 5 – Finanzen, Fristen, Behördenereignisse ✅ (12.10.2026, Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
+## Phase 5 – Finanzen, Fristen, Behördenereignisse ✅ (12.10.2026, Tests + Mac-Fensterlauf; iPhone-Abnahme im gebündelten Test 7.5 ✅)
 Fiktive, abstrakte Spielwerte – keine realen Steuer- oder Rechtsregeln. Wertstellung je Buchung, Spielwoche Mo–So,
 wöchentliche Fristen (Miete Wohnung 80 €, Miete Studio 40 € vom Privatkonto; Stadtabgabe 15 % vom positiven
 Wochengewinn vom Firmenkonto), automatisch bezahlt wenn gedeckt, sonst überfällig; Mahngebühr erhöht den offenen
@@ -184,7 +184,7 @@ Ereignis nach 3 überfälligen Fristen; erste Fälligkeit Tag 8; kein Game Over.
 - [x] Test-Runner erkennt Skriptfehler (abgebrochene Tests zählen jetzt als fehlgeschlagen)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Karte mit „Fristen (1)“, Fristen-Fenster, Mahnung 90 € offen, Wochenübersicht, Prüfungstermin-Ereignis); dabei gefunden und behoben: linke Seitenleiste ragte mit 4 Buttons aus dem Bild
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
+- [x] iPhone-Abnahme – gebündelter iPhone-Test (Ticket 7.5) ok, 13.10.2026
 
 Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] In Woche 1 keine Fristen; am ersten Montag (Tag 8) Mieten automatisch bezahlt, Hinweis in der Rückmeldung
@@ -195,7 +195,7 @@ Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ti
 - [ ] Behördenereignisse erscheinen als Fenster mit Dauer/Ruf/Firmenkonto in den Folgen; ab 3 offenen Fristen sicher die Vollstreckungsankündigung
 - [ ] Seitenleisten mit 4 Buttons vollständig sichtbar, in beiden Querformat-Richtungen
 
-## Phase 6 – Save/Load-Stabilisierung und Migration ✅ (12.10.2026, Tests + lange Tests + Mac-Fensterlauf; iPhone-Abnahme offen – gesammelt in Phase 7)
+## Phase 6 – Save/Load-Stabilisierung und Migration ✅ (12.10.2026, Tests + lange Tests + Mac-Fensterlauf; iPhone-Abnahme im gebündelten Test 7.5 ✅)
 Echte Altstände aller Versionen als Testdateien, robustes Schreiben (Kopf, 3 Backups, gültige .tmp übernehmen, defekte
 Stände aufbewahren), Konsistenzprüfung und einheitliche Regel für entfernte Daten, Rundlauf-/Störungs-/Lasttests
 (langer Lauf getrennt), Spielstand-Info im Hauptmenü. Spiellogik unverändert.
@@ -208,7 +208,7 @@ Stände aufbewahren), Konsistenzprüfung und einheitliche Regel für entfernte D
 - [x] Lange Tests am Ende der Phase: 3/3 grün (Rundlauf 30 × 30 Tage, Störungstest, Messung Tag 180: 397 KB, Laden 15 ms)
 - [x] Fensterlauf auf dem Mac mit Screenshots geprüft (Hauptmenü mit Spielstand-Info, Backup nach defektem Stand, Einstellungen mit aufbewahrter Kopie)
 - [ ] Im Editor durchgespielt – offen
-- [ ] iPhone-Abnahme – im gebündelten iPhone-Test (Phase 7, Ticket 7.5)
+- [x] iPhone-Abnahme – gebündelter iPhone-Test (Ticket 7.5) ok, 13.10.2026
 
 Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ticket 7.5; Logik durch automatische Tests abgedeckt):
 - [ ] Hauptmenü zeigt unter „Fortsetzen“ Tag, Uhrzeit, Konto und „gespeichert …“ mit richtiger Ortszeit
@@ -216,7 +216,7 @@ Abnahme auf dem iPhone (ersetzt durch den gebündelten iPhone-Test, Phase 7 / Ti
 - [ ] Ein Spielstand aus einem früheren Build (Phase 5) lässt sich fortsetzen
 - [ ] Speichern bei wenig freiem Speicher bzw. im Flugmodus funktioniert (alles lokal)
 
-## Phase 7 – Mobile Politur und Performance ← in Arbeit
+## Phase 7 – Mobile Politur und Performance ✅ (13.10.2026, Tests + Mac-Fensterlauf + iPhone-Test)
 Teil A ohne iPhone (Aufräumen, Layout-Tests, Performance auf dem Mac, iOS-Build vorbereiten), dann EIN gebündelter
 iPhone-Test, der die offenen iPhone-Abnahmen von Phase 3–6 und G2 ersetzt, dann Korrekturen.
 
@@ -224,22 +224,24 @@ iPhone-Test, der die offenen iPhone-Abnahmen von Phase 3–6 und G2 ersetzt, dan
 - [x] Ticket 7.2: Layout-Tests für 4 Geräteklassen (16:9 bis 19,5:9, mit/ohne Notch); gefunden und behoben: Hauptmenü zu hoch auf Notch-iPhones, Hinweis-Höhe erst ein Bild später korrekt (336/336 Tests grün)
 - [x] Ticket 7.3: Performance auf dem Mac: Ruhezustand 120 → 0 Bilder/s (Stromsparmodus + Markierung wippt nur kurz), Zeichenaufrufe 963 → 206 (Texturatlas), 60 FPS (338/338 Tests grün)
 - [x] Ticket 7.4: iOS-Build vorbereiten: Version 0.7.0 (Build 7), App-Symbol, Export nach Xcode headless geprüft (Querformat links/rechts, Daten und Grafiken im Paket, Tests/Werkzeuge nicht) (338/338 Tests grün)
-- [ ] Ticket 7.5: Gebündelter iPhone-Test (Game Director) – Checkliste unten
-- [ ] Ticket 7.6: Korrekturen aus dem iPhone-Test
+- [x] Ticket 7.5: Gebündelter iPhone-Test (Game Director, 13.10.2026): alle 9 Punkte ok
+- [x] Ticket 7.6: entfällt – keine Fehler gemeldet; die Layout-Wünsche vom iPhone gehen in G4/G5 auf
+- [x] Nachtrag: Code-Signatur „Apple Development“ im Export-Preset; `.gdignore` in `exports/` und `tools/` und `exports/*` vom Export ausgeschlossen (der Export hatte Dateien aus `exports/` ins .pck gepackt; jetzt 0)
 
 Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von Phase 3–6 und G2):
-- [ ] 1. Starten: App öffnen – das Bild ist quer. iPhone um 180° drehen – das Bild dreht mit, nichts wird von Notch oder Rand verdeckt.
-- [ ] 2. Fortsetzen: Den alten Spielstand vorher NICHT löschen – er ist der Migrationstest. „Fortsetzen“ tippen – das Spiel lädt; oben links Tag und Uhrzeit, oben rechts das Geld.
-- [ ] 3. Karte: Mit einem Finger wischen – die Karte bewegt sich flüssig. Mit zwei Fingern zoomen – dabei öffnet sich kein Fenster.
-- [ ] 4. Fahren: Auf das Gebäude „Studio“ tippen – ein Fenster öffnet sich. „Hinfahren“ tippen – das Taxi fährt, die Uhr springt vor.
-- [ ] 5. Fenster: Im Studio-Fenster die Liste mit dem Finger rauf und runter schieben – dabei startet nichts. Dann bei „Livestream“ auf „Produzieren“ tippen – das Geld oben rechts steigt.
-- [ ] 6. Seitenbuttons: Termine, Fristen, Kanal, Buchungen, Menü nacheinander antippen – jedes Fenster geht auf und mit „Schließen“ wieder zu; alle Buttons sind ganz zu sehen.
-- [ ] 7. Beenden: App ganz schließen (hochwischen, wegschieben), neu öffnen – das Hauptmenü zeigt unter „Fortsetzen“ Tag, Uhrzeit und Geld; nach „Fortsetzen“ ist alles wie vorher.
-- [ ] 8. Flugmodus: einschalten – alles funktioniert gleich.
-- [ ] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
+- [x] 1. Starten: App öffnen – das Bild ist quer. iPhone um 180° drehen – das Bild dreht mit, nichts wird von Notch oder Rand verdeckt.
+- [x] 2. Fortsetzen: Den alten Spielstand vorher NICHT löschen – er ist der Migrationstest. „Fortsetzen“ tippen – das Spiel lädt; oben links Tag und Uhrzeit, oben rechts das Geld.
+- [x] 3. Karte: Mit einem Finger wischen – die Karte bewegt sich flüssig. Mit zwei Fingern zoomen – dabei öffnet sich kein Fenster.
+- [x] 4. Fahren: Auf das Gebäude „Studio“ tippen – ein Fenster öffnet sich. „Hinfahren“ tippen – das Taxi fährt, die Uhr springt vor.
+- [x] 5. Fenster: Im Studio-Fenster die Liste mit dem Finger rauf und runter schieben – dabei startet nichts. Dann bei „Livestream“ auf „Produzieren“ tippen – das Geld oben rechts steigt.
+- [x] 6. Seitenbuttons: Termine, Fristen, Kanal, Buchungen, Menü nacheinander antippen – jedes Fenster geht auf und mit „Schließen“ wieder zu; alle Buttons sind ganz zu sehen.
+- [x] 7. Beenden: App ganz schließen (hochwischen, wegschieben), neu öffnen – das Hauptmenü zeigt unter „Fortsetzen“ Tag, Uhrzeit und Geld; nach „Fortsetzen“ ist alles wie vorher.
+- [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
+- [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung (Entwurf – wartet auf Freigabe des Game Directors)
-Grundlage: `docs/VISION.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (als Nächstes G3.1)
+Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
+Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
 Jedes Ticket = eine Sitzung: Tests grün, Mac-Fensterlauf mit Screenshots, Doku, Commit.
 Ab T bekommt jede neue Mechanik im selben Ticket ihr Tutorial. Jede neue Spielstand-Version bekommt eine
@@ -251,24 +253,24 @@ echte Testdatei und eine Migration.
 - [ ] G3.3 Freie Schrift (OFL, Lizenz unter `assets/fonts/`) + Schriftzug „OFF CAMERA“ als SVG; Hauptmenü (`scripts/ui/main_menu.gd`) und Startbild (Boot-Splash/Launch-Screen) in derselben Farbwelt
 
 ### G4 – UI-Layout (mehr Karte)
-- [ ] G4.1 Layout-Mockup als Screenshot aus einem Fensterlauf (HUD-Leiste, runde Seitenbuttons, Kachel-Fenster) → Freigabe
-- [ ] G4.2 HUD als schmale Leiste oben (neu `scripts/ui/hud_bar.gd`, `game_screen.gd`); Plätze für Schwarzgeld/Hitze, sichtbar erst wenn es sie gibt
-- [ ] G4.3 Runde Seitenbuttons mit Mini-Beschriftung, Gruppen Leben/Geschäft, Menü in der Ecke, Zählerpunkt als Bauteil (neu `scripts/ui/side_button.gd`, `game_screen.gd`)
-- [ ] G4.4 Ortsfenster als Kachel-Raster, 3–4 Spalten, ca. 85 % Breite (neu `scripts/ui/activity_tile.gd`, `windows/location_window.gd`, `activity_text.gd`)
-- [ ] G4.5 Reiter statt Scrollen, wenn ein Ort mehr Kacheln hat als ins Raster passen (Reiter-Zuordnung als Daten)
-- [ ] G4.6 Layout-Tests für die 4 Geräteklassen aus 7.2 umstellen, neuer Test „Touch-Ziele ≥ 44 pt“ (`tests/test_layout*.gd`, `tests/layout_helper.gd`)
+- [ ] G4.1 Layout-Mockup als Screenshot aus einem Fensterlauf (HUD-Leiste, runde Seitenbuttons rechts, Kachel-Fenster) → Freigabe
+- [ ] G4.2 Querformat fest auf EINE Richtung: Dynamic Island links (`project.godot` Ausrichtung, im exportierten Info.plist prüfen); Layout-Tests mit Rand nur links; Richtung prüft der Game Director beim nächsten iPhone-Build mit einem Blick
+- [ ] G4.3 HUD als schmale Leiste oben (neu `scripts/ui/hud_bar.gd`, `game_screen.gd`); Plätze für Schwarzgeld/Hitze, sichtbar erst wenn es sie gibt
+- [ ] G4.4 7 runde Seitenbuttons + Menü, alle rechts (Leben: Kalender, Fristen, Kanal; Geschäft: Organisation, Aufträge, Firma, Buchungen; Buttons ohne Funktion bleiben bis U verborgen), Kreis 64 px, unsichtbare Tippfläche mind. 84 px, Mini-Beschriftung, Zählerpunkt als Bauteil, Menü klein in der Ecke; links nur schmale Elemente (neu `scripts/ui/side_button.gd`, `game_screen.gd`)
+- [ ] G4.5 Ortsfenster als Kachel-Raster, 3–4 Spalten, ca. 85 % Breite (neu `scripts/ui/activity_tile.gd`, `windows/location_window.gd`, `activity_text.gd`)
+- [ ] G4.6 Reiter statt Scrollen, wenn ein Ort mehr Kacheln hat als ins Raster passen (Reiter-Zuordnung als Daten)
+- [ ] G4.7 Layout-Tests für die 4 Geräteklassen aus 7.2 umstellen, neuer Test „Tippflächen ≥ 84 px (≈ 44 pt)“ (`tests/test_layout*.gd`, `tests/layout_helper.gd`)
 
 ### G5 – Hinweise und Komfort
 - [ ] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, neu `scripts/core/settings.gd`): Schalter Kalender automatisch, Vibration; Einstellungsseite erweitern
-- [ ] G5.2 Dynamic Island: zuerst Mini-Test auf dem iPhone, ob Godot die Drehrichtung meldet (siehe offene Fragen); dann Button-Leisten auf die Seite ohne Insel, Tests mit Safe Area links/rechts (`app.gd`, `game_screen.gd`)
-- [ ] G5.3 „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl (Termine, Fristen); Daten dafür aus einer Systemabfrage, nicht aus der UI (neu `scripts/core/day_plan.gd`, neu `windows/calendar_window.gd` statt `appointments_window.gd`)
-- [ ] G5.4 Kalender öffnet sich bei Tagesbeginn genau einmal (abschaltbar); Reihenfolge Ereignis → Kalender; Spielstand Version 13 + Testdatei
-- [ ] G5.5 Konflikt-Popup statt „zweimal tippen“ (Ende der Aktion, betroffener Termin, „Trotzdem starten“/„Abbrechen“) für Aktivitäten und Fahrten (nutzt `AppointmentSystem.get_conflicts`)
-- [ ] G5.6 Kachel-Vorschau „Ende HH:MM“ + Wirkungen; Aktion „Warten bis Terminbeginn“ (über das TimeSystem)
-- [ ] G5.7 Erinnerung ≤ 30 Spielminuten vor einem Termin (Termin, Ort, Fahrzeit), genau einmal je Termin; Spielstand Version 14 + Testdatei
-- [ ] G5.8 Kombi-Button „Hinfahren und starten“ mit Konfliktprüfung für die Gesamtzeit (Fahrt + Aktion)
-- [ ] G5.9 Rote Zählerpunkte mit Zahl (Termine heute, fällige Fristen, offene Ereignisse); Zählungen kommen aus den Systemen
-- [ ] G5.10 Vibration (`Input.vibrate_handheld`) bei Warnungen und großen Geldänderungen, mit Schalter; Wirkung nur auf dem iPhone prüfbar
+- [ ] G5.2 „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl (Termine, Fristen); Daten dafür aus einer Systemabfrage, nicht aus der UI (neu `scripts/core/day_plan.gd`, neu `windows/calendar_window.gd` statt `appointments_window.gd`)
+- [ ] G5.3 Kalender öffnet sich bei Tagesbeginn genau einmal (abschaltbar); Reihenfolge Ereignis → Kalender; Spielstand Version 13 + Testdatei
+- [ ] G5.4 Konflikt-Popup statt „zweimal tippen“ (Ende der Aktion, betroffener Termin, „Trotzdem starten“/„Abbrechen“) für Aktivitäten und Fahrten (nutzt `AppointmentSystem.get_conflicts`)
+- [ ] G5.5 Kachel-Vorschau „Ende HH:MM“ + Wirkungen; Aktion „Warten bis Terminbeginn“ (über das TimeSystem)
+- [ ] G5.6 Erinnerung ≤ 30 Spielminuten vor einem Termin (Termin, Ort, Fahrzeit), genau einmal je Termin; Spielstand Version 14 + Testdatei
+- [ ] G5.7 Kombi-Button „Hinfahren und starten“ mit Konfliktprüfung für die Gesamtzeit (Fahrt + Aktion)
+- [ ] G5.8 Rote Zählerpunkte mit Zahl (Termine heute, fällige Fristen, offene Ereignisse); Zählungen kommen aus den Systemen
+- [ ] G5.9 Vibration (`Input.vibrate_handheld`) bei Warnungen und großen Geldänderungen, mit Schalter; Wirkung nur auf dem iPhone prüfbar
 
 ### T – Tutorial-System
 - [ ] T.1 Datenformat `data/tutorials/tutorials.json` (ID, Auslöser, Text, UI-Element, Reihenfolge, Voraussetzungen) + Katalog mit Prüfung (neu `scripts/models/tutorial_definition.gd`, `scripts/systems/tutorial_catalog.gd`)
@@ -282,7 +284,7 @@ echte Testdatei und eine Migration.
 ### U – Unterwelt (Hauptspiel; jedes Ticket mit Tutorial, Daten unter `data/underworld/`)
 - [ ] U.1 Schwarzgeld als drittes Konto im einen Ledger (`ledger_system.gd`, `consistency_check.gd`, Buchungen-Fenster); Spielstand-Version + Testdatei
 - [ ] U.2 Organisation: Name, Respekt, Hitze 0–100 (sinkt bei Ruhe), Stabilität (neu `scripts/systems/organisation_system.gd`); Schritt im DayCycle; Spielstand-Version
-- [ ] U.3 Einstiegs-Ereignis (neues Spiel und alte Spielstände), Namenseingabe, Fenster „Organisation“ + Seitenbutton
+- [ ] U.3 Einstiegs-Ereignis an Tag 2 mit dem Kontakt am Hafen (ein Code-Pfad für neue und alte Spielstände), Namenseingabe, Fenster „Organisation“ + Seitenbutton
 - [ ] U.4 Story-Aufträge als Datenkette + Fenster + roter Punkt (neu `mission_system.gd`); erster Auftrag „Erster Deal“
 - [ ] U.5 Produkte als Daten (Gras, Haschisch, Koks, Pillen: Einkaufspreis, Verkaufspreis, Qualität, Hitze je Einheit – nur Spielwerte)
 - [ ] U.6 Erfundener Lieferant: Einkauf auf Vorkasse, Bestand, Lieferung kann platzen (Seed)
@@ -291,7 +293,7 @@ echte Testdatei und eine Migration.
 - [ ] U.9 Verkaufen als Aktion (Zeit, Schwarzgeld, Hitze) – erster Deal abgeschlossen
 - [ ] U.10 Crew 1: Rollen als Daten, Bewerber (Seed), einstellen/feuern, Löhne im Tageswechsel
 - [ ] U.11 Crew 2: Dealer verkaufen täglich (Unterwelt-Abrechnung im DayCycle), Können/Loyalität/Gier, befördern
-- [ ] U.12 Gebiete als Daten (Viertel mit Nachfrage, Polizeipräsenz, Rivaleneinfluss) + Karten-Overlay
+- [ ] U.12 Gebiete als Daten (Viertel mit Nachfrage, Polizeipräsenz, Rivaleneinfluss) + Karten-Overlay, ein- und ausschaltbar per Schalter auf der Karte
 - [ ] U.13 Gebiete übernehmen, halten, verlieren
 - [ ] U.14 2–3 erfundene Rivalen-Gangs: Stärke, Aggression, Gebiete; Konflikt, Verhandlung, Waffenstillstand (Gewalt nur als Text und Folgen)
 - [ ] U.15 Crew-Folgen: Verhaftung, Verrat, Spitzel, Abwerbung (Ereignisse)
@@ -300,11 +302,11 @@ echte Testdatei und eine Migration.
 - [ ] U.18 Weitere Standorte: Verkaufspunkt, Lager, Club (auch Tarnfirma), Produktion („X Einheiten/Tag“), Liegeplatz am Hafen; ausbauen
 - [ ] U.19 Polizei 1: Beobachtung → Ermittlung nach Hitze, verbunden mit den Behördenereignissen aus Phase 5
 - [ ] U.20 Polizei 2: Razzia (Folgen für Standorte, Bestand, Schwarzgeld – als Buchung)
-- [ ] U.21 Justiz: Festnahme, Optionen (Anwalt, Bestechung, stillhalten, Crew opfern, kooperieren), Kaution, Prozess, Haft als Spieltage
+- [ ] U.21 Justiz: Festnahme, Optionen (Anwalt, Bestechung, stillhalten, Crew opfern, kooperieren), Kaution, Prozess, Haft als Spieltage mit Weiterspielen (kein Game Over)
 - [ ] U.22 Doppelleben: Kanal senkt Hitze-Anstieg leicht, Bekanntheit erhöht Aufmerksamkeit, Ereignisse Paparazzi/Leak/Gerüchte/Skandal
-- [ ] U.23 Beziehungen: erste Figuren als Daten mit Vertrauen/Wissen und Ereignissen
+- [ ] U.23 Beziehungen: Kontakt am Hafen, Partner/in, bestechlicher Beamter als Daten mit Vertrauen/Wissen und Ereignissen
 - [ ] U.24 Tageswechsel komplett (Abrechnung → Hitze → Fristen → Ereignisse → Kalender), Bot und lange Tests um die Unterwelt erweitern
 - [ ] U.25 HUD und Seitenbuttons final, Abnahme Paket U
 
 ## Spätere Phasen
-8. Balancing und mehr Inhalte
+8. Balancing und mehr Inhalte: Verhältnis Kanal-/Unterwelt-Einnahmen, evtl. „harter Modus“ mit Game Over, weitere Figuren (bester Freund, Manager)

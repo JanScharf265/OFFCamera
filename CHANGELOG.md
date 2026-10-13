@@ -1,6 +1,11 @@
 # Changelog
 
+## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Spielvision des Game Directors als `docs/VISION.md`, Leitfaden als Text `docs/LEITFADEN.md`; Ticketplan G3, G4, G5, T, U in der ROADMAP; Regeln in `CLAUDE.md` (Unterwelt als Hauptspiel, harte Inhaltsgrenze, Tutorial-Regel)
+
 ## Unveröffentlicht – Phase 7
+- Gebündelter iPhone-Test (Build 0.7.0) bestanden – Phase 7 abgeschlossen (Ticket 7.5)
+- Export packt keine Dateien aus `exports/` mehr ins Paket (`.gdignore` in `exports/` und `tools/`, Ausschlussfilter); Code-Signatur „Apple Development“ im Export-Preset
 - Warnung „ObjectDB instances leaked at exit“ untersucht: im Spiel kein Leck (0 Objekte pro neuem Spiel, Laden, App-Durchgang), Ursache sind Kreisverweise in Tests; Wächter-Tests `test_memory.gd` (Ticket 7.1)
 - Aufgeräumt: ungenutztes Kartensignal `pin_down` und ungenutzter Getter entfernt (Ticket 7.1)
 - Layout-Tests für typische iPhones im Querformat (16:9 ohne Notch, Notch, Dynamic Island, Grenzfall): HUD, Seitenleisten, Hinweis und alle Fenster in der Safe Area und ohne Überlappung; Menüs passen in die Höhe (Ticket 7.2)

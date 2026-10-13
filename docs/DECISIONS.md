@@ -300,3 +300,44 @@ ersetzt (Entscheidung des Game Directors): Er prüft nur Gerät, Touch, Darstell
 decken die automatischen Tests ab. Der alte Spielstand auf dem iPhone wird vorher nicht gelöscht – er ist der
 Migrationstest (voraussichtlich ein Stand aus dem G1-Build, Spielstand-Version 2 – der letzte Build, der auf dem iPhone lief).
 
+## 036 – Neue Ausrichtung: Unterwelt als Hauptspiel
+Der Game Director hat am 13.10.2026 die Spielvision aus dem Leitfaden (1.1, 1.3 C, 9.3, ursprüngliche Phase 4)
+wieder in den Mittelpunkt gestellt (Text unverändert in `docs/VISION.md`, Leitfaden als `docs/LEITFADEN.md`):
+Die Unterwelt ist das Hauptspiel, die Streamer-Karriere das Nebenspiel, das Merch-Label wird Tarnfirma.
+Reihenfolge der Pakete: G3 Icon/Logo → G4 UI-Layout → G5 Hinweise & Komfort → T Tutorial-System → U Unterwelt →
+Phase 8 Balancing. In U zuerst Schwarzgeld und Organisation, früh die Story-Aufträge, damit jeder weitere Schritt
+eine Aufgabe in der Kette bekommt. Ab T bekommt jede neue Mechanik im selben Ticket ihr Tutorial.
+Die vier Architekturregeln bleiben: Schwarzgeld wird das dritte Konto im einen Ledger, Unterwelt-Abrechnung ein
+Schritt im DayCycle, Ereignisse weiter zentral und deterministisch. Harte Inhaltsgrenze siehe `CLAUDE.md`.
+
+## 037 – Spielentscheidungen für die Unterwelt
+- Festnahme führt nicht zum Game Over: Kaution, Prozess und Haft sind Spieltage mit Einschränkungen und
+  Verlusten, danach geht es weiter. Ein „harter Modus“ mit Game Over wird evtl. in Phase 8 geprüft.
+- Die Unterwelt startet über ein Einstiegs-Ereignis an Tag 2 (Kontakt am Hafen) – ein Code-Pfad für neue und
+  alte Spielstände; Tag 1 bleibt den Grundlagen-Tutorials.
+- Kanal-Einnahmen werden nicht gekürzt; die Unterwelt verdient ein Vielfaches. Der Kanal zählt als Tarnung und
+  legales Geld. Die Verhältnisse werden in Phase 8 eingestellt.
+- Gewalt nur als Text und Folgen (Crew verletzt/weg, Standort verloren), keine ausführlichen Schilderungen.
+- Beziehungsfiguren in U: Kontakt am Hafen, Partner/in, bestechlicher Beamter. In Phase 8: bester Freund, Manager.
+  Der Rivalenboss ist in U zunächst ein Wert der Gang.
+
+## 038 – Bedienung: Seitenbuttons, Tippflächen, Ausrichtung, Speicherorte
+- 7 Seitenbuttons + Menü: Leben (Kalender, Fristen, Kanal), Geschäft (Organisation mit Reitern für Crew, Gebiete,
+  Standorte, Bestand; Aufträge; Firma; Buchungen); Menü klein in einer Ecke. Gebiete als Schalter auf der Karte.
+- Runde Buttons: Kreis 64 px, unsichtbare Tippfläche mindestens 84 px. Grund: 44 pt sind auf iPhones im
+  Querformat 74–84 px der Basisauflösung (720 px Höhe), 56–64 px wären nur ~34–38 pt.
+- Ausrichtung: Statt die Dynamic Island zu erkennen (iOS meldet die Safe Area im Querformat auf beiden Seiten
+  gleich, ob Godot die Drehrichtung zuverlässig meldet, ist unklar) wird das Spiel auf EINE Querformat-Richtung
+  festgelegt – die mit der Insel links. Button-Leisten rechts, links nur schmale Elemente. Die Richtung prüft der
+  Game Director beim nächsten iPhone-Build mit einem Blick (Ticket G4.2).
+- Speicherorte: Schalter (Tutorials an/aus, Kalender automatisch, Vibration) sind Geräte-Einstellungen in
+  `user://settings.cfg`; gesehene Tutorials, gezeigte Erinnerungen und der automatisch gezeigte Kalender je Tag
+  gehören zum Spielstand (neue Versionen mit Migration und Testdatei).
+
+## 039 – Abschluss Phase 7
+Der gebündelte iPhone-Test (7.5, Build 0.7.0) ist vom Game Director am 13.10.2026 bestanden: alle 9 Punkte ok,
+der alte Spielstand vom iPhone lädt. Damit sind auch die iPhone-Abnahmen von Phase 3–6 und G2 erledigt. Ticket 7.6
+entfällt (keine Fehler); die Layout-Wünsche vom iPhone gehen in G4/G5 auf. Nachtrag Export: Der Export hatte
+Dateien aus `exports/` ins .pck gepackt. Jetzt liegt eine `.gdignore` in `exports/` und `tools/`, und `exports/*`
+steht zusätzlich im `exclude_filter` (geprüft: 0 Einträge aus `exports/` im neuen .pck). Code-Signatur im Preset:
+„Apple Development“ (Team-ID nur in den lokalen Export-Zugangsdaten, nicht im Repo).

@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–2 und G1 abgeschlossen (auf dem iPhone abgenommen). Phase 3, Phase 4 und G2 (Querformat) abgeschlossen nach neuer Abnahmeregel (Tests + Mac-Fensterlauf, 255/255 Tests grün); ihre iPhone-Abnahme wird in Phase 7 nachgeholt. Phase 5 abgeschlossen (Tests + Mac-Fensterlauf). Phase 6 (Save/Load-Stabilisierung) abgeschlossen (332/332 Tests + 3/3 lange Tests, Mac-Fensterlauf); iPhone-Abnahmen gesammelt in Phase 7. Phase 7 (Mobile Politur): Teil A fertig (7.1–7.4, Build 0.7.0) – als Nächstes der gebündelte iPhone-Test (7.5).** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–7 sowie G1 und G2 abgeschlossen; der gebündelte iPhone-Test von Build 0.7.0 ist bestanden (13.10.2026, 338/338 Tests + 3/3 lange Tests grün). Neue Ausrichtung: Die Unterwelt wird das Hauptspiel (`docs/VISION.md`). Als Nächstes: Pakete G3 (Icon/Logo) → G4 (UI-Layout) → G5 (Komfort) → T (Tutorials) → U (Unterwelt), dann Phase 8.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |
