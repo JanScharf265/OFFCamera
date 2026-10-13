@@ -1,7 +1,7 @@
 extends Control
 
 ## Spielansicht im Querformat (G2): die isometrische Stadtkarte im Vollbild, darüber
-## HUD-Ecken (links oben Tag/Uhrzeit/Ort, rechts oben Konten, Energie, Stimmung),
+## die HUD-Leiste oben (G4.3, scripts/ui/hud_bar.gd: Tag/Uhrzeit/Ort, Energie, Stimmung, Konten),
 ## Seitenbuttons (links Termine, Fristen, Kanal, Unternehmen; rechts Buchungen, Menü, Hier),
 ## eine Hinweis-Leiste unten und höchstens ein Fenster (scripts/ui/windows/).
 ## Gebäude antippen öffnet das Fenster des Orts. Ein offenes Ereignis erscheint als
@@ -19,11 +19,10 @@ signal state_changed
 
 const GameStateScript := preload("res://scripts/core/game_state.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
-const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
-const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const CityMapScript := preload("res://scripts/ui/city_map.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const HudBarScript := preload("res://scripts/ui/hud_bar.gd")
 const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
 const AppointmentsWindowScript := preload("res://scripts/ui/windows/appointments_window.gd")
@@ -39,7 +38,6 @@ const TRANSFER_STEP_CENTS := 10000
 ## Kurze Hinweise verschwinden nach dieser Zeit (Echtzeit, nur Anzeige); lange bleiben bis zum Antippen.
 const TOAST_SECONDS := 4.0
 const TOAST_STICKY_LENGTH := 90
-const HUD_RIGHT_WIDTH := 380
 const GAP := 16.0
 ## Icons (Kenney „Game Icons“, CC0). Fehlt eine Datei, bleibt der Button ohne Icon.
 const ICON_DIR := "res://assets/kenney/game-icons/"
@@ -58,15 +56,7 @@ var _game: GameStateScript
 ## Safe-Area-Abstände [links, oben, rechts, unten] in Viewport-Pixeln (von der App).
 var _margins: Array[float] = [24.0, 24.0, 24.0, 24.0]
 var _map: CityMapScript
-var _hud_left: PanelContainer
-var _hud_right: PanelContainer
-var _date_label: Label
-var _clock_label: Label
-var _location_label: Label
-var _balance_label: Label
-var _company_balance_label: Label
-var _stat_labels := {}
-var _stat_bars := {}
+var _hud: HudBarScript
 var _left_bar: VBoxContainer
 var _right_bar: VBoxContainer
 var _company_button: Button
@@ -107,10 +97,8 @@ func _ready() -> void:
 	_map.location_pressed.connect(_on_location_pressed)
 	add_child(_map)
 
-	_hud_left = _build_hud_left()
-	add_child(_hud_left)
-	_hud_right = _build_hud_right()
-	add_child(_hud_right)
+	_hud = HudBarScript.new()
+	add_child(_hud)
 
 	_left_bar = _side_bar("LeftBar")
 	_left_bar.add_child(_side_button("Termine", "AppointmentsButton", _open_appointments))
@@ -151,55 +139,6 @@ func _ready() -> void:
 
 # --- Aufbau -----------------------------------------------------------------------
 
-func _build_hud_left() -> PanelContainer:
-	var panel := UiStyle.hud_panel()
-	panel.name = "HudLeft"
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	panel.add_child(box)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	box.add_child(row)
-	_date_label = UiStyle.label("")
-	_date_label.name = "DateLabel"
-	_date_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	row.add_child(_date_label)
-	_clock_label = UiStyle.label("", UiStyle.LARGE_FONT_SIZE)
-	_clock_label.name = "ClockLabel"
-	row.add_child(_clock_label)
-	_location_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
-	_location_label.name = "LocationLabel"
-	box.add_child(_location_label)
-	return panel
-
-
-func _build_hud_right() -> PanelContainer:
-	var panel := UiStyle.hud_panel()
-	panel.name = "HudRight"
-	panel.custom_minimum_size.x = HUD_RIGHT_WIDTH
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	panel.add_child(box)
-	_balance_label = UiStyle.label("")
-	_balance_label.name = "BalanceLabel"
-	box.add_child(_balance_label)
-	_company_balance_label = UiStyle.label("", UiStyle.SMALL_FONT_SIZE)
-	_company_balance_label.name = "CompanyBalanceLabel"
-	box.add_child(_company_balance_label)
-	for key in PlayerStatsScript.KEYS:
-		var stat_label := UiStyle.label("", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
-		box.add_child(stat_label)
-		_stat_labels[key] = stat_label
-		var bar := ProgressBar.new()
-		bar.min_value = PlayerStatsScript.MIN_VALUE
-		bar.max_value = PlayerStatsScript.MAX_VALUE
-		bar.show_percentage = false
-		bar.custom_minimum_size.y = 10
-		box.add_child(bar)
-		_stat_bars[key] = bar
-	return panel
-
-
 func _side_bar(node_name: String) -> VBoxContainer:
 	var bar := VBoxContainer.new()
 	bar.name = node_name
@@ -224,15 +163,15 @@ func _layout() -> void:
 	var right := size.x - _margins[2]
 	var bottom := size.y - _margins[3]
 
-	_hud_left.reset_size()
-	_hud_left.position = Vector2(left, top)
-	_hud_right.reset_size()
-	_hud_right.position = Vector2(right - _hud_right.size.x, top)
-	# Jede Leiste beginnt unter ihrem eigenen HUD-Block (rechts ist er mit Firmenkonto höher).
+	_hud.reset_size()
+	_hud.position = Vector2(left, top)
+	_hud.size = Vector2(right - left, _hud.size.y)
+	# Die Seitenleisten beginnen unter der HUD-Leiste.
+	var below_hud := top + _hud.size.y + GAP
 	_left_bar.reset_size()
-	_left_bar.position = Vector2(left, top + _hud_left.size.y + GAP)
+	_left_bar.position = Vector2(left, below_hud)
 	_right_bar.reset_size()
-	_right_bar.position = Vector2(right - _right_bar.size.x, top + _hud_right.size.y + GAP)
+	_right_bar.position = Vector2(right - _right_bar.size.x, below_hud)
 
 	var toast_width := maxf(minf(900.0, right - left - 2.0 * (UiStyle.SIDE_BUTTON_SIZE.x + GAP)), 200.0)
 	# Umbrechende Labels berechnen ihre Mindesthöhe für die Breite, die sie gerade haben (anfangs ~1 px →
@@ -514,17 +453,7 @@ func _on_toast_input(event: InputEvent) -> void:
 # --- Anzeige ----------------------------------------------------------------------
 
 func _refresh() -> void:
-	_date_label.text = _game.time.format_date()
-	_clock_label.text = _game.time.format_clock()
-	_location_label.text = "Ort: %s" % _game.locations.get_current_definition().display_name
-	_balance_label.text = "Konto: %s" % LedgerSystemScript.format_cents(_game.ledger.get_balance())
-	_company_balance_label.visible = _game.company.is_founded()
-	_company_balance_label.text = "Firmenkonto: %s" % LedgerSystemScript.format_cents(
-			_game.ledger.get_balance(LedgerSystemScript.COMPANY))
-	for key in PlayerStatsScript.KEYS:
-		var value := _game.stats.get_value(key)
-		_stat_labels[key].text = "%s %d/%d" % [PlayerStatsScript.LABELS[key], value, PlayerStatsScript.MAX_VALUE]
-		_stat_bars[key].value = value
+	_hud.refresh(_game)
 	_company_button.visible = _game.company.is_founded()
 	var open_count := _game.obligations.count_open()
 	_obligations_button.text = "Fristen (%d)" % open_count if open_count > 0 else "Fristen"

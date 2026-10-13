@@ -45,13 +45,20 @@ func test_click_through_new_game_activity_menu_and_continue() -> void:
 	new_game.pressed.emit()
 
 	assert_eq((_find(app, "ClockLabel") as Label).text, "08:00")
-	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 500,00 €")
-	assert_eq((_find(app, "LocationLabel") as Label).text, "Ort: Wohnung")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "500,00 €")
+	assert_eq((_find(app, "LocationLabel") as Label).text, "Wohnung")
+	# G4.3: Energie und Stimmung als Balken mit Zahl.
+	assert_eq((_find(app, "StatValue_energy") as Label).text, "80")
+	assert_eq((_find(app, "StatValue_mood") as Label).text, "60")
+	assert_eq((_find(app, "StatBar_energy") as ProgressBar).value, 80.0)
+	assert_eq((_find(app, "StatBar_mood") as ProgressBar).value, 60.0)
+	var mood_icon := _find(app, "Stat_mood").get_child(0) as TextureRect
+	assert_true(mood_icon.texture != null and mood_icon.texture.resource_path.ends_with("smiley.svg"), "Smiley fehlt")
 
 	_travel(app, "studio")  # 08:00 -> 08:20
 	(_find(app, "ContentButton_livestream") as Button).pressed.emit()
 	assert_eq((_find(app, "ClockLabel") as Label).text, "10:20")
-	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 525,00 €")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "525,00 €")
 	assert_eq(app.game.ledger.get_entries().size(), 1)
 	_press(app, "LedgerButton")
 	assert_eq((_find(app, "LedgerList") as Node).get_child_count(), 1)
@@ -61,7 +68,7 @@ func test_click_through_new_game_activity_menu_and_continue() -> void:
 	assert_true(continue_button != null, "Fortsetzen fehlt nach dem ersten Spiel")
 	continue_button.pressed.emit()
 	assert_eq((_find(app, "ClockLabel") as Label).text, "10:20")
-	assert_eq((_find(app, "LocationLabel") as Label).text, "Ort: Studio")
+	assert_eq((_find(app, "LocationLabel") as Label).text, "Studio")
 
 	app.free()
 
@@ -106,7 +113,7 @@ func test_event_replaces_activities_until_decided() -> void:
 
 	_press(app, "EventOption_accept")
 	assert_true(_find(app, "EventPanel") == null, "Ereignis-Fenster noch offen")
-	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 530,00 €")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "530,00 €")
 
 	app.free()
 
@@ -124,8 +131,8 @@ func test_save_and_continue_after_restart() -> void:
 	assert_true(_find(restarted, "ContinueButton") != null, "Fortsetzen fehlt nach Neustart")
 	_press(restarted, "ContinueButton")
 	assert_eq((_find(restarted, "ClockLabel") as Label).text, "10:20")
-	assert_eq((_find(restarted, "LocationLabel") as Label).text, "Ort: Studio")
-	assert_eq((_find(restarted, "BalanceLabel") as Label).text, "Konto: 525,00 €")
+	assert_eq((_find(restarted, "LocationLabel") as Label).text, "Studio")
+	assert_eq((_find(restarted, "BalanceLabel") as Label).text, "525,00 €")
 	assert_eq(restarted.game.ledger.get_entries().size(), 1)
 	restarted.free()
 	SaveSystemScript.delete_save(TEST_SAVE_PATH)
@@ -185,7 +192,7 @@ func test_map_shows_location_and_travel_changes_activities() -> void:
 
 	_press(app, "TravelButton")
 	assert_eq((_find(app, "ClockLabel") as Label).text, "08:20")
-	assert_eq((_find(app, "LocationLabel") as Label).text, "Ort: Café am Hafen")
+	assert_eq((_find(app, "LocationLabel") as Label).text, "Café am Hafen")
 	assert_eq((_find(app, "TravelButton") as Button).visible, false)  # schon hier
 	assert_true(_find(app, "StartButton_coffee") != null, "Kaffee fehlt am Hafen")
 	assert_true(_find(app, "StartButton_rest") == null, "Ausruhen darf es am Hafen nicht geben")
@@ -239,7 +246,7 @@ func test_buy_equipment_in_studio_raises_quality() -> void:
 	_travel(app, "studio")
 	assert_eq((_find(app, "EquipmentTitle_camera") as Label).text, "Kamera · Stufe 0/3 (nichts)")
 	_press(app, "EquipmentButton_camera")
-	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 380,00 €")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "380,00 €")
 	assert_eq((_find(app, "EquipmentTitle_camera") as Label).text, "Kamera · Stufe 1/3 (Webcam HD)")
 	var summary := (_find(app, "ContentSummary_livestream") as Label).text
 	assert_true(summary.ends_with("+26,25 €"), summary)
@@ -308,7 +315,7 @@ func test_found_company_in_office() -> void:
 	assert_eq((_find(app, "CompanyInfo_merch_label") as Label).text, "1 h · Gebühr 150,00 € · Einlage 200,00 € aufs Firmenkonto")
 	_press(app, "CompanyFoundButton_merch_label")
 	assert_eq((_find(app, "ClockLabel") as Label).text, "09:20")
-	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 150,00 €")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "150,00 €")
 	assert_eq((_find(app, "CompanyInfo_merch_label") as Label).text, "Gegründet · Firmenkonto 200,00 € · Auslastung 50 · Ruf 50")
 	assert_eq((_find(app, "CompanyFoundButton_merch_label") as Button).visible, false)
 	app.free()
@@ -323,7 +330,7 @@ func test_company_section_before_and_after_founding() -> void:
 	assert_eq((_find(app, "CompanyButton") as Button).visible, false)  # erst nach der Gründung
 	_travel(app, "office")
 	_press(app, "CompanyFoundButton_merch_label")
-	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "Firmenkonto: 200,00 €")
+	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "200,00 €")
 	assert_eq((_find(app, "CompanyButton") as Button).visible, true)
 	_press(app, "CompanyButton")
 	assert_eq((_find(app, "CompanyName") as Label).text, "Merch-Label")
@@ -345,11 +352,11 @@ func test_deposit_and_withdraw_buttons_move_money() -> void:
 	_press(app, "CompanyFoundButton_merch_label")  # privat 150 €, Firma 200 €
 	_press(app, "CompanyButton")
 	_press(app, "CompanyDepositButton")
-	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 50,00 €")
-	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "Firmenkonto: 300,00 €")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "50,00 €")
+	assert_eq((_find(app, "CompanyBalanceLabel") as Label).text, "300,00 €")
 	assert_eq((_find(app, "CompanyDepositButton") as Button).disabled, true)  # nur noch 50 € privat
 	_press(app, "CompanyWithdrawButton")
-	assert_eq((_find(app, "BalanceLabel") as Label).text, "Konto: 150,00 €")
+	assert_eq((_find(app, "BalanceLabel") as Label).text, "150,00 €")
 	_press(app, "LedgerButton")
 	assert_true(_screen_contains(app, "Einlage ins Unternehmen (Firma)"), "Firmenbuchung nicht markiert")
 	app.free()

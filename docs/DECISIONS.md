@@ -382,3 +382,12 @@ Rechter Rand: keine Sonderregel. Das Spiel hält die Safe Area je Seite genau so
 bleibt rechts ungenutzter Platz, dafür nichts in den abgerundeten Ecken. Ob wir rechts weniger Abstand nehmen
 dürfen, entscheiden wir nach dem iPhone-Test (Punkt in der ROADMAP). Das Mockup rechnete rechts mit 48 px; mit
 symmetrischer Safe Area rücken die Button-Spalten etwa 75 px nach links (Ortsfenster entsprechend schmaler).
+
+## 044 – HUD-Leiste (G4.3)
+Eine Zeile, höchstens 64 px hoch (gemessen ~62 px), über die volle Breite der Safe Area: links Tag (klein,
+gedämpft), Uhrzeit, Ort mit Symbol; rechts Energie (Kenney „power“) und Stimmung (eigenes Smiley-SVG
+`assets/icons/smiley.svg`) je als Symbol + Balken + Zahl, dann „Privat“ und „Firma“ (erst nach der Gründung) als
+kleine Beschriftung über dem Betrag. Die Texte „Konto:“, „Ort:“, „Energie 80/100“ entfallen – Symbole und
+Beschriftungen ersetzen sie. Schwarzgeld und Hitze kommen in Paket U an dieselbe Stelle; dann reicht die Breite auf
+dem iPhone SE (1280 px) evtl. nicht mehr für alles in einer Zeile – Prüfung durch den Layout-Test (Inhalt ≤ Breite),
+dann kürzere Beschriftungen oder kleinere Schrift. Die Seitenleisten (noch alte Form bis G4.4) beginnen unter der Leiste.

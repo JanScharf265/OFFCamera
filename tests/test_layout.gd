@@ -53,7 +53,7 @@ func test_hud_bars_and_hint_fit_every_device() -> void:
 		var screen := _busy_game(app)
 		Layout.apply(app, device)
 		var safe := Layout.safe_rect(device)
-		var names := ["HudLeft", "HudRight", "LeftBar", "RightBar", "Toast"]
+		var names := ["HudBar", "LeftBar", "RightBar", "Toast"]
 		var rects := {}
 		for node_name in names:
 			var control := app.find_child(node_name, true, false) as Control
@@ -64,6 +64,12 @@ func test_hud_bars_and_hint_fit_every_device() -> void:
 			for j in range(i + 1, names.size()):
 				assert_true(not rects[names[i]].intersects(rects[names[j]]), "%s: %s überlappt %s" % [device,
 						names[i], names[j]])
+		# G4.3: Die HUD-Leiste geht über die volle Breite der Safe Area, ist schmal, und ihr Inhalt passt hinein.
+		var hud := app.find_child("HudBar", true, false) as Control
+		assert_true(absf(rects["HudBar"].size.x - safe.size.x) < 0.5, "%s: HUD-Leiste nicht volle Breite" % device)
+		assert_true(rects["HudBar"].size.y <= 64.0, "%s: HUD-Leiste zu hoch: %d" % [device, rects["HudBar"].size.y])
+		assert_true(hud.get_combined_minimum_size().x <= rects["HudBar"].size.x + 0.5, "%s: HUD-Inhalt zu breit: %d" % [
+				device, hud.get_combined_minimum_size().x])
 		var map := app.find_child("CityMap", true, false) as Control
 		assert_eq(map.size, screen.size, "%s: Karte nicht Vollbild" % device)
 		assert_eq((app.find_child("CompanyButton", true, false) as Button).visible, true)

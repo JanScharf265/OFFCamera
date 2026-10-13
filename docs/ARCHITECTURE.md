@@ -225,8 +225,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Schriftzug „OFF CAMERA“ (G3.3): Baustein `logo.gd` (Bebas Neue, OFL) im Hauptmenü; dasselbe Bild als Startbild
   (`assets/splash/splash.png`, erzeugt von `tools/splash/make_splash.gd`).
 - Spielansicht im Querformat (G2, `game_screen.gd`): Stadtkarte im Vollbild (auch unter Notch/Home-Balken),
-  darüber innerhalb der Safe Area: `HudLeft` (Tag, Uhrzeit, Ort), `HudRight` (Konto, Firmenkonto, Energie,
-  Stimmung), `LeftBar` (Termine, Fristen – rot mit Anzahl bei offenen Fristen, Kanal, Firma – erst nach der Gründung) und `RightBar` (Buchungen, Menü, Hier),
+  darüber innerhalb der Safe Area: `HudBar` (G4.3, `hud_bar.gd`: schmale Leiste über die volle Breite – links Tag,
+  Uhrzeit, Ort; rechts Energie und Stimmung als Icon + Balken + Zahl, Privat- und Firmenkonto), `LeftBar` (Termine, Fristen – rot mit Anzahl bei offenen Fristen, Kanal, Firma – erst nach der Gründung) und `RightBar` (Buchungen, Menü, Hier),
   unten der Hinweis `Toast` (`FeedbackLabel`; kurze Texte ca. 4 s, lange/mehrzeilige bleiben bis zum Antippen).
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.

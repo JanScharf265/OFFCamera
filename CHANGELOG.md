@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- HUD als schmale Leiste oben statt zwei großer Kästen: Tag, Uhrzeit, Ort links; Energie und Stimmung als Balken mit Zahl (Stimmung mit Smiley), Privat- und Firmenkonto rechts – mehr sichtbare Karte (Ticket G4.3)
 - Feste Querformat-Richtung: Dynamic Island links, Bedienung rechts – die App dreht nicht mehr mit (Ticket G4.2)
 - Layout-Mockup für das neue HUD, runde Buttons und Kachel-Ortsfenster (Ticket G4.1)
 - Schriftzug „OFF CAMERA“ (Bebas Neue, OFL) im Hauptmenü statt Titel + „Prototyp“; gleiches Bild als Startbild (Boot-Splash und iOS-Launch-Screen) auf der UI-Hintergrundfarbe (Ticket G3.3)
