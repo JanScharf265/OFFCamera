@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Drei App-Icon-Entwürfe (SVG) mit Vorschau in 1024 px und 60 px auf hellem und dunklem Hintergrund (Ticket G3.1)
 - Spielvision des Game Directors als `docs/VISION.md`, Leitfaden als Text `docs/LEITFADEN.md`; Ticketplan G3, G4, G5, T, U in der ROADMAP; Regeln in `CLAUDE.md` (Unterwelt als Hauptspiel, harte Inhaltsgrenze, Tutorial-Regel)
 
 ## Unveröffentlicht – Phase 7

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Entwurf B „REC im Schatten“: der rote Aufnahme-Punkt wird von einem Schatten verdeckt wie bei einer Finsternis. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1C1030"/>
+      <stop offset="1" stop-color="#050509"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.42" cy="0.42" r="0.5">
+      <stop offset="0" stop-color="#FF2D6F" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FF2D6F" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dot" cx="0.38" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#FF7AA5"/>
+      <stop offset="0.5" stop-color="#FF1F62"/>
+      <stop offset="1" stop-color="#B8003F"/>
+    </radialGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1A1424"/>
+      <stop offset="1" stop-color="#0B0910"/>
+    </linearGradient>
+    <clipPath id="dotClip"><circle cx="512" cy="512" r="270"/></clipPath>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <circle cx="512" cy="512" r="270" fill="url(#dot)"/>
+  <g clip-path="url(#dotClip)">
+    <circle cx="672" cy="640" r="290" fill="url(#shade)"/>
+  </g>
+  <circle cx="512" cy="512" r="270" fill="none" stroke="#FF2D6F" stroke-opacity="0.45" stroke-width="12"/>
+</svg>

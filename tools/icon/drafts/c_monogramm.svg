@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Entwurf C „OC“: das O ist ein leuchtendes Objektiv mit REC-Punkt, das C ist sein offener, dunkler Schatten. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#20123A"/>
+      <stop offset="1" stop-color="#06060B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.34" cy="0.5" r="0.45">
+      <stop offset="0" stop-color="#FF2D6F" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#FF2D6F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF6A9A"/>
+      <stop offset="1" stop-color="#E0004F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <path d="M 810.35 377.65 A 190 190 0 1 0 810.35 646.35" fill="none" stroke="#3A3447" stroke-width="72" stroke-linecap="round"/>
+  <circle cx="342" cy="512" r="190" fill="none" stroke="url(#lit)" stroke-width="72"/>
+  <circle cx="342" cy="512" r="72" fill="#FF2D6F"/>
+</svg>
