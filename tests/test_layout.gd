@@ -13,8 +13,6 @@ const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 
 const SAVE_PATH := "user://test_layout_save.json"
-## Orte, die im „Grenzfall“ bis zu den Reitern (G4.6) scrollen dürfen.
-const GRENZFALL_UNTIL_TABS := ["studio", "office"]
 const LONG_TEXT := "Tagesabschluss Tag 12: Umsatz +123,45 € (30,00 € + 40,00 € Filiale + 18,00 € Reichweite · Auslastung 88 % · Ruf +5 %) · Fixkosten -45,00 € · Ergebnis +78,45 €\nMiete Wohnung (Woche 3) automatisch bezahlt: -80,00 €.\nMahnung: Stadtabgabe (für Woche 2) – offen jetzt 25,00 € (+15,00 € Mahngebühr)."
 
 
@@ -212,9 +210,7 @@ func test_location_windows_fit_without_scrolling() -> void:
 				continue
 			var content := window.find_child("LocationWindowContent", true, false) as Control
 			var scroll := window.find_child("WindowScroll", true, false) as ScrollContainer
-			Layout.sort_containers(window)
-			Layout.settle_labels(content, 200.0)
-			Layout.sort_containers(window)
+			Layout.settle_in_place(window)
 			var safe := Layout.safe_rect(device)
 			# Unten darf das Ortsfenster den Grundabstand (24 px) mitnutzen, nicht aber den Bereich des Geräts.
 			var device_safe := safe.grow_side(SIDE_BOTTOM, Layout.PADDING - 8.0)
@@ -229,12 +225,17 @@ func test_location_windows_fit_without_scrolling() -> void:
 			var columns: int = content.call("get_columns")
 			assert_true(columns >= 3 and columns <= 4, "%s: %d Spalten" % [tag, columns])
 			var needed := content.get_combined_minimum_size().y
-			# Der „Grenzfall“ (kein echtes Gerät, schmal + große Ränder) hat nur 3 Spalten: Studio (7 Kacheln) und
-			# Büro (4 Kacheln, mit 21-px-Schrift aus G4.5b) brauchen dort mehr Höhe und passen erst mit den Reitern
-			# aus G4.6 ohne Scrollen. Alle echten Geräteklassen: ohne Ausnahme.
-			if not (device.begins_with("Grenzfall") and location_id in GRENZFALL_UNTIL_TABS):
-				assert_true(needed <= scroll.size.y + 0.5, "%s: braucht %d px, sichtbar %d – müsste scrollen" % [tag,
-						needed, scroll.size.y])
+			# G4.6: keine Ausnahmen mehr – wo nötig, zeigt das Fenster Reiter; dann muss jeder Reiter passen.
+			assert_true(needed <= scroll.size.y + 0.5, "%s: braucht %d px, sichtbar %d – müsste scrollen" % [tag,
+					needed, scroll.size.y])
+			if content.call("has_tabs"):
+				for tab_button in window.find_child("LocationTabs", true, false).get_children():
+					(tab_button as Button).pressed.emit()
+					Layout.settle_in_place(window)
+					var tab_needed := content.get_combined_minimum_size().y
+					assert_true(tab_needed <= scroll.size.y + 0.5, "%s / %s: braucht %d px, sichtbar %d" % [tag,
+							tab_button.name, tab_needed, scroll.size.y])
+				(window.find_child("LocationTabs", true, false).get_child(0) as Button).pressed.emit()
 			# G4.5b: Tippfläche jedes Kachel-Buttons ≥ 84 px, Lesetext ≥ 21 px, Namen und Hinweise nicht abgeschnitten.
 			for node in window.find_children("*", "Button", true, false):
 				var button := node as Button
@@ -263,10 +264,160 @@ func test_location_windows_fit_without_scrolling() -> void:
 			var tops := {}
 			for tile in content.find_child("TileGrid", true, false).get_children():
 				var tile_control := tile as Control
+				if not tile_control.visible:
+					continue  # Kachel eines anderen Reiters
 				var row := roundi(tile_control.position.y)
 				var bottom := tile_control.position.y + tile_control.size.y
 				if tops.has(row):
 					assert_true(absf(tops[row] - bottom) < 0.5, "%s: Kacheln einer Reihe unterschiedlich hoch" % tag)
 				tops[row] = bottom
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+
+
+# --- Reiter im Ortsfenster (G4.6) --------------------------------------------------------
+
+const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
+const GameStateScript := preload("res://scripts/core/game_state.gd")
+const TEST_TABS := {"alltag": 6, "content": 5, "geschaeft": 4}
+
+
+## Echte Daten plus ein Test-Ort „Testmarkt“ mit vielen Aktivitäten in drei Reitern – nur hier, nicht in data/.
+func _data_with_test_market():
+	var data := Helpers.game_data()
+	var locations: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/locations/locations.json"))
+	locations.append({"id": "test_market", "display_name": "Testmarkt", "description": "Nur für Tests.",
+			"map_position": [0.4, 0.55]})
+	assert_true(data.locations.load_data(locations), "; ".join(data.locations.errors))
+	var activities: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/activities/activities.json"))
+	for tab in TEST_TABS:
+		for i in TEST_TABS[tab]:
+			activities.append({"id": "test_%s_%d" % [tab, i], "display_name": "Probe %d" % (i + 1), "tab": tab,
+					"location": "test_market", "duration_minutes": 30, "effects": {"energy": -5, "mood": 2}})
+	assert_true(data.activities.load_data(activities), "; ".join(data.activities.errors))
+	assert_true(data.check_references().is_empty(), "; ".join(data.check_references()))
+	return data
+
+
+func _screen_on(device: String, data) -> Control:
+	var screen := GameScreenScript.new()
+	screen.call("setup", GameStateScript.new(data, Helpers.TEST_SEED))
+	(Engine.get_main_loop() as SceneTree).root.add_child(screen)
+	var margins: Array[float] = []
+	for value in Layout.DEVICES[device]["margins"]:
+		margins.append(float(value))
+	screen.size = Layout.DEVICES[device]["size"]
+	screen.call("set_safe_margins", margins)
+	return screen
+
+
+func _visible_tile_ids(content: Control) -> PackedStringArray:
+	var ids := PackedStringArray()
+	for tile in content.find_child("TileGrid", true, false).get_children():
+		if (tile as Control).visible:
+			ids.append(String(tile.name).trim_prefix("Tile_"))
+	return ids
+
+
+func test_many_activities_get_tabs_that_fit() -> void:
+	var data = _data_with_test_market()
+	for device in Layout.DEVICES:
+		var screen := _screen_on(device, data)
+		_press(screen, "MapPin_test_market")
+		var window := screen.find_child("Window_location", false, false) as Control
+		var content := window.find_child("LocationWindowContent", true, false) as Control
+		var scroll := window.find_child("WindowScroll", true, false) as ScrollContainer
+		Layout.settle_in_place(window)
+		assert_eq(content.call("has_tabs"), true, "%s: keine Reiter" % device)
+		var bar := window.find_child("LocationTabs", true, false) as Control
+		var names := PackedStringArray()
+		for button in bar.get_children():
+			names.append(String(button.name))
+		# Feste Reihenfolge, leere Reiter (Unterwelt) fehlen; geöffnet wird der erste.
+		assert_eq(names, PackedStringArray(["LocationTab_alltag", "LocationTab_content", "LocationTab_geschaeft"]))
+		assert_eq(content.call("get_current_tab"), "alltag")
+		var rect := Layout.rect_of(window)
+		assert_true(_inside(Layout.safe_rect(device).grow_side(SIDE_BOTTOM, Layout.PADDING - 8.0), rect),
+				"%s: Fenster ragt heraus: %s" % [device, rect])
+		for tab in TEST_TABS:
+			_press(screen, "LocationTab_%s" % tab)
+			Layout.settle_in_place(window)
+			var ids := _visible_tile_ids(content)
+			assert_eq(ids.size(), TEST_TABS[tab], "%s / %s: %s" % [device, tab, ids])
+			for id in ids:
+				assert_true(id.begins_with("test_%s_" % tab), "%s / %s: falsche Kachel %s" % [device, tab, id])
+			var needed := content.get_combined_minimum_size().y
+			assert_true(needed <= scroll.size.y + 0.5, "%s / %s: braucht %d px, sichtbar %d" % [device, tab, needed,
+					scroll.size.y])
+			var tab_button := screen.find_child("LocationTab_%s" % tab, true, false) as Button
+			assert_true(tab_button.size.y >= UiStyle.TOUCH_SIZE - 0.5, "%s: Reiter-Tippfläche %d px" % [device,
+					tab_button.size.y])
+			assert_true(tab_button.get_theme_font_size("font_size") >= UiStyle.MIN_READ_FONT_SIZE, device)
+			# Aktiver Reiter klar erkennbar: Akzentfarbe, die anderen nicht.
+			for other in TEST_TABS:
+				var box := (screen.find_child("LocationTab_%s" % other, true, false) as Button) \
+						.get_theme_stylebox("normal") as StyleBoxFlat
+				assert_eq(box.bg_color == UiStyle.ACCENT, other == tab, "%s: aktiver Reiter %s" % [device, other])
+		screen.free()
+
+
+func test_location_reopens_on_first_tab() -> void:
+	var data = _data_with_test_market()
+	var screen := _screen_on("iPhone 15/16 Pro Max (Dynamic Island)", data)
+	_press(screen, "MapPin_test_market")
+	_press(screen, "LocationTab_geschaeft")
+	_press(screen, "WindowCloseButton")
+	_press(screen, "MapPin_test_market")
+	var content := screen.find_child("LocationWindowContent", true, false)
+	assert_eq(content.call("get_current_tab"), "alltag")
+	screen.free()
+
+
+func test_locations_that_fit_show_no_tabs() -> void:
+	for device in Layout.DEVICES:
+		var app := _app()
+		_busy_game(app)
+		for location_id in ["home", "cafe_harbor", "gym", "office", "label_store"]:
+			_press(app, "MapPin_%s" % location_id)
+			Layout.apply(app, device)
+			var window := app.find_child("Window_location", true, false) as Control
+			var content := window.find_child("LocationWindowContent", true, false)
+			assert_eq(content.call("has_tabs"), false, "%s / %s: Reiter ohne Not" % [device, location_id])
+			assert_eq((window.find_child("LocationTabs", true, false) as Control).visible, false)
+		# Das Studio passt auf echten Geräten ohne Reiter, nur im „Grenzfall“ (3 Spalten) braucht es sie.
+		_press(app, "MapPin_studio")
+		Layout.apply(app, device)
+		var studio := app.find_child("LocationWindowContent", true, false)
+		assert_eq(studio.call("has_tabs"), device.begins_with("Grenzfall"), "%s / studio" % device)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+
+
+## G4.6: Im Studio VOR ORT (Buttons frei, Hinweiszeilen sichtbar) um 12:40 mit Terminkonflikt – Kachel-Namen und
+## Hinweise auf keiner Geräteklasse abgeschnitten, auch im aktiven Reiter des „Grenzfalls“.
+func test_studio_on_site_texts_not_cut() -> void:
+	for device in Layout.DEVICES:
+		var app := _app()
+		_press(app, "NewGameButton")
+		_press(app, "MapPin_studio")
+		_press(app, "TravelButton")
+		var game = app.get("game")
+		game.time.advance(TimeSystemScript.at(1, 12, 40) - game.time.get_minutes())
+		_press(app, "HereButton")
+		Layout.apply(app, device)
+		var window := app.find_child("Window_location", true, false) as Control
+		Layout.settle_in_place(window)
+		var checked := 0
+		for node in window.find_children("*", "Label", true, false):
+			var label := node as Label
+			var name_text := String(label.name)
+			if not label.is_visible_in_tree() or not (name_text.begins_with("TileTitle_") or name_text.begins_with("TileHint_")):
+				continue
+			checked += 1
+			var width := label.get_theme_font("font").get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
+					label.get_theme_font_size("font_size")).x
+			assert_true(width <= label.size.x + 0.5, "%s: „%s“ abgeschnitten (%d > %d px)" % [device, label.text, width,
+					label.size.x])
+		assert_true(checked >= 6, "%s: nur %d Texte geprüft" % [device, checked])
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)

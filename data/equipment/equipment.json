@@ -2,6 +2,7 @@
 	{
 		"id": "camera",
 		"display_name": "Kamera",
+		"tab": "content",
 		"location": "studio",
 		"formats": ["short_video", "livestream", "long_video"],
 		"levels": [
@@ -13,6 +14,7 @@
 	{
 		"id": "microphone",
 		"display_name": "Mikrofon",
+		"tab": "content",
 		"location": "studio",
 		"formats": ["livestream", "long_video", "community_qa"],
 		"levels": [
@@ -24,6 +26,7 @@
 	{
 		"id": "lighting",
 		"display_name": "Licht",
+		"tab": "content",
 		"location": "studio",
 		"formats": ["short_video", "livestream", "long_video"],
 		"levels": [

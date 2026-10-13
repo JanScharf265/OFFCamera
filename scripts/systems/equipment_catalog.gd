@@ -96,6 +96,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> EquipmentDe
 	definition.id = id
 	definition.display_name = reader.string_field(entry, "display_name", where, true)
 	definition.location = reader.string_field(entry, "location", where, true)
+	definition.tab = reader.tab_field(entry, where)
 
 	var formats: Variant = entry.get("formats")
 	if typeof(formats) != TYPE_ARRAY or formats.is_empty():

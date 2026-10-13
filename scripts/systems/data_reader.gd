@@ -6,6 +6,7 @@ extends RefCounted
 
 const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
+const LocationTabScript := preload("res://scripts/models/location_tab.gd")
 
 var errors: PackedStringArray = []
 
@@ -31,6 +32,15 @@ func id_field(entry: Dictionary, where: String) -> String:
 		errors.append("%s: 'id' fehlt oder ist ungültig (nur a–z, 0–9, _)." % where)
 		return ""
 	return id
+
+
+## Pflichtfeld "tab" (G4.6): Reiter im Ortsfenster, eine der IDs aus location_tab.gd.
+func tab_field(entry: Dictionary, where: String) -> String:
+	var tab := string_field(entry, "tab", where, true)
+	if not tab.is_empty() and tab not in LocationTabScript.IDS:
+		errors.append("%s: 'tab' muss einer von %s sein, nicht '%s'." % [where, ", ".join(LocationTabScript.IDS), tab])
+		return ""
+	return tab
 
 
 func string_field(entry: Dictionary, field: String, where: String, required: bool) -> String:

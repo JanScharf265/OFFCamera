@@ -32,7 +32,7 @@ func test_new_game_has_start_values() -> void:
 ## das ActivitySystem unterstützt sie aber weiter – geprüft mit Testdaten.
 func test_income_is_in_ledger_with_reference_and_start_time() -> void:
 	var data := Helpers.game_data()
-	data.activities.load_data([{"id": "side_job", "display_name": "Nebenjob", "location": "office",
+	data.activities.load_data([{"id": "side_job", "display_name": "Nebenjob", "location": "office", "tab": "geschaeft",
 			"duration_minutes": 60, "money_cents": 2500, "category": "work", "effects": {"energy": -10}}])
 	var game := GameStateScript.new(data, Helpers.TEST_SEED)
 	game.locations.travel("office")  # 08:00 -> 08:20

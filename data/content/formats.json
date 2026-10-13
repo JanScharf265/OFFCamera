@@ -2,6 +2,7 @@
 	{
 		"id": "short_video",
 		"display_name": "Kurzvideo",
+		"tab": "content",
 		"description": "Ein schneller Clip fürs Handy, gedreht am Küchentisch.",
 		"location": "home",
 		"duration_minutes": 60,
@@ -12,6 +13,7 @@
 	{
 		"id": "livestream",
 		"display_name": "Livestream",
+		"tab": "content",
 		"description": "Zwei Stunden live mit dem Chat.",
 		"location": "studio",
 		"duration_minutes": 120,
@@ -22,6 +24,7 @@
 	{
 		"id": "long_video",
 		"display_name": "Langes Video",
+		"tab": "content",
 		"description": "Vier Stunden Dreh und Schnitt für ein aufwendiges Video.",
 		"location": "studio",
 		"duration_minutes": 240,
@@ -32,6 +35,7 @@
 	{
 		"id": "community_qa",
 		"display_name": "Community-Q&A",
+		"tab": "content",
 		"description": "Eine Stunde Fragen aus dem Chat beantworten.",
 		"location": "studio",
 		"duration_minutes": 60,

@@ -394,7 +394,7 @@ func test_care_can_beat_decay() -> void:
 
 func test_activity_catalog_checks_company_fields() -> void:
 	var catalog := ActivityCatalogScript.new()
-	var base := {"id": "x", "display_name": "X", "location": "office", "duration_minutes": 30}
+	var base := {"id": "x", "display_name": "X", "location": "office", "tab": "geschaeft", "duration_minutes": 30}
 	var wrong_requirement := base.duplicate()
 	wrong_requirement["requires"] = "yacht"
 	assert_eq(catalog.load_data([wrong_requirement]), false)

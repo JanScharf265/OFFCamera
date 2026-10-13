@@ -16,7 +16,7 @@ func _game_at(location_id: String) -> GameStateScript:
 
 
 func _valid(id: String = "clip") -> Dictionary:
-	return {"id": id, "display_name": "Clip", "location": "home", "duration_minutes": 30,
+	return {"id": id, "display_name": "Clip", "location": "home", "tab": "content", "duration_minutes": 30,
 			"channel": {"followers_base": 1, "followers_per_mille": 0},
 			"income": {"base_cents": 0, "per_1000_followers_cents": 0}}
 

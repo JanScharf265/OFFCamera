@@ -4,7 +4,7 @@ const ActivityCatalogScript := preload("res://scripts/systems/activity_catalog.g
 
 
 func _valid(id: String = "rest") -> Dictionary:
-	return {"id": id, "display_name": "Ausruhen", "location": "home", "duration_minutes": 60, "effects": {"energy": 15}}
+	return {"id": id, "display_name": "Ausruhen", "location": "home", "tab": "alltag", "duration_minutes": 60, "effects": {"energy": 15}}
 
 
 func test_real_data_file_loads_without_errors() -> void:
@@ -46,13 +46,13 @@ func test_duplicate_ids_are_rejected() -> void:
 func test_invalid_fields_are_all_reported() -> void:
 	var catalog := ActivityCatalogScript.new()
 	var data := [
-		{"id": "Bad-ID", "display_name": "x", "location": "home", "duration_minutes": 10},
-		{"id": "no_name", "location": "home", "duration_minutes": 10},
-		{"id": "zero_duration", "display_name": "x", "location": "home", "duration_minutes": 0},
-		{"id": "fraction", "display_name": "x", "location": "home", "duration_minutes": 1.5},
-		{"id": "money_no_category", "display_name": "x", "location": "home", "duration_minutes": 10, "money_cents": -100},
-		{"id": "bad_effect", "display_name": "x", "location": "home", "duration_minutes": 10, "effects": {"health": 5}},
-		{"id": "no_location", "display_name": "x", "duration_minutes": 10},
+		{"id": "Bad-ID", "display_name": "x", "location": "home", "tab": "alltag", "duration_minutes": 10},
+		{"id": "no_name", "location": "home", "tab": "alltag", "duration_minutes": 10},
+		{"id": "zero_duration", "display_name": "x", "location": "home", "tab": "alltag", "duration_minutes": 0},
+		{"id": "fraction", "display_name": "x", "location": "home", "tab": "alltag", "duration_minutes": 1.5},
+		{"id": "money_no_category", "display_name": "x", "location": "home", "tab": "alltag", "duration_minutes": 10, "money_cents": -100},
+		{"id": "bad_effect", "display_name": "x", "location": "home", "tab": "alltag", "duration_minutes": 10, "effects": {"health": 5}},
+		{"id": "no_location", "display_name": "x", "tab": "alltag", "duration_minutes": 10},
 	]
 	assert_eq(catalog.load_data(data), false)
 	assert_eq(catalog.errors.size(), 7, "; ".join(catalog.errors))

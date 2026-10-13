@@ -98,6 +98,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> ContentForm
 	definition.display_name = reader.string_field(entry, "display_name", where, true)
 	definition.description = reader.string_field(entry, "description", where, false)
 	definition.location = reader.string_field(entry, "location", where, true)
+	definition.tab = reader.tab_field(entry, where)
 	definition.duration_minutes = reader.int_field(entry, "duration_minutes", where, true)
 	definition.effects = reader.effects_field(entry, where)
 	if definition.duration_minutes <= 0 and DataReaderScript.is_whole_number(entry.get("duration_minutes")):

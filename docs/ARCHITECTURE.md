@@ -239,6 +239,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Hinweiszeile, Button mit Sperrgrund; Käufe mit Rahmen-Button. G4.5b: Kachel-Buttons (`UiStyle.style_tile_button`)
   sind 84 px hoch (Tippfläche), gezeichnet werden nur die unteren 56 px (negative `expand_margin_top`); Hinweiszeile
   und Button liegen übereinander im `ActionArea`. Lesetext ≥ `UiStyle.MIN_READ_FONT_SIZE` (21 px).
+  G4.6 Reiter: Jede Aktion an einem Ort hat in den Daten das Pflichtfeld `tab` (IDs in `models/location_tab.gd`,
+  geprüft von `DataReader.tab_field`). `set_available_size()` misst synchron (Container sortieren, Umbrüche setzen),
+  ob alle Kacheln in die sichtbare Höhe (`UiWindow.body_height()`) passen; sonst erscheinen Reiter in der Titelzeile
+  (`LocationTabs`, nur nicht leere, feste Reihenfolge) und das Raster zeigt nur die Kacheln des gewählten Reiters.
+  Die Wahl ist reine Anzeige (nicht im Spielstand), das Fenster öffnet immer auf dem ersten Reiter.
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,

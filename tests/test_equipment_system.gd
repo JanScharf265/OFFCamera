@@ -14,7 +14,7 @@ func _game_at_studio() -> GameStateScript:
 
 
 func _valid(id: String = "tripod") -> Dictionary:
-	return {"id": id, "display_name": "Stativ", "location": "studio", "formats": ["livestream"],
+	return {"id": id, "display_name": "Stativ", "location": "studio", "tab": "content", "formats": ["livestream"],
 			"levels": [{"name": "Klein", "price_cents": 1000, "quality_percent": 2},
 				{"name": "Groß", "price_cents": 3000, "quality_percent": 4}]}
 

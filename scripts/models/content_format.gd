@@ -10,6 +10,8 @@ var display_name: String
 var description: String
 ## ID des Ortes, an dem produziert wird.
 var location: String
+## Reiter im Ortsfenster (G4.6), siehe location_tab.gd.
+var tab: String
 var duration_minutes: int
 ## Änderungen an PlayerStats, z. B. {"energy": -20, "mood": 5}.
 var effects: Dictionary

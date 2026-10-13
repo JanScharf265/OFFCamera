@@ -8,6 +8,8 @@ var id: String
 var display_name: String
 ## Ort, an dem man es kaufen kann.
 var location: String
+## Reiter im Ortsfenster (G4.6), siehe location_tab.gd.
+var tab: String
 ## Content-Formate, deren Qualität es verbessert.
 var formats: PackedStringArray
 ## Stufen 1..n als {"name": String, "price_cents": int, "quality_percent": int};

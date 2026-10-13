@@ -435,3 +435,23 @@ Chip-Abstand 8 px. Abweichungen vom Auftrag: (1) Konflikt-Hinweis „⚠ Verpass
 gemessen 257 px, die Kacheln sind 222–248 px breit. (2) „Q&A mit der Community“ stand in `data/content/formats.json`
 (nicht activities.json) – dort umbenannt. Bekannt offen: Im „Grenzfall“ (3 Spalten, kein echtes Gerät) passen Studio
 und Büro nicht ohne Scrollen und die Titelzeile zeigt „…“ – kommt mit den Reitern in G4.6.
+
+## 048 – Reiter im Ortsfenster (G4.6)
+Zuordnung als Daten: Pflichtfeld `tab` in activities.json, formats.json, equipment.json und company_types.json
+(gilt für Gründung und Filiale). Alltag: Ausruhen, Schlafen, Essen gehen, Kaffee, Training, Woche planen (alles
+Persönliche ohne Firma). Content: Kurzvideo, Livestream, Langes Video, Community-Q&A, Kamera, Mikrofon, Licht.
+Geschäft: Ware nachbestellen, Kampagne planen, Merch zeigen, Laden führen, Merch-Label (Gründung/Filiale) – alles,
+was eine Firma voraussetzt oder betrifft. Unterwelt: noch leer.
+Platz, gemessen (G4.5b-Stand): Eine eigene Reiter-Zeile über dem Raster kostet ≥ 44 px Höhe, das Studio hat in zwei
+Reihen aber nur 1–40 px Reserve (13/14: 468 von 469 px). Eine Spalte links kostet ~120 px Breite (Text „Unterwelt“
+in 21 px + Rand) – im „Grenzfall“ fiele das Raster dann auf 2 Spalten und das Studio bräuchte 3 Reihen. Die
+Titelzeile ist ohnehin 84 px hoch (Tippflächen), dort kosten Reiter nur Breite: Reiter stehen zwischen Infos und
+„Hinfahren“; die Infos (Öffnungszeiten, Entfernung) weichen auf „…“ aus, wenn es eng wird (nur im „Grenzfall“).
+Ob Reiter nötig sind, misst das Fenster selbst beim Layout (synchron, gleiche Methode wie die Layout-Tests). Heute
+zeigt nur das Studio im „Grenzfall“ Reiter (Content: 6 Kacheln, 468 von 468 px; Geschäft: 1 Kachel).
+Korrektur zu 047: (1) „Büro im Grenzfall braucht 508 px“ war ein Messfehler des Tests – die Hilfsfunktion
+`settle_labels()` setzte alle umbrechenden Labels auf 200 px Breite. Mit echter Breite gemessen: 442 von 468 px, das
+Büro passt ohne Reiter. Die Layout-Tests messen jetzt wie das Spiel (`Layout.settle_in_place`). (2) „Nichts
+abgeschnitten“ stimmte nicht ganz: Im Studio vor Ort (Buttons frei) war „Nächste: USB-Mikrofon“ auf dem SE 12 px zu
+breit – der Test prüfte das Studio nur von woanders (dann ist die Hinweiszeile ausgeblendet). Jetzt „→ USB-Mikrofon“
+und ein eigener Test vor Ort.

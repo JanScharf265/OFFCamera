@@ -65,6 +65,15 @@ func _init(kind: String, title: String, window_content: Control, closable: bool 
 	_scroll.add_child(content)
 
 
+## Sichtbare Höhe für den Inhalt (Fenster minus Rand, Titelzeile, Abstand) – synchron aus den Mindestgrößen,
+## damit der Inhalt vor dem nächsten Bild entscheiden kann, ob er Reiter braucht (G4.6).
+func body_height() -> float:
+	var box := get_theme_stylebox("panel")
+	var header := get_child(0).get_child(0) as Control
+	return size.y - box.get_minimum_size().y - header.get_combined_minimum_size().y \
+			- float((get_child(0) as VBoxContainer).get_theme_constant("separation"))
+
+
 func is_closable() -> bool:
 	return _close_button.visible
 

@@ -98,6 +98,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> ActivityDef
 	definition.display_name = reader.string_field(entry, "display_name", where, true)
 	definition.description = reader.string_field(entry, "description", where, false)
 	definition.location = reader.string_field(entry, "location", where, true)
+	definition.tab = reader.tab_field(entry, where)
 	definition.category = reader.string_field(entry, "category", where, false)
 	definition.duration_minutes = reader.int_field(entry, "duration_minutes", where, true)
 	definition.money_cents = reader.int_field(entry, "money_cents", where, false)

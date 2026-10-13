@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Reiter im Ortsfenster (Alltag · Content · Geschäft · Unterwelt) – nur wenn die Kacheln eines Orts nicht ohne Scrollen passen; neues Pflichtfeld "tab" in den Daten; Hinweis bei Ausrüstung kürzer („→ USB-Mikrofon“) (Ticket G4.6)
 - Kacheln besser lesbar: Schrift 21 px statt 16 px, flachere Buttons (56 px sichtbar) mit großer Tippfläche (84 px), Wirkungen als Symbol + Zahl in höchstens 2 Zeilen, kürzere Namen „Community-Q&A“ und „Merch zeigen“, Konflikt-Hinweis „⚠ Verpasst: 14:00“; Öffnungszeiten und Entfernung im Ortsfenster in 21 px (Ticket G4.5b)
 - Ortsfenster als Kachel-Raster (3–4 Spalten, ohne Scrollen): Name, Dauer mit „Ende HH:MM“, Wirkungen als Symbol + Zahl (grün/rot), Hinweiszeile für Terminkonflikte, Sperrgrund im Button, Käufe mit Rahmen-Button; Infos und „Hinfahren“ in der Titelzeile; runder Schließen-Button in allen Fenstern (Ticket G4.5)
 - Runde Buttons rechts in zwei Gruppen „Leben“ (Kalender, Fristen, Kanal) und „Geschäft“ (Firma, Buchungen): Kreis 64 px, Tippfläche 84 px, Beschriftung, roter Zählerpunkt bei offenen Fristen; Menü als Zahnrad in der HUD-Leiste; links nur „Hier“ (Ticket G4.4)

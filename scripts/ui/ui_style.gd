@@ -65,6 +65,9 @@ const TILE_ROW_GAP := 8
 ## Mindestbreite einer Kachel: daraus ergibt sich die Spaltenzahl (höchstens 4).
 const TILE_MIN_WIDTH := 220.0
 const TILE_MAX_COLUMNS := 4
+## Reiter im Ortsfenster (G4.6): in der Titelzeile, Tippfläche 84 px hoch, sichtbar 52 px.
+const TAB_VISIBLE := 52.0
+const TAB_PADDING := 16
 ## HUD-Leiste oben (G4.3): Abstand der Elemente und kleine Beschriftung über den Beträgen.
 const HUD_GAP := 18
 const HUD_CAPTION_FONT_SIZE := 15
@@ -197,3 +200,22 @@ static func _low_box(color: Color, hidden: float) -> StyleBoxFlat:
 	box.content_margin_top = hidden + 4.0
 	box.content_margin_bottom = 4.0
 	return box
+
+
+## Reiter (G4.6): 84 px hoch (Tippfläche), sichtbar mittig TAB_VISIBLE; aktiv in Akzentfarbe, sonst mit Rahmen.
+static func style_tab_button(target: Button, active: bool) -> void:
+	var hidden := (TOUCH_SIZE - TAB_VISIBLE) / 2.0
+	var box := _box(ACCENT if active else SURFACE, TAB_PADDING)
+	box.expand_margin_top = -hidden
+	box.expand_margin_bottom = -hidden
+	box.set_corner_radius_all(int(TAB_VISIBLE / 2.0))
+	if not active:
+		box.border_color = SURFACE_PRESSED
+		box.set_border_width_all(2)
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		target.add_theme_stylebox_override(state, box)
+	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		target.add_theme_color_override(color_name, TEXT if active else MUTED)
+	target.add_theme_font_size_override("font_size", MIN_READ_FONT_SIZE)
+	target.custom_minimum_size.y = TOUCH_SIZE

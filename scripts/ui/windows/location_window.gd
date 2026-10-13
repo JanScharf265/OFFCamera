@@ -2,7 +2,8 @@ extends VBoxContainer
 
 ## Fensterinhalt eines Orts (G2, ab G4.5 als Kachel-Raster): oben Öffnungszeiten, Entfernung und
 ## „Hinfahren“, darunter alles, was man dort tun kann – Content, Aktivitäten, Ausrüstung, Gründung,
-## Filiale – als Kacheln (activity_tile.gd) in 3–4 Spalten, ohne Scrollen. Ist man woanders, bleiben die
+## Filiale – als Kacheln (activity_tile.gd) in 3–4 Spalten, ohne Scrollen. Passen die Kacheln nicht in die
+## sichtbare Höhe, erscheinen Reiter in der Titelzeile (G4.6, Zuordnung aus dem Datenfeld "tab"). Ist man woanders, bleiben die
 ## Aktionen sichtbar, aber gesperrt; der Grund aus den Systemen steht im Button („Nur vor Ort möglich“).
 ## Zeigt nur an; Aktionen laufen über die Handler des GameScreens.
 
@@ -12,6 +13,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const ActivityTileScript := preload("res://scripts/ui/activity_tile.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const LocationTabScript := preload("res://scripts/models/location_tab.gd")
 
 const CONFLICT_PREFIX := "⚠ Verpasst: "
 
@@ -24,6 +26,13 @@ var _location_distance: Label
 var _travel_button: Button
 var _grid: GridContainer
 var _details: Control
+var _tab_bar: HBoxContainer
+## tab_id -> Button (nur Reiter mit Kacheln, in fester Reihenfolge)
+var _tab_buttons := {}
+## Kachel -> tab_id
+var _tile_tabs := {}
+var _current_tab := ""
+var _tabs_active := false
 ## id -> Kachel, je Art
 var _cards := {}
 var _content_cards := {}
@@ -70,6 +79,7 @@ func _ready() -> void:
 		_grid.add_child(_build_branch_card(id))
 	if _grid.get_child_count() == 0:
 		add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+	_build_tabs()
 	refresh()
 
 
@@ -77,10 +87,84 @@ func get_title() -> String:
 	return _game.locations.get_catalog().get_definition(location_id).display_name
 
 
-## Vom GameScreen: verfügbare Breite des Inhalts → Spaltenzahl (3–4, bei sehr wenig Platz weniger).
-func set_available_width(width: float) -> void:
+## Vom GameScreen: verfügbare Breite und Höhe des Inhalts → Spaltenzahl (3–4, bei sehr wenig Platz weniger)
+## und ob Reiter nötig sind: nur wenn alle Kacheln zusammen nicht ohne Scrollen passen (G4.6).
+func set_available_size(width: float, height: float) -> void:
 	var columns := int(floor((width + UiStyle.TILE_GAP) / (UiStyle.TILE_MIN_WIDTH + UiStyle.TILE_GAP)))
 	_grid.columns = clampi(columns, 1, UiStyle.TILE_MAX_COLUMNS)
+	_set_tabs_active(false)
+	if _tab_buttons.size() > 1 and _measure_height(width) > height + 0.5:
+		_set_tabs_active(true)
+
+
+
+func has_tabs() -> bool:
+	return _tabs_active
+
+
+func get_current_tab() -> String:
+	return _current_tab
+
+
+## Reiter wechseln (Tipp auf einen Reiter). Kostet keine Spielzeit, wird nicht gespeichert.
+func select_tab(tab_id: String) -> void:
+	if not _tab_buttons.has(tab_id):
+		return
+	_current_tab = tab_id
+	_apply_tab_filter()
+
+
+func _build_tabs() -> void:
+	_tab_bar = HBoxContainer.new()
+	_tab_bar.name = "LocationTabs"
+	_tab_bar.add_theme_constant_override("separation", 8)
+	_tab_bar.visible = false
+	_details.add_child(_tab_bar)
+	_details.move_child(_tab_bar, 1)  # zwischen Infos und „Hinfahren“
+	for tab_id in LocationTabScript.IDS:
+		if tab_id not in _tile_tabs.values():
+			continue  # leere Reiter werden nicht gezeigt
+		var button: Button = _screen.scroll_button(LocationTabScript.LABELS[tab_id], "LocationTab_%s" % tab_id)
+		button.pressed.connect(func() -> void: select_tab(tab_id))
+		_tab_bar.add_child(button)
+		_tab_buttons[tab_id] = button
+		if _current_tab.is_empty():
+			_current_tab = tab_id  # Das Fenster öffnet immer auf dem ersten Reiter.
+	_apply_tab_filter()
+
+
+func _set_tabs_active(active: bool) -> void:
+	_tabs_active = active
+	_tab_bar.visible = active
+	_apply_tab_filter()
+
+
+func _apply_tab_filter() -> void:
+	for tile in _tile_tabs:
+		tile.visible = not _tabs_active or _tile_tabs[tile] == _current_tab
+	for tab_id in _tab_buttons:
+		UiStyle.style_tab_button(_tab_buttons[tab_id], tab_id == _current_tab)
+
+
+## Höhe, die alle sichtbaren Kacheln bei dieser Breite brauchen – synchron gemessen (Container sortieren,
+## umbrechende Labels auf ihre Breite setzen), weil die Entscheidung vor dem nächsten Bild fallen muss.
+func _measure_height(width: float) -> float:
+	size = Vector2(width, size.y)
+	for i in 2:
+		_sort(self)
+		for node in find_children("*", "Label", true, false):
+			var label := node as Label
+			if label.autowrap_mode != TextServer.AUTOWRAP_OFF:
+				label.get_line_count()
+				label.update_minimum_size()
+	return get_combined_minimum_size().y
+
+
+static func _sort(node: Node) -> void:
+	if node is Container:
+		node.notification(Container.NOTIFICATION_SORT_CHILDREN)
+	for child in node.get_children():
+		_sort(child)
 
 
 func get_columns() -> int:
@@ -132,10 +216,12 @@ func _conflict_hint(minutes: int) -> String:
 
 
 func _tile(key: String, title: String, button_name: String, action_text: String, is_purchase: bool,
-		action: Callable) -> ActivityTileScript:
+		action: Callable, tab: String) -> ActivityTileScript:
 	var button: Button = _screen.scroll_button(action_text, button_name)
 	button.pressed.connect(action)
-	return ActivityTileScript.new(key, title, button, action_text, is_purchase)
+	var tile := ActivityTileScript.new(key, title, button, action_text, is_purchase)
+	_tile_tabs[tile] = tab
+	return tile
 
 
 # --- Details und Fahrt -------------------------------------------------------------
@@ -197,7 +283,7 @@ func _refresh_details() -> void:
 func _build_activity_card(activity_id: String) -> Control:
 	var definition = _game.activities.get_catalog().get_definition(activity_id)
 	var tile := _tile(activity_id, definition.display_name, "StartButton_%s" % activity_id, "Starten", false,
-			func() -> void: _screen.on_activity_pressed(activity_id))
+			func() -> void: _screen.on_activity_pressed(activity_id), definition.tab)
 	tile.tooltip_text = definition.description
 	_cards[activity_id] = tile
 	return tile
@@ -206,7 +292,7 @@ func _build_activity_card(activity_id: String) -> Control:
 func _build_content_card(format_id: String) -> Control:
 	var format = _game.content.get_catalog().get_definition(format_id)
 	var tile := _tile(format_id, format.display_name, "ContentButton_%s" % format_id, "Produzieren", false,
-			func() -> void: _screen.on_content_pressed(format_id))
+			func() -> void: _screen.on_content_pressed(format_id), format.tab)
 	tile.tooltip_text = format.description
 	_content_cards[format_id] = tile
 	return tile
@@ -215,7 +301,7 @@ func _build_content_card(format_id: String) -> Control:
 func _build_equipment_card(equipment_id: String) -> Control:
 	var definition = _game.equipment.get_catalog().get_definition(equipment_id)
 	var tile := _tile(equipment_id, definition.display_name, "EquipmentButton_%s" % equipment_id, "Kaufen", true,
-			func() -> void: _screen.on_equipment_pressed(equipment_id))
+			func() -> void: _screen.on_equipment_pressed(equipment_id), definition.tab)
 	_equipment_cards[equipment_id] = tile
 	return tile
 
@@ -233,7 +319,7 @@ func _refresh_equipment_card(equipment_id: String) -> void:
 	else:
 		tile.set_effects([ActivityText.chip(ActivityText.signed_money(-next["price_cents"]), -1, ActivityText.MONEY_ICON),
 				ActivityText.chip("+%d %% Qualität" % next["quality_percent"], 1)])
-		tile.set_hint("Nächste: %s" % next["name"], false)
+		tile.set_hint("→ %s" % next["name"], false)  # nächste Stufe; kurz, damit nichts abgeschnitten wird
 	tile.set_reason(_game.equipment.check_buy(equipment_id))
 	tile.button.visible = not next.is_empty()
 
@@ -241,7 +327,7 @@ func _refresh_equipment_card(equipment_id: String) -> void:
 func _build_company_card(type_id: String) -> Control:
 	var definition = _game.company.get_catalog().get_definition(type_id)
 	var tile := _tile(type_id, definition.display_name, "CompanyFoundButton_%s" % type_id, "Gründen",
-			false, func() -> void: _screen.on_company_found_pressed(type_id))
+			false, func() -> void: _screen.on_company_found_pressed(type_id), definition.tab)
 	tile.tooltip_text = definition.description
 	tile.info_label("CompanyInfo_%s" % type_id)
 	_company_cards[type_id] = tile
@@ -275,7 +361,7 @@ func _refresh_company_card(type_id: String, now: int) -> void:
 func _build_branch_card(type_id: String) -> Control:
 	var definition = _game.company.get_catalog().get_definition(type_id)
 	var tile := _tile("branch_%s" % type_id, definition.branch_display_name, "BranchOpenButton_%s" % type_id,
-			"Eröffnen", false, func() -> void: _screen.on_branch_open_pressed(type_id))
+			"Eröffnen", false, func() -> void: _screen.on_branch_open_pressed(type_id), definition.tab)
 	tile.info_label("BranchInfo_%s" % type_id)
 	_branch_cards[type_id] = tile
 	return tile

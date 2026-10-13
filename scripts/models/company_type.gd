@@ -10,6 +10,8 @@ var display_name: String
 var description: String
 ## Ort, an dem gegründet wird.
 var found_location: String
+## Reiter im Ortsfenster (G4.6), siehe location_tab.gd.
+var tab: String
 ## Spielzeit für die Gründung (> 0).
 var founding_minutes: int
 ## Gründungsgebühr (Ausgabe vom Privatkonto, > 0).

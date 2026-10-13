@@ -238,7 +238,8 @@ func _layout() -> void:
 		_window.custom_minimum_size = Vector2(window_right - left, window_bottom - window_top)
 		_window.size = _window.custom_minimum_size
 		_window.position = Vector2(left, window_top)
-		_window.content.call("set_available_width", _window.size.x - 2.0 * UiStyle.COMPACT_WINDOW_PADDING)
+		_window.content.call("set_available_size", _window.size.x - 2.0 * UiStyle.COMPACT_WINDOW_PADDING,
+				_window.body_height())
 	elif _window != null:
 		var width := minf(UiStyle.WINDOW_MAX_WIDTH, right - left - 2.0 * GAP)
 		_window.custom_minimum_size = Vector2(width, bottom - top)

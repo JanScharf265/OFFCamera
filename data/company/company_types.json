@@ -2,6 +2,7 @@
 	{
 		"id": "merch_label",
 		"display_name": "Merch-Label",
+		"tab": "geschaeft",
 		"description": "Shirts, Caps und Kaffeebecher mit deinem Kanal-Logo – erst online, später mit eigenem Laden.",
 		"found_location": "office",
 		"founding_minutes": 60,

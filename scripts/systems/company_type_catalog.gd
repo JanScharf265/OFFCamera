@@ -113,6 +113,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> CompanyType
 	definition.display_name = reader.string_field(entry, "display_name", where, true)
 	definition.description = reader.string_field(entry, "description", where, false)
 	definition.found_location = reader.string_field(entry, "found_location", where, true)
+	definition.tab = reader.tab_field(entry, where)
 	for field in POSITIVE_FIELDS + NON_NEGATIVE_FIELDS + SCORE_FIELDS:
 		var value := reader.int_field(entry, field, where, true)
 		if field in POSITIVE_FIELDS and value <= 0:

@@ -9,6 +9,8 @@ var display_name: String
 var description: String
 ## ID des Ortes, an dem die Aktivität stattfindet.
 var location: String
+## Reiter im Ortsfenster (G4.6), siehe location_tab.gd.
+var tab: String
 var duration_minutes: int
 ## Einnahme > 0, Ausgabe < 0, 0 = keine Buchung.
 var money_cents: int

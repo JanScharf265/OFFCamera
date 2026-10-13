@@ -72,3 +72,16 @@ static func sort_containers(root: Node) -> void:
 ## Rechteck eines (auch verschachtelten) Controls in Koordinaten von `screen`.
 static func screen_rect(control: Control, screen: Control) -> Rect2:
 	return Rect2(control.global_position - screen.global_position, control.size)
+
+
+## Wie das Spiel selbst misst (G4.6): Container sortieren, umbrechende Labels auf ihrer TATSÄCHLICHEN Breite
+## umbrechen lassen, erneut sortieren. (settle_labels() setzt dagegen eine feste Breite.)
+static func settle_in_place(root: Control) -> void:
+	for i in 2:
+		sort_containers(root)
+		for node in root.find_children("*", "Label", true, false):
+			var label := node as Label
+			if label.autowrap_mode != TextServer.AUTOWRAP_OFF:
+				label.get_line_count()
+				label.update_minimum_size()
+	sort_containers(root)

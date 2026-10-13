@@ -2,6 +2,7 @@
 	{
 		"id": "rest",
 		"display_name": "Ausruhen",
+		"tab": "alltag",
 		"description": "Eine Stunde abschalten.",
 		"location": "home",
 		"duration_minutes": 60,
@@ -10,6 +11,7 @@
 	{
 		"id": "sleep",
 		"display_name": "Schlafen",
+		"tab": "alltag",
 		"description": "Acht Stunden Schlaf.",
 		"location": "home",
 		"duration_minutes": 480,
@@ -18,6 +20,7 @@
 	{
 		"id": "eat_out",
 		"display_name": "Essen gehen",
+		"tab": "alltag",
 		"description": "Eine Stunde essen gehen.",
 		"location": "cafe_harbor",
 		"duration_minutes": 60,
@@ -28,6 +31,7 @@
 	{
 		"id": "coffee",
 		"display_name": "Kaffee",
+		"tab": "alltag",
 		"description": "Ein Café con leche mit Blick aufs Meer.",
 		"location": "cafe_harbor",
 		"duration_minutes": 30,
@@ -38,6 +42,7 @@
 	{
 		"id": "training",
 		"display_name": "Training",
+		"tab": "alltag",
 		"description": "Anderthalb Stunden Kraft und Ausdauer.",
 		"location": "gym",
 		"duration_minutes": 90,
@@ -46,6 +51,7 @@
 	{
 		"id": "plan_week",
 		"display_name": "Woche planen",
+		"tab": "alltag",
 		"description": "Termine sortieren, Ideen sammeln, Prioritäten setzen.",
 		"location": "office",
 		"duration_minutes": 60,
@@ -54,6 +60,7 @@
 	{
 		"id": "order_stock",
 		"display_name": "Ware nachbestellen",
+		"tab": "geschaeft",
 		"description": "Bestände prüfen, Nachschub für Shirts und Caps ordern.",
 		"location": "office",
 		"duration_minutes": 60,
@@ -64,6 +71,7 @@
 	{
 		"id": "plan_campaign",
 		"display_name": "Kampagne planen",
+		"tab": "geschaeft",
 		"description": "Neue Motive, Fotos und ein Rabatt fürs Wochenende.",
 		"location": "office",
 		"duration_minutes": 90,
@@ -74,6 +82,7 @@
 	{
 		"id": "merch_shoutout",
 		"display_name": "Merch zeigen",
+		"tab": "geschaeft",
 		"description": "Eine halbe Stunde die neue Kollektion in die Kamera halten.",
 		"location": "studio",
 		"duration_minutes": 30,
@@ -84,6 +93,7 @@
 	{
 		"id": "run_store",
 		"display_name": "Laden führen",
+		"tab": "geschaeft",
 		"description": "Vier Stunden hinter der Kasse, beraten, Regale auffüllen.",
 		"location": "label_store",
 		"duration_minutes": 240,
