@@ -228,7 +228,18 @@ func _layout() -> void:
 
 	_dim.position = Vector2.ZERO
 	_dim.size = size
-	if _window != null:
+	if _window != null and _window_kind == "location":
+		# Ortsfenster (G4.5): unter der HUD-Leiste, vom linken Rand bis vor die Button-Spalten (≈ 85 % der
+		# nutzbaren Breite), damit das Kachel-Raster ohne Scrollen passt. Leiste und Buttons bleiben sichtbar.
+		# Unten nutzt es den Grundabstand mit (nicht den Bereich des Home-Balkens), damit zwei Reihen passen.
+		var window_top := top + _hud.size.y + COLUMN_GAP / 2.0
+		var window_right := _life_group.position.x - GAP
+		var window_bottom := size.y - maxf(_margins[3] - UiStyle.PADDING, 0.0) - COLUMN_GAP
+		_window.custom_minimum_size = Vector2(window_right - left, window_bottom - window_top)
+		_window.size = _window.custom_minimum_size
+		_window.position = Vector2(left, window_top)
+		_window.content.call("set_available_width", _window.size.x - 2.0 * UiStyle.COMPACT_WINDOW_PADDING)
+	elif _window != null:
 		var width := minf(UiStyle.WINDOW_MAX_WIDTH, right - left - 2.0 * GAP)
 		_window.custom_minimum_size = Vector2(width, bottom - top)
 		_window.size = _window.custom_minimum_size

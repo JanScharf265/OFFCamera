@@ -406,3 +406,18 @@ Hinweis unten: Kurze Hinweise haben `mouse_filter = IGNORE`, damit Tipps durch s
 (z. B. auf ein verdecktes Kartenschild); lange/mehrzeilige behalten STOP, weil man sie zum Schließen antippt. Der
 Hinweis liegt zwischen „Hier“ und den Button-Spalten (vorher konnte er auf schmalen Geräten die Spalte überdecken –
 vom Layout-Test gefunden).
+
+## 046 – Ortsfenster als Kachel-Raster (G4.5)
+Das Ortsfenster liegt unter der HUD-Leiste und reicht vom linken Rand der Safe Area bis vor die Button-Spalten
+(Pro Max ~1100 px ≈ 84 % der nutzbaren Breite); „Hier“ liegt dabei unter dem abgedunkelten Hintergrund wie bisher
+alles außer dem Fenster. Spalten: so viele Kacheln à mind. 220 px wie passen, höchstens 4 (echte Geräte: 4,
+„Grenzfall“: 3). Damit das Studio (7 Kacheln = 2 Reihen) ohne Scrollen passt, gemessen und angepasst: Infos und
+„Hinfahren“ stehen in der Titelzeile; Schließen ist rund (Kreis 56, Tippfläche 84) – in allen Fenstern einheitlich;
+das Ortsfenster hat 12 statt 24 px Innenabstand und nutzt unten den Grundabstand (nicht den Home-Balken-Bereich).
+Schriften: Kachel-Titel 20 px, Text 16 px – kleiner wollten wir nicht gehen. Die Hinweiszeile ist immer reserviert:
+gelb bei Terminkonflikt („⚠ Verpasst: …“), sonst grau (Qualität bei Content, nächste Stufe bei Ausrüstung), damit
+alle Buttons einer Reihe auf einer Höhe liegen. Sperrgründe stehen im Button. Käufe (Ausrüstung) haben einen
+Rahmen-Button statt der vollen Akzentfarbe. Die Gründungs-Kachel zeigt Gebühr und Einlage als Text (zu lang für Chips).
+Offen: (1) Im „Grenzfall“ (kein echtes Gerät) braucht das Studio mit 3 Spalten 3 Reihen und scrollt – die Reiter aus
+G4.6 lösen das. (2) Die Kachel-Buttons sind 74 px hoch, wie im Mockup: ≈ 44 pt nur auf dem Pro Max, ≈ 40 pt auf
+13/14 und ≈ 38 pt auf dem SE – klären in G4.7 (84 px kostet eine Reihe oder Reiter).

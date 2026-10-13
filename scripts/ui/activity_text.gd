@@ -9,6 +9,9 @@ const ActivityDefinitionScript := preload("res://scripts/models/activity_definit
 
 const CHANNEL_SHORT_LABELS := {"community": "Community", "reputation": "Ruf"}
 const COMPANY_SHORT_LABELS := {"utilization": "Auslastung", "reputation": "Ruf (Firma)"}
+## Symbole der Kachel-Chips (G4.5).
+const STAT_ICONS := {"energy": "res://assets/icons/bolt.svg", "mood": "res://assets/icons/smiley.svg"}
+const MONEY_ICON := "res://assets/kenney/game-icons-expansion/coin.png"
 
 
 ## Betrag mit Vorzeichen, z. B. "+25,00 €" / "-15,00 €".
@@ -150,3 +153,47 @@ static func channel_change_text(change) -> Array[String]:
 					causes.append(cause)
 		detail += " (gewünscht: %s · %s)" % [" · ".join(channel_parts(change.requested)), ", ".join(causes)]
 	return [head, detail]
+
+
+## Zeit-Zeile einer Kachel (G4.5), z. B. "2 h · Ende 10:20" oder "8 h · Ende 07:00 (+1 Tag)".
+## Reine Anzeige: Ende = jetzt + Dauer.
+@warning_ignore("integer_division")
+static func duration_with_end(now_minutes: int, duration_minutes: int) -> String:
+	var end := now_minutes + duration_minutes
+	var minute_of_day := end % TimeSystemScript.MINUTES_PER_DAY
+	var text := "%s · Ende %02d:%02d" % [TimeSystemScript.format_duration(duration_minutes),
+			minute_of_day / TimeSystemScript.MINUTES_PER_HOUR, minute_of_day % TimeSystemScript.MINUTES_PER_HOUR]
+	var days := TimeSystemScript.day_of(end) - TimeSystemScript.day_of(now_minutes)
+	if days > 0:
+		text += " (+%d Tag%s)" % [days, "" if days == 1 else "e"]
+	return text
+
+
+## Wirkungen als Kachel-Chips (G4.5): Werte des Spielers, Kanal, Unternehmen, Geld – in fester Reihenfolge.
+## Rückgabe: Array von {"text", "tone" (1 gut, -1 Kosten, 0 neutral), "icon"}.
+static func effect_chips(effects: Dictionary, money_cents: int, channel: Dictionary = {},
+		company: Dictionary = {}) -> Array:
+	var chips := []
+	for key in PlayerStatsScript.KEYS:
+		var change: int = effects.get(key, 0)
+		if change != 0:
+			chips.append(chip("%+d" % change, change, STAT_ICONS[key]))
+	var followers: int = channel.get("followers", 0)
+	if followers != 0:
+		chips.append(chip("%s Follower" % signed_int(followers), followers))
+	for key in ["community", "reputation"]:
+		var change: int = channel.get(key, 0)
+		if change != 0:
+			chips.append(chip("%s %+d" % [CHANNEL_SHORT_LABELS[key], change], change))
+	for key in ["utilization", "reputation"]:
+		var change: int = company.get(key, 0)
+		if change != 0:
+			chips.append(chip("%s %+d" % [COMPANY_SHORT_LABELS[key], change], change))
+	if money_cents != 0:
+		chips.append(chip(signed_money(money_cents), money_cents, MONEY_ICON))
+	return chips
+
+
+## Ein Chip; tone folgt dem Vorzeichen (positiv = gut), außer neutral ist gewünscht (sign = 0).
+static func chip(text: String, sign_value: int, icon: String = "") -> Dictionary:
+	return {"text": text, "tone": signi(sign_value), "icon": icon}

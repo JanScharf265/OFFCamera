@@ -7,6 +7,7 @@ extends PanelContainer
 signal close_pressed
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const RoundButtonScript := preload("res://scripts/ui/round_button.gd")
 
 ## Hat sich die Liste zwischen Antippen und Loslassen weiter bewegt, war es Scrollen.
 const TAP_SCROLL_TOLERANCE := 12
@@ -29,17 +30,27 @@ func _init(kind: String, title: String, window_content: Control, closable: bool 
 	add_child(box)
 
 	var header := HBoxContainer.new()
+	header.name = "WindowHeader"
+	header.add_theme_constant_override("separation", 16)
 	box.add_child(header)
 	_title = UiStyle.label(title, UiStyle.LARGE_FONT_SIZE)
 	_title.name = "WindowTitle"
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_title.clip_text = true
 	header.add_child(_title)
-	_close_button = UiStyle.side_button("Schließen", "res://assets/kenney/game-icons/cross.png")
-	_close_button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-	_close_button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	# Optional: Inhalt liefert Zusatzelemente für die Titelzeile (z. B. Ortsfenster: Infos + „Hinfahren“, G4.5).
+	if content.has_method("take_header_extra"):
+		var extra: Control = content.call("take_header_extra")
+		add_theme_stylebox_override("panel", UiStyle.window_box(UiStyle.COMPACT_WINDOW_PADDING))
+		_title.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_title.clip_text = false
+		extra.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		header.add_child(extra)
+	# Rund wie die Buttons der Spielansicht (G4.5): Kreis 56 px, Tippfläche 84 px.
+	_close_button = RoundButtonScript.new("", "res://assets/kenney/game-icons/cross.png", UiStyle.CLOSE_ROUND_SIZE)
 	_close_button.name = "WindowCloseButton"
-	_close_button.custom_minimum_size = Vector2(200, 72)
+	_close_button.tooltip_text = "Schließen"
+	_close_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_close_button.visible = closable
 	_close_button.pressed.connect(func() -> void: close_pressed.emit())
 	header.add_child(_close_button)

@@ -89,7 +89,8 @@ func test_disabled_activity_shows_reason() -> void:
 	_press(app, "ContinueButton")
 	_press(app, "HereButton")  # Fenster des aktuellen Orts
 	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, true)
-	assert_true(_screen_has_text(app, "Zu wenig Energie (benötigt 20)."), "Grund wird nicht angezeigt")
+	# G4.5: Der Sperrgrund steht im Button der Kachel.
+	assert_eq((_find(app, "ContentButton_livestream") as Button).text, "Zu wenig Energie (benötigt 20).")
 
 	app.free()
 
@@ -185,7 +186,7 @@ func test_map_shows_location_and_travel_changes_activities() -> void:
 
 	_press(app, "MapPin_cafe_harbor")  # nur auswählen, keine Zeit
 	assert_eq((_find(app, "ClockLabel") as Label).text, "08:00")
-	assert_eq((_find(app, "LocationName") as Label).text, "Café am Hafen")
+	assert_eq((_find(app, "WindowTitle") as Label).text, "Café am Hafen")
 	assert_eq((_find(app, "LocationHours") as Label).text, "Geöffnet: 07:00–20:00 · jetzt offen")
 	assert_eq((_find(app, "LocationDistance") as Label).text, "4,2 km · 20 min Fahrt")
 	assert_eq((_find(app, "TravelButton") as Button).text, "Hinfahren (20 min)")
@@ -244,12 +245,15 @@ func test_buy_equipment_in_studio_raises_quality() -> void:
 	_press(app, "HereButton")
 	assert_true(_find(app, "EquipmentButton_camera") == null, "Ausrüstung darf es zu Hause nicht geben")
 	_travel(app, "studio")
-	assert_eq((_find(app, "EquipmentTitle_camera") as Label).text, "Kamera · Stufe 0/3 (nichts)")
+	assert_eq((_find(app, "TileTitle_camera") as Label).text, "Kamera")
+	assert_eq((_find(app, "TileTime_camera") as Label).text, "Stufe 0/3 · nichts")
 	_press(app, "EquipmentButton_camera")
 	assert_eq((_find(app, "BalanceLabel") as Label).text, "380,00 €")
-	assert_eq((_find(app, "EquipmentTitle_camera") as Label).text, "Kamera · Stufe 1/3 (Webcam HD)")
-	var summary := (_find(app, "ContentSummary_livestream") as Label).text
-	assert_true(summary.ends_with("+26,25 €"), summary)
+	assert_eq((_find(app, "TileTime_camera") as Label).text, "Stufe 1/3 · Webcam HD")
+	# Einnahme des Livestreams steigt mit der Qualität (letzter Chip der Kachel = Geld).
+	var chips := _find(app, "TileEffects_livestream").get_children()
+	var money := (chips[chips.size() - 1] as Control).get_child(-1) as Label
+	assert_eq(money.text, "+26,25 €")
 	app.free()
 
 
@@ -442,7 +446,7 @@ func test_location_window_elsewhere_shows_locked_actions() -> void:
 	_press(app, "MapPin_studio")
 	assert_eq((_find(app, "WindowTitle") as Label).text, "Studio")
 	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, true)
-	assert_true(_screen_has_text(app, "Nur vor Ort möglich: Studio."), "Grund fehlt")
+	assert_eq((_find(app, "ContentButton_livestream") as Button).text, "Nur vor Ort möglich: Studio.")
 	assert_eq((_find(app, "TravelButton") as Button).visible, true)
 	app.free()
 

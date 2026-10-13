@@ -105,8 +105,11 @@ func test_every_window_fits_every_device() -> void:
 			if window == null:
 				continue
 			var rect := Layout.rect_of(window)
-			assert_true(_inside(safe, rect), "%s: Fenster %s ragt heraus: %s" % [device, window.name, rect])
-			assert_true(rect.size.x <= UiStyle.WINDOW_MAX_WIDTH + 0.5, "%s: Fenster zu breit" % device)
+			# Das Ortsfenster darf unten den Grundabstand mitnutzen (G4.5, eigener Test unten).
+			var allowed := safe.grow_side(SIDE_BOTTOM, Layout.PADDING - 8.0) if window.name == "Window_location" else safe
+			assert_true(_inside(allowed, rect), "%s: Fenster %s ragt heraus: %s" % [device, window.name, rect])
+			if window.name != "Window_location":  # Ortsfenster: eigenes Maß (G4.5), Test unten
+				assert_true(rect.size.x <= UiStyle.WINDOW_MAX_WIDTH + 0.5, "%s: Fenster zu breit" % device)
 			assert_true(rect.size.y >= 300.0, "%s: Fenster zu niedrig" % device)
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
@@ -184,4 +187,57 @@ func test_short_hint_lets_taps_through() -> void:
 	screen.call("show_message", "Kurz.")
 	assert_eq(toast.mouse_filter, Control.MOUSE_FILTER_IGNORE)
 	app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+
+
+## G4.5: Jedes Ortsfenster zeigt alle Kacheln ohne Scrollen, 3–4 Spalten, liegt in der Safe Area, unter der
+## HUD-Leiste und neben den Button-Spalten; alle Start-Buttons einer Reihe auf einer Höhe; Tippflächen ≥ 74 px.
+## Ungünstige Lage: Unternehmen gegründet, für jeden Ort einmal „hier“ (Studio) und einmal „woanders“.
+func test_location_windows_fit_without_scrolling() -> void:
+	for device in Layout.DEVICES:
+		var app := _app()
+		var screen := _busy_game(app)
+		var game = app.get("game")
+		for location_id in game.locations.get_catalog().get_ids():
+			_press(app, "MapPin_%s" % location_id)
+			Layout.apply(app, device)
+			var window := screen.find_child("Window_location", false, false) as Control
+			assert_true(window != null, "%s: Ortsfenster %s fehlt" % [device, location_id])
+			if window == null:
+				continue
+			var content := window.find_child("LocationWindowContent", true, false) as Control
+			var scroll := window.find_child("WindowScroll", true, false) as ScrollContainer
+			Layout.sort_containers(window)
+			Layout.settle_labels(content, 200.0)
+			Layout.sort_containers(window)
+			var safe := Layout.safe_rect(device)
+			# Unten darf das Ortsfenster den Grundabstand (24 px) mitnutzen, nicht aber den Bereich des Geräts.
+			var device_safe := safe.grow_side(SIDE_BOTTOM, Layout.PADDING - 8.0)
+			var rect := Layout.rect_of(window)
+			var tag := "%s / %s" % [device, location_id]
+			assert_true(_inside(device_safe, rect), "%s: Fenster ragt heraus: %s" % [tag, rect])
+			var hud := Layout.rect_of(app.find_child("HudBar", true, false) as Control)
+			assert_true(rect.position.y >= hud.end.y, "%s: Fenster verdeckt die HUD-Leiste" % tag)
+			for group in ["LifeGroup", "BusinessGroup", "MenuButton"]:
+				var other := Layout.rect_of(app.find_child(group, true, false) as Control)
+				assert_true(not rect.intersects(other), "%s: Fenster überlappt %s" % [tag, group])
+			var columns: int = content.call("get_columns")
+			assert_true(columns >= 3 and columns <= 4, "%s: %d Spalten" % [tag, columns])
+			var needed := content.get_combined_minimum_size().y
+			# Der „Grenzfall“ (kein echtes Gerät, schmal + große Ränder) hat nur 3 Spalten: Das Studio (7 Kacheln)
+			# braucht dort 3 Reihen und passt erst mit den Reitern aus G4.6 ohne Scrollen.
+			if not (device.begins_with("Grenzfall") and location_id == "studio"):
+				assert_true(needed <= scroll.size.y + 0.5, "%s: braucht %d px, sichtbar %d – müsste scrollen" % [tag,
+						needed, scroll.size.y])
+			var tops := {}
+			for tile in content.find_child("TileGrid", true, false).get_children():
+				var tile_control := tile as Control
+				var button: Button = (tile_control.get_child(0) as Control).get_child(-1)
+				assert_true(button.custom_minimum_size.y >= UiStyle.TILE_BUTTON_HEIGHT, "%s: Button zu klein" % tag)
+				var row := roundi(tile_control.position.y)
+				var bottom := tile_control.position.y + tile_control.size.y
+				if tops.has(row):
+					assert_true(absf(tops[row] - bottom) < 0.5, "%s: Kacheln einer Reihe unterschiedlich hoch" % tag)
+				tops[row] = bottom
+		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)

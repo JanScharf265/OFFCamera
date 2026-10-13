@@ -232,6 +232,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Aufträge), `MenuButton` als Zahnrad in der Leiste, links unten nur `HereButton`,
   unten zwischen „Hier“ und den Spalten der Hinweis `Toast` (`FeedbackLabel`; kurze Texte ca. 4 s und lassen Tipps auf die
   Karte durch, lange/mehrzeilige bleiben bis zum Antippen).
+- Ortsfenster (G4.5, `windows/location_window.gd` + `activity_tile.gd`): unter der HUD-Leiste vom linken Rand bis vor
+  die Button-Spalten; Infos und „Hinfahren“ in der Titelzeile (`take_header_extra()`, von `ui_window.gd` eingebaut),
+  darunter ein `GridContainer` mit 3–4 Spalten (`set_available_width()` vom GameScreen). Jede Kachel: Name,
+  „Dauer · Ende HH:MM“ (`ActivityText.duration_with_end`), Wirkungs-Chips (`ActivityText.effect_chips`), feste
+  Hinweiszeile, Button mit Sperrgrund; Käufe mit Rahmen-Button (`UiStyle.style_purchase_button`).
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,

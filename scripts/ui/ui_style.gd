@@ -39,10 +39,29 @@ const HUD_SURFACE := Color(0.07, 0.07, 0.09, 0.86)
 ## Runde Buttons der Spielansicht (G4.4, Entscheidung 038): sichtbarer Kreis 64 px, Tippfläche 84 px (≈ 44 pt).
 const ROUND_BUTTON_SIZE := 64.0
 const MENU_ROUND_SIZE := 44.0
+const CLOSE_ROUND_SIZE := 56.0
 const TOUCH_SIZE := 84.0
 const ROUND_BUTTON_BORDER := Color(1, 1, 1, 0.14)
 const ROUND_CAPTION_FONT_SIZE := 15
 const BADGE := Color("#FF3B5C")
+## Ortsfenster als Kachel-Raster (G4.5).
+const WARNING := Color("#F2C14E")
+const PURCHASE_TEXT := Color("#FF8FA3")
+const TILE_PADDING := 10
+const TILE_TITLE_FONT_SIZE := 20
+const TILE_FONT_SIZE := 16
+const TILE_ICON_SIZE := 18
+const TILE_HINT_HEIGHT := 16.0
+## Ortsfenster: kleinerer Innenabstand, damit zwei Kachel-Reihen ohne Scrollen passen.
+const COMPACT_WINDOW_PADDING := 12
+const TILE_BUTTON_HEIGHT := 74.0  # ≈ 44 pt
+const TILE_BUTTON_FONT_SIZE := 22
+const TILE_REASON_FONT_SIZE := 16
+const TILE_GAP := 12
+## Mindestbreite einer Kachel: daraus ergibt sich die Spaltenzahl (höchstens 4).
+const TILE_MIN_WIDTH := 220.0
+const TILE_MAX_COLUMNS := 4
+const TRAVEL_BUTTON_WIDTH := 240.0
 ## HUD-Leiste oben (G4.3): Abstand der Elemente und kleine Beschriftung über den Beträgen.
 const HUD_GAP := 18
 const HUD_CAPTION_FONT_SIZE := 15
@@ -139,8 +158,24 @@ static func side_button(text: String, icon_path: String = "") -> Button:
 
 
 ## Hintergrund eines Fensters.
-static func window_box() -> StyleBoxFlat:
-	var box := _box(BACKGROUND, PADDING)
+static func window_box(padding: int = PADDING) -> StyleBoxFlat:
+	var box := _box(BACKGROUND, padding)
 	box.border_color = SURFACE_PRESSED
 	box.set_border_width_all(2)
 	return box
+
+
+## Button für Käufe (sofort, ohne Spielzeit – G4.5): Rahmen statt Fläche, damit man ihn von Aktivitäten
+## (kosten Spielzeit) unterscheidet.
+static func style_purchase_button(target: Button) -> void:
+	var normal := _box(SURFACE, 12)
+	normal.border_color = ACCENT
+	normal.set_border_width_all(2)
+	var pressed := _box(ACCENT_PRESSED, 12)
+	for state in ["normal", "hover"]:
+		target.add_theme_stylebox_override(state, normal)
+	for state in ["pressed", "hover_pressed"]:
+		target.add_theme_stylebox_override(state, pressed)
+	target.add_theme_stylebox_override("disabled", _box(DISABLED, 12))
+	for color_name in ["font_color", "font_hover_color", "font_focus_color"]:
+		target.add_theme_color_override(color_name, PURCHASE_TEXT)
