@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Runde Buttons rechts in zwei Gruppen „Leben“ (Kalender, Fristen, Kanal) und „Geschäft“ (Firma, Buchungen): Kreis 64 px, Tippfläche 84 px, Beschriftung, roter Zählerpunkt bei offenen Fristen; Menü als Zahnrad in der HUD-Leiste; links nur „Hier“ (Ticket G4.4)
+- Energie im HUD mit Blitz-Symbol; kurze Hinweise unten lassen Tipps auf die Karte durch, z. B. auf das Schild „Ladenlokal“ (Ticket G4.4)
 - HUD als schmale Leiste oben statt zwei großer Kästen: Tag, Uhrzeit, Ort links; Energie und Stimmung als Balken mit Zahl (Stimmung mit Smiley), Privat- und Firmenkonto rechts – mehr sichtbare Karte (Ticket G4.3)
 - Feste Querformat-Richtung: Dynamic Island links, Bedienung rechts – die App dreht nicht mehr mit (Ticket G4.2)
 - Layout-Mockup für das neue HUD, runde Buttons und Kachel-Ortsfenster (Ticket G4.1)

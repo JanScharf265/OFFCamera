@@ -36,6 +36,13 @@ const SIDE_BUTTON_SIZE := Vector2(140, 84)
 const SIDE_ICON_SIZE := 28
 const WINDOW_MAX_WIDTH := 980
 const HUD_SURFACE := Color(0.07, 0.07, 0.09, 0.86)
+## Runde Buttons der Spielansicht (G4.4, Entscheidung 038): sichtbarer Kreis 64 px, Tippfläche 84 px (≈ 44 pt).
+const ROUND_BUTTON_SIZE := 64.0
+const MENU_ROUND_SIZE := 44.0
+const TOUCH_SIZE := 84.0
+const ROUND_BUTTON_BORDER := Color(1, 1, 1, 0.14)
+const ROUND_CAPTION_FONT_SIZE := 15
+const BADGE := Color("#FF3B5C")
 ## HUD-Leiste oben (G4.3): Abstand der Elemente und kleine Beschriftung über den Beträgen.
 const HUD_GAP := 18
 const HUD_CAPTION_FONT_SIZE := 15

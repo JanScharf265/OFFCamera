@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hkn52ryu3iky"
-path="res://.godot/imported/power.png-812f414c76a9ddc4141f9d7cf57bf269.ctex"
+uid="uid://c4heup3h5imt2"
+path="res://.godot/imported/exclamation.png-c2c6e84a9b37cc6f5b70f67e247adb50.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/kenney/game-icons/power.png"
-dest_files=["res://.godot/imported/power.png-812f414c76a9ddc4141f9d7cf57bf269.ctex"]
+source_file="res://assets/kenney/game-icons/exclamation.png"
+dest_files=["res://.godot/imported/exclamation.png-c2c6e84a9b37cc6f5b70f67e247adb50.ctex"]
 
 [params]
 

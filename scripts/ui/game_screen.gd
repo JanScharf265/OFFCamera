@@ -2,7 +2,9 @@ extends Control
 
 ## Spielansicht im Querformat (G2): die isometrische Stadtkarte im Vollbild, darüber
 ## die HUD-Leiste oben (G4.3, scripts/ui/hud_bar.gd: Tag/Uhrzeit/Ort, Energie, Stimmung, Konten),
-## Seitenbuttons (links Termine, Fristen, Kanal, Unternehmen; rechts Buchungen, Menü, Hier),
+## runde Buttons (G4.4, round_button.gd): rechts zwei Spalten „Leben“ (Kalender, Fristen, Kanal) und
+## „Geschäft“ (Firma nach der Gründung, Buchungen; ab Paket U Organisation und Aufträge), das Menü als
+## Zahnrad an der HUD-Leiste, links unten nur „Hier“,
 ## eine Hinweis-Leiste unten und höchstens ein Fenster (scripts/ui/windows/).
 ## Gebäude antippen öffnet das Fenster des Orts. Ein offenes Ereignis erscheint als
 ## Fenster, das zuerst entschieden werden muss.
@@ -23,6 +25,7 @@ const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const CityMapScript := preload("res://scripts/ui/city_map.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const HudBarScript := preload("res://scripts/ui/hud_bar.gd")
+const RoundButtonScript := preload("res://scripts/ui/round_button.gd")
 const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
 const AppointmentsWindowScript := preload("res://scripts/ui/windows/appointments_window.gd")
@@ -41,26 +44,29 @@ const TOAST_STICKY_LENGTH := 90
 const GAP := 16.0
 ## Icons (Kenney „Game Icons“, CC0). Fehlt eine Datei, bleibt der Button ohne Icon.
 const ICON_DIR := "res://assets/kenney/game-icons/"
-const ICON_EXPANSION_DIR := "res://assets/kenney/game-icons-expansion/"
 const ICONS := {
-	"AppointmentsButton": ICON_EXPANSION_DIR + "flag.png",
-	"ObligationsButton": ICON_DIR + "warning.png",
+	"AppointmentsButton": "res://assets/icons/calendar.svg",
+	"ObligationsButton": ICON_DIR + "exclamation.png",
 	"ChannelButton": ICON_DIR + "video.png",
 	"CompanyButton": ICON_DIR + "cart.png",
-	"LedgerButton": ICON_EXPANSION_DIR + "coin.png",
-	"MenuButton": ICON_DIR + "menuList.png",
+	"LedgerButton": ICON_DIR + "menuList.png",
+	"MenuButton": ICON_DIR + "gear.png",
 	"HereButton": ICON_DIR + "target.png",
 }
+## Abstand zwischen den beiden Button-Spalten und zwischen den Buttons einer Spalte.
+const COLUMN_GAP := 8.0
 
 var _game: GameStateScript
 ## Safe-Area-Abstände [links, oben, rechts, unten] in Viewport-Pixeln (von der App).
 var _margins: Array[float] = [24.0, 24.0, 24.0, 24.0]
 var _map: CityMapScript
 var _hud: HudBarScript
-var _left_bar: VBoxContainer
-var _right_bar: VBoxContainer
-var _company_button: Button
-var _obligations_button: Button
+var _life_group: PanelContainer
+var _business_group: PanelContainer
+var _menu_button: RoundButtonScript
+var _here_button: RoundButtonScript
+var _company_button: RoundButtonScript
+var _obligations_button: RoundButtonScript
 var _toast: PanelContainer
 var _feedback_label: Label
 var _toast_timer: Timer
@@ -100,17 +106,26 @@ func _ready() -> void:
 	_hud = HudBarScript.new()
 	add_child(_hud)
 
-	_left_bar = _side_bar("LeftBar")
-	_left_bar.add_child(_side_button("Termine", "AppointmentsButton", _open_appointments))
-	_obligations_button = _side_button("Fristen", "ObligationsButton", _open_obligations)
-	_left_bar.add_child(_obligations_button)
-	_left_bar.add_child(_side_button("Kanal", "ChannelButton", _open_channel))
-	_company_button = _side_button("Firma", "CompanyButton", _open_company)
-	_left_bar.add_child(_company_button)
-	_right_bar = _side_bar("RightBar")
-	_right_bar.add_child(_side_button("Buchungen", "LedgerButton", _open_ledger))
-	_right_bar.add_child(_side_button("Menü", "MenuButton", func() -> void: menu_pressed.emit()))
-	_right_bar.add_child(_side_button("Hier", "HereButton", _on_here_pressed))
+	_life_group = _button_group("LifeGroup", "LEBEN")
+	_add_to_group(_life_group, _round_button("Kalender", "AppointmentsButton", _open_appointments))
+	_obligations_button = _round_button("Fristen", "ObligationsButton", _open_obligations)
+	_add_to_group(_life_group, _obligations_button)
+	_add_to_group(_life_group, _round_button("Kanal", "ChannelButton", _open_channel))
+	_business_group = _button_group("BusinessGroup", "GESCHÄFT")
+	# Ab Paket U kommen hier „Organisation“ und „Aufträge“ dazu (Entscheidung 038).
+	_company_button = _round_button("Firma", "CompanyButton", _open_company)
+	_add_to_group(_business_group, _company_button)
+	_add_to_group(_business_group, _round_button("Buchungen", "LedgerButton", _open_ledger))
+	_menu_button = RoundButtonScript.new("", ICONS["MenuButton"], UiStyle.MENU_ROUND_SIZE)
+	_menu_button.name = "MenuButton"
+	_menu_button.tooltip_text = "Menü"
+	_menu_button.pressed.connect(func() -> void: menu_pressed.emit())
+	add_child(_menu_button)
+	_here_button = RoundButtonScript.new("", ICONS["HereButton"])
+	_here_button.name = "HereButton"
+	_here_button.tooltip_text = "Hier"
+	_here_button.pressed.connect(_on_here_pressed)
+	add_child(_here_button)
 
 	_toast = UiStyle.hud_panel()
 	_toast.name = "Toast"
@@ -139,16 +154,35 @@ func _ready() -> void:
 
 # --- Aufbau -----------------------------------------------------------------------
 
-func _side_bar(node_name: String) -> VBoxContainer:
-	var bar := VBoxContainer.new()
-	bar.name = node_name
-	bar.add_theme_constant_override("separation", 8)
-	add_child(bar)
-	return bar
+## Gruppe runder Buttons auf dezentem Hintergrund mit kleiner Überschrift (z. B. „LEBEN“).
+func _button_group(node_name: String, title: String) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = node_name
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box := UiStyle.flat_box(UiStyle.HUD_SURFACE, 0)
+	box.content_margin_top = 6
+	box.content_margin_bottom = 8
+	box.content_margin_left = 6
+	box.content_margin_right = 6
+	panel.add_theme_stylebox_override("panel", box)
+	var column := VBoxContainer.new()
+	column.name = "Buttons"
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_theme_constant_override("separation", int(COLUMN_GAP))
+	panel.add_child(column)
+	var header := UiStyle.label(title, UiStyle.HUD_CAPTION_FONT_SIZE, UiStyle.MUTED)
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(header)
+	add_child(panel)
+	return panel
 
 
-func _side_button(text: String, node_name: String, action: Callable) -> Button:
-	var button := UiStyle.side_button(text, ICONS.get(node_name, ""))
+func _add_to_group(group: PanelContainer, button: RoundButtonScript) -> void:
+	group.get_node("Buttons").add_child(button)
+
+
+func _round_button(caption: String, node_name: String, action: Callable) -> RoundButtonScript:
+	var button := RoundButtonScript.new(caption, ICONS.get(node_name, ""))
 	button.name = node_name
 	button.pressed.connect(action)
 	return button
@@ -166,14 +200,22 @@ func _layout() -> void:
 	_hud.reset_size()
 	_hud.position = Vector2(left, top)
 	_hud.size = Vector2(right - left, _hud.size.y)
-	# Die Seitenleisten beginnen unter der HUD-Leiste.
-	var below_hud := top + _hud.size.y + GAP
-	_left_bar.reset_size()
-	_left_bar.position = Vector2(left, below_hud)
-	_right_bar.reset_size()
-	_right_bar.position = Vector2(right - _right_bar.size.x, below_hud)
+	# Zahnrad: Kreis mittig in der Leiste, die Tippfläche (84 px) reicht unsichtbar darunter.
+	_menu_button.position = Vector2(right - UiStyle.TOUCH_SIZE, top)
+	_menu_button.set_circle_top((_hud.size.y - UiStyle.MENU_ROUND_SIZE) / 2.0)
+	# Rechts zwei Spalten unter der Tippfläche des Zahnrads: „Geschäft“ außen, „Leben“ daneben.
+	var columns_top := top + UiStyle.TOUCH_SIZE + COLUMN_GAP
+	_business_group.reset_size()
+	_business_group.position = Vector2(right - _business_group.size.x, columns_top)
+	_life_group.reset_size()
+	_life_group.position = Vector2(_business_group.position.x - COLUMN_GAP - _life_group.size.x, columns_top)
+	# Links (Seite der Dynamic Island) nur „Hier“ unten.
+	_here_button.position = Vector2(left, bottom - UiStyle.TOUCH_SIZE)
 
-	var toast_width := maxf(minf(900.0, right - left - 2.0 * (UiStyle.SIDE_BUTTON_SIZE.x + GAP)), 200.0)
+	# Der Hinweis liegt zwischen „Hier“ und den Button-Spalten.
+	var toast_left := left + UiStyle.TOUCH_SIZE + GAP
+	var toast_right := _life_group.position.x - GAP
+	var toast_width := maxf(minf(900.0, toast_right - toast_left), 200.0)
 	# Umbrechende Labels berechnen ihre Mindesthöhe für die Breite, die sie gerade haben (anfangs ~1 px →
 	# riesig). Breite setzen, Umbruch erzwingen (get_line_count) und Mindestgröße neu berechnen lassen –
 	# dann stimmt die Höhe sofort, nicht erst ein Bild später (gemessen in Phase 7).
@@ -182,7 +224,7 @@ func _layout() -> void:
 	_feedback_label.get_line_count()
 	_feedback_label.update_minimum_size()
 	_toast.reset_size()
-	_toast.position = Vector2((left + right - _toast.size.x) / 2.0, bottom - _toast.size.y)
+	_toast.position = Vector2((toast_left + toast_right - _toast.size.x) / 2.0, bottom - _toast.size.y)
 
 	_dim.position = Vector2.ZERO
 	_dim.size = size
@@ -438,7 +480,10 @@ func _show_feedback(text: String, color: Color) -> void:
 	_feedback_label.text = text
 	_feedback_label.add_theme_color_override("font_color", color)
 	_toast.visible = true
-	if text.length() > TOAST_STICKY_LENGTH or "\n" in text:
+	var sticky := text.length() > TOAST_STICKY_LENGTH or "\n" in text
+	# Kurze Hinweise lassen Tipps auf die Karte durch (G4.4); lange muss man antippen, um sie zu schließen.
+	_toast.mouse_filter = Control.MOUSE_FILTER_STOP if sticky else Control.MOUSE_FILTER_IGNORE
+	if sticky:
 		_toast_timer.stop()  # lange Texte bleiben, bis man sie antippt
 	elif is_inside_tree():
 		_toast_timer.start(TOAST_SECONDS)
@@ -455,11 +500,7 @@ func _on_toast_input(event: InputEvent) -> void:
 func _refresh() -> void:
 	_hud.refresh(_game)
 	_company_button.visible = _game.company.is_founded()
-	var open_count := _game.obligations.count_open()
-	_obligations_button.text = "Fristen (%d)" % open_count if open_count > 0 else "Fristen"
-	for state in ["normal", "hover"]:
-		_obligations_button.add_theme_stylebox_override(state,
-				UiStyle.flat_box(UiStyle.ACCENT if open_count > 0 else UiStyle.HUD_SURFACE, 8))
+	_obligations_button.set_badge(_game.obligations.count_open())
 
 	if not _game.locations.get_catalog().has(_selected_location):
 		_selected_location = _game.locations.get_current()

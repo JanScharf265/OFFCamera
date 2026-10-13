@@ -53,7 +53,7 @@ func test_hud_bars_and_hint_fit_every_device() -> void:
 		var screen := _busy_game(app)
 		Layout.apply(app, device)
 		var safe := Layout.safe_rect(device)
-		var names := ["HudBar", "LeftBar", "RightBar", "Toast"]
+		var names := ["HudBar", "MenuButton", "LifeGroup", "BusinessGroup", "HereButton", "Toast"]
 		var rects := {}
 		for node_name in names:
 			var control := app.find_child(node_name, true, false) as Control
@@ -62,6 +62,8 @@ func test_hud_bars_and_hint_fit_every_device() -> void:
 					safe, rects[node_name]])
 		for i in names.size():
 			for j in range(i + 1, names.size()):
+				if [names[i], names[j]] == ["HudBar", "MenuButton"]:
+					continue  # Das Zahnrad sitzt absichtlich in der Leiste (G4.4).
 				assert_true(not rects[names[i]].intersects(rects[names[j]]), "%s: %s überlappt %s" % [device,
 						names[i], names[j]])
 		# G4.3: Die HUD-Leiste geht über die volle Breite der Safe Area, ist schmal, und ihr Inhalt passt hinein.
@@ -70,6 +72,14 @@ func test_hud_bars_and_hint_fit_every_device() -> void:
 		assert_true(rects["HudBar"].size.y <= 64.0, "%s: HUD-Leiste zu hoch: %d" % [device, rects["HudBar"].size.y])
 		assert_true(hud.get_combined_minimum_size().x <= rects["HudBar"].size.x + 0.5, "%s: HUD-Inhalt zu breit: %d" % [
 				device, hud.get_combined_minimum_size().x])
+		# G4.4: Platz in der Leiste für das Zahnrad – kein HUD-Text liegt unter dem Kreis.
+		Layout.sort_containers(screen)
+		var gear := Layout.screen_rect((app.find_child("MenuButton", true, false) as Control).find_child("Circle",
+				true, false) as Control, screen)
+		var space := Layout.screen_rect(hud.find_child("MenuSpace", true, false) as Control, screen)
+		assert_true(gear.position.x >= space.position.x - 0.5, "%s: Zahnrad liegt über HUD-Text" % device)
+		assert_true(gear.position.y >= rects["HudBar"].position.y and gear.end.y <= rects["HudBar"].end.y,
+				"%s: Zahnrad nicht in der Leiste: %s" % [device, gear])
 		var map := app.find_child("CityMap", true, false) as Control
 		assert_eq(map.size, screen.size, "%s: Karte nicht Vollbild" % device)
 		assert_eq((app.find_child("CompanyButton", true, false) as Button).visible, true)
@@ -135,3 +145,43 @@ func test_menu_with_long_message_is_scrollable() -> void:
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 
+
+## G4.4: Jeder runde Button hat eine Tippfläche von mindestens 84 px (≈ 44 pt) und einen 64-px-Kreis;
+## rechts zwei Spalten (Leben | Geschäft), links nur „Hier“ – auf allen Geräteklassen.
+func test_round_buttons_have_touch_size_and_sit_right() -> void:
+	for device in Layout.DEVICES:
+		var app := _app()
+		var screen := _busy_game(app)
+		Layout.apply(app, device)
+		Layout.sort_containers(screen)
+		var safe := Layout.safe_rect(device)
+		var life := Layout.rect_of(app.find_child("LifeGroup", true, false) as Control)
+		var business := Layout.rect_of(app.find_child("BusinessGroup", true, false) as Control)
+		assert_true(life.end.x <= business.position.x + 0.5, "%s: Leben nicht links von Geschäft" % device)
+		assert_true(business.end.x >= safe.end.x - 0.5, "%s: Geschäft nicht am rechten Rand" % device)
+		for node_name in ["AppointmentsButton", "ObligationsButton", "ChannelButton", "CompanyButton", "LedgerButton",
+				"MenuButton", "HereButton"]:
+			var button := app.find_child(node_name, true, false) as Control
+			var rect := Layout.screen_rect(button, screen)
+			assert_true(rect.size.x >= UiStyle.TOUCH_SIZE - 0.5 and rect.size.y >= UiStyle.TOUCH_SIZE - 0.5,
+					"%s: Tippfläche %s zu klein: %s" % [device, node_name, rect.size])
+			assert_true(_inside(safe, rect), "%s: %s ragt aus der Safe Area" % [device, node_name])
+			var circle := button.find_child("Circle", true, false) as Control
+			var expected := UiStyle.MENU_ROUND_SIZE if node_name == "MenuButton" else UiStyle.ROUND_BUTTON_SIZE
+			assert_eq(circle.size, Vector2(expected, expected), "%s: Kreis %s" % [device, node_name])
+		var here := Layout.rect_of(app.find_child("HereButton", true, false) as Control)
+		assert_true(here.end.x < safe.position.x + safe.size.x / 2.0, "%s: „Hier“ nicht links" % device)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+
+
+## G4.4: Kurze Hinweise lassen Tipps auf die Karte durch, lange muss man antippen.
+func test_short_hint_lets_taps_through() -> void:
+	var app := _app()
+	var screen := _busy_game(app)
+	var toast := app.find_child("Toast", true, false) as Control
+	assert_eq(toast.mouse_filter, Control.MOUSE_FILTER_STOP)  # langer Hinweis aus _busy_game
+	screen.call("show_message", "Kurz.")
+	assert_eq(toast.mouse_filter, Control.MOUSE_FILTER_IGNORE)
+	app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)

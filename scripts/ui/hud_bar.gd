@@ -11,13 +11,14 @@ const PlayerStatsScript := preload("res://scripts/models/player_stats.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 const STAT_ICONS := {
-	"energy": "res://assets/kenney/game-icons/power.png",
+	"energy": "res://assets/icons/bolt.svg",
 	"mood": "res://assets/icons/smiley.svg",
 }
 const STAT_COLORS := {"energy": Color("#7FD38A"), "mood": Color("#F2C14E")}
 const LOCATION_ICON := "res://assets/kenney/game-icons/target.png"
 const ICON_SIZE := 20
 const STAT_BAR_WIDTH := 64
+const CONTENT_MARGIN_X := 18
 
 var _date_label: Label
 var _clock_label: Label
@@ -33,8 +34,8 @@ func _init() -> void:
 	name = "HudBar"
 	add_theme_stylebox_override("panel", UiStyle.flat_box(UiStyle.HUD_SURFACE, 0))
 	var box := get_theme_stylebox("panel") as StyleBoxFlat
-	box.content_margin_left = 18
-	box.content_margin_right = 18
+	box.content_margin_left = CONTENT_MARGIN_X
+	box.content_margin_right = CONTENT_MARGIN_X
 	box.content_margin_top = 6
 	box.content_margin_bottom = 6
 	var row := HBoxContainer.new()
@@ -66,6 +67,13 @@ func _init() -> void:
 	_company_balance_label = _company_block.get_child(1)
 	row.add_child(_company_block)
 	# Ab Paket U: Schwarzgeld und Hitze kommen hier dazu (Plätze nach Entscheidung 042).
+	# Platz für das Zahnrad (Menü): Es liegt als eigener Button mit großer Tippfläche über der Leiste (G4.4).
+	var menu_space := Control.new()
+	menu_space.name = "MenuSpace"
+	# Der Kreis sitzt mittig in einer 84-px-Tippfläche am rechten Rand: Platz = halbe Tippfläche + halber Kreis
+	# minus Innenabstand der Leiste.
+	menu_space.custom_minimum_size.x = UiStyle.TOUCH_SIZE / 2.0 + UiStyle.MENU_ROUND_SIZE / 2.0 - CONTENT_MARGIN_X
+	row.add_child(menu_space)
 
 
 func refresh(game: GameStateScript) -> void:

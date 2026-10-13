@@ -59,3 +59,16 @@ static func settle_labels(root: Control, width: float) -> void:
 			label.get_line_count()
 			label.update_minimum_size()
 
+
+## Headless sortieren Container ihre Kinder erst im nächsten Bild. Für Messungen verschachtelter Controls:
+## alle Container unterhalb von `root` (von oben nach unten) sofort sortieren lassen.
+static func sort_containers(root: Node) -> void:
+	if root is Container:
+		root.notification(Container.NOTIFICATION_SORT_CHILDREN)
+	for child in root.get_children():
+		sort_containers(child)
+
+
+## Rechteck eines (auch verschachtelten) Controls in Koordinaten von `screen`.
+static func screen_rect(control: Control, screen: Control) -> Rect2:
+	return Rect2(control.global_position - screen.global_position, control.size)

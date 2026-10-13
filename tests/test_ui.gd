@@ -488,7 +488,9 @@ func test_obligations_button_shows_open_count_and_pay_works() -> void:
 	var app := _app_with_open_rent()
 	if app == null:
 		return
-	assert_eq((_find(app, "ObligationsButton") as Button).text, "Fristen (1)")
+	# G4.4: roter Zählerpunkt statt „Fristen (1)“.
+	assert_eq(_find(app, "ObligationsButton").call("get_badge"), 1)
+	assert_eq((_find(app, "ObligationsButton").find_child("BadgeLabel", true, false) as Label).text, "1")
 	assert_true("Miete Wohnung (Woche 2) fällig" in (_find(app, "FeedbackLabel") as Label).text,
 			(_find(app, "FeedbackLabel") as Label).text)
 	_press(app, "ObligationsButton")
@@ -498,7 +500,8 @@ func test_obligations_button_shows_open_count_and_pay_works() -> void:
 	_press(app, "ObligationsButton")  # neu öffnen
 	assert_eq((_find(app, "ObligationPayButton_rent_home_8") as Button).disabled, false)
 	_press(app, "ObligationPayButton_rent_home_8")
-	assert_eq((_find(app, "ObligationsButton") as Button).text, "Fristen")
+	assert_eq(_find(app, "ObligationsButton").call("get_badge"), 0)
+	assert_eq((_find(app, "ObligationsButton").find_child("Badge", true, false) as Control).visible, false)
 	assert_true("Miete Wohnung (Woche 2) bezahlt: -80,00 €." in (_find(app, "FeedbackLabel") as Label).text,
 			(_find(app, "FeedbackLabel") as Label).text)
 	assert_true(_screen_has_text(app, "Keine offenen Fristen."), "Leerzustand fehlt")

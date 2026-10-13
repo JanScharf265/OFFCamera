@@ -1,0 +1,108 @@
+extends Button
+
+## Runder Button der Spielansicht (G4.4): sichtbarer Kreis mit Symbol, optional eine kleine Beschriftung
+## darunter und ein roter Zählerpunkt. Die Tippfläche ist der ganze Button (UiStyle.TOUCH_SIZE, ≥ 84 px ≈ 44 pt),
+## auch dort, wo nichts gezeichnet ist. Gezeichnet wird nur über die Kinder; der Button selbst ist unsichtbar.
+
+const UiStyle := preload("res://scripts/ui/ui_style.gd")
+
+const BADGE_SIZE := 24.0
+
+var _circle: Panel
+var _circle_box: StyleBoxFlat
+var _badge: Panel
+var _badge_label: Label
+var _caption_label: Label
+var _circle_size: float
+var _circle_top := 0.0
+
+
+## caption leer = ohne Beschriftung. circle_size: sichtbarer Durchmesser.
+func _init(caption: String, icon_path: String, circle_size: float = UiStyle.ROUND_BUTTON_SIZE) -> void:
+	_circle_size = circle_size
+	custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE, UiStyle.TOUCH_SIZE)
+	focus_mode = Control.FOCUS_NONE
+	tooltip_text = caption
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
+		add_theme_stylebox_override(state, StyleBoxEmpty.new())
+
+	_circle = Panel.new()
+	_circle.name = "Circle"
+	_circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_circle_box = UiStyle.flat_box(UiStyle.HUD_SURFACE, 0)
+	_circle_box.set_corner_radius_all(int(circle_size / 2.0))
+	_circle_box.border_color = UiStyle.ROUND_BUTTON_BORDER
+	_circle_box.set_border_width_all(2)
+	_circle_box.anti_aliasing = true
+	_circle.add_theme_stylebox_override("panel", _circle_box)
+	add_child(_circle)
+	var icon_rect := TextureRect.new()
+	icon_rect.name = "Icon"
+	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon_rect.texture = load(icon_path) if ResourceLoader.exists(icon_path) else null
+	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var icon_size := roundf(circle_size * 0.46)
+	icon_rect.size = Vector2(icon_size, icon_size)
+	icon_rect.position = Vector2(circle_size - icon_size, circle_size - icon_size) / 2.0
+	_circle.add_child(icon_rect)
+
+	if not caption.is_empty():
+		_caption_label = UiStyle.label(caption, UiStyle.ROUND_CAPTION_FONT_SIZE)
+		_caption_label.name = "Caption"
+		_caption_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_caption_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		add_child(_caption_label)
+
+	_badge = Panel.new()
+	_badge.name = "Badge"
+	_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var badge_box := UiStyle.flat_box(UiStyle.BADGE, 0)
+	badge_box.set_corner_radius_all(int(BADGE_SIZE / 2.0))
+	badge_box.anti_aliasing = true
+	_badge.add_theme_stylebox_override("panel", badge_box)
+	_badge.size = Vector2(BADGE_SIZE, BADGE_SIZE)
+	_badge.visible = false
+	add_child(_badge)
+	_badge_label = UiStyle.label("", UiStyle.ROUND_CAPTION_FONT_SIZE)
+	_badge_label.name = "BadgeLabel"
+	_badge_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_badge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_badge_label.size = _badge.size
+	_badge.add_child(_badge_label)
+
+	button_down.connect(func() -> void: _circle_box.bg_color = UiStyle.SURFACE_PRESSED)
+	button_up.connect(func() -> void: _circle_box.bg_color = UiStyle.HUD_SURFACE)
+	resized.connect(_arrange)
+	_arrange()
+
+
+## Abstand des Kreises von der Oberkante der Tippfläche (z. B. Zahnrad mittig in der HUD-Leiste).
+func set_circle_top(top: float) -> void:
+	_circle_top = top
+	_arrange()
+
+
+## Roter Zählerpunkt; 0 = unsichtbar.
+func set_badge(count: int) -> void:
+	_badge.visible = count > 0
+	_badge_label.text = str(count) if count < 100 else "99+"
+
+
+func get_badge() -> int:
+	return int(_badge_label.text) if _badge.visible else 0
+
+
+func _arrange() -> void:
+	var width := maxf(size.x, custom_minimum_size.x)
+	var top := _circle_top
+	if _caption_label == null and is_zero_approx(_circle_top):
+		top = (maxf(size.y, custom_minimum_size.y) - _circle_size) / 2.0
+	_circle.size = Vector2(_circle_size, _circle_size)
+	_circle.position = Vector2((width - _circle_size) / 2.0, top)
+	if _caption_label != null:
+		# Etwas breiter als die Tippfläche, damit „Organisation“ nicht abgeschnitten wird.
+		_caption_label.size = Vector2(width + 24.0, 0.0)
+		_caption_label.position = Vector2(-12.0, top + _circle_size)
+	_badge.position = Vector2((width + _circle_size) / 2.0 - BADGE_SIZE + 6.0, top - 4.0)

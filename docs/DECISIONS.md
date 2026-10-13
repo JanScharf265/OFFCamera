@@ -391,3 +391,18 @@ kleine Beschriftung über dem Betrag. Die Texte „Konto:“, „Ort:“, „Ene
 Beschriftungen ersetzen sie. Schwarzgeld und Hitze kommen in Paket U an dieselbe Stelle; dann reicht die Breite auf
 dem iPhone SE (1280 px) evtl. nicht mehr für alles in einer Zeile – Prüfung durch den Layout-Test (Inhalt ≤ Breite),
 dann kürzere Beschriftungen oder kleinere Schrift. Die Seitenleisten (noch alte Form bis G4.4) beginnen unter der Leiste.
+
+## 045 – Runde Buttons (G4.4)
+Baustein `scripts/ui/round_button.gd`: ein unsichtbarer Button mit 84 × 84 px Tippfläche, darin der sichtbare Kreis
+(64 px, beim Zahnrad 44 px) mit Symbol, optional eine kleine Beschriftung und ein roter Zählerpunkt (`set_badge`).
+Rechts zwei Gruppen auf dezentem Hintergrund, „Geschäft“ außen am Rand, „Leben“ daneben; beide beginnen unter der
+Tippfläche des Zahnrads. Das Zahnrad sitzt mittig in der HUD-Leiste, seine Tippfläche reicht unsichtbar darunter;
+die Leiste hält dafür Platz frei (`MenuSpace`). „Organisation“ und „Aufträge“ werden erst in Paket U angelegt
+(keine Buttons ohne Funktion). Der Kalender-Button heißt schon „Kalender“; das Fenster dahinter bleibt bis G5.2 die
+Terminliste. Symbole: eigenes Kalender- und Blitz-SVG (`assets/icons/`, Kenney hat beides nicht), Zahnrad,
+Ausrufezeichen und Liste aus Kenney „Game Icons“ (CC0). Statt „Fristen (1)“ und roter Buttonfarbe zeigt ein roter
+Punkt die Zahl der offenen Fristen; die übrigen Zähler (Termine heute usw.) kommen in G5.8.
+Hinweis unten: Kurze Hinweise haben `mouse_filter = IGNORE`, damit Tipps durch sie auf die Karte gehen
+(z. B. auf ein verdecktes Kartenschild); lange/mehrzeilige behalten STOP, weil man sie zum Schließen antippt. Der
+Hinweis liegt zwischen „Hier“ und den Button-Spalten (vorher konnte er auf schmalen Geräten die Spalte überdecken –
+vom Layout-Test gefunden).
