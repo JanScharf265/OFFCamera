@@ -3,7 +3,8 @@
 /android/
 
 # Build-Ausgaben (iOS-Export / Xcode-Projekt)
-exports/
+exports/*
+!exports/.gdignore
 build/
 
 # Signierung und Geheimnisse – niemals committen
