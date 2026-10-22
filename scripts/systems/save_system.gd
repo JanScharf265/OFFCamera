@@ -20,8 +20,9 @@ const ChannelSystemScript := preload("res://scripts/systems/channel_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
+const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 13
+const SAVE_VERSION := 14
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -273,6 +274,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		10: return _migrate_10_to_11(game)
 		11: return _migrate_11_to_12(game)
 		12: return _migrate_12_to_13(game)
+		13: return _migrate_13_to_14(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -386,6 +388,16 @@ static func _migrate_12_to_13(game: Dictionary) -> String:
 	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
 		return "Zeit fehlt."
 	game["day_start"] = {"calendar_shown_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 13 → 14 (G5.6): Erinnerungen vor Terminen – Termine, deren Beginn schon höchstens 30 Spielminuten entfernt ist
+## (oder vorbei), gelten als erinnert; ein alter Stand zeigt beim Laden also keine nachträgliche Erinnerung.
+static func _migrate_13_to_14(game: Dictionary) -> String:
+	var minutes: Variant = _saved_minutes(game)
+	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
+		return "Zeit fehlt."
+	game["reminders"] = {"reminded": [], "reminded_until_minutes": int(minutes) + ReminderSystemScript.REMINDER_MINUTES}
 	return ""
 
 

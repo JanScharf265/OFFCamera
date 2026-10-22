@@ -29,6 +29,9 @@ const RoundButtonScript := preload("res://scripts/ui/round_button.gd")
 const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
 const CalendarWindowScript := preload("res://scripts/ui/windows/calendar_window.gd")
+const ReminderWindowScript := preload("res://scripts/ui/windows/reminder_window.gd")
+## Breite des kleinen Erinnerungsfensters (G5.6)
+const REMINDER_MAX_WIDTH := 760.0
 const ChannelWindowScript := preload("res://scripts/ui/windows/channel_window.gd")
 const CompanyWindowScript := preload("res://scripts/ui/windows/company_window.gd")
 const LedgerWindowScript := preload("res://scripts/ui/windows/ledger_window.gd")
@@ -240,6 +243,17 @@ func _layout() -> void:
 		_window.position = Vector2(left, window_top)
 		_window.content.call("set_available_size", _window.size.x - 2.0 * UiStyle.COMPACT_WINDOW_PADDING,
 				_window.body_height())
+	elif _window != null and _window_kind == "reminder":
+		# Kleines Fenster mittig (G5.6), so hoch wie nötig (höchstens die Safe Area).
+		var small_width := minf(REMINDER_MAX_WIDTH, right - left - 2.0 * GAP)
+		_window.custom_minimum_size = Vector2.ZERO
+		_window.size = Vector2(small_width, bottom - top)
+		var frame := _window.size.y - _window.body_height()
+		var inner := small_width - _window.get_theme_stylebox("panel").get_minimum_size().x
+		var height := minf(frame + _window.content.call("needed_height", inner), bottom - top)
+		_window.custom_minimum_size = Vector2(small_width, height)
+		_window.size = _window.custom_minimum_size
+		_window.position = Vector2((left + right - small_width) / 2.0, (top + bottom - height) / 2.0)
 	elif _window != null:
 		var width := minf(UiStyle.WINDOW_MAX_WIDTH, right - left - 2.0 * GAP)
 		_window.custom_minimum_size = Vector2(width, bottom - top)
@@ -257,7 +271,7 @@ func _open_window(kind: String, content: Control, closable: bool = true) -> void
 	_close_window()
 	_window_kind = kind
 	_window = UiWindowScript.new(kind, content.call("get_title"), content, closable)
-	_window.close_pressed.connect(_close_window)
+	_window.close_pressed.connect(_on_window_closed)
 	_dim.visible = true
 	add_child(_window)
 	_layout()
@@ -274,7 +288,43 @@ func _close_window() -> void:
 
 func _on_dim_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed and _window != null and _window.is_closable():
+		_on_window_closed()
+
+
+## Vom Spieler geschlossen: Eine Erinnerung, die auf Ereignis oder Kalender gewartet hat, kommt jetzt (G5.6).
+func _on_window_closed() -> void:
+	_close_window()
+	_open_due_reminder()
+
+
+## Reihenfolge Ereignis → Kalender → Erinnerung (G5.6), nie zwei Fenster übereinander: Die Erinnerung wartet, solange
+## ein Ereignis offen ist oder der Kalender steht; sonst ersetzt sie ein offenes Fenster. Fällig sagt das
+## ReminderSystem (genau einmal je Termin).
+func _open_due_reminder() -> void:
+	if _game.events.has_pending() or _window_kind in ["event", "calendar", "reminder"]:
+		return
+	var appointment_id := _game.reminders.take_due()
+	if appointment_id.is_empty():
+		return
+	var content := ReminderWindowScript.new()
+	content.setup(self, _game, appointment_id)
+	_open_window("reminder", content)
+
+
+## „Später“: nur schließen – die Erinnerung kommt für diesen Termin nicht wieder.
+func close_reminder() -> void:
+	if _window_kind == "reminder":
 		_close_window()
+
+
+func on_reminder_travel_pressed(location_id: String) -> void:
+	close_reminder()
+	on_travel_pressed(location_id)
+
+
+func on_reminder_wait_pressed(appointment_id: String) -> void:
+	close_reminder()
+	on_wait_pressed(appointment_id)
 
 
 func _open_location(location_id: String) -> void:
@@ -555,6 +605,7 @@ func _refresh() -> void:
 	# offenes Fenster – nie zwei übereinander). Ob er fällig ist, entscheidet das DayStartSystem.
 	if pending_id.is_empty() and _game.day_start.take_calendar_due(auto_calendar):
 		_open_appointments()
+	_open_due_reminder()
 
 	if _window != null:
 		_window.refresh()

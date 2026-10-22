@@ -183,7 +183,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 12, "meta": {…}, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 14, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -201,6 +201,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 13 → 14 (G5.6): `reminders` = {`reminded`: [], `reminded_until_minutes`: gespeicherte Zeit + 30} – Termine,
+  deren Beginn schon höchstens 30 Spielminuten entfernt ist, gelten als erinnert (keine nachträgliche Erinnerung).
 - Migration 9 → 10: Wertstellung = Buchungszeit; Tagesabschlüsse (`company`, `day:<t>`) auf Tag t, 23:59.
 - Schreiben (Phase 6): `.tmp` schreiben und wieder einlesen → wenn eine Hauptdatei existiert, Backups rotieren
   (`.bak2` → `.bak3`, `.bak` → `.bak2`, Hauptdatei → `.bak`) → `.tmp` nach `savegame.json`. Nie während eines
@@ -281,6 +283,13 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   (über übersprungene Tage einmal für den aktuellen) und merkt den Tag auch bei ausgeschaltetem Geräte-Schalter. Die
   Spielansicht fragt es in `_refresh()` erst, wenn kein Ereignis offen ist, und öffnet dann den Kalender (ersetzt ein
   offenes Fenster). Neues Spiel: Tag 1 gilt als gezeigt. Kostet keine Spielzeit.
+- Erinnerung vor Terminen (G5.6, `scripts/systems/reminder_system.gd`, im GameState als `reminders`, im Spielstand seit
+  Version 14 mit `reminded` und `reminded_until_minutes`): `take_due()` liefert einen offenen Termin, der in 1–30
+  Spielminuten beginnt, genau einmal je Termin; `describe(id)` liefert Name, Beginn, Ort, Fahrzeit vom aktuellen Ort,
+  „dort“ und `on_time` (jetzt + Fahrzeit ≤ Beginn). Springt eine Aktion über das Fenster, ist der Termin verpasst –
+  keine Erinnerung. Die Spielansicht fragt nach Ereignis und Kalender (`_open_due_reminder()`, auch nach dem Schließen
+  eines Fensters) und zeigt `reminder_window.gd` als kleines Fenster mittig: „Du schaffst es noch“ / „Du kommst zu
+  spät: Fahrt 20 min“, „Hinfahren“ oder „Warten bis HH:MM“, „Später“. Kostet keine Spielzeit.
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,

@@ -21,6 +21,7 @@ const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
 const DayCycleScript := preload("res://scripts/core/day_cycle.gd")
 const ObligationSystemScript := preload("res://scripts/systems/obligation_system.gd")
 const DayStartSystemScript := preload("res://scripts/systems/day_start_system.gd")
+const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -47,6 +48,8 @@ var obligations: ObligationSystemScript
 var day_cycle: DayCycleScript
 ## Tagesbeginn: Kalender genau einmal je Tag (G5.3).
 var day_start: DayStartSystemScript
+## Erinnerung ≤ 30 Spielminuten vor einem Termin, genau einmal je Termin (G5.6).
+var reminders: ReminderSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -71,6 +74,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	day_cycle = DayCycleScript.new(time, [company, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
+	reminders = ReminderSystemScript.new(time, appointments, locations)
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).
@@ -93,6 +97,7 @@ func to_dict() -> Dictionary:
 		"company": company.to_dict(),
 		"obligations": obligations.to_dict(),
 		"day_start": day_start.to_dict(),
+		"reminders": reminders.to_dict(),
 	}
 
 
@@ -101,7 +106,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start"]:
+			"obligations", "day_start", "reminders"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -125,6 +130,8 @@ func restore(saved: Dictionary) -> String:
 		error = obligations.restore(saved["obligations"])
 	if error.is_empty():
 		error = day_start.restore(saved["day_start"])
+	if error.is_empty():
+		error = reminders.restore(saved["reminders"])
 	return error
 
 

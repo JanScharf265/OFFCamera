@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Erinnerung vor Terminen: Beginnt ein Termin in höchstens 30 Spielminuten, erscheint genau einmal ein kleines Fenster mit Termin, Uhrzeit, Ort und Fahrzeit – „Du schaffst es noch“ oder „Du kommst zu spät: Fahrt 20 min“ – und „Hinfahren“, „Warten bis 14:00“ oder „Später“; kommt nach Ereignis und Kalender; Spielstand Version 14 (alte Spielstände laden weiter) (Ticket G5.6)
 - „Warten bis 14:00“: Ist man vor Ort und der Termin kommt heute noch, springt die Uhr genau auf den Terminbeginn – kostet nichts, Energie und Stimmung bleiben; danach direkt „Wahrnehmen“. Im Kalender bei jedem Termin (sonst gesperrt mit Grund, z. B. „Erst hinfahren: Studio“) und vor Ort in der Titelzeile des Ortsfensters (Ticket G5.5)
 - Würde eine Aktion oder Fahrt einen Termin verpassen lassen, fragt jetzt ein Popup nach („Termin verpassen?“ mit Ende der Aktion, allen betroffenen Terminen, Ort und Kosten; „Trotzdem starten“ / „Abbrechen“) – statt „nochmal tippen“ (Ticket G5.4)
 - Kalender öffnet sich bei Tagesbeginn von selbst – genau einmal je Tag, auch nach dem Verschlafen mehrerer Tage nur einmal; offene Ereignisse kommen zuerst; abschaltbar in den Einstellungen; Spielstand Version 13 (alte Spielstände laden weiter) (Ticket G5.3)

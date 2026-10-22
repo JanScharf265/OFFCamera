@@ -563,3 +563,17 @@ Anzeige: im Kalender bei jedem solchen Termin („Warten bis 14:00“, gesperrt 
 Ort, an der Stelle von „Hinfahren“ in der Titelzeile, nach Beginn als „Wahrnehmen“. Aus der Ferne steht dort schon
 „Hinfahren“; ein zweiter, gesperrter Button „Erst hinfahren: Studio“ passte im „Grenzfall“ (1280 px mit Reitern) nicht
 mehr in die Titelzeile – die Infozeilen wurden abgeschnitten. Der Grund steht dann im Kalender.
+
+## 057 – Erinnerung vor Terminen (G5.6)
+Eigenes kleines `ReminderSystem` (wie das DayStartSystem): Fällig ist ein offener Termin, der in 1–30 Spielminuten
+beginnt und noch nicht erinnert wurde; die Spielansicht fragt nach jeder Aktion. Genau auf dem Beginn (z. B. nach
+„Warten“) kommt keine Erinnerung mehr. Springt eine Aktion über das Fenster, ist der Termin verpasst und es kommt
+keine – das Konflikt-Popup (G5.4) hat vorher gefragt. „Schaffst du es“ rechnet das System (jetzt + Fahrzeit ≤ Beginn),
+die UI zeigt nur an. Reihenfolge Ereignis → Kalender → Erinnerung: Die Erinnerung wartet, solange ein Ereignis offen
+ist oder der Kalender steht, und kommt beim Schließen; andere Fenster (z. B. das Ortsfenster nach einer Aktivität)
+ersetzt sie wie der Kalender – nie zwei Fenster übereinander. Als kleines Fenster mittig statt eines Popups, damit es
+dieselbe Ein-Fenster-Regel nutzt. „Hinfahren“/„Warten“ schließen die Erinnerung und laufen über die normalen Handler
+(mit Konflikt-Popup). Gespeichert: erinnerte IDs plus `reminded_until_minutes` (Termine bis zu diesem Beginn gelten
+als erinnert) – nötig, weil die Migration 13 → 14 die Termin-Daten nicht kennt: Sie setzt den Wert auf gespeicherte
+Zeit + 30, damit ein alter Stand keine nachträgliche Erinnerung zeigt. Spielstand Version 14, Testdatei
+`tests/fixtures/saves/v14.json` aus dem aktuellen Code (Tag 9, ohne Oberfläche gespielt).

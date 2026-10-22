@@ -250,3 +250,50 @@ func test_wait_buttons_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## G5.6: Erinnerungsfenster – zu Hause (Hinfahren, „zu spät“) und im Studio (Warten): Tippflächen, Schrift, nichts
+## abgeschnitten (auch Button-Texte), kleines Fenster ganz in der Safe Area.
+func test_reminder_window_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		for on_site in [false, true]:
+			var app := _app()
+			_press(app, "NewGameButton")
+			var screen := app.find_child("CityMap", true, false).get_parent() as Control
+			if on_site:
+				app.game.locations.travel("studio")
+			app.game.time.advance(TimeSystemScript.at(1, 13, 45) - app.game.time.get_minutes())
+			screen.call("_refresh")
+			Layout.apply(app, device)
+			var window := screen.find_child("Window_reminder", false, false) as Control
+			var where := "%s / Erinnerung %s" % [device, "Studio" if on_site else "Wohnung"]
+			if window == null:
+				problems.append("%s: kein Fenster" % where)
+				app.free()
+				continue
+			Layout.settle_in_place(window)
+			_audit(window, screen, where, problems)
+			for node in window.find_children("*", "Button", true, false):
+				var button := node as Button
+				if button.text.is_empty() or not button.is_visible_in_tree():
+					continue
+				var width := button.get_theme_font("font").get_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
+						button.get_theme_font_size("font_size")).x
+				if width > button.size.x + 0.5:
+					problems.append("%s: „%s“ abgeschnitten" % [where, button.text])
+			for node in window.find_children("*", "Label", true, false):
+				var label := node as Label
+				if label.is_visible_in_tree() and label.autowrap_mode != TextServer.AUTOWRAP_OFF \
+						and label.get_line_count() > label.get_visible_line_count():
+					problems.append("%s: „%s“ nicht ganz sichtbar" % [where, label.text])
+			if not Layout.safe_rect(device).grow(0.5).encloses(Layout.rect_of(window)):
+				problems.append("%s: Fenster ragt aus der Safe Area: %s" % [where, Layout.rect_of(window)])
+			var scroll := window.find_child("WindowScroll", true, false) as ScrollContainer
+			var content := window.find_child("ReminderContent", true, false) as Control
+			if content.get_combined_minimum_size().y > scroll.size.y + 0.5:
+				problems.append("%s: Inhalt braucht %d px, sichtbar %d" % [where, content.get_combined_minimum_size().y,
+						scroll.size.y])
+			app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)
