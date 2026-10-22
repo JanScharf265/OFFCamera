@@ -200,26 +200,88 @@ func test_map_shows_location_and_travel_changes_activities() -> void:
 	app.free()
 
 
-func test_conflict_warning_needs_second_tap() -> void:
+## G5.4: Konflikt-Popup statt „zweimal tippen“ – Aktivität: Abbrechen ändert nichts, Trotzdem starten startet einmal.
+func test_conflict_popup_for_activity() -> void:
 	var app := _start_app()
 	if app == null:
 		return
 	_press(app, "NewGameButton")
 	app.game.time.advance(TimeSystemScript.at(1, 13, 30) - app.game.time.get_minutes())
 	_press(app, "HereButton")
-
-	_press(app, "StartButton_rest")  # würde den Termin um 14:00 verpassen lassen
-	assert_eq(app.game.time.format_clock(), "13:30")
+	var before := JSON.stringify(app.game.to_dict())
+	_press(app, "StartButton_rest")  # 1 h – der Termin um 14:00 würde verpasst
+	assert_true(_find(app, "ConflictPopup") != null, "kein Popup")
+	assert_eq((_find(app, "ConflictTitle") as Label).text, "Termin verpassen?")
+	assert_eq((_find(app, "ConflictAction") as Label).text, "Ausruhen · 1 h · Ende 14:30")
+	assert_true(_screen_has_text(app, "„Treffen mit der Kamerafrau“ · Tag 1 · 14:00 · Studio"), "Termin fehlt")
+	assert_true(_screen_has_text(app, "Verpasst: Stimmung -10"), "Kosten fehlen")
+	assert_eq(JSON.stringify(app.game.to_dict()), before, "Popup allein ändert etwas")
+	_press(app, "ConflictCancelButton")
+	assert_true(_find(app, "ConflictPopup") == null, "Popup nach Abbrechen noch da")
+	assert_eq(JSON.stringify(app.game.to_dict()), before, "Abbrechen ändert etwas")
+	_press(app, "StartButton_rest")
+	var confirm := _find(app, "ConflictConfirmButton") as Button
+	confirm.pressed.emit()
+	confirm.pressed.emit()  # zweiter Tipp auf denselben Button: darf nichts mehr tun
+	assert_eq(app.game.time.format_clock(), "14:30", "nicht genau einmal gestartet")
+	assert_eq(app.game.stats.get_value("energy"), 95, "Ausruhen nicht genau einmal (80 + 15)")
 	var feedback := _find(app, "FeedbackLabel") as Label
-	assert_true(feedback.text.begins_with("Achtung: Damit verpasst du „Treffen mit der Kamerafrau“"), feedback.text)
-
-	_press(app, "StartButton_rest")  # zweiter Tipp: trotzdem
-	assert_eq(app.game.time.format_clock(), "14:30")
 	assert_true("Termin verpasst: „Treffen mit der Kamerafrau“ (Stimmung -10)" in feedback.text, feedback.text)
+	assert_true(_find(app, "ConflictPopup") == null, "Popup nach dem Start noch da")
 	app.free()
 
 
-## G5.2: Kalender – Tagesplan als Zeitstrahl (Termin mit Ort, Zeit, Fahrzeit; Jetzt-Linie; Zustände).
+func test_conflict_popup_for_travel() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	app.game.time.advance(TimeSystemScript.at(1, 13, 50) - app.game.time.get_minutes())
+	_press(app, "MapPin_cafe_harbor")
+	_press(app, "TravelButton")  # 20 min → 14:10
+	assert_eq((_find(app, "ConflictAction") as Label).text, "Fahrt nach Café am Hafen · 20 min · Ende 14:10")
+	_press(app, "ConflictConfirmButton")
+	assert_eq(app.game.locations.get_current(), "cafe_harbor")
+	assert_eq(app.game.time.format_clock(), "14:10")
+	app.free()
+
+
+func test_no_conflict_no_popup() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "HereButton")
+	_press(app, "StartButton_rest")  # 08:00 → 09:00, kein Termin dazwischen
+	assert_true(_find(app, "ConflictPopup") == null, "Popup ohne Konflikt")
+	assert_eq(app.game.time.format_clock(), "09:00")
+	app.free()
+
+
+func test_conflict_popup_lists_all_conflicts() -> void:
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+	var data := Helpers.game_data()
+	var list: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/appointments/appointments.json"))
+	list.append({"id": "extra_call", "title": "Anruf vom Label", "location": "office", "start": {"day": 1, "hour": 16},
+			"duration_minutes": 30, "effects": {}, "missed_effects": {"mood": -3}})
+	assert_true(data.appointments.load_data(list), "; ".join(data.appointments.errors))
+	var app := AppScript.new()
+	app.save_path = TEST_SAVE_PATH
+	app.preloaded_data = data
+	(Engine.get_main_loop() as SceneTree).root.add_child(app)
+	_press(app, "NewGameButton")
+	app.game.time.advance(TimeSystemScript.at(1, 13, 30) - app.game.time.get_minutes())
+	_press(app, "HereButton")
+	_press(app, "StartButton_sleep")  # 8 h: 14:00 und 16:00
+	assert_true(_find(app, "ConflictEntry_0") != null and _find(app, "ConflictEntry_1") != null, "nicht alle Konflikte")
+	assert_true(_screen_has_text(app, "„Anruf vom Label“ · Tag 1 · 16:00 · Büro"), "zweiter Termin fehlt")
+	assert_true(_screen_has_text(app, "Verpasst: Stimmung -3"), "Kosten des zweiten fehlen")
+	_press(app, "ConflictCancelButton")
+	assert_eq(app.game.time.format_clock(), "13:30")
+	app.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
 func test_calendar_window_shows_day_plan() -> void:
 	var app := _start_app()
 	if app == null:

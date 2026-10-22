@@ -541,3 +541,13 @@ Einschalten keinen alten Tag nachholt. Neues Spiel: Tag 1 gilt als gezeigt (der 
 Tageswechsel). Spielstand Version 13 mit `day_start.calendar_shown_day`; Migration 12 → 13 setzt den gespeicherten Tag
 (alte Stände öffnen den Kalender nicht sofort beim Laden). Testdatei v13 aus dem aktuellen Code (Tag 9, ohne
 Oberfläche gespielt – dort ist der Kalender für Tag 9 noch nicht gezeigt und öffnet sich einmal beim ersten Anzeigen).
+
+## 055 – Konflikt-Popup (G5.4)
+Das „nochmal tippen“ (Warnung im Hinweis, zweiter Tipp führt aus) ist ersetzt durch ein Popup über allem
+(`scripts/ui/conflict_popup.gd`): Titel „Termin verpassen?“, die Aktion mit Dauer und Ende, darunter jeder betroffene
+Termin (voller Name, Tag und Uhrzeit, Ort) und die Kosten des Verpassens aus den Daten (`missed_effects`), Buttons
+„Abbrechen“ (ändert nichts) und „Trotzdem starten“ (führt die Aktion genau einmal aus – der Button ist danach
+wirkungslos, das Popup weg). Die Prüfung macht das AppointmentSystem (`get_conflicts`), die Spielansicht bündelt sie in
+`_guard()` für alle Aktionen mit Spielzeit: Aktivitäten, Content, Fahrten, Gründung, Filiale, Termine (beim Wahrnehmen
+zählt der Termin selbst nicht). Käufe kosten keine Zeit und fragen nicht. Solange das Popup offen ist, ist nichts
+darunter tippbar. Der Hinweis „⚠ Verpasst: 14:00“ in den Kacheln (G4.5b) bleibt als Vorwarnung.

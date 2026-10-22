@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Würde eine Aktion oder Fahrt einen Termin verpassen lassen, fragt jetzt ein Popup nach („Termin verpassen?“ mit Ende der Aktion, allen betroffenen Terminen, Ort und Kosten; „Trotzdem starten“ / „Abbrechen“) – statt „nochmal tippen“ (Ticket G5.4)
 - Kalender öffnet sich bei Tagesbeginn von selbst – genau einmal je Tag, auch nach dem Verschlafen mehrerer Tage nur einmal; offene Ereignisse kommen zuerst; abschaltbar in den Einstellungen; Spielstand Version 13 (alte Spielstände laden weiter) (Ticket G5.3)
 - „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl für heute – Termine mit Uhrzeit, Ort und Fahrzeit, fällige und überfällige Fristen, Vergangenes grau, der nächste Termin hervorgehoben, die aktuelle Uhrzeit als rote Linie, Hinweis auf den nächsten späteren Termin; „Wahrnehmen“ wie bisher (Ticket G5.2)
 - Start ohne schwarze Pause (Ziel): Hauptmenü und Stadtkarte werden schon hinter dem Ladebildschirm aufgebaut und einmal gezeichnet; der Kartenatlas wird nur einmal gepackt; der Ladebildschirm verschwindet so schnell wie möglich (keine Mindestdauer); ausführliche „[Start]“-Zeilen bis zum ersten Kartenbild (Ticket G5.1c)

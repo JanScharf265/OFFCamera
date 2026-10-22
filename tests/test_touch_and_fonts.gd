@@ -185,3 +185,29 @@ func test_loading_screen_layout() -> void:
 					problems.append("%s: „%s“ außerhalb der Safe Area %s" % [where, label.text, Layout.rect_of(label)])
 			screen.free()
 	_report(problems)
+
+
+## G5.4: Konflikt-Popup – Tippflächen, Schrift, nichts abgeschnitten, Panel in der Safe Area.
+func test_conflict_popup_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		var screen := _game(app)  # im Büro, Firma gegründet
+		app.game.time.advance(TimeSystemScript.at(1, 13, 30) - app.game.time.get_minutes())
+		_press(app, "HereButton")
+		_press(app, "StartButton_plan_week")
+		var popup := screen.find_child("ConflictPopup", false, false) as Control
+		if popup == null:
+			_press(app, "WindowCloseButton")
+			problems.append("%s: kein Popup" % device)
+			app.free()
+			continue
+		Layout.apply(app, device)
+		Layout.settle_in_place(popup)
+		_audit(popup, screen, "%s / Konflikt-Popup" % device, problems)
+		var panel := Layout.rect_of(popup.find_child("PopupPanel", false, false) as Control)
+		if not Layout.safe_rect(device).grow(0.5).encloses(panel):
+			problems.append("%s: Popup ragt aus der Safe Area: %s" % [device, panel])
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)

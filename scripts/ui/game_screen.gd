@@ -12,8 +12,7 @@ extends Control
 ##
 ## Aktualisiert wird nach jeder Aktion explizit über _refresh(), nicht über die
 ## System-Signale (die feuern teils mitten im Ablauf einer Aktion).
-## Würde eine Aktion einen Termin verpassen lassen, erscheint zuerst eine Warnung;
-## erst ein zweiter Tipp auf denselben Button führt sie aus.
+## Würde eine Aktion einen Termin verpassen lassen, fragt zuerst ein Popup nach (G5.4, conflict_popup.gd).
 
 signal menu_pressed
 ## Nach jeder erfolgreichen Aktion – die App speichert dann.
@@ -25,6 +24,7 @@ const ActivityText := preload("res://scripts/ui/activity_text.gd")
 const CityMapScript := preload("res://scripts/ui/city_map.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const HudBarScript := preload("res://scripts/ui/hud_bar.gd")
+const ConflictPopupScript := preload("res://scripts/ui/conflict_popup.gd")
 const RoundButtonScript := preload("res://scripts/ui/round_button.gd")
 const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
@@ -35,7 +35,6 @@ const LedgerWindowScript := preload("res://scripts/ui/windows/ledger_window.gd")
 const EventWindowScript := preload("res://scripts/ui/windows/event_window.gd")
 const ObligationsWindowScript := preload("res://scripts/ui/windows/obligations_window.gd")
 
-const CONFIRM_HINT := " Nochmal tippen, um trotzdem fortzufahren."
 ## Betrag je Tipp auf Einlage/Entnahme.
 const TRANSFER_STEP_CENTS := 10000
 ## Kurze Hinweise verschwinden nach dieser Zeit (Echtzeit, nur Anzeige); lange bleiben bis zum Antippen.
@@ -76,8 +75,8 @@ var _dim: ColorRect
 var _window: UiWindowScript
 var _window_kind := ""
 var _selected_location := ""
-## Schlüssel der Aktion, deren Warnung gerade angezeigt wird (z. B. "travel:gym").
-var _confirm_key := ""
+## Offenes Konflikt-Popup (G5.4) oder null.
+var _popup: ConflictPopupScript
 
 
 ## Vor dem Einfügen in den Baum aufrufen.
@@ -246,6 +245,10 @@ func _layout() -> void:
 		_window.custom_minimum_size = Vector2(width, bottom - top)
 		_window.size = _window.custom_minimum_size
 		_window.position = Vector2((left + right - width) / 2.0, top)
+	if _popup != null:
+		# Konflikt-Popup immer ganz oben, Panel mittig in der Safe Area (G5.4).
+		move_child(_popup, get_child_count() - 1)
+		_popup.place(size, Rect2(left, top, right - left, bottom - top))
 
 
 # --- Fenster ----------------------------------------------------------------------
@@ -343,39 +346,55 @@ func _was_scroll() -> bool:
 	return _window != null and _window.was_scroll()
 
 
-## true = ausführen. Bei einer Warnung erst beim zweiten Tipp auf dieselbe Aktion.
-func _confirmed(key: String, warning: String) -> bool:
-	if warning.is_empty() or _confirm_key == key:
-		_confirm_key = ""
-		return true
-	_confirm_key = key
-	_show_feedback(warning + CONFIRM_HINT, UiStyle.NEGATIVE)
-	return false
+## Führt `run` aus – oder fragt erst per Popup, wenn die Aktion (Dauer `minutes`) einen Termin verpassen ließe.
+## Die Konflikte kommen aus dem AppointmentSystem; hier wird nur angezeigt.
+func _guard(minutes: int, action_name: String, run: Callable, except_id: String = "") -> void:
+	var conflicts := _game.appointments.get_conflicts(minutes, except_id)
+	if conflicts.is_empty():
+		run.call()
+		return
+	var lines := []
+	for definition in conflicts:
+		var location := _game.locations.get_catalog().get_definition(definition.location)
+		lines.append(["„%s“ · %s · %s" % [definition.title, TimeSystemScript.format_stamp(definition.start_minutes),
+				location.display_name if location != null else definition.location],
+				"Verpasst: %s" % ActivityText.option_summary(definition.missed_effects, 0)])
+	var action_line := "%s · %s" % [action_name, ActivityText.duration_with_end(_game.time.get_minutes(), minutes)]
+	_close_popup()
+	_popup = ConflictPopupScript.new("Termin verpassen?", action_line, lines, run)
+	_popup.closed.connect(func() -> void: _popup = null)
+	add_child(_popup)
+	_layout()
+
+
+func _close_popup() -> void:
+	if _popup != null:
+		remove_child(_popup)
+		_popup.queue_free()
+		_popup = null
 
 
 func on_activity_pressed(activity_id: String) -> void:
 	if _was_scroll():
 		return
 	var definition := _game.activities.get_catalog().get_definition(activity_id)
-	if not _confirmed("activity:" + activity_id, _game.appointments.conflict_warning(definition.duration_minutes)):
-		return
-	_after_action(_game.activities.start(activity_id), "%s erledigt" % definition.display_name)
+	_guard(definition.duration_minutes, definition.display_name, func() -> void:
+		_after_action(_game.activities.start(activity_id), "%s erledigt" % definition.display_name))
 
 
 func on_content_pressed(format_id: String) -> void:
 	if _was_scroll():
 		return
 	var format := _game.content.get_catalog().get_definition(format_id)
-	if not _confirmed("content:" + format_id, _game.appointments.conflict_warning(format.duration_minutes)):
-		return
-	var outcome := _game.content.preview(format_id)
-	var reason := _game.content.produce(format_id)
-	var parts := ActivityText.channel_parts({"followers": outcome["followers"], "community": outcome["community"],
-			"reputation": outcome["reputation"]})
-	if outcome["income_cents"] != 0:
-		parts.append(ActivityText.signed_money(outcome["income_cents"]))
-	var result := " (%s)" % " · ".join(parts) if not parts.is_empty() else ""
-	_after_action(reason, "%s produziert%s" % [format.display_name, result])
+	_guard(format.duration_minutes, format.display_name, func() -> void:
+		var outcome := _game.content.preview(format_id)
+		var reason := _game.content.produce(format_id)
+		var parts := ActivityText.channel_parts({"followers": outcome["followers"], "community": outcome["community"],
+				"reputation": outcome["reputation"]})
+		if outcome["income_cents"] != 0:
+			parts.append(ActivityText.signed_money(outcome["income_cents"]))
+		var result := " (%s)" % " · ".join(parts) if not parts.is_empty() else ""
+		_after_action(reason, "%s produziert%s" % [format.display_name, result]))
 
 
 func on_equipment_pressed(equipment_id: String) -> void:
@@ -395,43 +414,36 @@ func on_company_found_pressed(type_id: String) -> void:
 	if _was_scroll():
 		return
 	var definition := _game.company.get_catalog().get_definition(type_id)
-	if not _confirmed("company:" + type_id, _game.appointments.conflict_warning(definition.founding_minutes)):
-		return
-	_after_action(_game.company.found(type_id), "%s gegründet" % definition.display_name)
+	_guard(definition.founding_minutes, "%s gründen" % definition.display_name, func() -> void:
+		_after_action(_game.company.found(type_id), "%s gegründet" % definition.display_name))
 
 
 func on_branch_open_pressed(type_id: String) -> void:
 	if _was_scroll():
 		return
 	var definition := _game.company.get_catalog().get_definition(type_id)
-	if not _confirmed("branch:" + type_id, _game.appointments.conflict_warning(definition.branch_opening_minutes)):
-		return
-	_after_action(_game.company.open_branch(), "%s eröffnet" % definition.branch_display_name)
+	_guard(definition.branch_opening_minutes, "%s eröffnen" % definition.branch_display_name, func() -> void:
+		_after_action(_game.company.open_branch(), "%s eröffnet" % definition.branch_display_name))
 
 
 func on_travel_pressed(location_id: String) -> void:
 	if _was_scroll():
 		return
-	var warning := _game.appointments.conflict_warning(_game.locations.travel_minutes_to(location_id))
-	if not _confirmed("travel:" + location_id, warning):
-		return
-	var origin := _game.locations.get_current()
-	var reason := _game.locations.travel(location_id)
-	if reason.is_empty():
-		_map.play_travel(origin, location_id)
-	var name_text := _game.locations.get_catalog().get_definition(location_id).display_name if reason.is_empty() else ""
-	_after_action(reason, "Angekommen: %s" % name_text)
+	var target := _game.locations.get_catalog().get_definition(location_id)
+	_guard(_game.locations.travel_minutes_to(location_id), "Fahrt nach %s" % target.display_name, func() -> void:
+		var origin := _game.locations.get_current()
+		var reason := _game.locations.travel(location_id)
+		if reason.is_empty():
+			_map.play_travel(origin, location_id)
+		_after_action(reason, "Angekommen: %s" % target.display_name if reason.is_empty() else ""))
 
 
 func on_attend_pressed(appointment_id: String) -> void:
 	if _was_scroll():
 		return
-	var warning := _game.appointments.conflict_warning(_game.appointments.minutes_to_attend(appointment_id),
-			appointment_id)
-	if not _confirmed("attend:" + appointment_id, warning):
-		return
 	var title := _game.appointments.get_catalog().get_definition(appointment_id).title
-	_after_action(_game.appointments.attend(appointment_id), "„%s“ wahrgenommen" % title)
+	_guard(_game.appointments.minutes_to_attend(appointment_id), "„%s“ wahrnehmen" % title, func() -> void:
+		_after_action(_game.appointments.attend(appointment_id), "„%s“ wahrgenommen" % title), appointment_id)
 
 
 func on_obligation_pay_pressed(instance_id: String) -> void:
@@ -459,7 +471,6 @@ func on_event_option_pressed(instance_id: String, option_id: String, option_labe
 
 ## Rückmeldung nach einer Aktion, inklusive verpasster Termine und Tagesabschlüsse.
 func _after_action(reason: String, success_text: String) -> void:
-	_confirm_key = ""
 	if reason.is_empty():
 		var text := "%s – jetzt %s." % [success_text, _game.time.format_clock()]
 		for id in _game.appointments.take_missed_notices():

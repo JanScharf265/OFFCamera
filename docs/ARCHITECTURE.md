@@ -106,8 +106,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   `time.advance(warten bis Beginn + Dauer)`.
 - Verpassen: auf `time_advanced(from, to)` wird jeder offene Termin mit Beginn < `to` verpasst,
   `missed_effects` genau einmal angewendet; `take_missed_notices()` liefert sie einmal für die Anzeige.
-- `conflict_warning(minuten)`: Text, wenn eine Aktion über den Beginn eines offenen Termins hinausliefe.
-  Die UI verlangt dann einen zweiten Tipp.
+- `get_conflicts(minuten)`: offene Termine, deren Beginn eine Aktion überspringen würde. Die UI fragt dann per
+  Konflikt-Popup nach (G5.4). `conflict_warning(minuten)` liefert denselben Befund als Text (nur noch in Tests genutzt).
 - Termine mit Beginn vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe.
 - Gespeichert: `since_minutes`, `attended`, `missed` (sortierte ID-Listen).
 
@@ -307,7 +307,10 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
     Zeichenaufrufe bündelt. Die Standortmarkierung wippt nur 3 s nach `restart()` (Stromsparmodus).
   - Gebäudeaussehen je Orts-ID als Tabelle `BUILDINGS`; Grafiken unter `assets/kenney/` (CC0, je mit `License.txt`).
     Fehlt eine Grafik, wird das Teil ausgelassen statt abzustürzen.
-- Kollision mit Termin: erster Tipp zeigt die Warnung, zweiter Tipp auf dieselbe Aktion führt aus.
+- Kollision mit Termin (G5.4, `conflict_popup.gd`): `GameScreen._guard()` fragt `get_conflicts()` und zeigt bei
+  Treffern ein Popup über allem – Aktion mit Dauer und Ende, alle betroffenen Termine (Name, Uhrzeit, Ort) und die
+  Kosten des Verpassens aus den Daten; „Abbrechen“ ändert nichts, „Trotzdem starten“ führt die Aktion genau einmal
+  aus. Gilt für Aktivitäten, Content, Fahrten, Gründung, Filiale und Termine.
 - Offenes Ereignis: Fenster `Window_event` (Inhalt `EventPanel`) ersetzt jedes andere Fenster und sperrt die
   Karte, bis eine Option gewählt ist.
 - Automatisch gespeichert wird beim Start eines neuen Spiels, nach jeder erfolgreichen Aktion
