@@ -219,9 +219,8 @@ func test_location_windows_fit_without_scrolling() -> void:
 			assert_true(_inside(device_safe, rect), "%s: Fenster ragt heraus: %s" % [tag, rect])
 			var hud := Layout.rect_of(app.find_child("HudBar", true, false) as Control)
 			assert_true(rect.position.y >= hud.end.y, "%s: Fenster verdeckt die HUD-Leiste" % tag)
-			for group in ["LifeGroup", "BusinessGroup", "MenuButton"]:
-				var other := Layout.rect_of(app.find_child(group, true, false) as Control)
-				assert_true(not rect.intersects(other), "%s: Fenster überlappt %s" % [tag, group])
+			# G4.7 (Entscheidung 049): volle Breite der Safe Area – die Button-Spalten liegen abgedunkelt darunter.
+			assert_true(absf(rect.size.x - safe.size.x) < 0.5, "%s: Fenster nicht volle Breite" % tag)
 			var columns: int = content.call("get_columns")
 			assert_true(columns >= 3 and columns <= 4, "%s: %d Spalten" % [tag, columns])
 			var needed := content.get_combined_minimum_size().y
@@ -236,31 +235,7 @@ func test_location_windows_fit_without_scrolling() -> void:
 					assert_true(tab_needed <= scroll.size.y + 0.5, "%s / %s: braucht %d px, sichtbar %d" % [tag,
 							tab_button.name, tab_needed, scroll.size.y])
 				(window.find_child("LocationTabs", true, false).get_child(0) as Button).pressed.emit()
-			# G4.5b: Tippfläche jedes Kachel-Buttons ≥ 84 px, Lesetext ≥ 21 px, Namen und Hinweise nicht abgeschnitten.
-			for node in window.find_children("*", "Button", true, false):
-				var button := node as Button
-				if button.visible and button.name != "WindowCloseButton":
-					assert_true(button.size.y >= UiStyle.TOUCH_SIZE - 0.5, "%s: Tippfläche %s nur %d px" % [tag,
-							button.name, button.size.y])
-					assert_true(button.get_theme_font_size("font_size") >= UiStyle.MIN_READ_FONT_SIZE,
-							"%s: Schrift %s zu klein" % [tag, button.name])
-			for node in window.find_children("*", "Label", true, false):
-				var label := node as Label
-				if label.name == "WindowTitle" or not label.is_visible_in_tree():
-					continue
-				assert_true(label.get_theme_font_size("font_size") >= UiStyle.MIN_READ_FONT_SIZE,
-						"%s: „%s“ in %d px" % [tag, label.text, label.get_theme_font_size("font_size")])
-				var name_text := String(label.name)
-				# Kachel-Namen und Hinweise: auf allen Klassen; Titelzeile (Zeiten, Entfernung): auf echten Geräten –
-				# im „Grenzfall“ darf sie „…“ zeigen.
-				var header_line := name_text in ["LocationHours", "LocationDistance"]
-				if name_text.begins_with("TileTitle_") or name_text.begins_with("TileHint_") \
-						or (header_line and not device.begins_with("Grenzfall")):
-					var font := label.get_theme_font("font")
-					var width := font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
-							label.get_theme_font_size("font_size")).x
-					assert_true(width <= label.size.x + 0.5, "%s: „%s“ abgeschnitten (%d > %d px)" % [tag, label.text,
-							width, label.size.x])
+			# Tippflächen, Schrift und Abschneiden aller Texte prüft test_touch_and_fonts.gd (G4.7) – für alle Fenster.
 			var tops := {}
 			for tile in content.find_child("TileGrid", true, false).get_children():
 				var tile_control := tile as Control

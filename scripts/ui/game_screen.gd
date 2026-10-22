@@ -170,7 +170,7 @@ func _button_group(node_name: String, title: String) -> PanelContainer:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_theme_constant_override("separation", int(COLUMN_GAP))
 	panel.add_child(column)
-	var header := UiStyle.label(title, UiStyle.HUD_CAPTION_FONT_SIZE, UiStyle.MUTED)
+	var header := UiStyle.mini_label(title, UiStyle.MUTED)
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(header)
 	add_child(panel)
@@ -229,13 +229,12 @@ func _layout() -> void:
 	_dim.position = Vector2.ZERO
 	_dim.size = size
 	if _window != null and _window_kind == "location":
-		# Ortsfenster (G4.5): unter der HUD-Leiste, vom linken Rand bis vor die Button-Spalten (≈ 85 % der
-		# nutzbaren Breite), damit das Kachel-Raster ohne Scrollen passt. Leiste und Buttons bleiben sichtbar.
-		# Unten nutzt es den Grundabstand mit (nicht den Bereich des Home-Balkens), damit zwei Reihen passen.
+		# Ortsfenster (G4.5, seit G4.7 volle Breite – Entscheidung 049): unter der HUD-Leiste über die ganze Breite
+		# der Safe Area; die Button-Spalten liegen darunter (abgedunkelt, wie bei allen Fenstern). Unten nutzt es
+		# den Grundabstand mit (nicht den Bereich des Home-Balkens), damit zwei Kachel-Reihen passen.
 		var window_top := top + _hud.size.y + COLUMN_GAP / 2.0
-		var window_right := _life_group.position.x - GAP
 		var window_bottom := size.y - maxf(_margins[3] - UiStyle.PADDING, 0.0) - COLUMN_GAP
-		_window.custom_minimum_size = Vector2(window_right - left, window_bottom - window_top)
+		_window.custom_minimum_size = Vector2(right - left, window_bottom - window_top)
 		_window.size = _window.custom_minimum_size
 		_window.position = Vector2(left, window_top)
 		_window.content.call("set_available_size", _window.size.x - 2.0 * UiStyle.COMPACT_WINDOW_PADDING,

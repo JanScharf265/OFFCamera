@@ -242,7 +242,8 @@ func _build_details() -> Control:
 	info.add_child(_location_distance)
 	_travel_button = _screen.scroll_button("Hinfahren", "TravelButton")
 	_travel_button.add_theme_font_size_override("font_size", UiStyle.TILE_BUTTON_FONT_SIZE)
-	UiStyle.style_tile_button(_travel_button)
+	# Sichtbar mittig wie die Reiter (G4.7), Tippfläche 84 px.
+	UiStyle.style_accent_touch_button(_travel_button, UiStyle.TAB_VISIBLE)
 	_travel_button.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE * 2.0, UiStyle.TOUCH_SIZE)
 	_travel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_travel_button.pressed.connect(func() -> void: _screen.on_travel_pressed(location_id))
@@ -264,8 +265,12 @@ func _refresh_details() -> void:
 	var definition = _game.locations.get_catalog().get_definition(location_id)
 	tooltip_text = definition.description
 	var now_open: bool = _game.locations.is_open_at(location_id, _game.time.get_minutes())
-	_location_hours.text = "Geöffnet: %s · jetzt %s" % [LocationSystemScript.format_hours(definition),
-			"offen" if now_open else "geschlossen"]
+	# Kurzform (G4.7), damit die Titelzeile auch mit Reitern und „Hinfahren“ nichts abschneidet.
+	if definition.has_hours:
+		_location_hours.text = "%s · %s" % [LocationSystemScript.format_hours(definition),
+				"offen" if now_open else "geschlossen"]
+	else:
+		_location_hours.text = "immer geöffnet"
 	var here: bool = location_id == _game.locations.get_current()
 	if here:
 		_location_distance.text = "Du bist hier."

@@ -187,7 +187,7 @@ func test_map_shows_location_and_travel_changes_activities() -> void:
 	_press(app, "MapPin_cafe_harbor")  # nur auswählen, keine Zeit
 	assert_eq((_find(app, "ClockLabel") as Label).text, "08:00")
 	assert_eq((_find(app, "WindowTitle") as Label).text, "Café am Hafen")
-	assert_eq((_find(app, "LocationHours") as Label).text, "Geöffnet: 07:00–20:00 · jetzt offen")
+	assert_eq((_find(app, "LocationHours") as Label).text, "07:00–20:00 · offen")
 	assert_eq((_find(app, "LocationDistance") as Label).text, "4,2 km · 20 min Fahrt")
 	assert_eq((_find(app, "TravelButton") as Button).text, "Hinfahren (20 min)")
 

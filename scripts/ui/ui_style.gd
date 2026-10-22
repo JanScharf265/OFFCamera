@@ -36,19 +36,21 @@ const SIDE_BUTTON_SIZE := Vector2(140, 84)
 const SIDE_ICON_SIZE := 28
 const WINDOW_MAX_WIDTH := 980
 const HUD_SURFACE := Color(0.07, 0.07, 0.09, 0.86)
+## HUD-Leiste (G4.7): voll deckend, damit keine Kartenschilder durchscheinen.
+const HUD_BAR_SURFACE := Color(0.07, 0.07, 0.09, 1.0)
 ## Runde Buttons der Spielansicht (G4.4, Entscheidung 038): sichtbarer Kreis 64 px, Tippfläche 84 px (≈ 44 pt).
 const ROUND_BUTTON_SIZE := 64.0
 const MENU_ROUND_SIZE := 44.0
 const CLOSE_ROUND_SIZE := 56.0
 const TOUCH_SIZE := 84.0
 const ROUND_BUTTON_BORDER := Color(1, 1, 1, 0.14)
-const ROUND_CAPTION_FONT_SIZE := 15
 const BADGE := Color("#FF3B5C")
 ## Ortsfenster als Kachel-Raster (G4.5, Lesbarkeit G4.5b). Mindestschrift für Lesetext: 21 px ≈ 11 pt auf allen
 ## iPhones (720 / Bildschirmhöhe in Punkten, z. B. SE: 1,92 px/pt; Pro Max: 1,67 px/pt).
 const WARNING := Color("#F2C14E")
 const PURCHASE_TEXT := Color("#FF8FA3")
 const MIN_READ_FONT_SIZE := 21
+const MINI_FONT_SIZE := 19
 const TILE_PADDING := 10
 const TILE_TITLE_FONT_SIZE := 23
 const TILE_FONT_SIZE := 21
@@ -63,14 +65,13 @@ const TILE_BUTTON_FONT_SIZE := 22
 const TILE_GAP := 10
 const TILE_ROW_GAP := 8
 ## Mindestbreite einer Kachel: daraus ergibt sich die Spaltenzahl (höchstens 4).
-const TILE_MIN_WIDTH := 220.0
+const TILE_MIN_WIDTH := 252.0  # G4.7: längste Zeitzeile („1 h 30 min · Ende 10:50“, 231 px) + Innenabstand
 const TILE_MAX_COLUMNS := 4
 ## Reiter im Ortsfenster (G4.6): in der Titelzeile, Tippfläche 84 px hoch, sichtbar 52 px.
 const TAB_VISIBLE := 52.0
 const TAB_PADDING := 16
 ## HUD-Leiste oben (G4.3): Abstand der Elemente und kleine Beschriftung über den Beträgen.
-const HUD_GAP := 18
-const HUD_CAPTION_FONT_SIZE := 15
+const HUD_GAP := 12
 const DIM := Color(0, 0, 0, 0.55)
 
 
@@ -219,3 +220,39 @@ static func style_tab_button(target: Button, active: bool) -> void:
 		target.add_theme_color_override(color_name, TEXT if active else MUTED)
 	target.add_theme_font_size_override("font_size", MIN_READ_FONT_SIZE)
 	target.custom_minimum_size.y = TOUCH_SIZE
+
+
+## Mini-Beschriftung (G4.7): unter runden Buttons, „Privat“, „LEBEN“ … – MINI_FONT_SIZE (19 px ≈ 10 pt).
+## Die Meta "mini_caption" sagt dem Schrift-Test, dass hier 19 statt 21 px genügen.
+static func mini_label(text: String, color: Color = TEXT) -> Label:
+	var result := label(text, MINI_FONT_SIZE, color)
+	result.set_meta("mini_caption", true)
+	return result
+
+
+## Tippfläche auf TOUCH_SIZE vergrößern, ohne dass der Button sichtbar wächst (G4.7): Alle Zustände zeichnen nur
+## `visible_height` (mittig) über negative expand_margin; die Mindestgröße wird TOUCH_SIZE × TOUCH_SIZE.
+static func grow_touch_area(target: Button, visible_height: float) -> void:
+	var hidden := maxf(TOUCH_SIZE - visible_height, 0.0) / 2.0
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		var box := target.get_theme_stylebox(state)
+		if box == null:
+			continue
+		var copy := box.duplicate() as StyleBox
+		if copy is StyleBoxFlat:
+			(copy as StyleBoxFlat).expand_margin_top = -hidden
+			(copy as StyleBoxFlat).expand_margin_bottom = -hidden
+		target.add_theme_stylebox_override(state, copy)
+	target.custom_minimum_size = Vector2(maxf(target.custom_minimum_size.x, TOUCH_SIZE), TOUCH_SIZE)
+
+
+## Akzent-Button mit vergrößerter Tippfläche (G4.7, z. B. „Hinfahren“): Farben ausdrücklich gesetzt, weil das
+## Theme beim Aufbau noch nicht greift; sichtbar `visible_height`, Tippfläche TOUCH_SIZE.
+static func style_accent_touch_button(target: Button, visible_height: float) -> void:
+	for state in ["normal", "hover"]:
+		target.add_theme_stylebox_override(state, _box(ACCENT, 12))
+	for state in ["pressed", "hover_pressed"]:
+		target.add_theme_stylebox_override(state, _box(ACCENT_PRESSED, 12))
+	target.add_theme_stylebox_override("disabled", _box(DISABLED, 12))
+	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	grow_touch_area(target, visible_height)

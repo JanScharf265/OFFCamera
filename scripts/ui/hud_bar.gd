@@ -17,7 +17,7 @@ const STAT_ICONS := {
 const STAT_COLORS := {"energy": Color("#7FD38A"), "mood": Color("#F2C14E")}
 const LOCATION_ICON := "res://assets/kenney/game-icons/target.png"
 const ICON_SIZE := 20
-const STAT_BAR_WIDTH := 64
+const STAT_BAR_WIDTH := 48
 const CONTENT_MARGIN_X := 18
 
 var _date_label: Label
@@ -32,7 +32,7 @@ var _stat_bars := {}
 
 func _init() -> void:
 	name = "HudBar"
-	add_theme_stylebox_override("panel", UiStyle.flat_box(UiStyle.HUD_SURFACE, 0))
+	add_theme_stylebox_override("panel", UiStyle.flat_box(UiStyle.HUD_BAR_SURFACE, 0))
 	var box := get_theme_stylebox("panel") as StyleBoxFlat
 	box.content_margin_left = CONTENT_MARGIN_X
 	box.content_margin_right = CONTENT_MARGIN_X
@@ -143,12 +143,15 @@ func _bar_box(color: Color) -> StyleBoxFlat:
 	return box
 
 
-## Kleine Beschriftung über dem Betrag, z. B. „Privat“ / „500,00 €“.
-func _money(caption: String, value_name: String) -> VBoxContainer:
-	var block := VBoxContainer.new()
-	block.add_theme_constant_override("separation", -4)
-	block.alignment = BoxContainer.ALIGNMENT_CENTER
-	block.add_child(UiStyle.label(caption, UiStyle.HUD_CAPTION_FONT_SIZE, UiStyle.MUTED))
+## Kleine Beschriftung neben dem Betrag, z. B. „Privat 500,00 €“ (G4.7: nebeneinander, damit die Leiste mit
+## 19-px-Beschriftung nicht höher wird).
+func _money(caption: String, value_name: String) -> HBoxContainer:
+	var block := HBoxContainer.new()
+	block.add_theme_constant_override("separation", 6)
+	var caption_label := UiStyle.mini_label(caption, UiStyle.MUTED)
+	caption_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	caption_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	block.add_child(caption_label)
 	var value := _label(value_name, UiStyle.SMALL_FONT_SIZE, UiStyle.TEXT)
 	block.add_child(value)
 	return block

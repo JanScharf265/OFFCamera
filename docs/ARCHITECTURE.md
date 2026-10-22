@@ -232,9 +232,10 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Aufträge), `MenuButton` als Zahnrad in der Leiste, links unten nur `HereButton`,
   unten zwischen „Hier“ und den Spalten der Hinweis `Toast` (`FeedbackLabel`; kurze Texte ca. 4 s und lassen Tipps auf die
   Karte durch, lange/mehrzeilige bleiben bis zum Antippen).
-- Ortsfenster (G4.5, `windows/location_window.gd` + `activity_tile.gd`): unter der HUD-Leiste vom linken Rand bis vor
-  die Button-Spalten; Infos und „Hinfahren“ in der Titelzeile (`take_header_extra()`, von `ui_window.gd` eingebaut),
-  darunter ein `GridContainer` mit 3–4 Spalten (`set_available_width()` vom GameScreen). Jede Kachel: Name,
+- Ortsfenster (G4.5, `windows/location_window.gd` + `activity_tile.gd`): unter der HUD-Leiste über die volle Breite der
+  Safe Area (seit G4.7; die Button-Spalten liegen abgedunkelt darunter); Infos und „Hinfahren“ in der Titelzeile
+  (`take_header_extra()`, von `ui_window.gd` eingebaut), darunter ein `GridContainer` mit 3–4 Spalten
+  (`set_available_size()` vom GameScreen, Kacheln mind. `UiStyle.TILE_MIN_WIDTH` breit). Jede Kachel: Name,
   „Dauer · Ende HH:MM“ (`ActivityText.duration_with_end`), Wirkungs-Chips (`ActivityText.effect_chips`), feste
   Hinweiszeile, Button mit Sperrgrund; Käufe mit Rahmen-Button. G4.5b: Kachel-Buttons (`UiStyle.style_tile_button`)
   sind 84 px hoch (Tippfläche), gezeichnet werden nur die unteren 56 px (negative `expand_margin_top`); Hinweiszeile
@@ -244,6 +245,13 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   ob alle Kacheln in die sichtbare Höhe (`UiWindow.body_height()`) passen; sonst erscheinen Reiter in der Titelzeile
   (`LocationTabs`, nur nicht leere, feste Reihenfolge) und das Raster zeigt nur die Kacheln des gewählten Reiters.
   Die Wahl ist reine Anzeige (nicht im Spielstand), das Fenster öffnet immer auf dem ersten Reiter.
+- Tippflächen und Schrift (G4.7): Alles Tippbare ist mindestens `UiStyle.TOUCH_SIZE` (84 px ≈ 44 pt) groß. Wo ein
+  Button sichtbar kleiner bleiben soll (Kartenschilder, Buchungen-Filter, Kachel-Buttons, Reiter, „Hinfahren“),
+  zeichnen die Styleboxen mit negativer `expand_margin` nur einen Teil (`UiStyle.grow_touch_area`,
+  `style_tile_button`, `style_tab_button`, `style_accent_touch_button`). Lesetext ≥ `MIN_READ_FONT_SIZE` (21 px),
+  Mini-Beschriftungen (`UiStyle.mini_label`, Meta `mini_caption`) ≥ `MINI_FONT_SIZE` (19 px). Runde Buttons mit
+  Beschriftung sind mindestens so breit wie diese. Die HUD-Leiste ist voll deckend (`HUD_BAR_SURFACE`).
+  `tests/test_touch_and_fonts.gd` prüft das für Spielansicht und jedes Fenster auf allen 4 Geräteklassen.
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,

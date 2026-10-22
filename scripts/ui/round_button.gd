@@ -48,7 +48,7 @@ func _init(caption: String, icon_path: String, circle_size: float = UiStyle.ROUN
 	_circle.add_child(icon_rect)
 
 	if not caption.is_empty():
-		_caption_label = UiStyle.label(caption, UiStyle.ROUND_CAPTION_FONT_SIZE)
+		_caption_label = UiStyle.mini_label(caption)
 		_caption_label.name = "Caption"
 		_caption_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_caption_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -64,7 +64,7 @@ func _init(caption: String, icon_path: String, circle_size: float = UiStyle.ROUN
 	_badge.size = Vector2(BADGE_SIZE, BADGE_SIZE)
 	_badge.visible = false
 	add_child(_badge)
-	_badge_label = UiStyle.label("", UiStyle.ROUND_CAPTION_FONT_SIZE)
+	_badge_label = UiStyle.mini_label("")
 	_badge_label.name = "BadgeLabel"
 	_badge_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -76,6 +76,16 @@ func _init(caption: String, icon_path: String, circle_size: float = UiStyle.ROUN
 	button_up.connect(func() -> void: _circle_box.bg_color = UiStyle.HUD_SURFACE)
 	resized.connect(_arrange)
 	_arrange()
+
+
+## Mit Beschriftung ist der Button mindestens so breit wie sie (G4.7: 19-px-Schrift, nichts abgeschnitten) –
+## die Spalten werden dadurch etwas breiter.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED and _caption_label != null:
+		var text_width := _caption_label.get_theme_font("font").get_string_size(_caption_label.text,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, UiStyle.MINI_FONT_SIZE).x
+		custom_minimum_size.x = maxf(UiStyle.TOUCH_SIZE, ceilf(text_width) + 8.0)
+		_arrange()
 
 
 ## Abstand des Kreises von der Oberkante der Tippfläche (z. B. Zahnrad mittig in der HUD-Leiste).
@@ -102,7 +112,6 @@ func _arrange() -> void:
 	_circle.size = Vector2(_circle_size, _circle_size)
 	_circle.position = Vector2((width - _circle_size) / 2.0, top)
 	if _caption_label != null:
-		# Etwas breiter als die Tippfläche, damit „Organisation“ nicht abgeschnitten wird.
-		_caption_label.size = Vector2(width + 24.0, 0.0)
-		_caption_label.position = Vector2(-12.0, top + _circle_size)
+		_caption_label.size = Vector2(width, 0.0)
+		_caption_label.position = Vector2(0.0, top + _circle_size)
 	_badge.position = Vector2((width + _circle_size) / 2.0 - BADGE_SIZE + 6.0, top - 4.0)

@@ -424,6 +424,7 @@ func _update_pins() -> void:
 		var pin: Button = _pins[id]
 		for state in ["normal", "hover", "pressed", "hover_pressed"]:
 			pin.add_theme_stylebox_override(state, UiStyle.flat_box(color))
+		UiStyle.grow_touch_area(pin, PIN_HEIGHT)  # Tippfläche 84 px, sichtbar wie bisher (G4.7)
 
 
 func _layout_overlays() -> void:
@@ -434,7 +435,8 @@ func _layout_overlays() -> void:
 		pin.reset_size()
 		var anchor := CityLayoutScript.cell_to_world(_layout.get_location_cell(id))
 		var top := _to_screen(anchor + Vector2(0, _building_top(id) - 8.0))
-		pin.position = top - Vector2(pin.size.x / 2.0, pin.size.y)
+		# Unterkante des SICHTBAREN Schilds bleibt über dem Gebäude (die Tippfläche ragt unsichtbar darüber hinaus).
+		pin.position = top - Vector2(pin.size.x / 2.0, pin.size.y - (pin.size.y - PIN_HEIGHT) / 2.0)
 	if _marker != null:
 		_marker.visible = _pins.has(_current) and not is_traveling()
 		if _marker.visible:

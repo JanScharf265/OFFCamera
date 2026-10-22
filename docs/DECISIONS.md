@@ -455,3 +455,20 @@ Büro passt ohne Reiter. Die Layout-Tests messen jetzt wie das Spiel (`Layout.se
 abgeschnitten“ stimmte nicht ganz: Im Studio vor Ort (Buttons frei) war „Nächste: USB-Mikrofon“ auf dem SE 12 px zu
 breit – der Test prüfte das Studio nur von woanders (dann ist die Hinweiszeile ausgeblendet). Jetzt „→ USB-Mikrofon“
 und ein eigener Test vor Ort.
+
+## 049 – Tippflächen, Mindestschrift, Ortsfenster in voller Breite (G4.7)
+Ein Test prüft auf allen 4 Geräteklassen jeden sichtbaren Button und Text in Spielansicht und allen Fenstern (auch
+jeden Reiter und das Ereignis-Fenster): Tippfläche ≥ 84 px (≈ 44 pt), Lesetext ≥ 21 px (≈ 11 pt),
+Mini-Beschriftungen ≥ 19 px (≈ 10 pt; markiert über die Meta `mini_caption`), nichts abgeschnitten. Gefunden:
+Kartenschilder 64 px hoch (Büro 80 px breit), Buchungen-Filter 64 px hoch, alle Mini-Beschriftungen 15 px, „1 h 30
+min · Ende 10:50“ auf dem SE abgeschnitten, Titelzeile im „Grenzfall“ mit „…“. Lösungen: unsichtbar größere
+Tippflächen (sichtbar unverändert); Mini-Beschriftungen 19 px, runde Buttons so breit wie ihre Beschriftung (Spalten
+dadurch etwas breiter); „Privat“/„Firma“ neben statt über dem Betrag (Leiste bleibt ≤ 64 px), HUD-Abstände 12 px und
+Balken 48 px, damit die Leiste auch im „Grenzfall“ passt; Kacheln mind. 252 px breit; Öffnungszeiten in Kurzform
+(„07:00–20:00 · offen“, „immer geöffnet“). HUD-Leiste voll deckend (vorher 86 %, Schilder schienen durch).
+Entscheidung des Game Directors (22.10.2026): Das Ortsfenster nutzt die volle Breite der Safe Area wie alle anderen
+Fenster und liegt über den Button-Spalten. Grund: Mit 19-px-Beschriftungen wurden die Spalten breiter, die HUD-Leiste
+anfangs höher, und im „Grenzfall“ blieben für Öffnungszeiten und Entfernung neben Reitern und „Hinfahren“ nur
+~60–150 px. Die Spalten sind unter dem abgedunkelten Hintergrund ohnehin nicht tippbar, solange ein Fenster offen
+ist. Abweichung vom Mockup (G4.1) und von G4.5 („zwischen Hier und den Spalten“). Heute zeigt nur das Studio im
+„Grenzfall“ Reiter (3 Spalten); auf allen echten Geräten passt jeder Ort ohne Reiter.

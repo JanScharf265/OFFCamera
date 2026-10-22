@@ -45,6 +45,7 @@ func _ready() -> void:
 		var button := UiStyle.side_button(FILTERS[filter_id])
 		button.name = "LedgerFilter_%s" % (filter_id if not filter_id.is_empty() else "all")
 		button.custom_minimum_size = Vector2(160, 64)
+		UiStyle.grow_touch_area(button, 64.0)  # sichtbar 64 px, Tippfläche 84 px (G4.7)
 		button.toggle_mode = true
 		button.pressed.connect(func() -> void:
 			_filter = filter_id

@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (als Nächstes G4.1)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, als Nächstes G5.1)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -252,7 +252,7 @@ echte Testdatei und eine Migration.
 - [x] G3.2 Icon „Halbes Objektiv“: Quellen `assets/icon/app_icon.svg` + vereinfacht `app_icon_small.svg` (bis 87 px), 15 iOS-Größen erzeugt, alle 17 Icon-Plätze im Export-Preset belegt; Export headless geprüft (Xcode-Projekt enthält genau diese Dateien); Test `test_app_icon.gd` (340/340 Tests grün)
 - [x] G3.3 Schriftzug „OFF CAMERA“ (Variante 1 „Kino“): Bebas Neue (OFL, `assets/fonts/bebas_neue/`), Baustein `scripts/ui/logo.gd` im Hauptmenü, Startbild `assets/splash/splash.png` (Erzeuger `tools/splash/make_splash.gd`) als Boot-Splash und iOS-Launch-Screen; Export geprüft; Mac-Fensterlauf mit Screenshot (341/341 Tests grün)
 
-### G4 – UI-Layout (mehr Karte)
+### G4 – UI-Layout (mehr Karte) ✅ (22.10.2026)
 - [x] G4.1 Layout-Mockup (`tools/mockup/g4_1_karte.png`, `g4_1_ortsfenster.png`, Erzeuger `tools/mockup/g4_mockup.gd`) – freigegeben 13.10.2026 inkl. 2 Button-Spalten rechts, mit 5 Änderungen (in G4.3–G4.5 eingetragen)
 - [x] G4.2 Querformat fest auf EINE Richtung: `display/window/handheld/orientation = 2` („umgekehrt“) → im Export nur `UIInterfaceOrientationLandscapeRight` (Home-Seite rechts = Insel links); rechter Rand: Safe Area wie von iOS gemeldet (keine Sonderregel), offen für den nächsten iPhone-Test (341/341 Tests grün)
 - [x] G4.3 HUD als schmale Leiste oben (neu `scripts/ui/hud_bar.gd`, `game_screen.gd`); Plätze für Schwarzgeld/Hitze, sichtbar erst wenn es sie gibt; Energie und Stimmung als Balken MIT Zahl, Stimmung mit Smiley-Icon (kein Stern) – umgesetzt, Seitenleisten beginnen jetzt unter der Leiste; Layout-Test: volle Breite, ≤ 64 px hoch, Inhalt passt auf allen 4 Geräteklassen (341/341 Tests grün)
@@ -260,13 +260,15 @@ echte Testdatei und eine Migration.
 - [x] G4.5 Ortsfenster als Kachel-Raster, 3–4 Spalten, ca. 85 % Breite; jede Kachel mit fest reservierter Hinweiszeile (Start-Buttons auf einer Höhe); Käufe (sofort, ohne Spielzeit) mit eigenem Button-Stil (z. B. Rahmen-Button) – umgesetzt (`activity_tile.gd`): Kachel mit Name, „2 h · Ende HH:MM“, Wirkungen als Symbol + Zahl, Hinweiszeile (Terminkonflikt gelb, sonst Qualität/nächste Stufe grau), Sperrgrund im Button, Käufe mit Rahmen-Button; Infos und „Hinfahren“ in der Titelzeile; runder Schließen-Button in allen Fenstern; Layout-Test: alle Orte ohne Scrollen auf den 3 echten Geräteklassen (Grenzfall/Studio erst mit G4.6) (344/344 Tests grün) (neu `scripts/ui/activity_tile.gd`, `windows/location_window.gd`, `activity_text.gd`)
 - [x] G4.5b Lesbarkeit der Kacheln: Kachel-Buttons sichtbar 56 px, Tippfläche 84 px (reicht unsichtbar über die Hinweiszeile); Lesetext in Kacheln und Ortsfenster ≥ 21 px (≈ 11 pt), Kachel-Namen 23 px; Wirkungen höchstens 2 Zeilen, alle als Symbol + Zahl; kürzere Namen „Community-Q&A“, „Merch zeigen“; Konflikt-Hinweis „⚠ Verpasst: 14:00“; Tests für Tippfläche, Mindestschrift, nichts abgeschnitten (344/344 Tests grün)
 - [x] G4.6 Reiter statt Scrollen: Pflichtfeld "tab" (alltag, content, geschaeft, unterwelt) in Aktivitäten, Formaten, Ausrüstung, Unternehmensarten, vom Loader geprüft; Reiter nur, wenn die Kacheln eines Orts nicht ohne Scrollen passen (gemessen), in der Titelzeile, leere Reiter fehlen, Fenster öffnet auf dem ersten; Tippfläche 84 px, Schrift 21 px; heute nur Studio im „Grenzfall“; Test-Ort mit 15 Aktivitäten in 3 Reitern; Layout-Tests ohne Ausnahmen (352/352 Tests grün)
-- [ ] G4.7 Layout-Tests für die 4 Geräteklassen aus 7.2 umstellen, neuer Test „Tippflächen ≥ 84 px (≈ 44 pt)“ (Kachel-Buttons seit G4.5b: Tippfläche 84 px); dazu: Mindestschrift-Test für alle Fenster – Lesetext ≥ 21 px (≈ 11 pt), Mini-Beschriftungen (runde Buttons, HUD) ≥ 19 px (≈ 10 pt); HUD-Leiste so deckend, dass keine Kartenschilder durchscheinen (`tests/test_layout*.gd`, `tests/layout_helper.gd`)
+- [x] G4.7 Layout-Tests aufgeräumt, ohne Ausnahmen: neuer Test (`tests/test_touch_and_fonts.gd`) prüft auf allen 4 Geräteklassen JEDEN sichtbaren Button (Karte, HUD-Leiste, runde Buttons, alle Fenster inkl. jedes Reiters und des Ereignis-Fensters): Tippfläche ≥ 84 px, Lesetext ≥ 21 px, Mini-Beschriftungen ≥ 19 px, nichts abgeschnitten; zu klein waren Kartenschilder (64 px), Buchungen-Filter (64 px) und alle Mini-Beschriftungen (15 px) – jetzt unsichtbar größere Tippflächen bzw. 19 px; Spalten so breit wie ihre Beschriftung; HUD-Leiste voll deckend; Ortsfenster in voller Breite (Entscheidung 049) (355/355 Tests grün)
 
 Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [ ] Dynamic Island liegt links, App dreht beim Umdrehen des iPhones NICHT mit (G4.2)
 - [ ] Rechter Rand: Wie viel Abstand hält die Bedienung rechts ein (gleich wie links = iOS meldet die Safe Area symmetrisch)? Nichts in den abgerundeten Ecken (G4.2)
 - [ ] Startbild: Springt der Schriftzug beim Übergang vom iOS-Launch-Screen zum Godot-Startbild in der Größe? (G3.3)
 - [ ] App-Symbol auf dem Homescreen gut erkennbar, auch in der Suche/Einstellungen (G3.2)
+- [ ] Schrift in Kacheln, Seitenbuttons und Leiste gut lesbar? (G4.5b, G4.7)
+- [ ] Kacheln und Reiter gut tippbar? (G4.5b, G4.6, G4.7)
 
 ### G5 – Hinweise und Komfort
 - [ ] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, neu `scripts/core/settings.gd`): Schalter Kalender automatisch, Vibration; Einstellungsseite erweitern
