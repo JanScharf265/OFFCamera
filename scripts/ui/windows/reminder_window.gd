@@ -74,7 +74,7 @@ func _build() -> void:
 	var later: Button = _screen.scroll_button("Später", "ReminderLaterButton")
 	for state in ["normal", "hover"]:
 		later.add_theme_stylebox_override(state, UiStyle.flat_box(UiStyle.SURFACE_PRESSED, 16))
-	later.pressed.connect(func() -> void: _screen.close_reminder())
+	later.pressed.connect(func() -> void: _screen.on_reminder_later_pressed())
 	_grow(later)
 	buttons.add_child(later)
 

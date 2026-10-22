@@ -645,3 +645,15 @@ merkt sie den Auslöser `first_game_start` in `seen_triggers` statt einzelner ID
 Spielstart-Tutorials, die später dazukommen. Unbekannte IDs in `seen` (Tutorial aus den Daten entfernt) bleiben
 stehen, damit es nach einer Rückkehr nicht erneut kommt. `first_game_start` meldet die App bei „Neues Spiel“, nicht
 der GameState-Konstruktor (der auch beim Laden läuft).
+
+## 063 – Tutorial-Anzeige (T.3)
+Das Overlay ist kein Fenster der Ein-Fenster-Regel, sondern liegt darüber: Es muss auf Elemente IN Fenstern zeigen
+können (z. B. „Hinfahren“ im Ortsfenster). Deshalb wartet es nur auf die Fenster, die vorrangig sind (Ereignis,
+Kalender, Erinnerung) und auf das Konflikt-Popup; über einem Ortsfenster darf es liegen. Wörtlich nach Ticket gilt das
+auch für ein künftiges Kalender-Tutorial: Es erscheint nach dem Schließen des Kalenders – soll es auf Elemente im
+Kalender zeigen, muss das in T.5 neu entschieden werden. Das Platzhalter-Tutorial „Karte“ zeigt auf nichts
+(`ui_target` leer statt `CityMap`): Die Karte füllt den ganzen Bildschirm, eine Aussparung ließe keinen Platz für die
+Sprechblase. Die Lage der Sprechblase: unter, über, rechts, links vom Ziel – die erste, die ganz in der Safe Area liegt
+und das Ziel nicht verdeckt (Test auf allen 4 Geräteklassen). „Verstanden“ speichert sofort (gesehen bleibt gesehen,
+auch wenn die App danach beendet wird). Der feste Starthinweis „Tippe auf ein Gebäude …“ entfällt; der
+Hinweiskasten ist bis zur ersten Meldung verborgen (vorher stand er leer da).

@@ -25,6 +25,7 @@ const CityMapScript := preload("res://scripts/ui/city_map.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const HudBarScript := preload("res://scripts/ui/hud_bar.gd")
 const ConflictPopupScript := preload("res://scripts/ui/conflict_popup.gd")
+const TutorialOverlayScript := preload("res://scripts/ui/tutorial_overlay.gd")
 const RoundButtonScript := preload("res://scripts/ui/round_button.gd")
 const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
@@ -85,6 +86,8 @@ var _window_kind := ""
 var _selected_location := ""
 ## Offenes Konflikt-Popup (G5.4) oder null.
 var _popup: ConflictPopupScript
+## Tutorial-Anzeige (T.3) über allem; null = keine
+var _tutorial: TutorialOverlayScript
 
 
 ## Vor dem Einfügen in den Baum aufrufen.
@@ -139,6 +142,7 @@ func _ready() -> void:
 
 	_toast = UiStyle.hud_panel()
 	_toast.name = "Toast"
+	_toast.visible = false  # erst mit der ersten Meldung (T.3: kein fester Starthinweis mehr)
 	_toast.gui_input.connect(_on_toast_input)
 	add_child(_toast)
 	_feedback_label = UiStyle.wrapping_label("", UiStyle.SMALL_FONT_SIZE)
@@ -158,7 +162,7 @@ func _ready() -> void:
 	add_child(_dim)
 
 	resized.connect(_layout)
-	_show_feedback("Tippe auf ein Gebäude, um zu sehen, was du dort tun kannst.", UiStyle.TEXT)
+	# Der frühere feste Hinweis „Tippe auf ein Gebäude …“ entfällt (T.3) – das erklärt jetzt das Tutorial.
 	_refresh()
 
 
@@ -265,6 +269,10 @@ func _layout() -> void:
 		_window.custom_minimum_size = Vector2(width, bottom - top)
 		_window.size = _window.custom_minimum_size
 		_window.position = Vector2((left + right - width) / 2.0, top)
+	if _tutorial != null:
+		# Tutorial ganz oben (T.3): Aussparung und Sprechblase in der Safe Area.
+		move_child(_tutorial, get_child_count() - 1)
+		_tutorial.place(size, Rect2(left, top, right - left, bottom - top))
 	if _popup != null:
 		# Konflikt-Popup immer ganz oben, Panel mittig in der Safe Area (G5.4).
 		move_child(_popup, get_child_count() - 1)
@@ -297,10 +305,38 @@ func _on_dim_input(event: InputEvent) -> void:
 		_on_window_closed()
 
 
-## Vom Spieler geschlossen: Eine Erinnerung, die auf Ereignis oder Kalender gewartet hat, kommt jetzt (G5.6).
+## Vom Spieler geschlossen: Eine Erinnerung, die auf Ereignis oder Kalender gewartet hat, kommt jetzt (G5.6),
+## danach ein wartendes Tutorial (T.3).
 func _on_window_closed() -> void:
 	_close_window()
 	_open_due_reminder()
+	_open_due_tutorial()
+
+
+## Reihenfolge Ereignis → Kalender → Erinnerung → Tutorial (T.3): Das Tutorial wartet, solange eines dieser Fenster
+## oder das Konflikt-Popup offen ist; über einem Ortsfenster darf es liegen (dort zeigt es z. B. auf „Hinfahren“).
+## Welches fällig ist, entscheidet das TutorialSystem; „Verstanden“ markiert es als gesehen, dann kommt das nächste.
+func _open_due_tutorial() -> void:
+	if _tutorial != null or _popup != null or _game.events.has_pending() \
+			or _window_kind in ["event", "calendar", "reminder"]:
+		return
+	var tutorial_id := _game.tutorials.get_next_due()
+	if tutorial_id.is_empty():
+		return
+	_tutorial = TutorialOverlayScript.new(_game.tutorials.get_catalog().get_definition(tutorial_id), self)
+	_tutorial.confirmed.connect(_on_tutorial_confirmed)
+	add_child(_tutorial)
+	_layout()
+
+
+func _on_tutorial_confirmed(tutorial_id: String) -> void:
+	_game.tutorials.mark_seen(tutorial_id)
+	if _tutorial != null:
+		remove_child(_tutorial)
+		_tutorial.queue_free()
+		_tutorial = null
+	state_changed.emit()  # gesehen speichern
+	_open_due_tutorial()
 
 
 ## Reihenfolge Ereignis → Kalender → Erinnerung (G5.6), nie zwei Fenster übereinander: Die Erinnerung wartet, solange
@@ -326,6 +362,12 @@ func close_reminder() -> void:
 		_close_window()
 
 
+## „Später“ (G5.6): schließen; ein wartendes Tutorial kommt danach (T.3).
+func on_reminder_later_pressed() -> void:
+	close_reminder()
+	_open_due_tutorial()
+
+
 func on_reminder_travel_pressed(location_id: String) -> void:
 	close_reminder()
 	on_travel_pressed(location_id)
@@ -338,7 +380,7 @@ func on_reminder_wait_pressed(appointment_id: String) -> void:
 
 func _open_location(location_id: String) -> void:
 	_selected_location = location_id
-	# Tutorial-Auslöser (T.2) – angezeigt wird noch nichts (T.3).
+	# Tutorial-Auslöser (T.2); ein fälliges Tutorial zeigt sich über dem Fenster (T.3).
 	_game.tutorials.report("first_location_open")
 	if location_id != _game.locations.get_current():
 		_game.tutorials.report("first_location_elsewhere")
@@ -346,6 +388,7 @@ func _open_location(location_id: String) -> void:
 	content.setup(self, _game, location_id)
 	_open_window("location", content)
 	_map.set_state(_game.locations.get_current(), _selected_location)
+	_open_due_tutorial()
 
 
 ## Kalender (G5.2, ersetzt „Termine“): Tagesplan als Zeitstrahl.
@@ -666,3 +709,4 @@ func _refresh() -> void:
 		_window.refresh()
 		_window.set_title(_window.content.call("get_title"))
 	_layout()
+	_open_due_tutorial()

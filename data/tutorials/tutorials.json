@@ -5,7 +5,7 @@
 		"trigger": "first_game_start",
 		"title": "Marbella",
 		"text": "Das ist deine Stadt. Wische, um dich umzusehen, und zoome mit zwei Fingern.",
-		"ui_target": "CityMap",
+		"ui_target": "",
 		"order": 10,
 		"requires": []
 	},

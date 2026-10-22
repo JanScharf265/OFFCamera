@@ -106,6 +106,14 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Auslöser, `requires` auf unbekannte oder eigene ID, Zyklus in `requires` (Tiefensuche). `get_all()` sortiert nach
   `order`, dann ID; `get_for_trigger(trigger)`.
 - Seit T.2 in `GameData.load_all()` (`data.tutorials`).
+- Anzeige (T.3, `scripts/ui/tutorial_overlay.gd`): Control über der ganzen Spielansicht (MOUSE_FILTER_STOP – darunter
+  nichts tippbar), zeichnet die Abdunklung in vier Streifen um das Ziel (`find_child(ui_target)`, sichtbar), einen
+  pulsierenden Rahmen und einen Pfeil; Sprechblase unter/über/rechts/links vom Ziel – die erste Lage ganz in der
+  Safe Area ohne Überlappung. Ziel fehlt → mittig + `push_warning`. Die Lage des Ziels wird jedes Bild geprüft
+  (Fenster sortieren ihre Inhalte erst im nächsten Bild); `place()` legt sofort fest (Spielansicht `_layout()`,
+  Tests). `GameScreen._open_due_tutorial()` nach `_refresh()`, nach dem Öffnen eines Orts, nach dem Schließen eines
+  Fensters und nach „Später“: wartet, solange ein Ereignis offen ist, der Kalender oder die Erinnerung steht oder das
+  Konflikt-Popup offen ist; über einem Ortsfenster darf es liegen. „Verstanden“ → `mark_seen`, speichern, nächstes.
 - TutorialSystem (T.2, `scripts/systems/tutorial_system.gd`, im GameState als `tutorials`): `report(trigger)` merkt
   einen Auslöser (unbekannte → Fehler, nichts passiert; mehrfach schadet nicht; Signal `tutorial_due` beim ersten
   Mal). Fällig (`get_due()`, nach `order`): Auslöser gemeldet, nicht gesehen, alle `requires` gesehen.

@@ -341,3 +341,27 @@ func test_trip_tiles_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## T.3: Tutorial-Sprechblase – Schrift, „Verstanden“-Tippfläche, nichts abgeschnitten, auf allen 4 Geräteklassen
+## (mittig, an einem Kartenschild und im Ortsfenster an „Hinfahren“).
+func test_tutorial_overlay_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		_press(app, "NewGameButton")
+		var screen := app.find_child("CityMap", true, false).get_parent() as Control
+		for step in ["", "TutorialConfirmButton", "TutorialConfirmButton+MapPin_studio"]:
+			for name in step.split("+", false):
+				_press(app, name)
+			Layout.apply(app, device)
+			var overlay := screen.find_child("TutorialOverlay", false, false) as Control
+			if overlay == null:
+				problems.append("%s / %s: kein Tutorial" % [device, step])
+				continue
+			Layout.settle_in_place(overlay)
+			screen.call("_layout")
+			_audit(overlay, screen, "%s / %s" % [device, overlay.get("tutorial_id")], problems)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)
