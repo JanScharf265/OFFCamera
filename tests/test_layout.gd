@@ -129,9 +129,11 @@ func test_menus_fit_every_device() -> void:
 		assert_true(needed.y <= safe.size.y + 0.5, "%s: Hauptmenü braucht %d px, verfügbar %d" % [device, needed.y, safe.size.y])
 		assert_true(needed.x <= safe.size.x + 0.5, "%s: Hauptmenü zu breit" % device)
 		_press(app, "SettingsButton")
-		var settings := app.find_child("DeleteSaveButton", true, false).get_parent() as Control
+		var settings := app.find_child("SettingsScreen", true, false) as Control
 		Layout.settle_labels(settings, UiStyle.COLUMN_WIDTH)
-		assert_true(settings.get_combined_minimum_size().y <= safe.size.y + 0.5, "%s: Einstellungen zu hoch" % device)
+		assert_true(settings.get_combined_minimum_size().y <= safe.size.y + 0.5, "%s: Einstellungen zu hoch (%d > %d)" % [
+				device, settings.get_combined_minimum_size().y, safe.size.y])
+		assert_true(settings.get_combined_minimum_size().x <= safe.size.x + 0.5, "%s: Einstellungen zu breit" % device)
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 

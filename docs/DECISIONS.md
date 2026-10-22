@@ -657,3 +657,17 @@ Sprechblase. Die Lage der Sprechblase: unter, über, rechts, links vom Ziel – 
 und das Ziel nicht verdeckt (Test auf allen 4 Geräteklassen). „Verstanden“ speichert sofort (gesehen bleibt gesehen,
 auch wenn die App danach beendet wird). Der feste Starthinweis „Tippe auf ein Gebäude …“ entfällt; der
 Hinweiskasten ist bis zur ersten Meldung verborgen (vorher stand er leer da).
+
+## 064 – Tutorial-Einstellungen und Lexikon (T.4)
+„Tutorials anzeigen“ ist eine Geräte-Einstellung (wie Vibration), nicht Teil des Spielstands. Aus heißt nur „nicht
+anzeigen“: Das TutorialSystem merkt Auslöser weiter, fällige Tutorials kommen nach dem Einschalten (beim nächsten
+Öffnen der Spielansicht). „Tutorials zurücksetzen“ wirkt auf den aktuellen Spielstand (die gesehenen IDs liegen dort)
+und läuft über `TutorialSystem.reset_seen()`: gesehen und `seen_triggers` werden geleert, gemeldete Auslöser bleiben –
+deren Tutorials sind sofort wieder fällig, die übrigen kommen beim nächsten passenden Auslöser. Der Spielstart gilt
+dabei als gemeldet: Wer zurücksetzt, ist in einem Spiel, und in einem migrierten Stand (v14 → v15) wurde
+`first_game_start` nie gemeldet – ohne diese Regel kämen dort die Spielstart-Erklärungen nie wieder. Rückfrage wie
+beim Löschen (zweimal tippen); ohne Spielstand ist der Button gesperrt. Das Lexikon zeigt nur Gesehenes (keine
+Spoiler), auch Tutorials, die per Migration als gesehen gelten; sortiert nach Bereich (`mechanic`), dann Reihenfolge.
+Erreichbar über Zahnrad → Einstellungen → „Hilfe / Lexikon“. Die Einstellungsseite wurde mit dem dritten Schalter
+und zwei Buttons zu hoch fürs Querformat (719 statt höchstens 632 px) – Buttons stehen jetzt paarweise in Zeilen,
+Abstände 8 statt 12 px. Kein neues Spielstand-Format: Die gesehenen IDs aus T.2 reichen.

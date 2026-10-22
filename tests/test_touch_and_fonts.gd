@@ -148,9 +148,10 @@ func test_settings_screen_touch_and_fonts() -> void:
 		app.settings_path = "user://test_touch_fonts_settings.cfg"
 		_press(app, "SettingsButton")
 		Layout.apply(app, device)
-		var page := app.find_child("SettingVibration", true, false).get_parent() as Control
+		var page := app.find_child("SettingsScreen", true, false) as Control
 		Layout.settle_in_place(page)
 		assert_true(page.find_child("SettingCalendarAutoOpen", false, false) != null, "Schalter Kalender fehlt")
+		assert_true(page.find_child("SettingTutorials", false, false) != null, "Schalter Tutorials fehlt")
 		_audit(page, page, "%s / Einstellungen" % device, problems)
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
@@ -362,6 +363,34 @@ func test_tutorial_overlay_touch_and_fonts() -> void:
 			Layout.settle_in_place(overlay)
 			screen.call("_layout")
 			_audit(overlay, screen, "%s / %s" % [device, overlay.get("tutorial_id")], problems)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)
+
+
+## T.4: Lexikon mit drei aufgeklappten Einträgen – Tippflächen, Schrift, nichts abgeschnitten.
+func test_lexicon_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	var game := Helpers.new_game()
+	for id in ["tut_map", "tut_map_tap_building", "tut_travel"]:
+		game.tutorials.mark_seen(id)
+	for device in Layout.DEVICES:
+		SaveSystemScript.save(game, SAVE_PATH)
+		var app := AppScript.new()
+		app.save_path = SAVE_PATH
+		(Engine.get_main_loop() as SceneTree).root.add_child(app)
+		_press(app, "SettingsButton")
+		_press(app, "LexiconButton")
+		for id in ["tut_map", "tut_map_tap_building", "tut_travel"]:
+			_press(app, "LexiconTitle_%s" % id)
+		Layout.apply(app, device)
+		var page := app.find_child("LexiconScreen", true, false) as Control
+		Layout.settle_in_place(page)
+		_audit(page, page, "%s / Lexikon" % device, problems)
+		for node in page.find_children("LexiconText_*", "Label", true, false):
+			var label := node as Label
+			if label.get_line_count() > label.get_visible_line_count():
+				problems.append("%s / Lexikon: „%s“ nicht ganz sichtbar" % [device, label.text])
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)

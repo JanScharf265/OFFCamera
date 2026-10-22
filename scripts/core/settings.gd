@@ -14,8 +14,10 @@ const TMP_SUFFIX := ".tmp"
 const CALENDAR_AUTO_OPEN := "calendar_auto_open"
 ## Vibration bei Warnungen und großen Geldänderungen (genutzt ab G5.9).
 const VIBRATION := "vibration"
+## Tutorials anzeigen (T.4). Aus = keine Anzeige; fällige Tutorials bleiben fällig.
+const TUTORIALS := "tutorials"
 ## Schlüssel -> Standardwert. Alle Schalter sind standardmäßig an.
-const DEFAULTS := {CALENDAR_AUTO_OPEN: true, VIBRATION: true}
+const DEFAULTS := {CALENDAR_AUTO_OPEN: true, VIBRATION: true, TUTORIALS: true}
 
 var path := DEFAULT_PATH
 ## Grund, warum beim Laden die Standardwerte gelten ("" = Datei gelesen oder einfach noch keine da).

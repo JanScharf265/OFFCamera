@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Einstellungen: Schalter „Tutorials anzeigen“ und „Tutorials zurücksetzen“ (mit Rückfrage); neuer Bildschirm „Hilfe / Lexikon“ mit allen schon gesehenen Erklärungen (Antippen zeigt den Text). Die Einstellungsseite ist kompakter (Buttons paarweise nebeneinander), damit sie ohne Scrollen passt (Ticket T.4)
 - Tutorials werden angezeigt: Der Bildschirm wird abgedunkelt, das erklärte Element hervorgehoben (Rahmen, Pfeil), daneben eine Sprechblase mit „Verstanden“; danach kommt das nächste. Zuerst kommen Ereignis, Kalender und Erinnerung, nie zwei Fenster übereinander. Der feste Hinweis „Tippe auf ein Gebäude …“ beim Start entfällt (Ticket T.3)
 - Tutorials: Das Spiel merkt sich jetzt, wann eine Erklärung fällig ist und welche schon bestätigt wurden – jede genau einmal, auch über Speichern/Laden; angezeigt wird noch nichts (kommt mit T.3); Spielstand Version 15 – alte Spielstände laden weiter und bekommen keine Spielstart-Erklärungen (Ticket T.2)
 - Tutorials vorbereitet: Datenformat `data/tutorials/tutorials.json` mit Prüfung (Felder, Auslöser, Voraussetzungen ohne Zyklen) und drei Platzhaltern – noch nicht im Spiel sichtbar (Ticket T.1)

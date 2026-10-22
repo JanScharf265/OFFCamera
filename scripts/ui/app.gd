@@ -20,6 +20,7 @@ const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
 const SettingsScreenScript := preload("res://scripts/ui/settings_screen.gd")
 const SettingsScript := preload("res://scripts/core/settings.gd")
 const HapticsScript := preload("res://scripts/core/haptics.gd")
+const LexiconScreenScript := preload("res://scripts/ui/lexicon_screen.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const SafeAreaScript := preload("res://scripts/ui/safe_area.gd")
 const StartLog := preload("res://scripts/ui/start_log.gd")
@@ -141,6 +142,7 @@ func show_game(message: String = "") -> void:
 	# Aufbau der Spielansicht (nach dem Laden öffnen sich ggf. Ereignis/Kalender/Erinnerung) vibriert nicht.
 	haptics.quiet = true
 	screen.auto_calendar = settings == null or settings.get_flag(SettingsScript.CALENDAR_AUTO_OPEN)
+	screen.show_tutorials = settings == null or settings.get_flag(SettingsScript.TUTORIALS)
 	screen.menu_pressed.connect(show_main_menu)
 	screen.state_changed.connect(_save_game)
 	_set_screen(screen)
@@ -158,8 +160,37 @@ func show_settings(message: String = "") -> void:
 	screen.message = message
 	screen.device_settings = settings
 	screen.delete_save_pressed.connect(_delete_save)
+	screen.reset_tutorials_pressed.connect(_reset_tutorials)
+	screen.lexicon_pressed.connect(show_lexicon)
 	screen.back_pressed.connect(show_main_menu)
 	_set_screen(screen)
+
+
+## „Hilfe / Lexikon“ (T.4): gesehene Tutorials des aktuellen Spielstands (lädt ihn, falls noch nicht im Speicher).
+func show_lexicon() -> void:
+	var screen := LexiconScreenScript.new()
+	var current = _current_game()
+	screen.entries = current.tutorials.get_seen() if current != null else []
+	screen.back_pressed.connect(show_settings)
+	_set_screen(screen)
+
+
+## „Tutorials zurücksetzen“ (T.4): über das TutorialSystem im aktuellen Spielstand, dann speichern.
+func _reset_tutorials() -> void:
+	var current = _current_game()
+	if current == null:
+		show_settings("Es gibt keinen Spielstand.")
+		return
+	current.tutorials.reset_seen()
+	_save_game()
+	show_settings("Die Tutorials kommen wieder.")
+
+
+## Spiel im Speicher oder – falls es noch keins gibt – der gespeicherte Spielstand (dann auch für „Fortsetzen“).
+func _current_game():
+	if game == null and SaveSystemScript.has_save(save_path):
+		game = SaveSystemScript.load_game(_data, save_path)["game"]
+	return game
 
 
 func _delete_save() -> void:

@@ -79,6 +79,25 @@ func mark_seen(tutorial_id: String) -> String:
 	return ""
 
 
+## Alle gesehenen Tutorials (für das Lexikon), sortiert nach Bereich (mechanic), dann order und ID.
+func get_seen() -> Array:
+	var result := _catalog.get_all().filter(func(definition) -> bool: return is_seen(definition.id))
+	result.sort_custom(func(a, b) -> bool:
+		if a.mechanic != b.mechanic:
+			return a.mechanic < b.mechanic
+		return a.order < b.order or (a.order == b.order and a.id < b.id))
+	return result
+
+
+## „Tutorials zurücksetzen“ (T.4): nichts mehr gesehen (auch nicht über `seen_triggers`). Gemeldete Auslöser bleiben –
+## ihre Tutorials sind sofort wieder fällig. Der Spielstart gilt als gemeldet (man ist ja in einem Spiel), damit die
+## Spielstart-Tutorials auch in migrierten Spielständen wiederkommen. Kostet keine Spielzeit.
+func reset_seen() -> void:
+	_seen.clear()
+	_seen_triggers.clear()
+	_fired["first_game_start"] = true
+
+
 func to_dict() -> Dictionary:
 	return {"fired": _sorted(_fired), "seen": _sorted(_seen), "seen_triggers": _sorted(_seen_triggers)}
 

@@ -88,6 +88,8 @@ var _selected_location := ""
 var _popup: ConflictPopupScript
 ## Tutorial-Anzeige (T.3) über allem; null = keine
 var _tutorial: TutorialOverlayScript
+## Geräte-Schalter „Tutorials anzeigen“ (T.4, von der App gesetzt). Aus = keine Anzeige, fällige bleiben fällig.
+var show_tutorials := true
 
 
 ## Vor dem Einfügen in den Baum aufrufen.
@@ -317,7 +319,7 @@ func _on_window_closed() -> void:
 ## oder das Konflikt-Popup offen ist; über einem Ortsfenster darf es liegen (dort zeigt es z. B. auf „Hinfahren“).
 ## Welches fällig ist, entscheidet das TutorialSystem; „Verstanden“ markiert es als gesehen, dann kommt das nächste.
 func _open_due_tutorial() -> void:
-	if _tutorial != null or _popup != null or _game.events.has_pending() \
+	if not show_tutorials or _tutorial != null or _popup != null or _game.events.has_pending() \
 			or _window_kind in ["event", "calendar", "reminder"]:
 		return
 	var tutorial_id := _game.tutorials.get_next_due()
