@@ -74,6 +74,8 @@ var _here_button: RoundButtonScript
 var _company_button: RoundButtonScript
 var _obligations_button: RoundButtonScript
 var _calendar_button: RoundButtonScript
+## Vibration (G5.9, von der App gesetzt; null = keine) – die Spielansicht meldet nur ihre eigenen Warnungen.
+var haptics
 var _toast: PanelContainer
 var _feedback_label: Label
 var _toast_timer: Timer
@@ -310,6 +312,8 @@ func _open_due_reminder() -> void:
 	var appointment_id := _game.reminders.take_due()
 	if appointment_id.is_empty():
 		return
+	if haptics != null:
+		haptics.warn("reminder")
 	var content := ReminderWindowScript.new()
 	content.setup(self, _game, appointment_id)
 	_open_window("reminder", content)
@@ -416,6 +420,8 @@ func _guard(minutes: int, action_name: String, run: Callable, except_id: String 
 	var action_line := "%s · %s" % [action_name, ActivityText.duration_with_end(_game.time.get_minutes(), minutes)]
 	_close_popup()
 	_popup = ConflictPopupScript.new("Termin verpassen?", action_line, lines, run)
+	if haptics != null:
+		haptics.warn("conflict")
 	_popup.closed.connect(func() -> void: _popup = null)
 	add_child(_popup)
 	_layout()

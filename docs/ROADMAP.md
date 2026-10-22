@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, G5 läuft – als Nächstes G5.9)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4 und G5 fertig – als Nächstes T.1)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -270,9 +270,10 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [ ] Schrift in Kacheln, Seitenbuttons und Leiste gut lesbar? (G4.5b, G4.7)
 - [ ] Kacheln und Reiter gut tippbar? (G4.5b, G4.6, G4.7)
 - [ ] Kein schwarzer Bildschirm mehr beim Start? Ladebildschirm flüssig? Dazu in der Xcode-Konsole die Zeilen „[Start] … ms“ ablesen und mir schicken (G5.1b)
+- [ ] Vibration spürbar? Nicht zu oft (z. B. bei jeder Miete, mehreren Warnungen hintereinander)? Schalter „Vibration“ aus → keine (G5.9)
 - [ ] „[Start]“-Zeilen bis zum ersten Kartenbild schicken: einmal „Fortsetzen“ tippen, dann alle Zeilen bis „Stadtkarte: Bild … gezeichnet“ mit einem Wert unter 50 ms (G5.1c)
 
-### G5 – Hinweise und Komfort
+### G5 – Hinweise und Komfort ✅ (22.10.2026)
 - [x] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, `scripts/core/settings.gd`): Schalter „Kalender bei Tagesbeginn automatisch öffnen“ und „Vibration“ (beide an), robust bei fehlender/kaputter Datei, atomar geschrieben, „Spielstand löschen“ lässt sie stehen; Einstellungsseite mit großen Schaltern (Tippfläche 84 px, Schrift 24 px) (362/362 Tests grün)
 - [x] G5.1b Ladebildschirm statt schwarzem Bildschirm: neue erste Szene `scenes/boot/loading.tscn` (Kamera-Sucher, „● REC“, Aufnahmeleiste mit echtem Fortschritt aus 4 Schritten: App-Szene im Hintergrund, Spieldaten, Kartengrafiken im Hintergrund, Spielstand-Kopf), Blende aus dem „Halben Objektiv“ bei 100 %, Fehlermeldung statt Hänger, Zeitstempel „[Start] …“ im Log (366/366 Tests grün)
 - [x] G5.1c Schwarze Phase finden und abdecken: „[Start]“-Zeilen bis zum ersten Kartenbild (Hauptmenü, Tipp, Spielstand geladen, Spielbildschirm, Bildzeiten bis < 50 ms); App (Hauptmenü) und ein Probe-Spielbildschirm mit Karte werden verdeckt unter dem Ladebildschirm aufgebaut und gezeichnet, Kartenatlas wird geteilt statt je Karte neu gepackt; keine Mindestdauer – der Ladebildschirm verschwindet so schnell wie möglich (Entscheidung Game Director) (367/367 Tests grün)
@@ -283,7 +284,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] G5.6 Erinnerung ≤ 30 Spielminuten vor einem Termin (Termin, Ort, Fahrzeit, „Du schaffst es noch“/„Du kommst zu spät“, „Hinfahren“/„Warten“/„Später“), genau einmal je Termin, Reihenfolge Ereignis → Kalender → Erinnerung (`ReminderSystem`); Spielstand Version 14 + Migration + Testdatei (406/406 Tests + 3/3 lange Tests grün)
 - [x] G5.7 Kombi-Button „Hinfahren und starten“ (`TripSystem`: Fahrt + Aktion über die normalen Systeme, Prüfung bei Ankunft – Firma/Geld/Energie/Öffnungszeiten vor „Nur vor Ort“; Konflikt-Popup mit Gesamtzeit; scheitert die Aktion nach der Fahrt, ist man angekommen) für Aktivitäten, Content, Gründung, Filiale – Käufe nur vor Ort; Kachel mit Auto „20 min + 2 h“ und „Ende HH:MM“; „Hinfahren“ mit Auto und eigenem Stil (Rahmen statt Akzent-Fläche) (419/419 Tests grün)
 - [x] G5.8 Rote Zählerpunkte mit Zahl (Kalender: Termine heute, die noch kommen – `DayPlan.count_upcoming_today`; Fristen: offene – `ObligationSystem.count_open`; „9+“ ab 10; Ereignisse ohne Punkt, sie öffnen sofort ihr Fenster); Balken für Energie und Stimmung unter 40 gelb, unter 20 rot (`PlayerStats.level_of`), Stimmung normal blau (427/427 Tests grün)
-- [ ] G5.9 Vibration (`Input.vibrate_handheld`) bei Warnungen und großen Geldänderungen, mit Schalter; Wirkung nur auf dem iPhone prüfbar
+- [x] G5.9 Vibration (`Input.vibrate_handheld`, 60 ms) bei Konflikt-Popup, Erinnerung, Termin verpasst, neuer fälliger Frist/Mahnung, Ereignis und Geldänderungen ab ±100 € (ohne Umbuchungen), nur mit Schalter, höchstens einmal je 1,5 s, nicht beim Laden (`scripts/core/haptics.gd`, liest Geld über `LedgerSystem.entry_posted`); am Mac nichts spürbar – Wirkung nur auf dem iPhone prüfbar (435/435 Tests grün)
 
 ### T – Tutorial-System
 - [ ] T.1 Datenformat `data/tutorials/tutorials.json` (ID, Auslöser, Text, UI-Element, Reihenfolge, Voraussetzungen) + Katalog mit Prüfung (neu `scripts/models/tutorial_definition.gd`, `scripts/systems/tutorial_catalog.gd`)

@@ -606,3 +606,16 @@ kosten 5–20 Energie (Livestream 20, Training 15) – unter 40 sind noch etwa z
 (Pause, Schlafen); unter 20 scheitert schon ein Livestream („Zu wenig Energie“). Für die Stimmung gelten dieselben
 Grenzen, damit man sich nur ein Muster merken muss. Die Stimmung war im Normalfall gelb – sie ist jetzt blau, sonst
 wäre „niedrig“ nicht zu erkennen. Die Stufen sind reine Anzeige, keine Spielregel.
+
+## 060 – Vibration (G5.9)
+Ein kleiner Dienst `scripts/core/haptics.gd` (kein Autoload, gehört der App) entscheidet. Geld, verpasste Termine,
+Fristen und Ereignisse kommen über die Signale der Systeme, nicht aus der UI; nur die rein visuellen Warnungen
+(Konflikt-Popup, Erinnerung) meldet die Spielansicht selbst. Dauer 60 ms (kurz, aber spürbar), Schwellwert ±100 €
+(typische Aktionen bewegen 3,50–37,20 €; Miete, Gründung, Ausrüstung ab 100 € fallen auf). Umbuchungen privat ↔ Firma
+zählen nicht – sie sind weder Einnahme noch Ausgabe und kommen paarweise. „Neue fällige Frist“ ist das Signal
+`obligation_due`; es kommt auch, wenn die Frist sofort automatisch bezahlt wird (z. B. Miete) – das ist gewollt, die
+Frist ist trotzdem fällig geworden. Gegen Doppelungen gilt eine Sperre von 1,5 s echter Zeit: Eine Aktion läuft in
+einem Bild ab, alle ihre Auslöser fallen in die Sperre (Konflikt-Popup + „Trotzdem starten“ eingeschlossen). Beim
+Laden und beim Aufbau der Spielansicht ist der Dienst still (`quiet`), damit sich öffnende Ereignis-, Kalender- oder
+Erinnerungsfenster nicht vibrieren. Prüfbar ohne Gerät nur über Zähler und Gründe; ob die Vibration spürbar und
+nicht zu häufig ist, steht in der iPhone-Liste.

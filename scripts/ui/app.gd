@@ -19,6 +19,7 @@ const MainMenuScript := preload("res://scripts/ui/main_menu.gd")
 const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
 const SettingsScreenScript := preload("res://scripts/ui/settings_screen.gd")
 const SettingsScript := preload("res://scripts/core/settings.gd")
+const HapticsScript := preload("res://scripts/core/haptics.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const SafeAreaScript := preload("res://scripts/ui/safe_area.gd")
 const StartLog := preload("res://scripts/ui/start_log.gd")
@@ -38,6 +39,8 @@ var preloaded_resources: Array = []
 ## Laufende Sitzung oder null, solange kein Spiel gestartet/geladen wurde.
 var game: GameStateScript
 
+## Vibration (G5.9): hört auf das laufende Spiel, liest den Geräte-Schalter.
+var haptics
 var _data: GameDataScript
 var _safe_area: MarginContainer
 ## Für Bildschirme, die selbst mit der Safe Area umgehen (volle Fläche).
@@ -50,6 +53,7 @@ var _margins: Array[float] = []
 func _ready() -> void:
 	theme = UiStyle.create_theme()
 	settings = SettingsScript.load_from(settings_path)
+	haptics = HapticsScript.new(settings)
 
 	var background := ColorRect.new()
 	background.color = UiStyle.BACKGROUND
@@ -131,10 +135,15 @@ func continue_game() -> void:
 func show_game(message: String = "") -> void:
 	var screen := GameScreenScript.new()
 	screen.setup(game)
+	haptics.attach(game)
+	screen.haptics = haptics
+	# Aufbau der Spielansicht (nach dem Laden öffnen sich ggf. Ereignis/Kalender/Erinnerung) vibriert nicht.
+	haptics.quiet = true
 	screen.auto_calendar = settings == null or settings.get_flag(SettingsScript.CALENDAR_AUTO_OPEN)
 	screen.menu_pressed.connect(show_main_menu)
 	screen.state_changed.connect(_save_game)
 	_set_screen(screen)
+	haptics.quiet = false
 	StartLog.mark("Spielbildschirm aufgebaut", "game_screen")
 	StartLog.watch_frames("Stadtkarte")
 	if not message.is_empty():

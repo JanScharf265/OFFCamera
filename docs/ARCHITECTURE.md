@@ -283,6 +283,12 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   (über übersprungene Tage einmal für den aktuellen) und merkt den Tag auch bei ausgeschaltetem Geräte-Schalter. Die
   Spielansicht fragt es in `_refresh()` erst, wenn kein Ereignis offen ist, und öffnet dann den Kalender (ersetzt ein
   offenes Fenster). Neues Spiel: Tag 1 gilt als gezeigt. Kostet keine Spielzeit.
+- Vibration (G5.9, `scripts/core/haptics.gd`, gehört der App als `haptics`): `attach(game)` hört auf
+  `LedgerSystem.entry_posted` (Betrag ≥ ±100 €, Umbuchungen ausgenommen), `appointment_missed`, `obligation_due`,
+  `obligation_reminded`, `event_triggered`; die Spielansicht meldet Konflikt-Popup und Erinnerung über `warn()`.
+  Vibriert (`Input.vibrate_handheld(60)`) nur bei Schalter „Vibration“ an, höchstens einmal je 1,5 s
+  (`LOCK_MSEC`, echte Zeit), nicht solange `quiet` (Aufbau der Spielansicht nach Laden/Neues Spiel). `count`/`history`
+  zählen für Tests; Uhr und Ausgabe sind austauschbar. Kein Spielstand.
 - Zählerpunkte und Balkenfarben (G5.8): `RoundButton.set_badge(n)` – roter Punkt mit Zahl in Mini-Schrift (19 px),
   ab 10 „9+“ (breitere Pille), oben rechts außerhalb des Symbols. Die Spielansicht setzt in `_refresh()` (nach jeder
   Aktion, Fahrt, Warten und beim Laden) Kalender = `DayPlan.count_upcoming_today()` (Termine heute im Zustand
