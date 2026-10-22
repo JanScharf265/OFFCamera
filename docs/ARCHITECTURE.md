@@ -267,7 +267,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   G5.1c: Die Schritte „app“ und „warmup“ bauen die App (Hauptmenü) bzw. einen Probe-Spielbildschirm (neues Spiel nur im
   Speicher) unter dem Ladebildschirm auf (gleicher Eltern-Knoten, davor in der Reihenfolge = darunter gezeichnet) und
   lassen sie je `WARM_FRAMES` Bilder zeichnen; der Probe-Bildschirm wird danach freigegeben. Am Ende entfernt sich der
-  Ladebildschirm nur noch (mind. `MIN_VISIBLE_SECONDS` sichtbar). Die Karte teilt ihre gepackten Grafiken
+  Ladebildschirm nur noch (ohne Mindestdauer, so schnell wie möglich). Die Karte teilt ihre gepackten Grafiken
   (`CityMap._shared_textures`). `scripts/ui/start_log.gd` schreibt die „[Start]“-Zeilen (Hauptmenü, Tipp, Spielstand
   geladen, Spielbildschirm) und die Bildzeiten danach, bis ein Bild < 50 ms dauert.
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.

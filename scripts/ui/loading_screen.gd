@@ -9,7 +9,7 @@ extends Control
 ## G5.1c: Die App (Hauptmenü) und ein Probe-Spielbildschirm mit Stadtkarte werden VERDECKT unter dem Ladebildschirm
 ## aufgebaut und ein paar Bilder lang gezeichnet – so passieren der erste Aufbau, das Packen des Kartenatlas und das
 ## erste Zeichnen (Shader, Schriften) hinter dem Balken. Am Ende entfernt sich der Ladebildschirm nur noch; die App
-## ist dann schon gezeichnet. Steht er kürzer als MIN_VISIBLE_SECONDS, bleibt er bis dahin stehen (kein Aufblitzen).
+## ist dann schon gezeichnet. Keine Mindestdauer: Er verschwindet so schnell wie möglich (DECISIONS 052).
 ## Schlägt ein Schritt fehl, erscheint eine verständliche Meldung (kein Hänger, kein Absturz).
 ## Zeitstempel jedes Schritts gehen ins Log („[Start] …“) – auf dem iPhone in der Xcode-Konsole lesbar.
 ## Absichtlich wenige Abhängigkeiten (nur UiStyle und SafeArea): alles Schwere lädt erst in den Schritten.
@@ -42,8 +42,6 @@ const STEPS := [
 ]
 ## Bilder, die App bzw. Probe-Spielbildschirm verdeckt gezeichnet werden (je Bild ein Aufruf von advance()).
 const WARM_FRAMES := 3
-## Mindestdauer, die der Ladebildschirm sichtbar ist (inkl. Blende), damit er nicht nur aufblitzt (DECISIONS 052).
-const MIN_VISIBLE_SECONDS := 0.8
 const FAIL_TEXT := "Das Spiel konnte nicht geladen werden (%s).\nBitte schließe die App ganz und starte sie neu."
 
 const REC_RED := Color("#FF3B5C")
@@ -117,10 +115,6 @@ func _process(delta: float) -> void:
 		_iris = minf(_iris + delta / IRIS_SECONDS, 1.0)
 		if _iris >= 1.0:
 			_hand_over()
-	elif done and animate:
-		# Fertig: Blende erst, wenn der Ladebildschirm mit ihr zusammen MIN_VISIBLE_SECONDS stand.
-		if _elapsed >= MIN_VISIBLE_SECONDS - IRIS_SECONDS:
-			_iris = 0.0
 	elif not done and error_message.is_empty():
 		advance()
 	queue_redraw()
@@ -301,7 +295,9 @@ func _finish() -> void:
 	_percent_label.text = "100 %"
 	_status_label.text = "Aufnahme läuft."
 	_log("Alles geladen")
-	if not animate:
+	if animate:
+		_iris = 0.0
+	else:
 		_hand_over()
 
 

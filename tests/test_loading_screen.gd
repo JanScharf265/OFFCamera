@@ -96,23 +96,3 @@ func test_app_and_warmup_are_built_below_the_loading_screen() -> void:
 		_app.free()
 	if is_instance_valid(screen):
 		screen.free()
-
-
-## G5.1c: Mit Blende bleibt der Ladebildschirm mindestens MIN_VISIBLE_SECONDS sichtbar – nicht länger als nötig.
-func test_loading_screen_stays_at_least_min_time() -> void:
-	_app = null
-	var screen := _screen()
-	screen.set("animate", true)
-	screen.call("run_to_end")
-	assert_eq(screen.get("done"), true)
-	var elapsed := 0.0
-	while _app == null and elapsed < 3.0:
-		screen.call("_process", 0.05)
-		elapsed += 0.05
-	var minimum: float = screen.get("MIN_VISIBLE_SECONDS")
-	assert_true(elapsed >= minimum - 0.06, "zu früh übergeben: %.2f s" % elapsed)
-	assert_true(elapsed <= minimum + 0.11, "zu lange gewartet: %.2f s" % elapsed)
-	if _app != null:
-		_app.free()
-	if is_instance_valid(screen):
-		screen.free()

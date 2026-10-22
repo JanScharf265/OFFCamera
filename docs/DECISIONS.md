@@ -515,7 +515,6 @@ Spielbildschirm aufgebaut und die Dauer jedes Bildes danach, bis eines < 50 ms d
 Mac (zwei volle Starts mit „Fortsetzen“, Testspielstand v12): Hauptmenü verdeckt fertig ~0,3 s nach „bereit“,
 Probe-Spielbildschirm 50 ms, Übergabe ~0,93 s nach „bereit“; nach dem Tipp erstes Kartenbild nach 36–46 ms
 (Bild selbst 13–17 ms).
-Mindestdauer: Fertig unter 0,8 s, bleibt der Ladebildschirm bis 0,8 s stehen (inkl. 0,45 s Blende) –
-`MIN_VISIBLE_SECONDS`. Grund: Auf dem iPhone stand er in G5.1b nur ~0,6 s, der Balken war praktisch nicht zu sehen
-und wirkte wie ein Flackern. 0,8 s ist kurz genug, um nicht als Wartezeit zu stören. Dauert das Laden länger, gibt es
-keinerlei zusätzliches Warten.
+Keine Mindestdauer (Entscheidung des Game Directors): Der Ladebildschirm verschwindet so schnell wie möglich – nach
+dem letzten Schritt nur noch die Blende (0,45 s), kein zusätzliches Warten. (Zwischenzeitlich gab es eine Mindestdauer
+von 0,8 s gegen das Aufblitzen; sie wurde wieder entfernt.)
