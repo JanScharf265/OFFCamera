@@ -256,3 +256,18 @@ static func style_accent_touch_button(target: Button, visible_height: float) -> 
 	target.add_theme_stylebox_override("disabled", _box(DISABLED, 12))
 	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	grow_touch_area(target, visible_height)
+
+
+## Schalter auf der Einstellungsseite (G5.1): Fläche wie eine Karte statt der Akzentfarbe der Buttons.
+static func style_setting_toggle(target: CheckButton) -> void:
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		target.add_theme_stylebox_override(state, _box(SURFACE, 16))
+	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		target.add_theme_color_override(color_name, TEXT)
+	target.add_theme_constant_override("h_separation", 16)
+	# Eigene, große Schalter-Symbole (an: Akzentfarbe, aus: grau) – die Standard-Symbole sind kaum erkennbar.
+	for icon_name in ["checked", "checked_mirrored", "checked_disabled", "checked_disabled_mirrored"]:
+		target.add_theme_icon_override(icon_name, load("res://assets/icons/toggle_on.svg"))
+	for icon_name in ["unchecked", "unchecked_mirrored", "unchecked_disabled", "unchecked_disabled_mirrored"]:
+		target.add_theme_icon_override(icon_name, load("res://assets/icons/toggle_off.svg"))

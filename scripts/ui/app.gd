@@ -18,10 +18,15 @@ const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const MainMenuScript := preload("res://scripts/ui/main_menu.gd")
 const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
 const SettingsScreenScript := preload("res://scripts/ui/settings_screen.gd")
+const SettingsScript := preload("res://scripts/core/settings.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 ## Speicherort; Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
 var save_path := SaveSystemScript.DEFAULT_PATH
+## Ort der Geräte-Einstellungen (G5.1); Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
+var settings_path := SettingsScript.DEFAULT_PATH
+## Geräte-Einstellungen, beim Start geladen (gelten fürs Gerät, nicht pro Spielstand).
+var settings
 ## Seed für neue Spiele; -1 = zufällig (Tests setzen einen festen Wert).
 var new_game_seed := -1
 ## Laufende Sitzung oder null, solange kein Spiel gestartet/geladen wurde.
@@ -38,6 +43,7 @@ var _margins: Array[float] = []
 
 func _ready() -> void:
 	theme = UiStyle.create_theme()
+	settings = SettingsScript.load_from(settings_path)
 
 	var background := ColorRect.new()
 	background.color = UiStyle.BACKGROUND
@@ -122,13 +128,14 @@ func show_game(message: String = "") -> void:
 
 
 func show_settings(message: String = "") -> void:
-	var settings := SettingsScreenScript.new()
-	settings.has_save = game != null or SaveSystemScript.has_save(save_path)
-	settings.corrupt_count = SaveSystemScript.corrupt_files(save_path).size()
-	settings.message = message
-	settings.delete_save_pressed.connect(_delete_save)
-	settings.back_pressed.connect(show_main_menu)
-	_set_screen(settings)
+	var screen := SettingsScreenScript.new()
+	screen.has_save = game != null or SaveSystemScript.has_save(save_path)
+	screen.corrupt_count = SaveSystemScript.corrupt_files(save_path).size()
+	screen.message = message
+	screen.device_settings = settings
+	screen.delete_save_pressed.connect(_delete_save)
+	screen.back_pressed.connect(show_main_menu)
+	_set_screen(screen)
 
 
 func _delete_save() -> void:

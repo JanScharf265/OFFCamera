@@ -138,3 +138,20 @@ func test_every_window_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## G5.1: Einstellungsseite mit den Geräte-Schaltern – Tippflächen, Schrift, nichts abgeschnitten.
+func test_settings_screen_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		app.settings_path = "user://test_touch_fonts_settings.cfg"
+		_press(app, "SettingsButton")
+		Layout.apply(app, device)
+		var page := app.find_child("SettingVibration", true, false).get_parent() as Control
+		Layout.settle_in_place(page)
+		assert_true(page.find_child("SettingCalendarAutoOpen", false, false) != null, "Schalter Kalender fehlt")
+		_audit(page, page, "%s / Einstellungen" % device, problems)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)

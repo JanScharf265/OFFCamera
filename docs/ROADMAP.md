@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, als Nächstes G5.1)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, G5 läuft – als Nächstes G5.2)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -271,14 +271,14 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [ ] Kacheln und Reiter gut tippbar? (G4.5b, G4.6, G4.7)
 
 ### G5 – Hinweise und Komfort
-- [ ] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, neu `scripts/core/settings.gd`): Schalter Kalender automatisch, Vibration; Einstellungsseite erweitern
+- [x] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, `scripts/core/settings.gd`): Schalter „Kalender bei Tagesbeginn automatisch öffnen“ und „Vibration“ (beide an), robust bei fehlender/kaputter Datei, atomar geschrieben, „Spielstand löschen“ lässt sie stehen; Einstellungsseite mit großen Schaltern (Tippfläche 84 px, Schrift 24 px) (362/362 Tests grün)
 - [ ] G5.2 „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl (Termine, Fristen); Daten dafür aus einer Systemabfrage, nicht aus der UI (neu `scripts/core/day_plan.gd`, neu `windows/calendar_window.gd` statt `appointments_window.gd`)
 - [ ] G5.3 Kalender öffnet sich bei Tagesbeginn genau einmal (abschaltbar); Reihenfolge Ereignis → Kalender; Spielstand Version 13 + Testdatei
 - [ ] G5.4 Konflikt-Popup statt „zweimal tippen“ (Ende der Aktion, betroffener Termin, „Trotzdem starten“/„Abbrechen“) für Aktivitäten und Fahrten (nutzt `AppointmentSystem.get_conflicts`)
 - [ ] G5.5 Aktion „Warten bis Terminbeginn“ (über das TimeSystem) – die Kachel-Vorschau „Ende HH:MM“ + Wirkungen kam schon mit G4.5
 - [ ] G5.6 Erinnerung ≤ 30 Spielminuten vor einem Termin (Termin, Ort, Fahrzeit), genau einmal je Termin; Spielstand Version 14 + Testdatei
-- [ ] G5.7 Kombi-Button „Hinfahren und starten“ mit Konfliktprüfung für die Gesamtzeit (Fahrt + Aktion)
-- [ ] G5.8 Rote Zählerpunkte mit Zahl (Termine heute, fällige Fristen, offene Ereignisse); Zählungen kommen aus den Systemen
+- [ ] G5.7 Kombi-Button „Hinfahren und starten“ mit Konfliktprüfung für die Gesamtzeit (Fahrt + Aktion); dazu: „Hinfahren“ klar vom aktiven Reiter unterscheidbar (z. B. Auto-Symbol); Sperrgrund-Reihenfolge: zuerst Gründe, die Hinfahren nicht löst (z. B. „Erst ein Unternehmen gründen“), erst dann „Nur vor Ort möglich“
+- [ ] G5.8 Rote Zählerpunkte mit Zahl (Termine heute, fällige Fristen, offene Ereignisse); Zählungen kommen aus den Systemen; dazu: Balken für Energie und Stimmung färben sich bei niedrigen Werten gelb bzw. rot (Grenzen als Konstanten)
 - [ ] G5.9 Vibration (`Input.vibrate_handheld`) bei Warnungen und großen Geldänderungen, mit Schalter; Wirkung nur auf dem iPhone prüfbar
 
 ### T – Tutorial-System

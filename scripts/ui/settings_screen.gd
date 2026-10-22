@@ -1,11 +1,19 @@
 extends VBoxContainer
 
-## Einstellungen: Spielstand löschen (mit Rückfrage), Zurück.
+## Einstellungen: Geräte-Schalter (G5.1, gespeichert in user://settings.cfg, nicht im Spielstand),
+## Spielstand löschen (mit Rückfrage; die Schalter bleiben), Zurück.
 
 signal delete_save_pressed
 signal back_pressed
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const SettingsScript := preload("res://scripts/core/settings.gd")
+
+## Schalter: Schlüssel -> [Knotenname, Text].
+const TOGGLES := [
+	[SettingsScript.CALENDAR_AUTO_OPEN, "SettingCalendarAutoOpen", "Kalender bei Tagesbeginn automatisch öffnen"],
+	[SettingsScript.VIBRATION, "SettingVibration", "Vibration"],
+]
 
 const DELETE_TEXT := "Spielstand löschen"
 const CONFIRM_TEXT := "Wirklich löschen? Nochmal tippen"
@@ -15,6 +23,8 @@ var has_save := false
 var message := ""
 ## Anzahl aufbewahrter defekter Spielstände (Phase 6).
 var corrupt_count := 0
+## Geräte-Einstellungen (settings.gd); null = Schalter ausblenden.
+var device_settings
 
 var _delete_button: Button
 var _confirming := false
@@ -42,6 +52,10 @@ func _ready() -> void:
 		corrupt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		add_child(corrupt)
 
+	if device_settings != null:
+		for toggle in TOGGLES:
+			add_child(_toggle(toggle[0], toggle[1], toggle[2]))
+
 	if not message.is_empty():
 		var message_label := UiStyle.wrapping_label(message, UiStyle.SMALL_FONT_SIZE)
 		message_label.name = "MessageLabel"
@@ -66,3 +80,20 @@ func _on_delete_pressed() -> void:
 		_delete_button.text = CONFIRM_TEXT
 		return
 	delete_save_pressed.emit()
+
+
+## Schalter für eine Geräte-Einstellung; speichert sofort.
+func _toggle(key: String, node_name: String, text: String) -> CheckButton:
+	var toggle := CheckButton.new()
+	toggle.name = node_name
+	toggle.text = text
+	toggle.button_pressed = device_settings.get_flag(key)
+	toggle.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+	toggle.focus_mode = Control.FOCUS_NONE
+	toggle.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+	UiStyle.style_setting_toggle(toggle)
+	toggle.toggled.connect(func(on: bool) -> void:
+		var error: String = device_settings.set_flag(key, on)
+		if not error.is_empty():
+			push_warning(error))
+	return toggle

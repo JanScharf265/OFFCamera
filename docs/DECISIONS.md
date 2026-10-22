@@ -472,3 +472,13 @@ anfangs höher, und im „Grenzfall“ blieben für Öffnungszeiten und Entfernu
 ~60–150 px. Die Spalten sind unter dem abgedunkelten Hintergrund ohnehin nicht tippbar, solange ein Fenster offen
 ist. Abweichung vom Mockup (G4.1) und von G4.5 („zwischen Hier und den Spalten“). Heute zeigt nur das Studio im
 „Grenzfall“ Reiter (3 Spalten); auf allen echten Geräten passt jeder Ort ohne Reiter.
+
+## 050 – Geräte-Einstellungen (G5.1)
+Schalter, die fürs Gerät gelten (nicht pro Spielstand), liegen in `user://settings.cfg` (ConfigFile) – getrennt vom
+Spielstand, ohne Spielstand-Version, unberührt von „Spielstand löschen“. Kein Autoload: Die App lädt sie beim Start
+und reicht sie weiter (wie die Spielsitzung). Robustheit: Fehlt die Datei oder ist sie unlesbar, gelten die
+Standardwerte (beide Schalter an); die kaputte Datei wird nicht gelöscht, sondern beim nächsten Speichern ersetzt.
+Unbekannte Schlüssel und Werte vom falschen Typ werden ignoriert (Wert = Standard). Gespeichert wird sofort beim
+Umschalten, atomar über eine .tmp-Datei. Darstellung: CheckButton mit eigenen großen Schalter-Symbolen
+(`assets/icons/toggle_on.svg` / `toggle_off.svg`, an = Akzentfarbe) – die Godot-Standardsymbole waren auf dem
+Mac-Screenshot kaum als an/aus zu erkennen; Tippfläche 84 px, Schrift 24 px.

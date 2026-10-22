@@ -252,6 +252,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Mini-Beschriftungen (`UiStyle.mini_label`, Meta `mini_caption`) ≥ `MINI_FONT_SIZE` (19 px). Runde Buttons mit
   Beschriftung sind mindestens so breit wie diese. Die HUD-Leiste ist voll deckend (`HUD_BAR_SURFACE`).
   `tests/test_touch_and_fonts.gd` prüft das für Spielansicht und jedes Fenster auf allen 4 Geräteklassen.
+- Geräte-Einstellungen (G5.1, `scripts/core/settings.gd`): eigene Datei `user://settings.cfg` (ConfigFile, Abschnitt
+  `device`), getrennt vom Spielstand und ohne Version. Die App lädt sie beim Start (`App.settings`, Pfad
+  `App.settings_path` für Tests) und reicht sie an die Einstellungsseite. Schalter: `calendar_auto_open` (ab G5.3),
+  `vibration` (ab G5.9), Standard jeweils an. Laden ist fehlertolerant (fehlend/kaputt → Standardwerte, kaputte Datei
+  bleibt liegen, unbekannte Schlüssel und falsche Typen werden ignoriert); Speichern atomar (.tmp → umbenennen).
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,
