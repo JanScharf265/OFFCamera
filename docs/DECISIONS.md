@@ -498,3 +498,24 @@ Datei, dem App-Skript; das Einlesen der übrigen Skripte meldet er nicht schritt
 Mögliche Beschleunigung (nicht umgesetzt, erst nach den iPhone-Zeiten entscheiden): die Fenster-Skripte und die Karte
 nicht per `preload` in der App-Kette laden, sondern erst bei Bedarf (`load`) – das verkürzt den größten Mac-Posten.
 Die Skripte werden bereits als komprimierte Binär-Tokens exportiert (`script_export_mode=2`).
+
+## 052 – Schwarze Phase nach dem Ladebildschirm (G5.1c)
+iPhone (A20 Pro, G5.1b): Ladebildschirm bereit 1116 ms, alles geladen 1292 ms, Übergabe 1753 ms – danach laut Game
+Director noch schwarz. Bis dahin entstand die App erst NACH dem Ladebildschirm: Hauptmenü aufbauen, erstes Zeichnen
+mit neuen Schriften/Größen, bei „Fortsetzen“ dann Spielbildschirm, Karte, Atlas packen (Bilder aus den Texturen lesen,
+kopieren, neu hochladen) und das erste Zeichnen der Karte – alles ohne Ladebildschirm davor.
+Lösung: Der Ladebildschirm baut die App (Hauptmenü) und einen Probe-Spielbildschirm mit Stadtkarte und HUD verdeckt
+UNTER sich auf und lässt beide je 3 Bilder zeichnen; am Ende geht er nur noch weg – das Hauptmenü ist dann schon
+gezeichnet. Die Karte teilt ihren gepackten Atlas statisch, also packt der echte Spielstart nicht noch einmal.
+Gezeichnet wird in denselben Bildschirm (nicht in eine SubViewport), damit dieselben Zeichenwege vorbereitet werden.
+Unsicher (nur auf dem iPhone prüfbar): ob das erste Zeichnen auf dem iPhone wirklich an Shadern hängt und ob
+3 verdeckte Bilder genügen; ob der Grafiktreiber (Metal hinter dem Kompatibilitäts-Renderer) noch weitere Varianten
+erst beim ersten sichtbaren Bild vorbereitet. Die „[Start]“-Zeilen zeigen es: Hauptmenü, Tipp, Spielstand geladen,
+Spielbildschirm aufgebaut und die Dauer jedes Bildes danach, bis eines < 50 ms dauert.
+Mac (zwei volle Starts mit „Fortsetzen“, Testspielstand v12): Hauptmenü verdeckt fertig ~0,3 s nach „bereit“,
+Probe-Spielbildschirm 50 ms, Übergabe ~0,93 s nach „bereit“; nach dem Tipp erstes Kartenbild nach 36–46 ms
+(Bild selbst 13–17 ms).
+Mindestdauer: Fertig unter 0,8 s, bleibt der Ladebildschirm bis 0,8 s stehen (inkl. 0,45 s Blende) –
+`MIN_VISIBLE_SECONDS`. Grund: Auf dem iPhone stand er in G5.1b nur ~0,6 s, der Balken war praktisch nicht zu sehen
+und wirkte wie ein Flackern. 0,8 s ist kurz genug, um nicht als Wartezeit zu stören. Dauert das Laden länger, gibt es
+keinerlei zusätzliches Warten.

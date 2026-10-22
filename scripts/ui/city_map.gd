@@ -473,10 +473,16 @@ func _car_position() -> Vector2:
 # --- Zeichnen ----------------------------------------------------------------
 
 func _load_textures() -> void:
+	# G5.1c: Der gepackte Atlas wird für alle Karten geteilt – das Packen (Bilder lesen, kopieren, hochladen) passiert
+	# nur einmal, normalerweise schon verdeckt im Ladebildschirm, nicht erst beim Spielstart.
+	if not _shared_textures.is_empty():
+		_textures = _shared_textures.duplicate()
+		return
 	var paths := texture_paths()
 	for key in paths:
 		_textures[key] = load(paths[key]) as Texture2D if ResourceLoader.exists(paths[key]) else null
 	_pack_atlas()
+	_shared_textures = _textures.duplicate()
 
 
 ## Alle Kartengrafiken: Schlüssel -> Pfad. Der Ladebildschirm (G5.1b) lädt sie vorab im Hintergrund, damit der
@@ -501,6 +507,9 @@ static func texture_paths() -> Dictionary:
 ## Packt alle Kartengrafiken in eine gemeinsame Textur und ersetzt die Einträge durch Ausschnitte
 ## (AtlasTexture). Grund: Godot bündelt Zeichenaufrufe nur bei gleicher Textur – mit Einzeltexturen
 ## waren es ~960 Aufrufe je Bild (gemessen, Phase 7). Klappt das Packen nicht, bleiben die Einzeltexturen.
+## Fertig geladene (und wenn möglich gepackte) Kartengrafiken, geteilt von allen Karten (G5.1c).
+static var _shared_textures := {}
+
 const ATLAS_WIDTH := 1024
 const ATLAS_PADDING := 2
 

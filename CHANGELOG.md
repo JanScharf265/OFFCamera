@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Start ohne schwarze Pause (Ziel): Hauptmenü und Stadtkarte werden schon hinter dem Ladebildschirm aufgebaut und einmal gezeichnet; der Kartenatlas wird nur einmal gepackt; der Ladebildschirm steht mindestens 0,8 s; ausführliche „[Start]“-Zeilen bis zum ersten Kartenbild (Ticket G5.1c)
 - Ladebildschirm im Stil eines Kamera-Suchers statt schwarzem Bildschirm beim Start: blinkendes „● REC“, Aufnahmeleiste mit echtem Fortschritt, Statustexte („Licht an …“, „Marbella wird aufgebaut …“), am Ende schließt sich das Objektiv wie eine Blende; bei einem Ladefehler eine verständliche Meldung (Ticket G5.1b)
 - Einstellungen fürs Gerät: „Kalender bei Tagesbeginn automatisch öffnen“ und „Vibration“ (beide an, wirken ab G5.3 bzw. G5.9), gespeichert unabhängig vom Spielstand; „Spielstand löschen“ lässt sie stehen; große, gut erkennbare Schalter (Ticket G5.1)
 - Alles Tippbare mindestens 84 px (≈ 44 pt): Kartenschilder und Buchungen-Filter mit unsichtbar größerer Tippfläche; Mini-Beschriftungen 19 px statt 15 px (Spalten so breit wie „Buchungen“), „Privat“/„Firma“ neben dem Betrag; HUD-Leiste voll deckend; Ortsfenster über die volle Breite; Öffnungszeiten in Kurzform („07:00–20:00 · offen“) (Ticket G4.7)

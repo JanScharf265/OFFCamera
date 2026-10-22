@@ -270,10 +270,12 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [ ] Schrift in Kacheln, Seitenbuttons und Leiste gut lesbar? (G4.5b, G4.7)
 - [ ] Kacheln und Reiter gut tippbar? (G4.5b, G4.6, G4.7)
 - [ ] Kein schwarzer Bildschirm mehr beim Start? Ladebildschirm flüssig? Dazu in der Xcode-Konsole die Zeilen „[Start] … ms“ ablesen und mir schicken (G5.1b)
+- [ ] „[Start]“-Zeilen bis zum ersten Kartenbild schicken: einmal „Fortsetzen“ tippen, dann alle Zeilen bis „Stadtkarte: Bild … gezeichnet“ mit einem Wert unter 50 ms (G5.1c)
 
 ### G5 – Hinweise und Komfort
 - [x] G5.1 Dauerhafte Geräte-Einstellungen (`user://settings.cfg`, `scripts/core/settings.gd`): Schalter „Kalender bei Tagesbeginn automatisch öffnen“ und „Vibration“ (beide an), robust bei fehlender/kaputter Datei, atomar geschrieben, „Spielstand löschen“ lässt sie stehen; Einstellungsseite mit großen Schaltern (Tippfläche 84 px, Schrift 24 px) (362/362 Tests grün)
 - [x] G5.1b Ladebildschirm statt schwarzem Bildschirm: neue erste Szene `scenes/boot/loading.tscn` (Kamera-Sucher, „● REC“, Aufnahmeleiste mit echtem Fortschritt aus 4 Schritten: App-Szene im Hintergrund, Spieldaten, Kartengrafiken im Hintergrund, Spielstand-Kopf), Blende aus dem „Halben Objektiv“ bei 100 %, Fehlermeldung statt Hänger, Zeitstempel „[Start] …“ im Log (366/366 Tests grün)
+- [x] G5.1c Schwarze Phase finden und abdecken: „[Start]“-Zeilen bis zum ersten Kartenbild (Hauptmenü, Tipp, Spielstand geladen, Spielbildschirm, Bildzeiten bis < 50 ms); App (Hauptmenü) und ein Probe-Spielbildschirm mit Karte werden verdeckt unter dem Ladebildschirm aufgebaut und gezeichnet, Kartenatlas wird geteilt statt je Karte neu gepackt; Ladebildschirm mind. 0,8 s sichtbar (368/368 Tests grün)
 - [ ] G5.2 „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl (Termine, Fristen); Daten dafür aus einer Systemabfrage, nicht aus der UI (neu `scripts/core/day_plan.gd`, neu `windows/calendar_window.gd` statt `appointments_window.gd`)
 - [ ] G5.3 Kalender öffnet sich bei Tagesbeginn genau einmal (abschaltbar); Reihenfolge Ereignis → Kalender; Spielstand Version 13 + Testdatei
 - [ ] G5.4 Konflikt-Popup statt „zweimal tippen“ (Ende der Aktion, betroffener Termin, „Trotzdem starten“/„Abbrechen“) für Aktivitäten und Fahrten (nutzt `AppointmentSystem.get_conflicts`)

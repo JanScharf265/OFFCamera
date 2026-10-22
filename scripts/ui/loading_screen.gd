@@ -6,6 +6,10 @@ extends Control
 ## kommt aus diesen Schritten (beim Laden im Hintergrund aus dem Fortschritt des ResourceLoaders) und läuft nie
 ## rückwärts. Aussehen „Kamera-Sucher“: Sucher-Ecken, blinkendes „● REC“, Aufnahmeleiste mit Prozent,
 ## Statuszeile; bei 100 % schließt sich das „Halbe Objektiv“ wie eine Blende, dann übernimmt die App.
+## G5.1c: Die App (Hauptmenü) und ein Probe-Spielbildschirm mit Stadtkarte werden VERDECKT unter dem Ladebildschirm
+## aufgebaut und ein paar Bilder lang gezeichnet – so passieren der erste Aufbau, das Packen des Kartenatlas und das
+## erste Zeichnen (Shader, Schriften) hinter dem Balken. Am Ende entfernt sich der Ladebildschirm nur noch; die App
+## ist dann schon gezeichnet. Steht er kürzer als MIN_VISIBLE_SECONDS, bleibt er bis dahin stehen (kein Aufblitzen).
 ## Schlägt ein Schritt fehl, erscheint eine verständliche Meldung (kein Hänger, kein Absturz).
 ## Zeitstempel jedes Schritts gehen ins Log („[Start] …“) – auf dem iPhone in der Xcode-Konsole lesbar.
 ## Absichtlich wenige Abhängigkeiten (nur UiStyle und SafeArea): alles Schwere lädt erst in den Schritten.
@@ -23,14 +27,23 @@ const APP_SCENE := "res://scenes/app/app.tscn"
 const GAME_DATA_SCRIPT := "res://scripts/core/game_data.gd"
 const CITY_MAP_SCRIPT := "res://scripts/ui/city_map.gd"
 const SAVE_SYSTEM_SCRIPT := "res://scripts/systems/save_system.gd"
+const GAME_STATE_SCRIPT := "res://scripts/core/game_state.gd"
+const GAME_SCREEN_SCRIPT := "res://scripts/ui/game_screen.gd"
+const StartLog := preload("res://scripts/ui/start_log.gd")
 
 ## Schritte in Reihenfolge; weight = Anteil am Balken (Summe 100).
 const STEPS := [
-	{"id": "scene", "text": "Licht an …", "weight": 45},
-	{"id": "data", "text": "Drehbuch wird gelesen …", "weight": 10},
-	{"id": "map", "text": "Marbella wird aufgebaut …", "weight": 35},
-	{"id": "save", "text": "Spielstand wird geprüft …", "weight": 10},
+	{"id": "scene", "text": "Licht an …", "weight": 30},
+	{"id": "data", "text": "Drehbuch wird gelesen …", "weight": 5},
+	{"id": "map", "text": "Kulissen werden geladen …", "weight": 20},
+	{"id": "app", "text": "Kamera läuft warm …", "weight": 20},
+	{"id": "warmup", "text": "Marbella wird aufgebaut …", "weight": 20},
+	{"id": "save", "text": "Spielstand wird geprüft …", "weight": 5},
 ]
+## Bilder, die App bzw. Probe-Spielbildschirm verdeckt gezeichnet werden (je Bild ein Aufruf von advance()).
+const WARM_FRAMES := 3
+## Mindestdauer, die der Ladebildschirm sichtbar ist (inkl. Blende), damit er nicht nur aufblitzt (DECISIONS 052).
+const MIN_VISIBLE_SECONDS := 0.8
 const FAIL_TEXT := "Das Spiel konnte nicht geladen werden (%s).\nBitte schließe die App ganz und starte sie neu."
 
 const REC_RED := Color("#FF3B5C")
@@ -62,6 +75,10 @@ var _texture_paths: PackedStringArray = []
 ## Vorab geladene Ressourcen – gehen an die App, damit sie im Cache bleiben.
 var _resources: Array = []
 var _margins: Array[float] = [24.0, 24.0, 24.0, 24.0]
+## Verdeckt aufgebaute App (wird am Ende sichtbar) und Probe-Spielbildschirm (nur zum Aufwärmen).
+var _app: Node
+var _warmup: Control
+var _warm_ticks := 0
 var _elapsed := 0.0
 var _iris := -1.0
 var _logged_first_frame := false
@@ -100,6 +117,10 @@ func _process(delta: float) -> void:
 		_iris = minf(_iris + delta / IRIS_SECONDS, 1.0)
 		if _iris >= 1.0:
 			_hand_over()
+	elif done and animate:
+		# Fertig: Blende erst, wenn der Ladebildschirm mit ihr zusammen MIN_VISIBLE_SECONDS stand.
+		if _elapsed >= MIN_VISIBLE_SECONDS - IRIS_SECONDS:
+			_iris = 0.0
 	elif not done and error_message.is_empty():
 		advance()
 	queue_redraw()
@@ -125,6 +146,10 @@ func advance() -> void:
 			_advance_data()
 		"map":
 			_advance_map()
+		"app":
+			_advance_app()
+		"warmup":
+			_advance_warmup()
 		"save":
 			_advance_save()
 
@@ -195,6 +220,53 @@ func _advance_map() -> void:
 		_next_step()
 
 
+## App unter dem Ladebildschirm aufbauen (zeigt dort ihr Hauptmenü) und WARM_FRAMES Bilder zeichnen lassen.
+func _advance_app() -> void:
+	if _app == null:
+		_app = _scene.instantiate()
+		_app.set("preloaded_data", _data)
+		_app.set("preloaded_resources", _resources)
+		if not app_save_path.is_empty():
+			_app.set("save_path", app_save_path)
+		if not app_settings_path.is_empty():
+			_app.set("settings_path", app_settings_path)
+		_add_below(_app)
+		_warm_ticks = 0
+		return
+	_warm_ticks += 1
+	_set_step_progress(float(_warm_ticks) / WARM_FRAMES)
+	if _warm_ticks >= WARM_FRAMES:
+		_next_step()
+
+
+## Probe-Spielbildschirm (neues Spiel im Speicher, nie gespeichert) mit Stadtkarte und HUD verdeckt zeichnen:
+## packt den geteilten Kartenatlas und zeichnet Karte, Schilder und Leiste einmal vor – danach wieder weg.
+func _advance_warmup() -> void:
+	if _warmup == null:
+		_warmup = load(GAME_SCREEN_SCRIPT).new()
+		_warmup.name = "WarmupGameScreen"
+		_warmup.call("setup", load(GAME_STATE_SCRIPT).new(_data, 1))
+		_warmup.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_add_below(_warmup)
+		_warmup.call("set_safe_margins", _margins)
+		_warm_ticks = 0
+		return
+	_warm_ticks += 1
+	_set_step_progress(float(_warm_ticks) / WARM_FRAMES)
+	if _warm_ticks >= WARM_FRAMES:
+		_warmup.get_parent().remove_child(_warmup)
+		_warmup.queue_free()
+		_warmup = null
+		_next_step()
+
+
+## Unter dem Ladebildschirm einhängen (gleicher Eltern-Knoten, davor in der Reihenfolge = darunter gezeichnet).
+func _add_below(node: Node) -> void:
+	var parent := get_parent()
+	parent.add_child(node)
+	parent.move_child(node, get_index())
+
+
 func _advance_save() -> void:
 	var save_system = load(SAVE_SYSTEM_SCRIPT)
 	var path: String = app_save_path if not app_save_path.is_empty() else save_system.DEFAULT_PATH
@@ -229,30 +301,21 @@ func _finish() -> void:
 	_percent_label.text = "100 %"
 	_status_label.text = "Aufnahme läuft."
 	_log("Alles geladen")
-	if animate:
-		_iris = 0.0
-	else:
+	if not animate:
 		_hand_over()
 
 
+## Die App liegt schon (fertig gezeichnet) darunter – der Ladebildschirm geht nur noch weg.
 func _hand_over() -> void:
-	if not is_inside_tree() or _scene == null:
+	if not is_inside_tree() or _app == null:
 		return
 	_iris = -1.0
 	set_process(false)
-	var app := _scene.instantiate()
-	app.set("preloaded_data", _data)
-	app.set("preloaded_resources", _resources)
-	if not app_save_path.is_empty():
-		app.set("save_path", app_save_path)
-	if not app_settings_path.is_empty():
-		app.set("settings_path", app_settings_path)
 	var tree := get_tree()
-	tree.root.add_child(app)
 	if tree.current_scene == self:
-		tree.current_scene = app
+		tree.current_scene = _app
 	_log("Übergabe an die App")
-	handed_over.emit(app)
+	handed_over.emit(_app)
 	queue_free()
 
 
@@ -269,7 +332,7 @@ func _fail(detail: String) -> void:
 
 
 func _log(text: String) -> void:
-	print("[Start] %6d ms  %s" % [Time.get_ticks_msec(), text])
+	StartLog.mark(text)
 
 
 func _on_frame_drawn() -> void:

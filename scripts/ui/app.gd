@@ -21,6 +21,7 @@ const SettingsScreenScript := preload("res://scripts/ui/settings_screen.gd")
 const SettingsScript := preload("res://scripts/core/settings.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const SafeAreaScript := preload("res://scripts/ui/safe_area.gd")
+const StartLog := preload("res://scripts/ui/start_log.gd")
 
 ## Speicherort; Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
 var save_path := SaveSystemScript.DEFAULT_PATH
@@ -93,9 +94,12 @@ func show_main_menu(message: String = "") -> void:
 	menu.continue_pressed.connect(continue_game)
 	menu.settings_pressed.connect(show_settings)
 	_set_screen(menu)
+	StartLog.mark("Hauptmenü aufgebaut", "menu")
+	StartLog.watch_frames("Hauptmenü")
 
 
 func start_new_game() -> void:
+	StartLog.mark("Tipp: Neues Spiel", "tap")
 	game = GameStateScript.new(_data, new_game_seed)
 	_save_game()
 	show_game()
@@ -103,8 +107,10 @@ func start_new_game() -> void:
 
 ## Setzt die Sitzung im Speicher fort oder lädt den Spielstand.
 func continue_game() -> void:
+	StartLog.mark("Tipp: Fortsetzen", "tap")
 	if game == null:
 		var result := SaveSystemScript.load_game(_data, save_path)
+		StartLog.mark("Spielstand geladen", "loaded")
 		if result["game"] == null:
 			var reason: String = result["error"]
 			if not result.get("corrupt_kept", []).is_empty():
@@ -128,6 +134,8 @@ func show_game(message: String = "") -> void:
 	screen.menu_pressed.connect(show_main_menu)
 	screen.state_changed.connect(_save_game)
 	_set_screen(screen)
+	StartLog.mark("Spielbildschirm aufgebaut", "game_screen")
+	StartLog.watch_frames("Stadtkarte")
 	if not message.is_empty():
 		screen.show_message(message)
 
