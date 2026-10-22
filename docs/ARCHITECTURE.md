@@ -97,6 +97,17 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   `account` (Geld auf Privat-/Firmenkonto), `minutes` (Spielzeit nach dem Schließen), `company` (über
   `CompanySystem.apply()` mit Begründung). Katalog verlangt je Ereignis eine Option ohne Kosten.
 
+### Tutorials (`data/tutorials/tutorials.json`, `TutorialCatalog`; T.1 – noch ohne System und Anzeige)
+- Daten je Eintrag (alle Pflicht, andere Felder sind ein Fehler): `id`, `mechanic` (Mechanik-ID für den
+  Abdeckungstest T.7), `trigger` (eine ID aus `TutorialCatalog.TRIGGERS`), `title`, `text` (≤ 240 Zeichen),
+  `ui_target` (Knotenname des hervorgehobenen Elements, z. B. `TravelButton`; "" = keins), `order` (≥ 0, kleiner
+  zuerst), `requires` (Tutorial-IDs, die vorher gesehen sein müssen).
+- Prüfung wie bei den anderen Katalogen, alles oder nichts: fehlende/unbekannte Felder, doppelte IDs, unbekannter
+  Auslöser, `requires` auf unbekannte oder eigene ID, Zyklus in `requires` (Tiefensuche). `get_all()` sortiert nach
+  `order`, dann ID; `get_for_trigger(trigger)`.
+- Noch nicht in `GameData.load_all()` (kein Fingerabdruck-Wechsel, kein Spielstand) – das kommt mit dem
+  TutorialSystem (T.2).
+
 ### Termine (`data/appointments/appointments.json`, `AppointmentCatalog`, `AppointmentSystem`)
 - Daten: `id`, `title`, optional `description`, `location`, `start` {`day`, `hour`, optional `minute`},
   `duration_minutes` (> 0), optional `money_cents`/`category`/`effects` (beim Wahrnehmen),

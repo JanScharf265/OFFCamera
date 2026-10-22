@@ -619,3 +619,15 @@ einem Bild ab, alle ihre Auslöser fallen in die Sperre (Konflikt-Popup + „Tro
 Laden und beim Aufbau der Spielansicht ist der Dienst still (`quiet`), damit sich öffnende Ereignis-, Kalender- oder
 Erinnerungsfenster nicht vibrieren. Prüfbar ohne Gerät nur über Zähler und Gründe; ob die Vibration spürbar und
 nicht zu häufig ist, steht in der iPhone-Liste.
+
+## 061 – Datenformat für Tutorials (T.1)
+Auslöser sind eine feste, kleine Liste im Katalog (`TutorialCatalog.TRIGGERS`) statt freier Texte: Ein Tippfehler in
+den Daten fällt beim Laden auf, und das TutorialSystem (T.2) meldet genau diese IDs. Neue Auslöser kommen mit dem
+Ticket, das sie braucht, in die Liste. Alle Felder sind Pflicht, auch `ui_target` (leer erlaubt) und `requires`
+(leere Liste) – so ist jeder Eintrag vollständig lesbar; unbekannte Felder sind ein Fehler, damit sich keine
+vertippten Felder („requieres“) still einschleichen. `requires` darf nicht auf sich selbst oder doppelt verweisen;
+Zyklen werden per Tiefensuche gefunden und mit ihrem Weg gemeldet. Der Text ist auf 240 Zeichen begrenzt (≈ 2–3 kurze
+Sätze), damit er in die Anzeige (T.3) passt; der Layout-Test der Texte folgt in T.7. `ui_target` ist ein Knotenname
+(stabile UI-ID, wie ihn die Tests schon nutzen); ob es den Knoten gibt, prüft erst T.3/T.7, weil viele Knoten nur
+zur Laufzeit entstehen. Der Katalog ist noch nicht in `GameData` eingebunden, damit sich in T.1 weder Fingerabdruck
+noch Spielstand ändern.
