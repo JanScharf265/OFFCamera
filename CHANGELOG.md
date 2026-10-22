@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Tutorials: Das Spiel merkt sich jetzt, wann eine Erklärung fällig ist und welche schon bestätigt wurden – jede genau einmal, auch über Speichern/Laden; angezeigt wird noch nichts (kommt mit T.3); Spielstand Version 15 – alte Spielstände laden weiter und bekommen keine Spielstart-Erklärungen (Ticket T.2)
 - Tutorials vorbereitet: Datenformat `data/tutorials/tutorials.json` mit Prüfung (Felder, Auslöser, Voraussetzungen ohne Zyklen) und drei Platzhaltern – noch nicht im Spiel sichtbar (Ticket T.1)
 - Kurze Vibration bei Warnungen (Termin verpassen?, Erinnerung, Termin verpasst, neue Frist oder Mahnung, Ereignis) und bei Geldänderungen ab 100 € – höchstens einmal je Aktion, nicht beim Laden, abschaltbar in den Einstellungen; spürbar nur auf dem iPhone (Ticket G5.9). Paket G5 abgeschlossen
 - Rote Zählerpunkte mit Zahl am Kalender (Termine heute, die noch kommen) und an den Fristen (offene Fristen), ab 10 „9+“; der Punkt sitzt neben dem Symbol. Energie- und Stimmungsbalken werden unter 40 gelb und unter 20 rot, die Zahl bleibt daneben; Stimmung ist im Normalfall jetzt blau statt gelb (Ticket G5.8)

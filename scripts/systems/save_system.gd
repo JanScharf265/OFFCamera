@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 14
+const SAVE_VERSION := 15
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -275,6 +275,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		11: return _migrate_11_to_12(game)
 		12: return _migrate_12_to_13(game)
 		13: return _migrate_13_to_14(game)
+		14: return _migrate_14_to_15(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -398,6 +399,13 @@ static func _migrate_13_to_14(game: Dictionary) -> String:
 	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
 		return "Zeit fehlt."
 	game["reminders"] = {"reminded": [], "reminded_until_minutes": int(minutes) + ReminderSystemScript.REMINDER_MINUTES}
+	return ""
+
+
+## 14 → 15 (T.2): Tutorials – nichts gemeldet, nichts gesehen; aber alle Spielstart-Tutorials gelten als gesehen
+## (wer schon spielt, braucht keine Spielstart-Erklärung). Über den Auslöser, weil die Migration die Daten nicht kennt.
+static func _migrate_14_to_15(game: Dictionary) -> String:
+	game["tutorials"] = {"fired": [], "seen": [], "seen_triggers": ["first_game_start"]}
 	return ""
 
 

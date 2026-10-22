@@ -314,6 +314,7 @@ func _open_due_reminder() -> void:
 		return
 	if haptics != null:
 		haptics.warn("reminder")
+	_game.tutorials.report("first_appointment_reminder")
 	var content := ReminderWindowScript.new()
 	content.setup(self, _game, appointment_id)
 	_open_window("reminder", content)
@@ -337,6 +338,10 @@ func on_reminder_wait_pressed(appointment_id: String) -> void:
 
 func _open_location(location_id: String) -> void:
 	_selected_location = location_id
+	# Tutorial-Auslöser (T.2) – angezeigt wird noch nichts (T.3).
+	_game.tutorials.report("first_location_open")
+	if location_id != _game.locations.get_current():
+		_game.tutorials.report("first_location_elsewhere")
 	var content := LocationWindowScript.new()
 	content.setup(self, _game, location_id)
 	_open_window("location", content)
@@ -345,6 +350,7 @@ func _open_location(location_id: String) -> void:
 
 ## Kalender (G5.2, ersetzt „Termine“): Tagesplan als Zeitstrahl.
 func _open_appointments() -> void:
+	_game.tutorials.report("first_calendar_open")
 	var content := CalendarWindowScript.new()
 	content.setup(self, _game)
 	_open_window("calendar", content)

@@ -105,8 +105,16 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Prüfung wie bei den anderen Katalogen, alles oder nichts: fehlende/unbekannte Felder, doppelte IDs, unbekannter
   Auslöser, `requires` auf unbekannte oder eigene ID, Zyklus in `requires` (Tiefensuche). `get_all()` sortiert nach
   `order`, dann ID; `get_for_trigger(trigger)`.
-- Noch nicht in `GameData.load_all()` (kein Fingerabdruck-Wechsel, kein Spielstand) – das kommt mit dem
-  TutorialSystem (T.2).
+- Seit T.2 in `GameData.load_all()` (`data.tutorials`).
+- TutorialSystem (T.2, `scripts/systems/tutorial_system.gd`, im GameState als `tutorials`): `report(trigger)` merkt
+  einen Auslöser (unbekannte → Fehler, nichts passiert; mehrfach schadet nicht; Signal `tutorial_due` beim ersten
+  Mal). Fällig (`get_due()`, nach `order`): Auslöser gemeldet, nicht gesehen, alle `requires` gesehen.
+  `mark_seen(id)` bestätigt – erst dann kommt es nicht wieder. Melder: App (`first_game_start` bei „Neues Spiel“),
+  Spielansicht (`first_location_open`, `first_location_elsewhere`, `first_calendar_open`,
+  `first_appointment_reminder`), Systeme über Signale (`event_triggered` → `first_event`, `obligation_due` →
+  `first_obligation_due`; als gebundene Methode, nicht als Lambda – sonst Kreisverweis). Kostet keine Zeit, kein Geld.
+  Gespeichert (Version 15): `tutorials` = {`fired`, `seen`, `seen_triggers`} – Tutorials mit einem Auslöser aus
+  `seen_triggers` gelten als gesehen.
 
 ### Termine (`data/appointments/appointments.json`, `AppointmentCatalog`, `AppointmentSystem`)
 - Daten: `id`, `title`, optional `description`, `location`, `start` {`day`, `hour`, optional `minute`},
@@ -194,7 +202,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 14, "meta": {…}, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 15, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -212,6 +220,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 14 → 15 (T.2): `tutorials` = {`fired`: [], `seen`: [], `seen_triggers`: [„first_game_start“]} – wer
+  schon spielt, bekommt keine Spielstart-Erklärungen; alle anderen Tutorials kommen normal.
 - Migration 13 → 14 (G5.6): `reminders` = {`reminded`: [], `reminded_until_minutes`: gespeicherte Zeit + 30} – Termine,
   deren Beginn schon höchstens 30 Spielminuten entfernt ist, gelten als erinnert (keine nachträgliche Erinnerung).
 - Migration 9 → 10: Wertstellung = Buchungszeit; Tagesabschlüsse (`company`, `day:<t>`) auf Tag t, 23:59.

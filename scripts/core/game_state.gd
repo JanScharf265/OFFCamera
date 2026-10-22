@@ -23,6 +23,7 @@ const ObligationSystemScript := preload("res://scripts/systems/obligation_system
 const DayStartSystemScript := preload("res://scripts/systems/day_start_system.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
+const TutorialSystemScript := preload("res://scripts/systems/tutorial_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -53,6 +54,8 @@ var day_start: DayStartSystemScript
 var reminders: ReminderSystemScript
 ## „Hinfahren und starten“ (G5.7) – ohne eigenen Zustand, nicht im Spielstand.
 var trips: TripSystemScript
+## Tutorials (T.2): Auslöser, fällig, gesehen.
+var tutorials: TutorialSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -79,6 +82,11 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)
 	trips = TripSystemScript.new(time, locations, activities, content, company)
+	tutorials = TutorialSystemScript.new(data.tutorials)
+	# Auslöser aus den Systemen; die übrigen meldet die Spielansicht. Gebundene Methode statt Lambda: Ein Lambda hielte
+	# den GameState fest (Kreisverweis, Speicherleck – test_memory).
+	events.event_triggered.connect(tutorials.report.bind("first_event").unbind(1))
+	obligations.obligation_due.connect(tutorials.report.bind("first_obligation_due").unbind(1))
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).
@@ -102,6 +110,7 @@ func to_dict() -> Dictionary:
 		"obligations": obligations.to_dict(),
 		"day_start": day_start.to_dict(),
 		"reminders": reminders.to_dict(),
+		"tutorials": tutorials.to_dict(),
 	}
 
 
@@ -110,7 +119,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders"]:
+			"obligations", "day_start", "reminders", "tutorials"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -136,6 +145,8 @@ func restore(saved: Dictionary) -> String:
 		error = day_start.restore(saved["day_start"])
 	if error.is_empty():
 		error = reminders.restore(saved["reminders"])
+	if error.is_empty():
+		error = tutorials.restore(saved["tutorials"])
 	return error
 
 

@@ -15,6 +15,7 @@ const ContentFormatCatalogScript := preload("res://scripts/systems/content_forma
 const EquipmentCatalogScript := preload("res://scripts/systems/equipment_catalog.gd")
 const CompanyTypeCatalogScript := preload("res://scripts/systems/company_type_catalog.gd")
 const ObligationCatalogScript := preload("res://scripts/systems/obligation_catalog.gd")
+const TutorialCatalogScript := preload("res://scripts/systems/tutorial_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -27,6 +28,8 @@ var formats := ContentFormatCatalogScript.new()
 var equipment := EquipmentCatalogScript.new()
 var company_types := CompanyTypeCatalogScript.new()
 var obligations := ObligationCatalogScript.new()
+## Tutorials (T.2)
+var tutorials := TutorialCatalogScript.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -38,7 +41,8 @@ var fingerprint := ""
 func load_all() -> bool:
 	errors.clear()
 	var contents := ""
-	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations]:
+	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
+			tutorials]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		contents += FileAccess.get_file_as_string(catalog.DEFAULT_PATH)

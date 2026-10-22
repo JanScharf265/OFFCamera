@@ -631,3 +631,17 @@ Sätze), damit er in die Anzeige (T.3) passt; der Layout-Test der Texte folgt in
 (stabile UI-ID, wie ihn die Tests schon nutzen); ob es den Knoten gibt, prüft erst T.3/T.7, weil viele Knoten nur
 zur Laufzeit entstehen. Der Katalog ist noch nicht in `GameData` eingebunden, damit sich in T.1 weder Fingerabdruck
 noch Spielstand ändern.
+
+## 062 – TutorialSystem und Spielstand 15 (T.2)
+Gespeichert werden die gemeldeten Auslöser (`fired`), die bestätigten Tutorials (`seen`) und `seen_triggers`. Weil die
+gemeldeten Auslöser im Spielstand stehen, bleibt ein Tutorial fällig, bis es bestätigt ist – auch wenn zwischen
+Auslöser und Bestätigung gespeichert und geladen wird, und auch, wenn seine `requires` erst später gesehen werden
+(z. B. „Hinfahren“ nach „Gebäude antippen“). Fällig wird erst entschieden, wenn gefragt wird (`get_due()`), nicht
+beim Melden – so wirken neue Tutorials in den Daten auch für schon gemeldete Auslöser.
+Migration 14 → 15: Wer einen alten Spielstand hat, spielt schon und braucht keine Spielstart-Erklärung („So sieht
+die Karte aus“). Alle anderen Tutorials (Hinfahren, Kalender, Ereignis …) kommen normal, weil die Mechaniken teils
+neu sind. Die Migration kennt die Tutorial-Daten nicht (sie arbeitet nur auf dem gespeicherten Dictionary) – daher
+merkt sie den Auslöser `first_game_start` in `seen_triggers` statt einzelner IDs; das gilt dann auch für
+Spielstart-Tutorials, die später dazukommen. Unbekannte IDs in `seen` (Tutorial aus den Daten entfernt) bleiben
+stehen, damit es nach einer Rückkehr nicht erneut kommt. `first_game_start` meldet die App bei „Neues Spiel“, nicht
+der GameState-Konstruktor (der auch beim Laden läuft).

@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4 und G5 fertig, T läuft – als Nächstes T.2)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4 und G5 fertig, T läuft – als Nächstes T.3)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -288,7 +288,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 
 ### T – Tutorial-System
 - [x] T.1 Datenformat `data/tutorials/tutorials.json` (id, mechanic, trigger, title, text, ui_target, order, requires) + Modell `scripts/models/tutorial_definition.gd` + Katalog `scripts/systems/tutorial_catalog.gd` mit Prüfung (fehlende/unbekannte Felder, doppelte IDs, unbekannter Auslöser aus fester Liste, unbekannte/eigene/doppelte `requires`, Zyklen, Text ≤ 240 Zeichen) – alles oder nichts; 3 Platzhalter (Karte, Gebäude antippen, Hinfahren) (441/441 Tests grün)
-- [ ] T.2 TutorialSystem: Auslöser, jedes Tutorial genau einmal, gesehene IDs im Spielstand (neue Version + Migration + Testdatei), kostet keine Spielzeit
+- [x] T.2 TutorialSystem (`scripts/systems/tutorial_system.gd`): Auslöser melden (Spielansicht: Spielstart, Ort öffnen, Ort aus der Ferne, Kalender, Erinnerung; Systeme: Ereignis, fällige Frist), fällig = Auslöser gemeldet + nicht gesehen + `requires` gesehen, nach `order`; gesehen erst mit `mark_seen`, bis dahin fällig auch nach Laden; kostet keine Spielzeit; Spielstand Version 15 + Migration (Spielstart-Tutorials gelten als gesehen) + Testdatei v15; noch keine Anzeige (451/451 Tests + 3/3 lange Tests grün)
 - [ ] T.3 Anzeige: abdunkeln, Rahmen/Pfeil am UI-Element (stabile UI-IDs), „Verstanden“; feste Reihenfolge Ereignis → Kalender → Tutorial (neu `scripts/ui/tutorial_overlay.gd`)
 - [ ] T.4 Einstellungen „Tutorials an/aus“ und „Tutorials zurücksetzen“; Fenster „Hilfe/Lexikon“ mit allen gesehenen Erklärungen
 - [ ] T.5 Texte Grundlagen: Karte, Wischen/Zoomen, Gebäude antippen, Hinfahren, Aktivitäten, Energie/Stimmung, Kalender, Erinnerungen, Ereignisse, Speichern/Fortsetzen

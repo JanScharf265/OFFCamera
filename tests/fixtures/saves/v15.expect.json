@@ -1,0 +1,20 @@
+{
+	"camera_level": 1,
+	"company_founded": true,
+	"entry_count": 23,
+	"followers": 137,
+	"location": "office",
+	"private_balance_cents": 500,
+	"steps": [
+		"travel studio: ",
+		"livestream: ",
+		"camera: ",
+		"travel office: ",
+		"found: ",
+		"order_stock: ",
+		"brand: ",
+		"save: "
+	],
+	"time_minutes": 12000,
+	"version": 15
+}

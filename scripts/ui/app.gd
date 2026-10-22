@@ -105,6 +105,7 @@ func show_main_menu(message: String = "") -> void:
 func start_new_game() -> void:
 	StartLog.mark("Tipp: Neues Spiel", "tap")
 	game = GameStateScript.new(_data, new_game_seed)
+	game.tutorials.report("first_game_start")  # T.2
 	_save_game()
 	show_game()
 
