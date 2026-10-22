@@ -21,7 +21,7 @@ const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 
-const SAVE_VERSION := 12
+const SAVE_VERSION := 13
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -272,6 +272,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		9: return _migrate_9_to_10(game)
 		10: return _migrate_10_to_11(game)
 		11: return _migrate_11_to_12(game)
+		12: return _migrate_12_to_13(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -375,6 +376,16 @@ static func _migrate_11_to_12(game: Dictionary) -> String:
 		for field in ["account", "category", "label"]:
 			if not instance.has(field):
 				instance[field] = ""
+	return ""
+
+
+## 12 → 13 (G5.3): Tagesbeginn – der Kalender für den aktuellen Tag gilt als schon gezeigt (sonst würde er sich
+## beim ersten Laden eines alten Stands sofort öffnen); ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+static func _migrate_12_to_13(game: Dictionary) -> String:
+	var minutes: Variant = _saved_minutes(game)
+	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
+		return "Zeit fehlt."
+	game["day_start"] = {"calendar_shown_day": TimeSystemScript.day_of(int(minutes))}
 	return ""
 
 

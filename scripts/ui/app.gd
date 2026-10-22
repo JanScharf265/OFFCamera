@@ -131,6 +131,7 @@ func continue_game() -> void:
 func show_game(message: String = "") -> void:
 	var screen := GameScreenScript.new()
 	screen.setup(game)
+	screen.auto_calendar = settings == null or settings.get_flag(SettingsScript.CALENDAR_AUTO_OPEN)
 	screen.menu_pressed.connect(show_main_menu)
 	screen.state_changed.connect(_save_game)
 	_set_screen(screen)

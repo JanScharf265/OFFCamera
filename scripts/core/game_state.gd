@@ -20,6 +20,7 @@ const EquipmentSystemScript := preload("res://scripts/systems/equipment_system.g
 const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
 const DayCycleScript := preload("res://scripts/core/day_cycle.gd")
 const ObligationSystemScript := preload("res://scripts/systems/obligation_system.gd")
+const DayStartSystemScript := preload("res://scripts/systems/day_start_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -44,6 +45,8 @@ var equipment: EquipmentSystemScript
 var company: CompanySystemScript
 var obligations: ObligationSystemScript
 var day_cycle: DayCycleScript
+## Tagesbeginn: Kalender genau einmal je Tag (G5.3).
+var day_start: DayStartSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -66,6 +69,8 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	events.set_world(company, obligations)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, obligations, events])
+	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
+	day_start = DayStartSystemScript.new(time, START_DAY)
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).
@@ -87,6 +92,7 @@ func to_dict() -> Dictionary:
 		"equipment": equipment.to_dict(),
 		"company": company.to_dict(),
 		"obligations": obligations.to_dict(),
+		"day_start": day_start.to_dict(),
 	}
 
 
@@ -94,7 +100,8 @@ func to_dict() -> Dictionary:
 ## sonst Fehlertext. Bei einem Fehler kann der GameState teilweise geändert sein –
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
-	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company", "obligations"]:
+	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
+			"obligations", "day_start"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -116,6 +123,8 @@ func restore(saved: Dictionary) -> String:
 		error = company.restore(saved["company"])
 	if error.is_empty():
 		error = obligations.restore(saved["obligations"])
+	if error.is_empty():
+		error = day_start.restore(saved["day_start"])
 	return error
 
 

@@ -195,6 +195,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 11 → 12: Frist-Instanzen bekommen leere `account`/`category`/`label`; `ObligationSystem.restore()`
   ergänzt sie aus den Daten oder setzt Ersatzwerte (privat, „obligation“, ID).
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
+- Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
+  alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
 - Migration 9 → 10: Wertstellung = Buchungszeit; Tagesabschlüsse (`company`, `day:<t>`) auf Tag t, 23:59.
 - Schreiben (Phase 6): `.tmp` schreiben und wieder einlesen → wenn eine Hauptdatei existiert, Backups rotieren
   (`.bak2` → `.bak3`, `.bak` → `.bak2`, Hauptdatei → `.bak`) → `.tmp` nach `savegame.json`. Nie während eines
@@ -270,6 +272,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Ladebildschirm nur noch (ohne Mindestdauer, so schnell wie möglich). Die Karte teilt ihre gepackten Grafiken
   (`CityMap._shared_textures`). `scripts/ui/start_log.gd` schreibt die „[Start]“-Zeilen (Hauptmenü, Tipp, Spielstand
   geladen, Spielbildschirm) und die Bildzeiten danach, bis ein Bild < 50 ms dauert.
+- Kalender bei Tagesbeginn (G5.3, `scripts/systems/day_start_system.gd`, im GameState als `day_start`, im Spielstand
+  seit Version 13): merkt den zuletzt „gezeigten“ Tag. `take_calendar_due(auto_open)` ist genau einmal je Tag wahr
+  (über übersprungene Tage einmal für den aktuellen) und merkt den Tag auch bei ausgeschaltetem Geräte-Schalter. Die
+  Spielansicht fragt es in `_refresh()` erst, wenn kein Ereignis offen ist, und öffnet dann den Kalender (ersetzt ein
+  offenes Fenster). Neues Spiel: Tag 1 gilt als gezeigt. Kostet keine Spielzeit.
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,

@@ -530,3 +530,14 @@ anstehenden Termin, offen (rot) für Fristen. Die Jetzt-Linie steht hinter allen
 verbraucht seine ganze Dauer – der Zustand wurde deshalb nicht eingebaut. Ist der Tag leer, steht dort „Heute keine
 Termine und Fristen.“, und unter dem Plan ein Hinweis auf den nächsten späteren Termin. Der runde Button heißt schon
 seit G4.4 „Kalender“ (Knotenname bleibt `AppointmentsButton`).
+
+## 054 – Kalender bei Tagesbeginn (G5.3)
+Eigenes kleines System `DayStartSystem` statt eines Schritts im DayCycle: Der DayCycle läuft mitten im Zeitfortschritt
+(je übersprungenem Tag einmal), der Kalender soll aber erst danach und nur einmal für den aktuellen Tag erscheinen.
+Das System merkt den zuletzt erledigten Tag; die Spielansicht fragt nach jeder Aktion (in `_refresh()`) mit
+`take_calendar_due(auto_open)` – erst wenn kein Ereignis offen ist (Ereignisse zuerst, nie zwei Fenster übereinander:
+der Kalender ersetzt ein offenes Fenster). Der Tag gilt auch bei ausgeschaltetem Schalter als erledigt, damit späteres
+Einschalten keinen alten Tag nachholt. Neues Spiel: Tag 1 gilt als gezeigt (der Kalender kommt ab dem ersten
+Tageswechsel). Spielstand Version 13 mit `day_start.calendar_shown_day`; Migration 12 → 13 setzt den gespeicherten Tag
+(alte Stände öffnen den Kalender nicht sofort beim Laden). Testdatei v13 aus dem aktuellen Code (Tag 9, ohne
+Oberfläche gespielt – dort ist der Kalender für Tag 9 noch nicht gezeigt und öffnet sich einmal beim ersten Anzeigen).

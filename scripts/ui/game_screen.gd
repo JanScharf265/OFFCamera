@@ -57,6 +57,8 @@ const ICONS := {
 const COLUMN_GAP := 8.0
 
 var _game: GameStateScript
+## Geräte-Schalter „Kalender bei Tagesbeginn automatisch öffnen“ (G5.1/G5.3); von der App vor dem Einfügen gesetzt.
+var auto_calendar := true
 ## Safe-Area-Abstände [links, oben, rechts, unten] in Viewport-Pixeln (von der App).
 var _margins: Array[float] = [24.0, 24.0, 24.0, 24.0]
 var _map: CityMapScript
@@ -527,6 +529,10 @@ func _refresh() -> void:
 			_open_window("event", content, false)
 	elif _window_kind == "event":
 		_close_window()
+	# G5.3: Erst wenn kein Ereignis offen ist, öffnet sich bei Tagesbeginn genau einmal der Kalender (ersetzt ein
+	# offenes Fenster – nie zwei übereinander). Ob er fällig ist, entscheidet das DayStartSystem.
+	if pending_id.is_empty() and _game.day_start.take_calendar_due(auto_calendar):
+		_open_appointments()
 
 	if _window != null:
 		_window.refresh()

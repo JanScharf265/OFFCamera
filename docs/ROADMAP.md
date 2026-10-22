@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, G5 läuft – als Nächstes G5.3)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, G5 läuft – als Nächstes G5.4)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -277,7 +277,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] G5.1b Ladebildschirm statt schwarzem Bildschirm: neue erste Szene `scenes/boot/loading.tscn` (Kamera-Sucher, „● REC“, Aufnahmeleiste mit echtem Fortschritt aus 4 Schritten: App-Szene im Hintergrund, Spieldaten, Kartengrafiken im Hintergrund, Spielstand-Kopf), Blende aus dem „Halben Objektiv“ bei 100 %, Fehlermeldung statt Hänger, Zeitstempel „[Start] …“ im Log (366/366 Tests grün)
 - [x] G5.1c Schwarze Phase finden und abdecken: „[Start]“-Zeilen bis zum ersten Kartenbild (Hauptmenü, Tipp, Spielstand geladen, Spielbildschirm, Bildzeiten bis < 50 ms); App (Hauptmenü) und ein Probe-Spielbildschirm mit Karte werden verdeckt unter dem Ladebildschirm aufgebaut und gezeichnet, Kartenatlas wird geteilt statt je Karte neu gepackt; keine Mindestdauer – der Ladebildschirm verschwindet so schnell wie möglich (Entscheidung Game Director) (367/367 Tests grün)
 - [x] G5.2 „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl für heute (Termine mit Uhrzeit, Ort, Fahrzeit; Fristen des Tages und überfällige offene Fristen; Vergangenes grau, der nächste Termin hervorgehoben, Jetzt-Linie, Hinweis auf den nächsten späteren Termin); Daten aus `scripts/core/day_plan.gd`, Fenster `windows/calendar_window.gd` ersetzt `appointments_window.gd` (374/374 Tests grün)
-- [ ] G5.3 Kalender öffnet sich bei Tagesbeginn genau einmal (abschaltbar); Reihenfolge Ereignis → Kalender; Spielstand Version 13 + Testdatei
+- [x] G5.3 Kalender öffnet sich bei Tagesbeginn genau einmal (abschaltbar, auch über übersprungene Tage nur einmal); Reihenfolge Ereignis → Kalender; `DayStartSystem`; Spielstand Version 13 + Migration + Testdatei v13 (381/381 Tests + 3/3 lange grün)
 - [ ] G5.4 Konflikt-Popup statt „zweimal tippen“ (Ende der Aktion, betroffener Termin, „Trotzdem starten“/„Abbrechen“) für Aktivitäten und Fahrten (nutzt `AppointmentSystem.get_conflicts`)
 - [ ] G5.5 Aktion „Warten bis Terminbeginn“ (über das TimeSystem) – die Kachel-Vorschau „Ende HH:MM“ + Wirkungen kam schon mit G4.5
 - [ ] G5.6 Erinnerung ≤ 30 Spielminuten vor einem Termin (Termin, Ort, Fahrzeit), genau einmal je Termin; Spielstand Version 14 + Testdatei
