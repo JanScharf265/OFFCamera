@@ -473,8 +473,18 @@ func _car_position() -> Vector2:
 # --- Zeichnen ----------------------------------------------------------------
 
 func _load_textures() -> void:
+	var paths := texture_paths()
+	for key in paths:
+		_textures[key] = load(paths[key]) as Texture2D if ResourceLoader.exists(paths[key]) else null
+	_pack_atlas()
+
+
+## Alle Kartengrafiken: Schlüssel -> Pfad. Der Ladebildschirm (G5.1b) lädt sie vorab im Hintergrund, damit der
+## erste Aufbau der Karte nur noch den Cache liest.
+static func texture_paths() -> Dictionary:
+	var paths := {}
 	for key in TILES:
-		_textures[key] = _load(CITY_DIR + TILES[key])
+		paths[key] = CITY_DIR + TILES[key] + ".png"
 	var names: Array = FILLER_BUILDINGS.duplicate()
 	for style in BUILDINGS.values() + [DEFAULT_BUILDING]:
 		names.append(style["base"])
@@ -482,10 +492,10 @@ func _load_textures() -> void:
 		if style.has("roof"):
 			names.append(style["roof"])
 	for building_name in names:
-		_textures[building_name] = _load(BUILDING_DIR + building_name)
+		paths[building_name] = BUILDING_DIR + building_name + ".png"
 	for direction in CAR_DIRECTIONS.values():
-		_textures["car_" + direction] = _load(VEHICLE_DIR + "taxi_%s" % direction)
-	_pack_atlas()
+		paths["car_" + direction] = VEHICLE_DIR + "taxi_%s.png" % direction
+	return paths
 
 
 ## Packt alle Kartengrafiken in eine gemeinsame Textur und ersetzt die Einträge durch Ausschnitte
@@ -531,11 +541,6 @@ func _pack_atlas() -> void:
 		part.atlas = atlas
 		part.region = Rect2(regions[key])
 		_textures[key] = part
-
-
-static func _load(path_without_extension: String) -> Texture2D:
-	var path := path_without_extension + ".png"
-	return load(path) as Texture2D if ResourceLoader.exists(path) else null
 
 
 func _draw() -> void:

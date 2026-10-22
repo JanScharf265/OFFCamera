@@ -20,6 +20,7 @@ const GameScreenScript := preload("res://scripts/ui/game_screen.gd")
 const SettingsScreenScript := preload("res://scripts/ui/settings_screen.gd")
 const SettingsScript := preload("res://scripts/core/settings.gd")
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const SafeAreaScript := preload("res://scripts/ui/safe_area.gd")
 
 ## Speicherort; Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
 var save_path := SaveSystemScript.DEFAULT_PATH
@@ -29,6 +30,10 @@ var settings_path := SettingsScript.DEFAULT_PATH
 var settings
 ## Seed für neue Spiele; -1 = zufällig (Tests setzen einen festen Wert).
 var new_game_seed := -1
+## Vom Ladebildschirm (G5.1b) schon geladene und geprüfte Spieldaten; null = selbst laden.
+var preloaded_data: GameDataScript
+## Vom Ladebildschirm vorab geladene Kartengrafiken – nur festgehalten, damit sie im Cache bleiben.
+var preloaded_resources: Array = []
 ## Laufende Sitzung oder null, solange kein Spiel gestartet/geladen wurde.
 var game: GameStateScript
 
@@ -64,8 +69,8 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_update_safe_area)
 	_update_safe_area()
 
-	_data = GameDataScript.new()
-	if not _data.load_all():
+	_data = preloaded_data if preloaded_data != null else GameDataScript.new()
+	if preloaded_data == null and not _data.load_all():
 		_show_error("Die Spieldaten konnten nicht geladen werden:\n\n" + "\n".join(_data.errors))
 		return
 	show_main_menu()
@@ -212,19 +217,9 @@ func apply_margins(margins: Array[float]) -> void:
 		_screen.call("set_safe_margins", _margins)
 
 
-## Abstände [links, oben, rechts, unten] in Viewport-Pixeln: Grundabstand + Bereich außerhalb der
-## Safe Area. Die Safe Area kommt in Bildschirmpixeln und wird in Viewport-Koordinaten umgerechnet.
-## Ohne gültige Fenstergröße (Desktop, Tests) nur der Grundabstand.
+## Abstände [links, oben, rechts, unten] in Viewport-Pixeln (Rechnung in safe_area.gd, G5.1b).
 static func safe_margins(window_size: Vector2, safe: Rect2, viewport_size: Vector2, padding: float) -> Array[float]:
-	var margins: Array[float] = [padding, padding, padding, padding]
-	if window_size.x <= 0 or window_size.y <= 0 or safe.size.x <= 0 or safe.size.y <= 0:
-		return margins
-	var to_viewport := viewport_size / window_size
-	margins[0] += maxf(safe.position.x, 0.0) * to_viewport.x
-	margins[1] += maxf(safe.position.y, 0.0) * to_viewport.y
-	margins[2] += maxf(window_size.x - safe.end.x, 0.0) * to_viewport.x
-	margins[3] += maxf(window_size.y - safe.end.y, 0.0) * to_viewport.y
-	return margins
+	return SafeAreaScript.margins(window_size, safe, viewport_size, padding)
 
 
 ## Kurzinfo aus dem Spielstand-Kopf, z. B. "Tag 9 · Di, 08:00 · 400,00 € · gespeichert 12.10., 14:03".

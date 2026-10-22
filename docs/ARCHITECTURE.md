@@ -257,6 +257,13 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   `App.settings_path` für Tests) und reicht sie an die Einstellungsseite. Schalter: `calendar_auto_open` (ab G5.3),
   `vibration` (ab G5.9), Standard jeweils an. Laden ist fehlertolerant (fehlend/kaputt → Standardwerte, kaputte Datei
   bleibt liegen, unbekannte Schlüssel und falsche Typen werden ignoriert); Speichern atomar (.tmp → umbenennen).
+- Start (G5.1b): Hauptszene ist der leichte Ladebildschirm `scenes/boot/loading.tscn` (`scripts/ui/loading_screen.gd`,
+  hängt nur an UiStyle und `safe_area.gd`). Er lädt je Bild einen Schritt: App-Szene per
+  `ResourceLoader.load_threaded_request`/`load_threaded_get_status`, Spieldaten (`GameData.load_all`), Kartengrafiken
+  (`CityMap.texture_paths()`, ebenfalls im Hintergrund), Spielstand-Kopf. Fortschritt = Gewicht der fertigen Schritte +
+  Anteil im laufenden Schritt, nie rückwärts. Danach instanziiert er die App, übergibt `preloaded_data` und
+  `preloaded_resources` (hält die Grafiken im Cache) und wird freigegeben. Fehler → Meldung im Ladebildschirm.
+  Zeitstempel als „[Start] … ms“ im Log. Safe-Area-Rechnung liegt in `scripts/ui/safe_area.gd` (App nutzt sie mit).
   Gebäude/Schild antippen öffnet das Fenster des Orts; „Hier“ zentriert die Karte auf den aktuellen Ort und öffnet ihn.
   Icons der Seitenbuttons als Tabelle `ICONS` (Kenney „Game Icons“, CC0); fehlt eine Datei, bleibt nur der Text.
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,

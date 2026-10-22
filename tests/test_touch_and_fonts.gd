@@ -155,3 +155,33 @@ func test_settings_screen_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## G5.1b: Ladebildschirm (normal und mit Fehlermeldung) – Schrift, nichts abgeschnitten, alles in der Safe Area.
+func test_loading_screen_layout() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		for broken in [false, true]:
+			var screen := (load("res://scenes/boot/loading.tscn") as PackedScene).instantiate() as Control
+			screen.set("animate", false)
+			(Engine.get_main_loop() as SceneTree).root.add_child(screen)
+			var margins: Array[float] = []
+			for value in Layout.DEVICES[device]["margins"]:
+				margins.append(float(value))
+			screen.size = Layout.DEVICES[device]["size"]
+			screen.call("set_safe_margins", margins)
+			if broken:
+				screen.set("app_scene_path", "res://gibt_es_nicht.tscn")
+				screen.call("run_to_end", 3000)
+			else:
+				screen.call("advance")  # erster Schritt: Statustext steht
+			Layout.settle_in_place(screen)
+			var where := "%s / Ladebildschirm%s" % [device, " (Fehler)" if broken else ""]
+			_audit(screen, screen, where, problems)
+			var safe := Layout.safe_rect(device)
+			for node in screen.find_children("*", "Label", false, false):
+				var label := node as Label
+				if label.visible and not label.text.is_empty() and not safe.grow(0.5).encloses(Layout.rect_of(label)):
+					problems.append("%s: „%s“ außerhalb der Safe Area %s" % [where, label.text, Layout.rect_of(label)])
+			screen.free()
+	_report(problems)

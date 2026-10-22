@@ -482,3 +482,19 @@ Unbekannte Schlüssel und Werte vom falschen Typ werden ignoriert (Wert = Standa
 Umschalten, atomar über eine .tmp-Datei. Darstellung: CheckButton mit eigenen großen Schalter-Symbolen
 (`assets/icons/toggle_on.svg` / `toggle_off.svg`, an = Akzentfarbe) – die Godot-Standardsymbole waren auf dem
 Mac-Screenshot kaum als an/aus zu erkennen; Tippfläche 84 px, Schrift 24 px.
+
+## 051 – Ladebildschirm (G5.1b)
+Messung auf dem Mac (Fensterlauf, Zeit seit Engine-Start): Engine bis zum ersten Skript 430–460 ms (kalt 1,2 s);
+App-Szene laden 200–265 ms – das ist das Einlesen aller Skripte über die preload-Kette (App → Spielansicht → alle
+Fenster, Systeme, Karte); Aufbau bis zum ersten Bild 35–75 ms; „Neues Spiel“ mit Karte und Texturatlas 19–55 ms.
+Mit Ladebildschirm: erstes Bild des Ladebildschirms nach 616–650 ms, alle Schritte fertig nach 0,9–1,0 s, Übergabe an
+die App nach der Blende (0,45 s) bei ~1,4 s. Was auf dem iPhone schwarz ist, kann ich auf dem Mac nicht sehen: Die
+Zeit VOR dem ersten Skript (Engine-Start, Renderer) kann kein Spielskript überbrücken – dort zeigt iOS den
+Launch-Screen bzw. Godot sein Startbild. Abgedeckt ist jetzt alles NACH dem ersten Skript (App-Szene, Daten, Karte);
+die Zeitstempel „[Start] … ms“ in der Xcode-Konsole zeigen, wo die Sekunden auf dem iPhone liegen.
+Fortschritt ehrlich: Im ersten Schritt meldet der ResourceLoader nur 0 → fertig (die App-Szene hängt an genau einer
+Datei, dem App-Skript; das Einlesen der übrigen Skripte meldet er nicht schrittweise) – der Balken springt dort von
+0 auf 45 %. Die Kartengrafiken (~40 Dateien) liefern feine Schritte. Kein geschätzter Balken.
+Mögliche Beschleunigung (nicht umgesetzt, erst nach den iPhone-Zeiten entscheiden): die Fenster-Skripte und die Karte
+nicht per `preload` in der App-Kette laden, sondern erst bei Bedarf (`load`) – das verkürzt den größten Mac-Posten.
+Die Skripte werden bereits als komprimierte Binär-Tokens exportiert (`script_export_mode=2`).
