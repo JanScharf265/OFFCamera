@@ -276,7 +276,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Tippen vs. Scrollen: > 12 px Bewegung zwischen Antippen und Loslassen = Scrollen). Inhalte mit `setup()`,
   `get_title()`, `refresh()`: `location_window.gd` (Details, „Hinfahren“, Content, Aktivitäten, Ausrüstung,
   Gründung, Filiale – an fremden Orten sichtbar, aber gesperrt mit dem Grund aus `check()`),
-  `appointments_window.gd`, `obligations_window.gd` (Fristen: offen/Mahngebühr/Bezahlen, nächste Fälligkeiten),
+  `calendar_window.gd` (G5.2: Tagesplan als Zeitstrahl aus `scripts/core/day_plan.gd` – Termine und Fristen des Tages,
+  sortiert, mit Zustand, Fahrzeit und Platz der Jetzt-Linie; „Wahrnehmen“), `obligations_window.gd` (Fristen: offen/Mahngebühr/Bezahlen, nächste Fälligkeiten),
   `channel_window.gd` (Kanal + Verlauf), `company_window.gd` (Unternehmen,
   Tagesabschlüsse, Verlauf, Einlage/Entnahme), `ledger_window.gd` (Wochenübersicht je Konto nach Wertstellung, Buchungen, Filter alle/privat/Firma),
   `event_window.gd` (offenes Ereignis, nicht schließbar). Immer nur ein Fenster, Karte dahinter abgedunkelt

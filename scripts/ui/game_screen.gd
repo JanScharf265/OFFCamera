@@ -28,7 +28,7 @@ const HudBarScript := preload("res://scripts/ui/hud_bar.gd")
 const RoundButtonScript := preload("res://scripts/ui/round_button.gd")
 const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
-const AppointmentsWindowScript := preload("res://scripts/ui/windows/appointments_window.gd")
+const CalendarWindowScript := preload("res://scripts/ui/windows/calendar_window.gd")
 const ChannelWindowScript := preload("res://scripts/ui/windows/channel_window.gd")
 const CompanyWindowScript := preload("res://scripts/ui/windows/company_window.gd")
 const LedgerWindowScript := preload("res://scripts/ui/windows/ledger_window.gd")
@@ -280,10 +280,11 @@ func _open_location(location_id: String) -> void:
 	_map.set_state(_game.locations.get_current(), _selected_location)
 
 
+## Kalender (G5.2, ersetzt „Termine“): Tagesplan als Zeitstrahl.
 func _open_appointments() -> void:
-	var content := AppointmentsWindowScript.new()
+	var content := CalendarWindowScript.new()
 	content.setup(self, _game)
-	_open_window("appointments", content)
+	_open_window("calendar", content)
 
 
 func _open_obligations() -> void:

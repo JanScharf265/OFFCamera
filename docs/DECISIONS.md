@@ -518,3 +518,15 @@ Probe-Spielbildschirm 50 ms, Übergabe ~0,93 s nach „bereit“; nach dem Tipp 
 Keine Mindestdauer (Entscheidung des Game Directors): Der Ladebildschirm verschwindet so schnell wie möglich – nach
 dem letzten Schritt nur noch die Blende (0,45 s), kein zusätzliches Warten. (Zwischenzeitlich gab es eine Mindestdauer
 von 0,8 s gegen das Aufblitzen; sie wurde wieder entfernt.)
+
+## 053 – Kalender als Tagesplan (G5.2)
+Der Kalender zeigt nur HEUTE – als Zeitstrahl. Die Einträge berechnet `scripts/core/day_plan.gd` (reine Abfrage über
+Termine, Fristen und Orte, ändert nichts): Termine des Tages mit Beginn, Ende, Ort und Fahrzeit vom aktuellen Ort;
+Fristen, die heute fällig wurden (Mieten montags 00:00, bezahlt/offen/erlassen), und – nur für den heutigen Tag –
+offene Fristen früherer Tage als „überfällig“, damit nichts Offenes aus dem Blick gerät. Sortierung: Uhrzeit, bei
+Gleichstand Fristen vor Terminen, dann ID. Zustände: verpasst/erledigt/vorbei (grau), „als Nächstes“ für den ersten
+anstehenden Termin, offen (rot) für Fristen. Die Jetzt-Linie steht hinter allen Einträgen mit Beginn ≤ jetzt
+(`now_index`). Einen „laufenden“ Termin gibt es nicht: Verstreicht sein Beginn, gilt er als verpasst, und Wahrnehmen
+verbraucht seine ganze Dauer – der Zustand wurde deshalb nicht eingebaut. Ist der Tag leer, steht dort „Heute keine
+Termine und Fristen.“, und unter dem Plan ein Hinweis auf den nächsten späteren Termin. Der runde Button heißt schon
+seit G4.4 „Kalender“ (Knotenname bleibt `AppointmentsButton`).

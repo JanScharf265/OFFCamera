@@ -219,6 +219,36 @@ func test_conflict_warning_needs_second_tap() -> void:
 	app.free()
 
 
+## G5.2: Kalender – Tagesplan als Zeitstrahl (Termin mit Ort, Zeit, Fahrzeit; Jetzt-Linie; Zustände).
+func test_calendar_window_shows_day_plan() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_press(app, "AppointmentsButton")
+	assert_eq((_find(app, "WindowTitle") as Label).text, "Kalender · Tag 1 · Mo")
+	var row := _find(app, "CalendarEntry_camera_meeting")
+	assert_true(row != null, "Termin fehlt im Kalender")
+	assert_true(_screen_has_text(app, "Studio · 14:00–15:00 · 20 min Fahrt"), "Ort/Zeit/Fahrzeit fehlen")
+	assert_eq((_find(app, "CalendarState_camera_meeting") as Label).text, "als Nächstes")
+	var now_line := _find(app, "CalendarNowLine")
+	assert_true(now_line != null and now_line.get_index() < row.get_index(), "Jetzt-Linie nicht vor dem Termin")
+	assert_true(_screen_has_text(app, "Nächster Termin: Tag 2 · 09:00 · Probetraining (Fitnessstudio)"), "Hinweis fehlt")
+	_press(app, "WindowCloseButton")
+	# Termin verstreicht → grau und „verpasst“, die Jetzt-Linie steht danach.
+	app.game.time.advance(TimeSystemScript.at(1, 16) - app.game.time.get_minutes())
+	_press(app, "AppointmentsButton")
+	assert_eq((_find(app, "CalendarState_camera_meeting") as Label).text, "verpasst")
+	assert_true((_find(app, "CalendarEntry_camera_meeting").get_child(2) as Control).modulate.a < 1.0, "nicht ausgegraut")
+	assert_true(_find(app, "CalendarNowLine").get_index() > _find(app, "CalendarEntry_camera_meeting").get_index())
+	# Leerer Tag
+	_press(app, "WindowCloseButton")
+	app.game.time.advance(TimeSystemScript.at(4, 9) - app.game.time.get_minutes())
+	_press(app, "AppointmentsButton")
+	assert_true(_screen_has_text(app, "Heute keine Termine und Fristen."), "Leerzustand fehlt")
+	app.free()
+
+
 func test_attend_appointment_in_ui() -> void:
 	var app := _start_app()
 	if app == null:
