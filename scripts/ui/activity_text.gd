@@ -167,6 +167,23 @@ static func channel_change_text(change) -> Array[String]:
 ## Zeit-Zeile einer Kachel (G4.5), z. B. "2 h · Ende 10:20" oder "8 h · Ende 07:00 (+1 Tag)".
 ## Reine Anzeige: Ende = jetzt + Dauer.
 @warning_ignore("integer_division")
+## G5.7: Fahrt + Aktion, z. B. „20 min + 2 h“ (das Auto davor zeigt die Kachel als Symbol).
+static func trip_duration(travel_minutes: int, duration_minutes: int) -> String:
+	return "%s + %s" % [TimeSystemScript.format_duration(travel_minutes), TimeSystemScript.format_duration(duration_minutes)]
+
+
+## z. B. „Ende 15:00“, an einem späteren Tag „Ende 01:30 (+1 Tag)“.
+@warning_ignore("integer_division")
+static func end_text(end_minutes: int, now_minutes: int) -> String:
+	var minute_of_day := end_minutes % TimeSystemScript.MINUTES_PER_DAY
+	var text := "Ende %02d:%02d" % [minute_of_day / TimeSystemScript.MINUTES_PER_HOUR,
+			minute_of_day % TimeSystemScript.MINUTES_PER_HOUR]
+	var days := TimeSystemScript.day_of(end_minutes) - TimeSystemScript.day_of(now_minutes)
+	if days > 0:
+		text += " (+%d Tag%s)" % [days, "" if days == 1 else "e"]
+	return text
+
+
 static func duration_with_end(now_minutes: int, duration_minutes: int) -> String:
 	var end := now_minutes + duration_minutes
 	var minute_of_day := end % TimeSystemScript.MINUTES_PER_DAY

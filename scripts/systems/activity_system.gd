@@ -47,19 +47,29 @@ func get_catalog() -> ActivityCatalogScript:
 
 ## "" wenn die Aktivität jetzt möglich ist, sonst ein Grund für die Anzeige.
 func check(activity_id: String) -> String:
+	return _check(activity_id, false, _time.get_minutes())
+
+
+## G5.7 („Hinfahren und starten“): Prüfung, als wäre man um `start_minutes` am Ort der Aktivität angekommen –
+## alle Gründe außer „Nur vor Ort“, Öffnungszeiten ab der Ankunft. "" = möglich.
+func check_on_arrival(activity_id: String, start_minutes: int) -> String:
+	return _check(activity_id, true, start_minutes)
+
+
+func _check(activity_id: String, assume_there: bool, start_minutes: int) -> String:
 	var definition := _catalog.get_definition(activity_id)
 	if definition == null:
 		return "Unbekannte Aktivität: %s" % activity_id
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
-	if definition.location != _locations.get_current():
+	if not assume_there and definition.location != _locations.get_current():
 		var location := _locations.get_catalog().get_definition(definition.location)
 		return "Nur vor Ort möglich: %s." % (location.display_name if location != null else definition.location)
 	if definition.requires == "company" and not _company.is_founded():
 		return "Erst ein Unternehmen gründen (im Büro)."
 	if definition.requires == "branch" and not _company.is_branch_open():
 		return "Erst die Filiale eröffnen."
-	var closed_reason := _locations.check_open_during(definition.location, _time.get_minutes(),
+	var closed_reason := _locations.check_open_during(definition.location, start_minutes,
 			definition.duration_minutes)
 	if not closed_reason.is_empty():
 		return closed_reason

@@ -30,6 +30,7 @@ const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
 const CalendarWindowScript := preload("res://scripts/ui/windows/calendar_window.gd")
 const ReminderWindowScript := preload("res://scripts/ui/windows/reminder_window.gd")
+const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
 ## Breite des kleinen Erinnerungsfensters (G5.6)
 const REMINDER_MAX_WIDTH := 760.0
 const ChannelWindowScript := preload("res://scripts/ui/windows/channel_window.gd")
@@ -488,6 +489,40 @@ func on_travel_pressed(location_id: String) -> void:
 		_after_action(reason, "Angekommen: %s" % target.display_name if reason.is_empty() else ""))
 
 
+## G5.7 „Hinfahren und starten“: Konflikt-Popup für die Gesamtzeit (Fahrt + Aktion), dann Fahrt und Aktion über das
+## TripSystem. Scheitert die Aktion nach der Fahrt, ist man trotzdem angekommen – mit klarer Meldung.
+func on_trip_pressed(kind: String, id: String) -> void:
+	if _was_scroll():
+		return
+	var location_id: String = _game.trips.target_location(kind, id)
+	var target := _game.locations.get_catalog().get_definition(location_id)
+	var action_name := _trip_action_name(kind, id)
+	_guard(_game.trips.total_minutes(kind, id), "Fahrt nach %s + %s" % [target.display_name, action_name],
+			func() -> void:
+				var origin := _game.locations.get_current()
+				var result: Dictionary = _game.trips.run(kind, id)
+				if result["arrived"]:
+					_map.play_travel(origin, location_id)
+				if result["arrived"] and not result["reason"].is_empty():
+					_after_action("Angekommen: %s – aber %s: %s" % [target.display_name, action_name, result["reason"]],
+							"", true)
+				else:
+					_after_action(result["reason"], "Angekommen: %s · %s erledigt" % [target.display_name, action_name]))
+
+
+func _trip_action_name(kind: String, id: String) -> String:
+	match kind:
+		TripSystemScript.KIND_ACTIVITY:
+			return _game.activities.get_catalog().get_definition(id).display_name
+		TripSystemScript.KIND_CONTENT:
+			return _game.content.get_catalog().get_definition(id).display_name
+		TripSystemScript.KIND_FOUND:
+			return "%s gründen" % _game.company.get_catalog().get_definition(id).display_name
+		TripSystemScript.KIND_BRANCH:
+			return "%s eröffnen" % _game.company.get_catalog().get_definition(id).branch_display_name
+	return id
+
+
 func on_attend_pressed(appointment_id: String) -> void:
 	if _was_scroll():
 		return
@@ -531,9 +566,11 @@ func on_event_option_pressed(instance_id: String, option_id: String, option_labe
 
 
 ## Rückmeldung nach einer Aktion, inklusive verpasster Termine und Tagesabschlüsse.
-func _after_action(reason: String, success_text: String) -> void:
-	if reason.is_empty():
-		var text := "%s – jetzt %s." % [success_text, _game.time.format_clock()]
+## changed_anyway (G5.7): gescheitert, aber der Zustand hat sich geändert (angekommen) – trotzdem speichern.
+func _after_action(reason: String, success_text: String, changed_anyway: bool = false) -> void:
+	if reason.is_empty() or changed_anyway:
+		var text := "%s – jetzt %s." % [success_text, _game.time.format_clock()] if reason.is_empty() \
+				else "%s – jetzt %s." % [reason.trim_suffix("."), _game.time.format_clock()]
 		for id in _game.appointments.take_missed_notices():
 			var definition := _game.appointments.get_catalog().get_definition(id)
 			text += "\nTermin verpasst: „%s“ (%s)." % [definition.title,
@@ -542,11 +579,11 @@ func _after_action(reason: String, success_text: String) -> void:
 			text += "\nTagesabschluss %s" % settlement
 		for notice in _game.obligations.take_notices():
 			text += "\n%s" % notice
-		_show_feedback(text, UiStyle.TEXT)
+		_show_feedback(text, UiStyle.TEXT if reason.is_empty() else UiStyle.NEGATIVE)
 	else:
 		_show_feedback(reason, UiStyle.NEGATIVE)
 	_refresh()
-	if reason.is_empty():
+	if reason.is_empty() or changed_anyway:
 		state_changed.emit()
 
 

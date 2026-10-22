@@ -608,8 +608,11 @@ func test_location_window_elsewhere_shows_locked_actions() -> void:
 	_press(app, "NewGameButton")
 	_press(app, "MapPin_studio")
 	assert_eq((_find(app, "WindowTitle") as Label).text, "Studio")
-	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, true)
-	assert_eq((_find(app, "ContentButton_livestream") as Button).text, "Nur vor Ort möglich: Studio.")
+	# G5.7: Aktionen mit Spielzeit bieten „Hinfahren und starten“, Käufe bleiben „Nur vor Ort“.
+	assert_eq((_find(app, "ContentButton_livestream") as Button).disabled, false)
+	assert_eq((_find(app, "ContentButton_livestream") as Button).text, "Hinfahren und starten")
+	assert_eq((_find(app, "EquipmentButton_camera") as Button).disabled, true)
+	assert_eq((_find(app, "EquipmentButton_camera") as Button).text, "Nur vor Ort erhältlich: Studio.")
 	assert_eq((_find(app, "TravelButton") as Button).visible, true)
 	app.free()
 

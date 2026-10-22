@@ -283,6 +283,15 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   (über übersprungene Tage einmal für den aktuellen) und merkt den Tag auch bei ausgeschaltetem Geräte-Schalter. Die
   Spielansicht fragt es in `_refresh()` erst, wenn kein Ereignis offen ist, und öffnet dann den Kalender (ersetzt ein
   offenes Fenster). Neues Spiel: Tag 1 gilt als gezeigt. Kostet keine Spielzeit.
+- „Hinfahren und starten“ (G5.7, `scripts/systems/trip_system.gd`, im GameState als `trips`, ohne Zustand): für
+  Aktivitäten, Content, Gründung und Filiale an einem anderen Ort (`offers`). `check(kind, id)` prüft die Aktion so,
+  als wäre man angekommen – die Systeme haben dafür `check_on_arrival(id, start)` bzw.
+  `check_found_on_arrival`/`check_open_branch_on_arrival` (gleiche Regeln wie `check()`, nur ohne „Nur vor Ort“ und
+  mit den Öffnungszeiten ab der Ankunft). `run()` = `locations.travel()` + normale Aktion; Rückgabe
+  {`arrived`, `reason`} – scheitert die Aktion nach der Fahrt, ist man trotzdem dort. Die Spielansicht fragt vorher
+  das Konflikt-Popup mit der Gesamtzeit (`total_minutes`) und speichert auch bei „angekommen, aber gescheitert“.
+  Kachel: Auto + „20 min + 2 h“, Hinweiszeile „Ende 15:00“ (oder der Konflikt), Button „Hinfahren und starten“ mit
+  Auto; sonst der Grund im Button. Käufe haben keine Kombi. „Hinfahren“ in der Titelzeile: `UiStyle.style_travel_button`.
 - Erinnerung vor Terminen (G5.6, `scripts/systems/reminder_system.gd`, im GameState als `reminders`, im Spielstand seit
   Version 14 mit `reminded` und `reminded_until_minutes`): `take_due()` liefert einen offenen Termin, der in 1–30
   Spielminuten beginnt, genau einmal je Termin; `describe(id)` liefert Name, Beginn, Ort, Fahrzeit vom aktuellen Ort,
@@ -360,6 +369,7 @@ Headless ist das Fenster nur 64 × 64 – Layout-Tests stellen Geräte nach (`te
 | `EventSystem` | geplante/ausgelöste Ereignisse, verarbeitete IDs |
 | `ActivitySystem` | Prüfen und Ausführen von Aktivitäten |
 | `LocationSystem` | aktueller Ort, Reisezeit, Öffnungszeiten, Fahrten |
+| `TripSystem` | „Hinfahren und starten“: Prüfung bei Ankunft, Fahrt + Aktion (ohne Zustand, G5.7) |
 | `AppointmentSystem` | Termine: wahrnehmen, warten bis Beginn, verpasst, Kollisionen |
 | `ChannelSystem` | Follower, Community-Stimmung, Ruf, Kanal-Protokoll |
 | `ContentSystem` | Prüfen, Berechnen und Produzieren von Content |

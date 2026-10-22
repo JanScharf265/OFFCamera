@@ -297,3 +297,47 @@ func test_reminder_window_touch_and_fonts() -> void:
 			app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## G5.7: Studio-Fenster von der Wohnung aus um 10:00 – Kombi-Kacheln („Hinfahren und starten“ mit Auto), Sperrgründe
+## und „Hinfahren“ mit Auto: Tippflächen, Schrift, Zeitzeilen und Button-Texte nicht abgeschnitten (Button-Text in
+## einer Zeile samt Symbol), auch in jedem Reiter des „Grenzfalls“.
+func test_trip_tiles_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		_press(app, "NewGameButton")
+		var screen := app.find_child("CityMap", true, false).get_parent() as Control
+		app.game.time.advance(TimeSystemScript.at(1, 10) - app.game.time.get_minutes())
+		_press(app, "MapPin_studio")
+		Layout.apply(app, device)
+		var window := screen.find_child("Window_location", false, false) as Control
+		var pages: Array = [null]
+		var tabs := window.find_child("LocationTabs", true, false) as Control
+		if tabs != null and tabs.visible:
+			pages = tabs.get_children()
+		for page in pages:
+			if page != null:
+				(page as Button).pressed.emit()
+			Layout.settle_in_place(window)
+			var where := "%s%s" % [device, "" if page == null else " / %s" % page.name]
+			_audit(window, screen, where, problems)
+			for node in window.find_children("*", "Button", true, false):
+				var button := node as Button
+				if button.text.is_empty() or not button.is_visible_in_tree():
+					continue
+				var font := button.get_theme_font("font")
+				var font_size := button.get_theme_font_size("font_size")
+				var needed := font.get_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+				if button.icon != null:
+					needed += button.get_theme_constant("icon_max_width") + button.get_theme_constant("h_separation")
+				var box := button.get_theme_stylebox("normal")
+				var room := button.size.x - box.get_content_margin(SIDE_LEFT) - box.get_content_margin(SIDE_RIGHT)
+				if not button.disabled and needed > room + 0.5:
+					problems.append("%s: „%s“ passt nicht in eine Zeile (%d > %d px)" % [where, button.text, needed, room])
+		var travel := window.find_child("TravelButton", true, false) as Button
+		if travel == null or not travel.is_visible_in_tree() or travel.icon == null:
+			problems.append("%s: „Hinfahren“ ohne Auto" % device)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)

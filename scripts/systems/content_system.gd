@@ -103,15 +103,24 @@ func preview(format_id: String) -> Dictionary:
 
 ## "" wenn das Format jetzt produziert werden kann, sonst ein Grund für die Anzeige.
 func check(format_id: String) -> String:
+	return _check(format_id, false, _time.get_minutes())
+
+
+## G5.7 („Hinfahren und starten“): Prüfung, als wäre man um `start_minutes` am Ort des Formats angekommen.
+func check_on_arrival(format_id: String, start_minutes: int) -> String:
+	return _check(format_id, true, start_minutes)
+
+
+func _check(format_id: String, assume_there: bool, start_minutes: int) -> String:
 	var format := _catalog.get_definition(format_id)
 	if format == null:
 		return "Unbekanntes Format: %s" % format_id
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
-	if format.location != _locations.get_current():
+	if not assume_there and format.location != _locations.get_current():
 		var location := _locations.get_catalog().get_definition(format.location)
 		return "Nur vor Ort möglich: %s." % (location.display_name if location != null else format.location)
-	var closed_reason := _locations.check_open_during(format.location, _time.get_minutes(), format.duration_minutes)
+	var closed_reason := _locations.check_open_during(format.location, start_minutes, format.duration_minutes)
 	if not closed_reason.is_empty():
 		return closed_reason
 	var energy_change := format.get_effect("energy")

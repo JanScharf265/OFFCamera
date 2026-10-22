@@ -577,3 +577,19 @@ dieselbe Ein-Fenster-Regel nutzt. „Hinfahren“/„Warten“ schließen die Er
 als erinnert) – nötig, weil die Migration 13 → 14 die Termin-Daten nicht kennt: Sie setzt den Wert auf gespeicherte
 Zeit + 30, damit ein alter Stand keine nachträgliche Erinnerung zeigt. Spielstand Version 14, Testdatei
 `tests/fixtures/saves/v14.json` aus dem aktuellen Code (Tag 9, ohne Oberfläche gespielt).
+
+## 058 – „Hinfahren und starten“ (G5.7)
+Eigenes zustandsloses `TripSystem`, das nur die vorhandenen Systeme verkettet: Fahrt über `LocationSystem.travel`,
+Aktion über `ActivitySystem.start`, `ContentSystem.produce`, `CompanySystem.found`/`open_branch`. Damit keine Regel
+doppelt entsteht, haben die Prüfungen eine Variante „bei Ankunft“ (`check_on_arrival(id, start)`): dieselben
+Gründe wie `check()` in derselben Reihenfolge, nur ohne „Nur vor Ort“ und mit den Öffnungszeiten ab der Ankunft.
+Die Fahrt selbst kostet weder Geld noch Energie, also genügt die Prüfung bei Ankunft. `check()` vor Ort bleibt
+unverändert. Ein Grund, den Hinfahren nicht löst, steht im Button (keine Kombi). Konflikte prüft wie überall die
+Spielansicht mit dem Konflikt-Popup, hier für Fahrt + Aktion. Scheitert die Aktion nach der Fahrt doch (z. B. weil
+während der Fahrt etwas passiert), bleibt man angekommen, die Meldung sagt es („Angekommen: Studio – aber
+Livestream: …“), und der Stand wird gespeichert. Gilt für Aktivitäten, Content, Gründung und Filiale; Käufe nur vor
+Ort. Kachel: „20 min + 2 h · Ende 15:00“ passte auf dem iPhone SE nicht in eine Zeile – daher Auto + „20 min + 2 h“
+in der Zeitzeile und „Ende 15:00“ in der Hinweiszeile (droht ein Konflikt, steht dort „⚠ Verpasst: 14:00“, das Ende
+nennt dann das Popup). Das Emoji 🚗 wird durch ein eigenes Auto-Symbol (`assets/icons/car.svg`) ersetzt, weil die
+Spielschrift keine Emojis hat. „Hinfahren“ in der Titelzeile: dunkle Fläche mit Akzent-Rahmen und Auto statt der
+gefüllten Akzent-Pille des aktiven Reiters.

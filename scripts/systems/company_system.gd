@@ -113,6 +113,15 @@ func is_branch_open() -> bool:
 
 ## "" wenn die Filiale jetzt eröffnet werden kann, sonst ein Grund für die Anzeige.
 func check_open_branch() -> String:
+	return _check_open_branch(false, _time.get_minutes())
+
+
+## G5.7: wie check_open_branch(), als wäre man um `start_minutes` am Ort der Filiale angekommen.
+func check_open_branch_on_arrival(start_minutes: int) -> String:
+	return _check_open_branch(true, start_minutes)
+
+
+func _check_open_branch(assume_there: bool, start_minutes: int) -> String:
 	var definition := get_type()
 	if not is_founded():
 		return "Erst ein Unternehmen gründen (im Büro)."
@@ -124,10 +133,10 @@ func check_open_branch() -> String:
 		return "Die Filiale ist bereits eröffnet."
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
-	if definition.branch_location != _locations.get_current():
+	if not assume_there and definition.branch_location != _locations.get_current():
 		var location := _locations.get_catalog().get_definition(definition.branch_location)
 		return "Nur vor Ort möglich: %s." % (location.display_name if location != null else definition.branch_location)
-	var closed_reason := _locations.check_open_during(definition.branch_location, _time.get_minutes(),
+	var closed_reason := _locations.check_open_during(definition.branch_location, start_minutes,
 			definition.branch_opening_minutes)
 	if not closed_reason.is_empty():
 		return closed_reason
@@ -165,6 +174,15 @@ func get_value(key: String) -> int:
 
 ## "" wenn die Gründung jetzt möglich ist, sonst ein Grund für die Anzeige.
 func check_found(type_id: String) -> String:
+	return _check_found(type_id, false, _time.get_minutes())
+
+
+## G5.7: wie check_found(), als wäre man um `start_minutes` am Gründungsort angekommen.
+func check_found_on_arrival(type_id: String, start_minutes: int) -> String:
+	return _check_found(type_id, true, start_minutes)
+
+
+func _check_found(type_id: String, assume_there: bool, start_minutes: int) -> String:
 	var definition := _catalog.get_definition(type_id)
 	if definition == null:
 		return "Unbekannte Unternehmensart: %s" % type_id
@@ -172,10 +190,10 @@ func check_found(type_id: String) -> String:
 		return "Du hast bereits ein Unternehmen."
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
-	if definition.found_location != _locations.get_current():
+	if not assume_there and definition.found_location != _locations.get_current():
 		var location := _locations.get_catalog().get_definition(definition.found_location)
 		return "Nur vor Ort möglich: %s." % (location.display_name if location != null else definition.found_location)
-	var closed_reason := _locations.check_open_during(definition.found_location, _time.get_minutes(),
+	var closed_reason := _locations.check_open_during(definition.found_location, start_minutes,
 			definition.founding_minutes)
 	if not closed_reason.is_empty():
 		return closed_reason

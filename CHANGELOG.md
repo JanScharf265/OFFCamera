@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- „Hinfahren und starten“: Kacheln eines anderen Orts bieten statt „Nur vor Ort möglich“ einen Kombi-Button mit Gesamtzeit (Auto · „20 min + 2 h“, „Ende 12:20“); geprüft wird für die Ankunft (Firma, Geld, Energie, Öffnungszeiten) und für Termine mit der Gesamtzeit; scheitert die Aktion nach der Fahrt, bist du trotzdem angekommen und bekommst eine klare Meldung; Käufe nur vor Ort; „Hinfahren“ mit Auto-Symbol und eigenem Stil (Ticket G5.7)
 - Erinnerung vor Terminen: Beginnt ein Termin in höchstens 30 Spielminuten, erscheint genau einmal ein kleines Fenster mit Termin, Uhrzeit, Ort und Fahrzeit – „Du schaffst es noch“ oder „Du kommst zu spät: Fahrt 20 min“ – und „Hinfahren“, „Warten bis 14:00“ oder „Später“; kommt nach Ereignis und Kalender; Spielstand Version 14 (alte Spielstände laden weiter) (Ticket G5.6)
 - „Warten bis 14:00“: Ist man vor Ort und der Termin kommt heute noch, springt die Uhr genau auf den Terminbeginn – kostet nichts, Energie und Stimmung bleiben; danach direkt „Wahrnehmen“. Im Kalender bei jedem Termin (sonst gesperrt mit Grund, z. B. „Erst hinfahren: Studio“) und vor Ort in der Titelzeile des Ortsfensters (Ticket G5.5)
 - Würde eine Aktion oder Fahrt einen Termin verpassen lassen, fragt jetzt ein Popup nach („Termin verpassen?“ mit Ende der Aktion, allen betroffenen Terminen, Ort und Kosten; „Trotzdem starten“ / „Abbrechen“) – statt „nochmal tippen“ (Ticket G5.4)

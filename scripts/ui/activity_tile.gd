@@ -9,6 +9,7 @@ extends PanelContainer
 ## die Hinweiszeile tritt dann zurück.
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
+const CAR_ICON := "res://assets/icons/car.svg"
 
 ## Wirkung für set_effects(): {"text": "+25,00 €", "tone": 1 (gut) / -1 (Kosten) / 0 (neutral), "icon": Pfad oder ""}.
 const TONE_GOOD := 1
@@ -18,10 +19,15 @@ const TONE_NEUTRAL := 0
 var button: Button
 var _title: Label
 var _time: Label
+## G5.7: Auto vor der Zeitzeile und im Button bei „Hinfahren und starten“
+var _trip_icon: TextureRect
+var _trip := false
 var _effects: HFlowContainer
 var _info: Label
 var _hint: Label
 var _action_text := ""
+## Text des freien Buttons: Aktionstext oder (G5.7) „Hinfahren und starten“
+var _shown_action_text := ""
 
 
 ## key = Name-Suffix der Knoten (z. B. "livestream"), action_text = Text des Buttons, wenn frei.
@@ -42,9 +48,25 @@ func _init(key: String, title: String, action_button: Button, action_text: Strin
 	_title = _line(title, UiStyle.TILE_TITLE_FONT_SIZE, UiStyle.TEXT)
 	_title.name = "TileTitle_%s" % key
 	box.add_child(_title)
+	var time_row := HBoxContainer.new()
+	time_row.add_theme_constant_override("separation", 6)
+	time_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(time_row)
+	_trip_icon = TextureRect.new()
+	_trip_icon.name = "TileTripIcon_%s" % key
+	_trip_icon.texture = load(CAR_ICON)
+	_trip_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_trip_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_trip_icon.custom_minimum_size = Vector2(UiStyle.TILE_ICON_SIZE, UiStyle.TILE_ICON_SIZE)
+	_trip_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_trip_icon.modulate = UiStyle.MUTED
+	_trip_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_trip_icon.visible = false
+	time_row.add_child(_trip_icon)
 	_time = _line("", UiStyle.TILE_FONT_SIZE, UiStyle.MUTED)
 	_time.name = "TileTime_%s" % key
-	box.add_child(_time)
+	_time.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	time_row.add_child(_time)
 	_effects = HFlowContainer.new()
 	_effects.name = "TileEffects_%s" % key
 	_effects.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -75,7 +97,11 @@ func _init(key: String, title: String, action_button: Button, action_text: Strin
 
 	button = action_button
 	_action_text = action_text
+	_shown_action_text = action_text
 	button.text = action_text
+	# Auto bei „Hinfahren und starten“ (G5.7): klein und eng, damit der Text auf dem iPhone SE in eine Zeile passt.
+	button.add_theme_constant_override("icon_max_width", UiStyle.TILE_ICON_SIZE - 4)
+	button.add_theme_constant_override("h_separation", 4)
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.add_theme_font_size_override("font_size", UiStyle.TILE_BUTTON_FONT_SIZE)
 	UiStyle.style_tile_button(button, is_purchase)
@@ -97,6 +123,19 @@ func set_title(text: String) -> void:
 func set_time(text: String) -> void:
 	_time.text = text
 	_time.visible = not text.is_empty()
+	_trip_icon.visible = _trip and _time.visible
+
+
+## G5.7 „Hinfahren und starten“: an = Auto vor der Zeitzeile (Text z. B. „20 min + 2 h · Ende 15:00“ über set_time)
+## und im Button, Button-Text `trip_text`; aus = normaler Aktionstext. Danach set_reason() aufrufen.
+func set_trip(on: bool, trip_text: String = "") -> void:
+	_trip = on
+	_trip_icon.visible = on and _time.visible
+	if on:
+		_shown_action_text = trip_text
+	else:
+		_shown_action_text = _action_text
+	button.icon = load(CAR_ICON) if on else null
 
 
 ## effects: Array von {"text", "tone", "icon"} (siehe oben). Neu aufgebaut bei jedem Aufruf.
@@ -124,7 +163,9 @@ func set_hint(text: String, is_warning: bool = true) -> void:
 ## "" = frei (Button zeigt seinen Aktionstext), sonst steht der Sperrgrund im Button.
 func set_reason(reason: String) -> void:
 	button.disabled = not reason.is_empty()
-	button.text = _action_text if reason.is_empty() else reason
+	button.text = _shown_action_text if reason.is_empty() else reason
+	if not reason.is_empty():
+		button.icon = null
 	button.add_theme_font_size_override("font_size",
 			UiStyle.MIN_READ_FONT_SIZE if not reason.is_empty() else UiStyle.TILE_BUTTON_FONT_SIZE)
 	_hint.visible = reason.is_empty()  # gesperrt: Der Button nutzt die volle Höhe für den Grund

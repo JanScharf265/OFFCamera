@@ -22,6 +22,7 @@ const DayCycleScript := preload("res://scripts/core/day_cycle.gd")
 const ObligationSystemScript := preload("res://scripts/systems/obligation_system.gd")
 const DayStartSystemScript := preload("res://scripts/systems/day_start_system.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
+const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -50,6 +51,8 @@ var day_cycle: DayCycleScript
 var day_start: DayStartSystemScript
 ## Erinnerung ≤ 30 Spielminuten vor einem Termin, genau einmal je Termin (G5.6).
 var reminders: ReminderSystemScript
+## „Hinfahren und starten“ (G5.7) – ohne eigenen Zustand, nicht im Spielstand.
+var trips: TripSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -75,6 +78,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)
+	trips = TripSystemScript.new(time, locations, activities, content, company)
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).

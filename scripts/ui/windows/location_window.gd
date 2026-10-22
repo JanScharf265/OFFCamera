@@ -16,6 +16,9 @@ const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const LocationTabScript := preload("res://scripts/models/location_tab.gd")
 
 const CONFLICT_PREFIX := "⚠ Verpasst: "
+const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
+## G5.7: Button-Text der Kombi (das Auto-Symbol steht davor)
+const TRIP_TEXT := "Hinfahren und starten"
 
 var location_id := ""
 
@@ -186,7 +189,8 @@ func refresh() -> void:
 		tile.set_effects(ActivityText.effect_chips(definition.effects, definition.money_cents, {},
 				definition.company_effects))
 		tile.set_hint(_conflict_hint(definition.duration_minutes))
-		tile.set_reason(_game.activities.check(activity_id))
+		tile.set_reason(_trip_or(tile, TripSystemScript.KIND_ACTIVITY, activity_id, now,
+				_game.activities.check(activity_id)))
 	for format_id in _content_cards:
 		var format = _game.content.get_catalog().get_definition(format_id)
 		var tile: ActivityTileScript = _content_cards[format_id]
@@ -199,13 +203,43 @@ func refresh() -> void:
 			tile.set_hint("Qualität %d %%" % outcome["quality_percent"], false)
 		else:
 			tile.set_hint(conflict)
-		tile.set_reason(_game.content.check(format_id))
+		tile.set_reason(_trip_or(tile, TripSystemScript.KIND_CONTENT, format_id, now, _game.content.check(format_id)))
 	for equipment_id in _equipment_cards:
 		_refresh_equipment_card(equipment_id)
 	for type_id in _company_cards:
 		_refresh_company_card(type_id, now)
 	for type_id in _branch_cards:
 		_refresh_branch_card(type_id, now)
+
+
+## G5.7: Liegt die Aktion an einem anderen Ort, prüft das TripSystem „Hinfahren und starten“ für die Gesamtzeit.
+## Frei: Auto + „20 min + 2 h“ in der Zeitzeile, darunter „Ende 15:00“ in der Hinweiszeile (zusammen passte es auf
+## dem iPhone SE nicht in die Kachel) – droht ein Konflikt, steht dort „⚠ Verpasst: 14:00“ für die Gesamtzeit; Button
+## „Hinfahren und starten“. Sonst steht der Grund im Button – zuerst Gründe, die Hinfahren nicht löst.
+## Vor Ort: `here_reason` wie bisher. Rückgabe: Sperrgrund.
+func _trip_or(tile: ActivityTileScript, kind: String, id: String, now: int, here_reason: String) -> String:
+	if not _game.trips.offers(kind, id):
+		tile.set_trip(false)
+		return here_reason
+	var reason: String = _game.trips.check(kind, id)
+	tile.set_trip(reason.is_empty(), TRIP_TEXT)
+	if reason.is_empty():
+		var travel: int = _game.trips.travel_minutes(kind, id)
+		var minutes: int = _game.trips.action_minutes(kind, id)
+		tile.set_time(ActivityText.trip_duration(travel, minutes))
+		var conflict := _conflict_hint(travel + minutes)
+		if conflict.is_empty():
+			tile.set_hint(ActivityText.end_text(now + travel + minutes, now), false)
+		else:
+			tile.set_hint(conflict)
+	return reason
+
+
+func _press_tile(kind: String, id: String, here_action: Callable) -> void:
+	if _game.trips.offers(kind, id):
+		_screen.on_trip_pressed(kind, id)
+	else:
+		here_action.call()
 
 
 ## Hinweis, wenn die Aktion einen Termin verpassen ließe (Termine aus dem AppointmentSystem).
@@ -247,8 +281,9 @@ func _build_details() -> Control:
 	info.add_child(_location_distance)
 	_travel_button = _screen.scroll_button("Hinfahren", "TravelButton")
 	_travel_button.add_theme_font_size_override("font_size", UiStyle.TILE_BUTTON_FONT_SIZE)
-	# Sichtbar mittig wie die Reiter (G4.7), Tippfläche 84 px.
-	UiStyle.style_accent_touch_button(_travel_button, UiStyle.TAB_VISIBLE)
+	# Sichtbar mittig wie die Reiter (G4.7), Tippfläche 84 px; eigener Stil mit Auto (G5.7), damit es nicht wie der
+	# aktive Reiter aussieht.
+	UiStyle.style_travel_button(_travel_button, UiStyle.TAB_VISIBLE)
 	_travel_button.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE * 2.0, UiStyle.TOUCH_SIZE)
 	_travel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_travel_button.pressed.connect(func() -> void: _screen.on_travel_pressed(location_id))
@@ -331,7 +366,8 @@ func _refresh_wait() -> void:
 func _build_activity_card(activity_id: String) -> Control:
 	var definition = _game.activities.get_catalog().get_definition(activity_id)
 	var tile := _tile(activity_id, definition.display_name, "StartButton_%s" % activity_id, "Starten", false,
-			func() -> void: _screen.on_activity_pressed(activity_id), definition.tab)
+			func() -> void: _press_tile(TripSystemScript.KIND_ACTIVITY, activity_id,
+					func() -> void: _screen.on_activity_pressed(activity_id)), definition.tab)
 	tile.tooltip_text = definition.description
 	_cards[activity_id] = tile
 	return tile
@@ -340,7 +376,8 @@ func _build_activity_card(activity_id: String) -> Control:
 func _build_content_card(format_id: String) -> Control:
 	var format = _game.content.get_catalog().get_definition(format_id)
 	var tile := _tile(format_id, format.display_name, "ContentButton_%s" % format_id, "Produzieren", false,
-			func() -> void: _screen.on_content_pressed(format_id), format.tab)
+			func() -> void: _press_tile(TripSystemScript.KIND_CONTENT, format_id,
+					func() -> void: _screen.on_content_pressed(format_id)), format.tab)
 	tile.tooltip_text = format.description
 	_content_cards[format_id] = tile
 	return tile
@@ -375,7 +412,8 @@ func _refresh_equipment_card(equipment_id: String) -> void:
 func _build_company_card(type_id: String) -> Control:
 	var definition = _game.company.get_catalog().get_definition(type_id)
 	var tile := _tile(type_id, definition.display_name, "CompanyFoundButton_%s" % type_id, "Gründen",
-			false, func() -> void: _screen.on_company_found_pressed(type_id), definition.tab)
+			false, func() -> void: _press_tile(TripSystemScript.KIND_FOUND, type_id,
+					func() -> void: _screen.on_company_found_pressed(type_id)), definition.tab)
 	tile.tooltip_text = definition.description
 	tile.info_label("CompanyInfo_%s" % type_id)
 	_company_cards[type_id] = tile
@@ -402,14 +440,15 @@ func _refresh_company_card(type_id: String, now: int) -> void:
 				LedgerSystemScript.format_cents(definition.founding_fee_cents),
 				LedgerSystemScript.format_cents(definition.min_deposit_cents)])
 		tile.set_hint(_conflict_hint(definition.founding_minutes))
-	tile.set_reason(_game.company.check_found(type_id))
+	tile.set_reason(_trip_or(tile, TripSystemScript.KIND_FOUND, type_id, now, _game.company.check_found(type_id)))
 	tile.button.visible = not founded
 
 
 func _build_branch_card(type_id: String) -> Control:
 	var definition = _game.company.get_catalog().get_definition(type_id)
 	var tile := _tile("branch_%s" % type_id, definition.branch_display_name, "BranchOpenButton_%s" % type_id,
-			"Eröffnen", false, func() -> void: _screen.on_branch_open_pressed(type_id), definition.tab)
+			"Eröffnen", false, func() -> void: _press_tile(TripSystemScript.KIND_BRANCH, type_id,
+					func() -> void: _screen.on_branch_open_pressed(type_id)), definition.tab)
 	tile.info_label("BranchInfo_%s" % type_id)
 	_branch_cards[type_id] = tile
 	return tile
@@ -433,5 +472,5 @@ func _refresh_branch_card(type_id: String, now: int) -> void:
 				ActivityText.MONEY_ICON)] + per_day)
 		tile.set_hint(_conflict_hint(definition.branch_opening_minutes))
 	tile.set_info("")
-	tile.set_reason(_game.company.check_open_branch())
+	tile.set_reason(_trip_or(tile, TripSystemScript.KIND_BRANCH, type_id, now, _game.company.check_open_branch()))
 	tile.button.visible = not is_open

@@ -258,6 +258,31 @@ static func style_accent_touch_button(target: Button, visible_height: float) -> 
 	grow_touch_area(target, visible_height)
 
 
+## „Hinfahren“ in der Titelzeile (G5.7): klar anders als der aktive Reiter (gefüllte Akzent-Pille) – dunkle Fläche mit
+## Akzent-Rahmen, eckiger, mit Auto-Symbol. Sichtbar `visible_height`, Tippfläche TOUCH_SIZE.
+static func style_travel_button(target: Button, visible_height: float) -> void:
+	var normal := _box(SURFACE_PRESSED, 12)
+	normal.border_color = ACCENT
+	normal.set_border_width_all(3)
+	normal.set_corner_radius_all(8)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = ACCENT_PRESSED
+	var disabled := _box(DISABLED, 12)
+	disabled.set_corner_radius_all(8)
+	for state in ["normal", "hover"]:
+		target.add_theme_stylebox_override(state, normal)
+	for state in ["pressed", "hover_pressed"]:
+		target.add_theme_stylebox_override(state, pressed)
+	target.add_theme_stylebox_override("disabled", disabled)
+	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		target.add_theme_color_override(color_name, TEXT)
+	target.icon = load("res://assets/icons/car.svg")
+	target.add_theme_constant_override("icon_max_width", TILE_ICON_SIZE + 4)
+	target.add_theme_constant_override("h_separation", 8)
+	grow_touch_area(target, visible_height)
+
+
 ## Schalter auf der Einstellungsseite (G5.1): Fläche wie eine Karte statt der Akzentfarbe der Buttons.
 static func style_setting_toggle(target: CheckButton) -> void:
 	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
