@@ -8,6 +8,12 @@ signal stats_changed
 
 const MIN_VALUE := 0
 const MAX_VALUE := 100
+## Warnstufen für die Anzeige (G5.8, Entscheidung 059): unter LOW_BELOW gelb, unter CRITICAL_BELOW rot.
+const LOW_BELOW := 40
+const CRITICAL_BELOW := 20
+const LEVEL_OK := 0
+const LEVEL_LOW := 1
+const LEVEL_CRITICAL := 2
 ## Alle gültigen Schlüssel für Effekte in Daten (z. B. activities.json).
 const KEYS := ["energy", "mood"]
 const LABELS := {"energy": "Energie", "mood": "Stimmung"}
@@ -19,6 +25,15 @@ var mood: int
 func _init(p_energy: int = 80, p_mood: int = 60) -> void:
 	energy = clampi(p_energy, MIN_VALUE, MAX_VALUE)
 	mood = clampi(p_mood, MIN_VALUE, MAX_VALUE)
+
+
+## Warnstufe eines Werts (LEVEL_*): 40 und mehr normal, 20–39 niedrig, unter 20 kritisch.
+static func level_of(value: int) -> int:
+	if value < CRITICAL_BELOW:
+		return LEVEL_CRITICAL
+	if value < LOW_BELOW:
+		return LEVEL_LOW
+	return LEVEL_OK
 
 
 func get_value(key: String) -> int:

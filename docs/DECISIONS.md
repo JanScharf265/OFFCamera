@@ -593,3 +593,16 @@ in der Zeitzeile und „Ende 15:00“ in der Hinweiszeile (droht ein Konflikt, s
 nennt dann das Popup). Das Emoji 🚗 wird durch ein eigenes Auto-Symbol (`assets/icons/car.svg`) ersetzt, weil die
 Spielschrift keine Emojis hat. „Hinfahren“ in der Titelzeile: dunkle Fläche mit Akzent-Rahmen und Auto statt der
 gefüllten Akzent-Pille des aktiven Reiters.
+
+## 059 – Zählerpunkte und Warnfarben (G5.8)
+Zählungen kommen aus den Systemen: Kalender = `DayPlan.count_upcoming_today()` (dieselben Zustände, die der Kalender als
+„als Nächstes“/„anstehend“ zeigt – ein Termin, dessen Beginn gerade erreicht ist, zählt mit, weil er noch
+wahrgenommen werden kann), Fristen = `ObligationSystem.count_open()` (Instanzen entstehen erst bei Fälligkeit, offen
+heißt also fällig oder überfällig). Offene Ereignisse bekommen keinen Punkt: Sie öffnen sofort ihr eigenes, nicht
+schließbares Fenster, ein Zähler wäre nie zu sehen. Ab 10 „9+“, damit der Punkt klein bleibt (breitere Pille, 36 px).
+Der Punkt sitzt oben rechts über den Kreis hinaus, damit das Symbol frei bleibt (Test prüft: keine Überlappung).
+Warnfarben: gelb unter 40, rot unter 20 (`PlayerStats.LOW_BELOW`/`CRITICAL_BELOW`). Begründung: Die meisten Aktionen
+kosten 5–20 Energie (Livestream 20, Training 15) – unter 40 sind noch etwa zwei Aktionen möglich, Zeit zum Planen
+(Pause, Schlafen); unter 20 scheitert schon ein Livestream („Zu wenig Energie“). Für die Stimmung gelten dieselben
+Grenzen, damit man sich nur ein Muster merken muss. Die Stimmung war im Normalfall gelb – sie ist jetzt blau, sonst
+wäre „niedrig“ nicht zu erkennen. Die Stufen sind reine Anzeige, keine Spielregel.

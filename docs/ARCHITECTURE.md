@@ -283,6 +283,12 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   (über übersprungene Tage einmal für den aktuellen) und merkt den Tag auch bei ausgeschaltetem Geräte-Schalter. Die
   Spielansicht fragt es in `_refresh()` erst, wenn kein Ereignis offen ist, und öffnet dann den Kalender (ersetzt ein
   offenes Fenster). Neues Spiel: Tag 1 gilt als gezeigt. Kostet keine Spielzeit.
+- Zählerpunkte und Balkenfarben (G5.8): `RoundButton.set_badge(n)` – roter Punkt mit Zahl in Mini-Schrift (19 px),
+  ab 10 „9+“ (breitere Pille), oben rechts außerhalb des Symbols. Die Spielansicht setzt in `_refresh()` (nach jeder
+  Aktion, Fahrt, Warten und beim Laden) Kalender = `DayPlan.count_upcoming_today()` (Termine heute im Zustand
+  „als Nächstes“/„anstehend“) und Fristen = `ObligationSystem.count_open()` (Instanzen entstehen erst bei
+  Fälligkeit, offen = fällig oder überfällig). HUD-Balken: `PlayerStats.level_of(wert)` (LOW_BELOW 40,
+  CRITICAL_BELOW 20) → `HudBar.bar_color()` normal / `UiStyle.WARNING` / `UiStyle.BADGE`; die Zahl bleibt daneben.
 - „Hinfahren und starten“ (G5.7, `scripts/systems/trip_system.gd`, im GameState als `trips`, ohne Zustand): für
   Aktivitäten, Content, Gründung und Filiale an einem anderen Ort (`offers`). `check(kind, id)` prüft die Aktion so,
   als wäre man angekommen – die Systeme haben dafür `check_on_arrival(id, start)` bzw.

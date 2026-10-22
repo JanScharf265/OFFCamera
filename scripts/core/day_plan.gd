@@ -68,6 +68,15 @@ static func for_day(game, day: int = -1) -> Dictionary:
 			"next_later": _next_later(game, day)}
 
 
+## Zählerpunkt am Kalender (G5.8): Termine heute, die noch kommen (nächster und anstehende, noch nicht vorbei).
+static func count_upcoming_today(game) -> int:
+	var count := 0
+	for entry in for_day(game)["entries"]:
+		if entry["kind"] == KIND_APPOINTMENT and entry["state"] in [STATE_NEXT, STATE_UPCOMING]:
+			count += 1
+	return count
+
+
 static func is_past(entry: Dictionary) -> bool:
 	return entry["state"] in PAST_STATES
 

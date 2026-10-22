@@ -14,7 +14,11 @@ const STAT_ICONS := {
 	"energy": "res://assets/icons/bolt.svg",
 	"mood": "res://assets/icons/smiley.svg",
 }
-const STAT_COLORS := {"energy": Color("#7FD38A"), "mood": Color("#F2C14E")}
+## Normalfarben; G5.8: Stimmung blau statt gelb, weil Gelb jetzt „niedrig“ bedeutet.
+const STAT_COLORS := {"energy": Color("#7FD38A"), "mood": Color("#7FB4F2")}
+## Balkenfarbe je Warnstufe (PlayerStats.level_of): niedrig gelb, kritisch rot (G5.8).
+const LOW_COLOR := UiStyle.WARNING
+const CRITICAL_COLOR := UiStyle.BADGE
 const LOCATION_ICON := "res://assets/kenney/game-icons/target.png"
 const ICON_SIZE := 20
 const STAT_BAR_WIDTH := 48
@@ -89,6 +93,18 @@ func refresh(game: GameStateScript) -> void:
 		var value := game.stats.get_value(key)
 		_stat_labels[key].text = str(value)
 		_stat_bars[key].value = value
+		var fill := (_stat_bars[key] as ProgressBar).get_theme_stylebox("fill") as StyleBoxFlat
+		fill.bg_color = bar_color(key, value)
+
+
+## Farbe des Balkens: normal, unter 40 gelb, unter 20 rot (Grenzen in PlayerStats).
+static func bar_color(key: String, value: int) -> Color:
+	match PlayerStatsScript.level_of(value):
+		PlayerStatsScript.LEVEL_CRITICAL:
+			return CRITICAL_COLOR
+		PlayerStatsScript.LEVEL_LOW:
+			return LOW_COLOR
+	return STAT_COLORS[key]
 
 
 func _label(node_name: String, font_size: int, color: Color) -> Label:

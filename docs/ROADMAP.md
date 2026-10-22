@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, G5 läuft – als Nächstes G5.8)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3 und G4 fertig, G5 läuft – als Nächstes G5.9)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -282,7 +282,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] G5.5 Aktion „Warten bis Terminbeginn“ (über das TimeSystem, `AppointmentSystem.wait_until_start`): „Warten bis 14:00“ im Kalender (gesperrt mit Grund, z. B. „Erst hinfahren: Studio“) und vor Ort im Ortsfenster, danach „Wahrnehmen“; kostet nichts, Ereignisse in der Wartezeit genau einmal – die Kachel-Vorschau „Ende HH:MM“ + Wirkungen kam schon mit G4.5 (393/393 Tests grün)
 - [x] G5.6 Erinnerung ≤ 30 Spielminuten vor einem Termin (Termin, Ort, Fahrzeit, „Du schaffst es noch“/„Du kommst zu spät“, „Hinfahren“/„Warten“/„Später“), genau einmal je Termin, Reihenfolge Ereignis → Kalender → Erinnerung (`ReminderSystem`); Spielstand Version 14 + Migration + Testdatei (406/406 Tests + 3/3 lange Tests grün)
 - [x] G5.7 Kombi-Button „Hinfahren und starten“ (`TripSystem`: Fahrt + Aktion über die normalen Systeme, Prüfung bei Ankunft – Firma/Geld/Energie/Öffnungszeiten vor „Nur vor Ort“; Konflikt-Popup mit Gesamtzeit; scheitert die Aktion nach der Fahrt, ist man angekommen) für Aktivitäten, Content, Gründung, Filiale – Käufe nur vor Ort; Kachel mit Auto „20 min + 2 h“ und „Ende HH:MM“; „Hinfahren“ mit Auto und eigenem Stil (Rahmen statt Akzent-Fläche) (419/419 Tests grün)
-- [ ] G5.8 Rote Zählerpunkte mit Zahl (Termine heute, fällige Fristen, offene Ereignisse); Zählungen kommen aus den Systemen; dazu: Balken für Energie und Stimmung färben sich bei niedrigen Werten gelb bzw. rot (Grenzen als Konstanten)
+- [x] G5.8 Rote Zählerpunkte mit Zahl (Kalender: Termine heute, die noch kommen – `DayPlan.count_upcoming_today`; Fristen: offene – `ObligationSystem.count_open`; „9+“ ab 10; Ereignisse ohne Punkt, sie öffnen sofort ihr Fenster); Balken für Energie und Stimmung unter 40 gelb, unter 20 rot (`PlayerStats.level_of`), Stimmung normal blau (427/427 Tests grün)
 - [ ] G5.9 Vibration (`Input.vibrate_handheld`) bei Warnungen und großen Geldänderungen, mit Schalter; Wirkung nur auf dem iPhone prüfbar
 
 ### T – Tutorial-System

@@ -31,6 +31,7 @@ const LocationWindowScript := preload("res://scripts/ui/windows/location_window.
 const CalendarWindowScript := preload("res://scripts/ui/windows/calendar_window.gd")
 const ReminderWindowScript := preload("res://scripts/ui/windows/reminder_window.gd")
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
+const DayPlanScript := preload("res://scripts/core/day_plan.gd")
 ## Breite des kleinen Erinnerungsfensters (G5.6)
 const REMINDER_MAX_WIDTH := 760.0
 const ChannelWindowScript := preload("res://scripts/ui/windows/channel_window.gd")
@@ -72,6 +73,7 @@ var _menu_button: RoundButtonScript
 var _here_button: RoundButtonScript
 var _company_button: RoundButtonScript
 var _obligations_button: RoundButtonScript
+var _calendar_button: RoundButtonScript
 var _toast: PanelContainer
 var _feedback_label: Label
 var _toast_timer: Timer
@@ -112,7 +114,8 @@ func _ready() -> void:
 	add_child(_hud)
 
 	_life_group = _button_group("LifeGroup", "LEBEN")
-	_add_to_group(_life_group, _round_button("Kalender", "AppointmentsButton", _open_appointments))
+	_calendar_button = _round_button("Kalender", "AppointmentsButton", _open_appointments)
+	_add_to_group(_life_group, _calendar_button)
 	_obligations_button = _round_button("Fristen", "ObligationsButton", _open_obligations)
 	_add_to_group(_life_group, _obligations_button)
 	_add_to_group(_life_group, _round_button("Kanal", "ChannelButton", _open_channel))
@@ -623,6 +626,9 @@ func _on_toast_input(event: InputEvent) -> void:
 func _refresh() -> void:
 	_hud.refresh(_game)
 	_company_button.visible = _game.company.is_founded()
+	# Zählerpunkte (G5.8): Zählungen aus DayPlan bzw. ObligationSystem. Offene Ereignisse bekommen keinen Punkt –
+	# sie öffnen sofort ihr eigenes Fenster, das sich erst nach der Entscheidung schließt.
+	_calendar_button.set_badge(DayPlanScript.count_upcoming_today(_game))
 	_obligations_button.set_badge(_game.obligations.count_open())
 
 	if not _game.locations.get_catalog().has(_selected_location):

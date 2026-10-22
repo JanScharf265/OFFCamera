@@ -6,12 +6,17 @@ extends Button
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
-const BADGE_SIZE := 24.0
+## G5.8: Zahl in Mini-Schrift (19 px) – Punkt so hoch, dass sie hineinpasst; bei „9+“ breiter (Pille).
+const BADGE_SIZE := 26.0
+const BADGE_WIDE := 36.0
+## ab dieser Zahl „9+“
+const BADGE_MAX := 9
 
 var _circle: Panel
 var _circle_box: StyleBoxFlat
 var _badge: Panel
 var _badge_label: Label
+var _badge_count := 0
 var _caption_label: Label
 var _circle_size: float
 var _circle_top := 0.0
@@ -94,14 +99,18 @@ func set_circle_top(top: float) -> void:
 	_arrange()
 
 
-## Roter Zählerpunkt; 0 = unsichtbar.
+## Roter Zählerpunkt mit Zahl; 0 = unsichtbar, ab 10 „9+“.
 func set_badge(count: int) -> void:
-	_badge.visible = count > 0
-	_badge_label.text = str(count) if count < 100 else "99+"
+	_badge_count = maxi(count, 0)
+	_badge.visible = _badge_count > 0
+	_badge_label.text = str(_badge_count) if _badge_count <= BADGE_MAX else "%d+" % BADGE_MAX
+	_badge.size = Vector2(BADGE_SIZE if _badge_count <= BADGE_MAX else BADGE_WIDE, BADGE_SIZE)
+	_badge_label.size = _badge.size
+	_arrange()
 
 
 func get_badge() -> int:
-	return int(_badge_label.text) if _badge.visible else 0
+	return _badge_count if _badge.visible else 0
 
 
 func _arrange() -> void:
@@ -114,4 +123,5 @@ func _arrange() -> void:
 	if _caption_label != null:
 		_caption_label.size = Vector2(width, 0.0)
 		_caption_label.position = Vector2(0.0, top + _circle_size)
-	_badge.position = Vector2((width + _circle_size) / 2.0 - BADGE_SIZE + 6.0, top - 4.0)
+	# Oben rechts am Kreis, rechts über den Kreis hinaus, damit das Symbol frei bleibt (G5.8).
+	_badge.position = Vector2((width + _circle_size) / 2.0 - _badge.size.x + 12.0, top - 10.0)
