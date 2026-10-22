@@ -154,3 +154,87 @@ func test_restore_rejects_invalid_data_without_change() -> void:
 	assert_true(not game.appointments.restore({"since_minutes": 0, "attended": ["a"], "missed": ["a"]}).is_empty(),
 			"doppelt")
 	assert_eq(game.appointments.to_dict(), before)
+
+
+# --- G5.5: Warten bis Terminbeginn ---------------------------------------------------
+
+func _snapshot(game: GameStateScript) -> Dictionary:
+	return {"minutes": game.time.get_minutes(), "energy": game.stats.energy, "mood": game.stats.mood,
+			"balance": game.ledger.get_balance(), "entries": game.ledger.get_entries().size(),
+			"location": game.locations.get_current(), "appointments": game.appointments.to_dict()}
+
+
+func test_wait_sets_clock_exactly_to_start() -> void:
+	var game := _new_game()
+	game.locations.travel("studio")
+	_advance_to(game, TimeSystemScript.at(1, 12, 40))
+	var before := _snapshot(game)
+	assert_eq(game.appointments.offers_wait(MEETING), true)
+	assert_eq(game.appointments.check_wait(MEETING), "")
+	assert_eq(game.appointments.minutes_to_start(MEETING), 80)
+	assert_eq(game.appointments.wait_until_start(MEETING), "")
+	assert_eq(game.time.get_minutes(), TimeSystemScript.at(1, 14))
+	# Kostet nichts, ändert keine Werte, der Termin ist nicht verpasst.
+	assert_eq(game.stats.energy, before["energy"])
+	assert_eq(game.stats.mood, before["mood"])
+	assert_eq(game.ledger.get_balance(), before["balance"])
+	assert_eq(game.ledger.get_entries().size(), before["entries"])
+	assert_eq(game.appointments.is_missed(MEETING), false)
+	assert_eq(game.appointments.take_missed_notices().size(), 0)
+	# Danach: kein Warten mehr, direkt wahrnehmen.
+	assert_eq(game.appointments.offers_wait(MEETING), false)
+	assert_eq(game.appointments.check_wait(MEETING), "Termin hat schon begonnen.")
+	assert_eq(game.appointments.check(MEETING), "")
+	assert_eq(game.appointments.attend(MEETING), "")
+	assert_eq(game.time.format_clock(), "15:00")
+
+
+func test_wait_wrong_location_is_locked_without_change() -> void:
+	var game := _new_game()
+	_advance_to(game, TimeSystemScript.at(1, 12, 40))  # zu Hause
+	var before := _snapshot(game)
+	assert_eq(game.appointments.offers_wait(MEETING), true)
+	assert_eq(game.appointments.check_wait(MEETING), "Erst hinfahren: Studio")
+	assert_eq(game.appointments.wait_until_start(MEETING), "Erst hinfahren: Studio")
+	assert_eq(_snapshot(game), before)
+
+
+func test_wait_for_past_or_other_day_is_locked_without_change() -> void:
+	var game := _new_game()
+	game.locations.travel("studio")
+	_advance_to(game, TimeSystemScript.at(1, 14, 30))  # verpasst
+	var before := _snapshot(game)
+	assert_eq(game.appointments.offers_wait(MEETING), false)
+	assert_eq(game.appointments.wait_until_start(MEETING), "Termin ist vorbei.")
+	# Probetraining ist morgen – heute kein Warten, auch nicht vor Ort.
+	game.locations.travel("gym")
+	before = _snapshot(game)
+	assert_eq(game.appointments.offers_wait("gym_trial"), false)
+	assert_eq(game.appointments.wait_until_start("gym_trial"), "Termin ist nicht heute.")
+	assert_eq(_snapshot(game), before)
+	assert_eq(game.appointments.wait_until_start("nope"), "Unbekannter Termin: nope")
+
+
+## Das feste Ereignis (Tag 1, 20:00) liegt in der Wartezeit bis zu einem Test-Termin um 21:00 zu Hause:
+## Es kommt genau einmal – auch nach Speichern/Laden und weiterem Zeitfortschritt nicht erneut.
+func test_event_during_wait_comes_exactly_once() -> void:
+	var data := Helpers.game_data()
+	var list: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/appointments/appointments.json"))
+	list.append(_appointment("late_call", {"start": {"day": 1, "hour": 21}, "duration_minutes": 30}))
+	assert_true(data.appointments.load_data(list), "; ".join(data.appointments.errors))
+	var game := Helpers.new_game(data)
+	_advance_to(game, TimeSystemScript.at(1, 19))
+	var triggered := []
+	game.events.event_triggered.connect(func(id: String) -> void: triggered.append(id))
+	var entries := game.ledger.get_entries().size()
+	assert_eq(game.appointments.wait_until_start("late_call"), "")
+	assert_eq(game.time.format_clock(), "21:00")
+	assert_eq(triggered, ["first_brand_request"])
+	assert_eq(game.events.get_next_pending_id(), "first_brand_request")
+	assert_eq(game.ledger.get_entries().size(), entries)
+	var copy := Helpers.new_game(data)
+	assert_eq(copy.restore(game.to_dict()), "")
+	copy.events.event_triggered.connect(func(id: String) -> void: triggered.append(id))
+	copy.time.advance(60)
+	assert_eq(triggered, ["first_brand_request"])
+	assert_eq(copy.events.get_triggered_ids(), PackedStringArray(["first_brand_request"]))

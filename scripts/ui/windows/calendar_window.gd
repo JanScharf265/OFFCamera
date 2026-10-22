@@ -2,7 +2,8 @@ extends VBoxContainer
 
 ## Fensterinhalt „Kalender“ (G5.2, ersetzt „Termine“): Tagesplan als Zeitstrahl für heute – Termine und Fristen
 ## mit Uhrzeit, Ort und Fahrzeit; Vergangenes grau, der nächste Termin hervorgehoben, die aktuelle Uhrzeit als Linie.
-## Termine, die man jetzt wahrnehmen kann, haben „Wahrnehmen“, sonst steht der Grund da.
+## Termine, die man jetzt wahrnehmen kann, haben „Wahrnehmen“, sonst steht der Grund da. Kommt ein Termin heute noch,
+## gibt es „Warten bis HH:MM“ (G5.5) – gesperrt mit Grund, z. B. „Erst hinfahren: Studio“.
 ## Die Daten kommen aus DayPlan (scripts/core/day_plan.gd); hier wird nur angezeigt.
 
 const DayPlanScript := preload("res://scripts/core/day_plan.gd")
@@ -163,6 +164,8 @@ func _detail(entry: Dictionary) -> String:
 
 
 func _add_attend(box: VBoxContainer, appointment_id: String) -> void:
+	if _game.appointments.offers_wait(appointment_id):
+		_add_wait(box, appointment_id)
 	var reason: String = _game.appointments.check(appointment_id)
 	if not reason.is_empty():
 		box.add_child(UiStyle.wrapping_label(reason, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED))
@@ -170,6 +173,20 @@ func _add_attend(box: VBoxContainer, appointment_id: String) -> void:
 	var button: Button = _screen.scroll_button("Wahrnehmen", "AttendButton_%s" % appointment_id)
 	button.pressed.connect(func() -> void: _screen.on_attend_pressed(appointment_id))
 	box.add_child(button)
+
+
+## G5.5: „Warten bis 14:00“ – gesperrt mit Grund darunter (z. B. „Erst hinfahren: Studio“).
+func _add_wait(box: VBoxContainer, appointment_id: String) -> void:
+	var start: int = _game.appointments.get_catalog().get_definition(appointment_id).start_minutes
+	var button: Button = _screen.scroll_button("Warten bis %s" % _clock(start), "WaitButton_%s" % appointment_id)
+	button.pressed.connect(func() -> void: _screen.on_wait_pressed(appointment_id))
+	box.add_child(button)
+	var reason: String = _game.appointments.check_wait(appointment_id)
+	button.disabled = not reason.is_empty()
+	if not reason.is_empty():
+		var label := UiStyle.wrapping_label(reason, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+		label.name = "WaitReason_%s" % appointment_id
+		box.add_child(label)
 
 
 func _state_color(entry: Dictionary) -> Color:

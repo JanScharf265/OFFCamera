@@ -108,6 +108,10 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   `missed_effects` genau einmal angewendet; `take_missed_notices()` liefert sie einmal für die Anzeige.
 - `get_conflicts(minuten)`: offene Termine, deren Beginn eine Aktion überspringen würde. Die UI fragt dann per
   Konflikt-Popup nach (G5.4). `conflict_warning(minuten)` liefert denselben Befund als Text (nur noch in Tests genutzt).
+- Warten bis Terminbeginn (G5.5): `offers_wait(id)` (offen, heute, noch nicht begonnen → die UI zeigt den Button),
+  `check_wait(id)` (Grund oder "", z. B. „Erst hinfahren: Studio“), `wait_until_start(id)` = nur
+  `time.advance(bis Beginn)` – kein Geld, keine Werte; Ereignisse, Fristen und Tagesabschlüsse in der Wartezeit laufen
+  normal. Bei Ankunft genau zum Beginn gilt der Termin nicht als verpasst (verpasst nur bei Beginn < `to`).
 - Termine mit Beginn vor `since_minutes` (Spielbeginn bzw. Migration) entfallen ohne Strafe.
 - Gespeichert: `since_minutes`, `attended`, `missed` (sortierte ID-Listen).
 
@@ -282,9 +286,10 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Fenster (`scripts/ui/windows/`): `ui_window.gd` ist der Rahmen (Titel, „Schließen“, eigener Scrollbereich,
   Tippen vs. Scrollen: > 12 px Bewegung zwischen Antippen und Loslassen = Scrollen). Inhalte mit `setup()`,
   `get_title()`, `refresh()`: `location_window.gd` (Details, „Hinfahren“, Content, Aktivitäten, Ausrüstung,
-  Gründung, Filiale – an fremden Orten sichtbar, aber gesperrt mit dem Grund aus `check()`),
+  Gründung, Filiale – an fremden Orten sichtbar, aber gesperrt mit dem Grund aus `check()`; G5.5: vor Ort steht beim
+  nächsten Termin heute „Warten bis HH:MM“ bzw. danach „Wahrnehmen“ in der Titelzeile),
   `calendar_window.gd` (G5.2: Tagesplan als Zeitstrahl aus `scripts/core/day_plan.gd` – Termine und Fristen des Tages,
-  sortiert, mit Zustand, Fahrzeit und Platz der Jetzt-Linie; „Wahrnehmen“), `obligations_window.gd` (Fristen: offen/Mahngebühr/Bezahlen, nächste Fälligkeiten),
+  sortiert, mit Zustand, Fahrzeit und Platz der Jetzt-Linie; „Wahrnehmen“; G5.5: „Warten bis HH:MM“, gesperrt mit Grund), `obligations_window.gd` (Fristen: offen/Mahngebühr/Bezahlen, nächste Fälligkeiten),
   `channel_window.gd` (Kanal + Verlauf), `company_window.gd` (Unternehmen,
   Tagesabschlüsse, Verlauf, Einlage/Entnahme), `ledger_window.gd` (Wochenübersicht je Konto nach Wertstellung, Buchungen, Filter alle/privat/Firma),
   `event_window.gd` (offenes Ereignis, nicht schließbar). Immer nur ein Fenster, Karte dahinter abgedunkelt
@@ -346,7 +351,7 @@ Headless ist das Fenster nur 64 × 64 – Layout-Tests stellen Geräte nach (`te
 | `EventSystem` | geplante/ausgelöste Ereignisse, verarbeitete IDs |
 | `ActivitySystem` | Prüfen und Ausführen von Aktivitäten |
 | `LocationSystem` | aktueller Ort, Reisezeit, Öffnungszeiten, Fahrten |
-| `AppointmentSystem` | Termine: wahrnehmen, verpasst, Kollisionen |
+| `AppointmentSystem` | Termine: wahrnehmen, warten bis Beginn, verpasst, Kollisionen |
 | `ChannelSystem` | Follower, Community-Stimmung, Ruf, Kanal-Protokoll |
 | `ContentSystem` | Prüfen, Berechnen und Produzieren von Content |
 | `EquipmentSystem` | Ausrüstungsstufen, Kauf, Qualitätsbonus |

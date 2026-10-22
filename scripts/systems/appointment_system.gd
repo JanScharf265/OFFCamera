@@ -137,6 +137,56 @@ func attend(appointment_id: String) -> String:
 	return ""
 
 
+## Warten bis Terminbeginn (G5.5): true, wenn der Termin offen ist, heute liegt und noch nicht begonnen hat –
+## dann zeigt die UI „Warten bis HH:MM“ (frei oder mit Grund gesperrt).
+func offers_wait(appointment_id: String) -> bool:
+	var definition := _catalog.get_definition(appointment_id)
+	var now := _time.get_minutes()
+	return definition != null and _is_open(definition) and now < definition.start_minutes \
+			and TimeSystemScript.day_of(definition.start_minutes) == TimeSystemScript.day_of(now)
+
+
+## "" wenn man jetzt bis zum Beginn warten kann, sonst ein Grund für die Anzeige.
+func check_wait(appointment_id: String) -> String:
+	var definition := _catalog.get_definition(appointment_id)
+	if definition == null:
+		return "Unbekannter Termin: %s" % appointment_id
+	if _attended.has(appointment_id):
+		return "Termin bereits wahrgenommen."
+	if not _is_open(definition):
+		return "Termin ist vorbei."
+	var now := _time.get_minutes()
+	if now >= definition.start_minutes:
+		return "Termin hat schon begonnen."
+	if TimeSystemScript.day_of(definition.start_minutes) != TimeSystemScript.day_of(now):
+		return "Termin ist nicht heute."
+	if _time.is_advancing():
+		return "Gerade läuft bereits ein Zeitfortschritt."
+	if _locations.get_current() != definition.location:
+		var location := _locations.get_catalog().get_definition(definition.location)
+		return "Erst hinfahren: %s" % (location.display_name if location != null else definition.location)
+	return ""
+
+
+## Minuten bis zum Beginn (0, wenn er schon erreicht ist).
+func minutes_to_start(appointment_id: String) -> int:
+	var definition := _catalog.get_definition(appointment_id)
+	if definition == null:
+		return 0
+	return maxi(definition.start_minutes - _time.get_minutes(), 0)
+
+
+## Wartet bis genau zum Beginn: nur Zeitfortschritt – kein Geld, keine Werte. Ereignisse, Fristen und
+## Tagesabschlüsse in der Wartezeit laufen wie bei jedem Zeitfortschritt. Der Termin selbst gilt dabei nicht als
+## verpasst (verpasst wird erst, wenn die Zeit über den Beginn hinausgeht). Rückgabe wie check_wait().
+func wait_until_start(appointment_id: String) -> String:
+	var reason := check_wait(appointment_id)
+	if not reason.is_empty():
+		return reason
+	_time.advance(minutes_to_start(appointment_id))
+	return ""
+
+
 ## Offene Termine, die verpasst würden, wenn ab jetzt `minutes` Minuten vergehen.
 func get_conflicts(minutes: int, except_id: String = "") -> Array[AppointmentDefinitionScript]:
 	var result: Array[AppointmentDefinitionScript] = []

@@ -551,3 +551,15 @@ wirkungslos, das Popup weg). Die Prüfung macht das AppointmentSystem (`get_conf
 `_guard()` für alle Aktionen mit Spielzeit: Aktivitäten, Content, Fahrten, Gründung, Filiale, Termine (beim Wahrnehmen
 zählt der Termin selbst nicht). Käufe kosten keine Zeit und fragen nicht. Solange das Popup offen ist, ist nichts
 darunter tippbar. Der Hinweis „⚠ Verpasst: 14:00“ in den Kacheln (G4.5b) bleibt als Vorwarnung.
+
+## 056 – Warten bis Terminbeginn (G5.5)
+Die Regel liegt im AppointmentSystem (`offers_wait`, `check_wait`, `wait_until_start`): Warten ist nur ein
+Zeitfortschritt bis genau zum Beginn – kein Geld, keine Werte, keine neue Spielstand-Version. Angeboten wird es für
+offene Termine von heute, die noch nicht begonnen haben; frei nur vor Ort („Erst hinfahren: Studio“ sonst). Da ein
+Termin erst als verpasst gilt, wenn die Zeit über seinen Beginn hinausgeht, ist er danach frei zum Wahrnehmen. Fiele
+ein anderer Termin in die Wartezeit, fragt wie bei jeder Aktion das Konflikt-Popup (G5.4). Ereignisse in der
+Wartezeit laufen über das EventSystem wie sonst – genau einmal.
+Anzeige: im Kalender bei jedem solchen Termin („Warten bis 14:00“, gesperrt mit Grund darunter). Im Ortsfenster nur vor
+Ort, an der Stelle von „Hinfahren“ in der Titelzeile, nach Beginn als „Wahrnehmen“. Aus der Ferne steht dort schon
+„Hinfahren“; ein zweiter, gesperrter Button „Erst hinfahren: Studio“ passte im „Grenzfall“ (1280 px mit Reitern) nicht
+mehr in die Titelzeile – die Infozeilen wurden abgeschnitten. Der Grund steht dann im Kalender.

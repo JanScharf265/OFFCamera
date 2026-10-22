@@ -446,6 +446,17 @@ func on_attend_pressed(appointment_id: String) -> void:
 		_after_action(_game.appointments.attend(appointment_id), "„%s“ wahrgenommen" % title), appointment_id)
 
 
+## G5.5: bis zum Terminbeginn warten. Fiele ein anderer Termin in die Wartezeit, fragt das Konflikt-Popup.
+func on_wait_pressed(appointment_id: String) -> void:
+	if _was_scroll():
+		return
+	var definition := _game.appointments.get_catalog().get_definition(appointment_id)
+	var until := TimeSystemScript.format_stamp(definition.start_minutes).get_slice(" · ", 1)
+	_guard(_game.appointments.minutes_to_start(appointment_id), "Warten bis %s" % until, func() -> void:
+		_after_action(_game.appointments.wait_until_start(appointment_id), "Gewartet bis „%s“" % definition.title),
+			appointment_id)
+
+
 func on_obligation_pay_pressed(instance_id: String) -> void:
 	if _was_scroll():
 		return

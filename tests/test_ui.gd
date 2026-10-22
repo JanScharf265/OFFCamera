@@ -282,6 +282,77 @@ func test_conflict_popup_lists_all_conflicts() -> void:
 	SaveSystemScript.delete_save(TEST_SAVE_PATH)
 
 
+## G5.5: Im Studio um 12:40 bietet der Kalender „Warten bis 14:00“; danach steht die Uhr auf 14:00, „Wahrnehmen“ ist da.
+func test_calendar_wait_until_appointment() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	_travel(app, "studio")
+	app.game.time.advance(TimeSystemScript.at(1, 12, 40) - app.game.time.get_minutes())
+	var balance: int = app.game.ledger.get_balance()
+	_press(app, "AppointmentsButton")
+	var wait := _find(app, "WaitButton_camera_meeting") as Button
+	assert_true(wait != null and wait.visible, "Warten-Button fehlt")
+	assert_eq(wait.text, "Warten bis 14:00")
+	assert_eq(wait.disabled, false)
+	_press(app, "WaitButton_camera_meeting")
+	assert_eq(app.game.time.format_clock(), "14:00")
+	assert_eq(app.game.ledger.get_balance(), balance)
+	assert_eq(app.game.appointments.is_missed("camera_meeting"), false)
+	assert_true(_find(app, "WaitButton_camera_meeting") == null, "Warten nach Beginn noch da")
+	assert_true(_find(app, "AttendButton_camera_meeting") != null, "Wahrnehmen fehlt nach dem Warten")
+	_press(app, "AttendButton_camera_meeting")
+	assert_eq(app.game.appointments.is_attended("camera_meeting"), true)
+	app.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
+func test_calendar_wait_locked_at_wrong_location() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	app.game.time.advance(TimeSystemScript.at(1, 12, 40) - app.game.time.get_minutes())
+	_press(app, "AppointmentsButton")
+	var wait := _find(app, "WaitButton_camera_meeting") as Button
+	assert_true(wait != null and wait.disabled, "Warten nicht gesperrt")
+	assert_true(_screen_has_text(app, "Erst hinfahren: Studio"), "Grund fehlt")
+	wait.pressed.emit()
+	assert_eq(app.game.time.format_clock(), "12:40")
+	app.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
+func test_location_window_wait_and_attend() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	app.game.time.advance(TimeSystemScript.at(1, 12, 40) - app.game.time.get_minutes())
+	_press(app, "MapPin_studio")
+	# Aus der Ferne: kein Warten, dafür „Hinfahren“ (der Kalender nennt den Grund).
+	assert_eq((_find(app, "WaitButton") as Button).visible, false)
+	assert_eq((_find(app, "TravelButton") as Button).visible, true)
+	_press(app, "TravelButton")  # 13:00
+	_press(app, "MapPin_studio")
+	var wait := _find(app, "WaitButton") as Button
+	assert_eq(wait.visible, true)
+	assert_eq(wait.disabled, false)
+	assert_eq(wait.text, "Warten bis 14:00")
+	assert_eq((_find(app, "LocationAttendButton") as Button).visible, false)
+	_press(app, "WaitButton")
+	assert_eq(app.game.time.format_clock(), "14:00")
+	assert_eq((_find(app, "WaitButton") as Button).visible, false)
+	assert_eq((_find(app, "LocationAttendButton") as Button).visible, true)
+	_press(app, "LocationAttendButton")
+	assert_eq(app.game.time.format_clock(), "15:00")
+	assert_eq(app.game.appointments.is_attended("camera_meeting"), true)
+	assert_eq((_find(app, "LocationAttendButton") as Button).visible, false)
+	app.free()
+	SaveSystemScript.delete_save(TEST_SAVE_PATH)
+
+
 func test_calendar_window_shows_day_plan() -> void:
 	var app := _start_app()
 	if app == null:

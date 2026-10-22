@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- „Warten bis 14:00“: Ist man vor Ort und der Termin kommt heute noch, springt die Uhr genau auf den Terminbeginn – kostet nichts, Energie und Stimmung bleiben; danach direkt „Wahrnehmen“. Im Kalender bei jedem Termin (sonst gesperrt mit Grund, z. B. „Erst hinfahren: Studio“) und vor Ort in der Titelzeile des Ortsfensters (Ticket G5.5)
 - Würde eine Aktion oder Fahrt einen Termin verpassen lassen, fragt jetzt ein Popup nach („Termin verpassen?“ mit Ende der Aktion, allen betroffenen Terminen, Ort und Kosten; „Trotzdem starten“ / „Abbrechen“) – statt „nochmal tippen“ (Ticket G5.4)
 - Kalender öffnet sich bei Tagesbeginn von selbst – genau einmal je Tag, auch nach dem Verschlafen mehrerer Tage nur einmal; offene Ereignisse kommen zuerst; abschaltbar in den Einstellungen; Spielstand Version 13 (alte Spielstände laden weiter) (Ticket G5.3)
 - „Termine“ wird „Kalender“: Tagesplan als Zeitstrahl für heute – Termine mit Uhrzeit, Ort und Fahrzeit, fällige und überfällige Fristen, Vergangenes grau, der nächste Termin hervorgehoben, die aktuelle Uhrzeit als rote Linie, Hinweis auf den nächsten späteren Termin; „Wahrnehmen“ wie bisher (Ticket G5.2)

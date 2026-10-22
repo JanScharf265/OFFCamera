@@ -24,6 +24,11 @@ var _game
 var _location_hours: Label
 var _location_distance: Label
 var _travel_button: Button
+## G5.5: „Warten bis HH:MM“ für den nächsten Termin heute an diesem Ort, nach dem Warten „Wahrnehmen“
+## (beide unsichtbar, wenn nichts ansteht)
+var _wait_button: Button
+var _attend_button: Button
+var _appointment_id := ""
 var _grid: GridContainer
 var _details: Control
 var _tab_bar: HBoxContainer
@@ -247,6 +252,20 @@ func _build_details() -> Control:
 	_travel_button.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE * 2.0, UiStyle.TOUCH_SIZE)
 	_travel_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_travel_button.pressed.connect(func() -> void: _screen.on_travel_pressed(location_id))
+	_wait_button = _screen.scroll_button("", "WaitButton")
+	_wait_button.add_theme_font_size_override("font_size", UiStyle.TILE_BUTTON_FONT_SIZE)
+	UiStyle.style_accent_touch_button(_wait_button, UiStyle.TAB_VISIBLE)
+	_wait_button.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE * 2.0, UiStyle.TOUCH_SIZE)
+	_wait_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_wait_button.pressed.connect(func() -> void: _screen.on_wait_pressed(_appointment_id))
+	row.add_child(_wait_button)
+	_attend_button = _screen.scroll_button("Wahrnehmen", "LocationAttendButton")
+	_attend_button.add_theme_font_size_override("font_size", UiStyle.TILE_BUTTON_FONT_SIZE)
+	UiStyle.style_accent_touch_button(_attend_button, UiStyle.TAB_VISIBLE)
+	_attend_button.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE * 2.0, UiStyle.TOUCH_SIZE)
+	_attend_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_attend_button.pressed.connect(func() -> void: _screen.on_attend_pressed(_appointment_id))
+	row.add_child(_attend_button)
 	row.add_child(_travel_button)
 	return row
 
@@ -281,6 +300,30 @@ func _refresh_details() -> void:
 		_travel_button.text = "Hinfahren (%s)" % TimeSystemScript.format_duration(minutes)
 	_travel_button.visible = not here
 	_travel_button.disabled = not _game.locations.check_travel(location_id).is_empty()
+	_refresh_wait()
+
+
+## Nächster offener Termin heute an diesem Ort, nur vor Ort (G5.5): vor Beginn „Warten bis 14:00“ an der Stelle von
+## „Hinfahren“, ab Beginn „Wahrnehmen“, sobald das AppointmentSystem es erlaubt. Aus der Ferne steht hier „Hinfahren“ –
+## ein zweiter, gesperrter Button passt im „Grenzfall“ nicht in die Titelzeile; den Grund nennt der Kalender.
+func _refresh_wait() -> void:
+	_appointment_id = ""
+	var now: int = _game.time.get_minutes()
+	if location_id == _game.locations.get_current():
+		for definition in _game.appointments.get_upcoming():
+			if definition.location == location_id \
+					and TimeSystemScript.day_of(definition.start_minutes) == TimeSystemScript.day_of(now):
+				_appointment_id = definition.id
+				break
+	var waits: bool = not _appointment_id.is_empty() and _game.appointments.offers_wait(_appointment_id)
+	_wait_button.visible = waits
+	_attend_button.visible = not waits and not _appointment_id.is_empty() \
+			and _game.appointments.check(_appointment_id).is_empty()
+	if not waits:
+		return
+	var start: int = _game.appointments.get_catalog().get_definition(_appointment_id).start_minutes
+	_wait_button.text = "Warten bis %s" % TimeSystemScript.format_stamp(start).get_slice(" · ", 1)
+	_wait_button.disabled = not _game.appointments.check_wait(_appointment_id).is_empty()
 
 
 # --- Kacheln -----------------------------------------------------------------------

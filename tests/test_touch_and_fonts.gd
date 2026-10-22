@@ -211,3 +211,42 @@ func test_conflict_popup_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## G5.5: Um 12:40 – Kalender aus der Ferne mit gesperrtem „Warten bis 14:00“ und Grund, dann im Studio Kalender und
+## Ortsfenster mit freiem „Warten bis 14:00“: Tippflächen, Schrift, Button-Texte passen, Fenster in der Safe Area.
+func test_wait_buttons_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		_press(app, "NewGameButton")
+		var screen := app.find_child("CityMap", true, false).get_parent() as Control
+		app.game.time.advance(TimeSystemScript.at(1, 12, 40) - app.game.time.get_minutes())
+		for step in [["AppointmentsButton", "WaitButton_camera_meeting", true], ["MapPin_studio", "", false],
+				["TravelButton", "", false], ["MapPin_studio", "WaitButton", false],
+				["AppointmentsButton", "WaitButton_camera_meeting", false]]:
+			_press(app, step[0])
+			if step[1].is_empty():
+				continue
+			Layout.apply(app, device)
+			var window: Control = null
+			for child in screen.get_children():
+				if String(child.name).begins_with("Window_"):
+					window = child
+			Layout.settle_in_place(window)
+			var where := "%s / %s / %s" % [device, window.name, step[1]]
+			_audit(window, screen, where, problems)
+			var wait := window.find_child(step[1], true, false) as Button
+			if wait == null or not wait.is_visible_in_tree() or wait.disabled != step[2]:
+				problems.append("%s: Warten-Button fehlt oder falscher Zustand" % where)
+				continue
+			var text_width := wait.get_theme_font("font").get_string_size(wait.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
+					wait.get_theme_font_size("font_size")).x
+			if text_width > wait.size.x + 0.5:
+				problems.append("%s: „%s“ abgeschnitten" % [where, wait.text])
+			if not Layout.safe_rect(device).grow_side(SIDE_BOTTOM, Layout.PADDING - 8.0).grow(0.5) \
+					.encloses(Layout.rect_of(window)):
+				problems.append("%s: Fenster ragt aus der Safe Area: %s" % [where, Layout.rect_of(window)])
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)
