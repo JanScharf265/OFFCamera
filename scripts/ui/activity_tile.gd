@@ -186,6 +186,9 @@ func _chip(effect: Dictionary) -> HBoxContainer:
 	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	chip.add_theme_constant_override("separation", 3)
 	var icon_path: String = effect.get("icon", "")
+	if not icon_path.is_empty():
+		# Stabile UI-ID (T.6), z. B. „TileChip_singleplayer“ = Follower – das Symbole-Tutorial zeigt darauf.
+		chip.name = "TileChip_%s" % icon_path.get_file().get_basename()
 	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
 		var icon := TextureRect.new()
 		icon.texture = load(icon_path)

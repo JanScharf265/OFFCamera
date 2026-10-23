@@ -149,12 +149,27 @@ func test_placement_on_every_device() -> void:
 		_done(app)
 
 
-func test_missing_target_is_centered_without_crash() -> void:
-	var app := _app(_data_with_tutorials([_entry("tut_ghost", "first_game_start", "DoesNotExist")]))
+## T.6: Ein fälliges Tutorial, dessen Ziel gerade nicht sichtbar ist, wartet (kein Absturz, bleibt fällig); ein
+## anderes mit sichtbarem Ziel darf vorgehen. Verschwindet das Ziel eines offenen Overlays, steht die Sprechblase mittig.
+func test_missing_target_waits_without_crash() -> void:
+	var app := _app(_data_with_tutorials([_entry("tut_ghost", "first_game_start", "DoesNotExist"),
+			_entry("tut_here", "first_game_start", "HereButton")]))
 	_press(app, "NewGameButton")
-	_check_placement(app, "iPhone 15/16 Pro Max (Dynamic Island)", "")
+	var overlay := _overlay(app)
+	assert_true(overlay != null and overlay.get("tutorial_id") == "tut_here", "Tutorial mit sichtbarem Ziel fehlt")
 	_press(app, "TutorialConfirmButton")
-	assert_eq(app.game.tutorials.is_seen("tut_ghost"), true)
+	assert_true(_overlay(app) == null, "Tutorial ohne sichtbares Ziel erschienen")
+	assert_eq(app.game.tutorials.get_due(), PackedStringArray(["tut_ghost"]), "bleibt fällig")
+	# Overlay direkt mit fehlendem Ziel: mittig, kein Absturz.
+	var definition = app.game.tutorials.get_catalog().get_definition("tut_ghost")
+	var direct = load("res://scripts/ui/tutorial_overlay.gd").new(definition, _screen(app))
+	_screen(app).add_child(direct)
+	Layout.apply(app, "iPhone 15/16 Pro Max (Dynamic Island)")
+	var safe := Layout.safe_rect("iPhone 15/16 Pro Max (Dynamic Island)")
+	direct.call("place", _screen(app).size, safe)
+	assert_eq(direct.call("has_target"), false)
+	var bubble := direct.find_child("TutorialBubble", false, false) as Control
+	assert_true(Rect2(bubble.position, bubble.size).get_center().distance_to(safe.get_center()) < 1.0, "nicht mittig")
 	_done(app)
 
 

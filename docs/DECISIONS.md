@@ -687,3 +687,17 @@ so breit und mittig, dass auf keinem Gerät Platz für eine Sprechblase daneben 
 echten Situation auf allen 4 Geräteklassen geprüft (`tests/test_tutorial_texts.gd`). Lexikon (Korrektur): eigener
 Bildschirm mit festem rundem Schließen-Button oben rechts, Liste in Spielreihenfolge. Einstellungen (Korrektur): nur
 „Hilfe / Lexikon“ voll rot, „Spielstand löschen“ mit rotem Rahmen (Gefahr), „Tutorials zurücksetzen“ und „Zurück“ grau.
+
+## 066 – Tutorial-Texte Karriere/Firma, höchstens 3 hintereinander, Ortsbeschreibung (T.6, T.6b)
+Zehn weitere Tutorials mit neun neuen Auslösern; „angeboten“-Auslöser (Content, Ausrüstung, Firma, Ladenlokal,
+Symbole) meldet das Ortsfenster, sobald es das Erklärte zeigt. Zwei Regeln für die Anzeige, damit es nicht zu viel wird
+und nichts ins Leere zeigt: (1) Höchstens drei Tutorials hintereinander per „Verstanden“; weitere fällige kommen bei
+der nächsten Gelegenheit (Fenster öffnen/schließen, Aktion). (2) Ein fälliges Tutorial mit Ziel erscheint erst, wenn
+sein Ziel sichtbar ist (z. B. „Was die Symbole heißen“ erst, wenn ein Follower-Symbol auf einer Kachel zu sehen ist,
+auch nach Reiterwechsel); andere fällige Tutorials dürfen vorgehen. Das ändert T.3: Dort stand ein Tutorial mit
+fehlendem Ziel sofort mittig – das zeigte sonst z. B. die Symbol-Erklärung über der Karte. Die mittige Sprechblase
+bleibt als Rückfall, wenn das Ziel eines offenen Overlays verschwindet. Auf schmalen Geräten (Grenzfall) darf die
+Sprechblase seitlich schmaler werden (ab 280 px), wenn sie in voller Breite nirgends neben das Ziel passt. Die
+Wirkungs-Symbole bekommen feste Namen (`TileChip_singleplayer` usw.). T.6b: Die Ortsbeschreibung war seit G4.5b nur
+im Tooltip (auf dem iPhone unerreichbar); jetzt öffnet ein Tipp auf den Ortsnamen eine Info-Blase unter dem Titel,
+ein Tipp irgendwo schließt sie wieder; das Tutorial „Aktivitäten“ weist darauf hin.

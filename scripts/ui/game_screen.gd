@@ -35,6 +35,10 @@ const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
 const DayPlanScript := preload("res://scripts/core/day_plan.gd")
 ## Breite des kleinen Erinnerungsfensters (G5.6)
 const REMINDER_MAX_WIDTH := 760.0
+## Höchstens so viele Tutorials hintereinander (T.6)
+const TUTORIAL_CHAIN_MAX := 3
+## Breite der Info-Blase mit der Ortsbeschreibung (T.6b)
+const LOCATION_INFO_WIDTH := 520.0
 const ChannelWindowScript := preload("res://scripts/ui/windows/channel_window.gd")
 const CompanyWindowScript := preload("res://scripts/ui/windows/company_window.gd")
 const LedgerWindowScript := preload("res://scripts/ui/windows/ledger_window.gd")
@@ -90,6 +94,10 @@ var _popup: ConflictPopupScript
 var _tutorial: TutorialOverlayScript
 ## Geräte-Schalter „Tutorials anzeigen“ (T.4, von der App gesetzt). Aus = keine Anzeige, fällige bleiben fällig.
 var show_tutorials := true
+## Wie viele Tutorials gerade hintereinander kamen (T.6, höchstens TUTORIAL_CHAIN_MAX)
+var _tutorial_chain := 0
+## T.6b: Info-Blase mit der Ortsbeschreibung; null = keine
+var _location_info: Control
 
 
 ## Vor dem Einfügen in den Baum aufrufen.
@@ -275,6 +283,8 @@ func _layout() -> void:
 		# Konflikt-Popup immer ganz oben, Panel mittig in der Safe Area (G5.4).
 		move_child(_popup, get_child_count() - 1)
 		_popup.place(size, Rect2(left, top, right - left, bottom - top))
+	if _location_info != null:
+		_place_location_info(Rect2(left, top, right - left, bottom - top))
 	if _tutorial != null:
 		# Tutorial ganz oben, auch über dem Konflikt-Popup (T.3/T.5): Aussparung und Sprechblase in der Safe Area.
 		move_child(_tutorial, get_child_count() - 1)
@@ -294,6 +304,7 @@ func _open_window(kind: String, content: Control, closable: bool = true) -> void
 
 
 func _close_window() -> void:
+	_close_location_info()
 	if _window != null:
 		remove_child(_window)
 		_window.queue_free()
@@ -320,26 +331,40 @@ func _on_window_closed() -> void:
 ## wartet ein Tutorial – außer es erklärt genau dieses Fenster, d. h. sein Ziel liegt darin (T.5, z. B. Kalender-
 ## Tutorial mit Pfeil auf die Jetzt-Linie). Über einem Ortsfenster darf es immer liegen (z. B. „Hinfahren“).
 ## Welches fällig ist, entscheidet das TutorialSystem; „Verstanden“ markiert es als gesehen, dann kommt das nächste.
-func _open_due_tutorial() -> void:
+func _open_due_tutorial(chained: bool = false) -> void:
 	if not show_tutorials or _tutorial != null:
 		return
-	var tutorial_id := _game.tutorials.get_next_due()
-	if tutorial_id.is_empty():
+	# T.6: höchstens TUTORIAL_CHAIN_MAX Tutorials hintereinander; der Rest kommt bei der nächsten Gelegenheit.
+	_tutorial_chain = _tutorial_chain + 1 if chained else 0
+	if _tutorial_chain >= TUTORIAL_CHAIN_MAX:
 		return
-	var definition = _game.tutorials.get_catalog().get_definition(tutorial_id)
 	var blocking: Control = _popup
 	if blocking == null and _window_kind in ["event", "calendar", "reminder"]:
 		blocking = _window
-	if blocking != null:
-		_layout()  # Inhalt des Fensters steht, bevor das Ziel gesucht wird
-		if TutorialOverlayScript.find_target(blocking, definition.ui_target) == null:
-			return
-	elif _game.events.has_pending():
+	if blocking == null and _game.events.has_pending():
 		return
-	_tutorial = TutorialOverlayScript.new(definition, self)
-	_tutorial.confirmed.connect(_on_tutorial_confirmed)
-	add_child(_tutorial)
-	_layout()
+	if blocking != null or _window != null:
+		_layout()  # Inhalt des Fensters steht, bevor das Ziel gesucht wird
+	# T.6: das erste fällige Tutorial, dessen Ziel jetzt sichtbar ist (ohne Ziel: immer) – ein Tutorial, dessen Ziel
+	# gerade nicht zu sehen ist, wartet, bis es zu sehen ist (statt mittig über dem falschen Bildschirm).
+	for tutorial_id in _game.tutorials.get_due():
+		var definition = _game.tutorials.get_catalog().get_definition(tutorial_id)
+		var root: Control = blocking if blocking != null else self
+		if definition.ui_target.is_empty():
+			if blocking != null:
+				continue
+		elif TutorialOverlayScript.find_target(root, definition.ui_target) == null:
+			continue
+		_tutorial = TutorialOverlayScript.new(definition, self)
+		_tutorial.confirmed.connect(_on_tutorial_confirmed)
+		add_child(_tutorial)
+		_layout()
+		return
+
+
+## Von außen (z. B. Reiterwechsel, T.6): ist jetzt ein Tutorial mit sichtbarem Ziel fällig?
+func check_tutorials() -> void:
+	_open_due_tutorial()
 
 
 ## Schließt ein offenes Tutorial, ohne es als gesehen zu markieren (es bleibt fällig).
@@ -357,7 +382,7 @@ func _on_tutorial_confirmed(tutorial_id: String) -> void:
 		_tutorial.queue_free()
 		_tutorial = null
 	state_changed.emit()  # gesehen speichern
-	_open_due_tutorial()
+	_open_due_tutorial(true)
 
 
 ## Reihenfolge Ereignis → Kalender → Erinnerung (G5.6), nie zwei Fenster übereinander: Die Erinnerung wartet, solange
@@ -399,6 +424,57 @@ func on_reminder_wait_pressed(appointment_id: String) -> void:
 	on_wait_pressed(appointment_id)
 
 
+## T.6b: Tipp auf den Ortsnamen – Info-Blase mit der Beschreibung unter dem Titel; ein Tipp irgendwo schließt sie.
+func _show_location_info() -> void:
+	_close_location_info()
+	if _window == null or not _window.content.has_method("get_description"):
+		return
+	var catcher := Control.new()
+	catcher.name = "LocationInfo"
+	catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+	catcher.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and not event.pressed:
+			_close_location_info())
+	var bubble := PanelContainer.new()
+	bubble.name = "LocationInfoBubble"
+	var box := UiStyle.window_box(16)
+	box.border_color = UiStyle.ACCENT
+	box.set_border_width_all(2)
+	bubble.add_theme_stylebox_override("panel", box)
+	bubble.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var text := UiStyle.wrapping_label(_window.content.call("get_description"), UiStyle.SMALL_FONT_SIZE, UiStyle.TEXT)
+	text.name = "LocationInfoText"
+	bubble.add_child(text)
+	catcher.add_child(bubble)
+	_location_info = catcher
+	add_child(catcher)
+	_layout()
+
+
+func _close_location_info() -> void:
+	if _location_info != null:
+		remove_child(_location_info)
+		_location_info.queue_free()
+		_location_info = null
+
+
+func _place_location_info(safe: Rect2) -> void:
+	_location_info.position = Vector2.ZERO
+	_location_info.size = size
+	move_child(_location_info, get_child_count() - 1)
+	var bubble := _location_info.get_child(0) as PanelContainer
+	var width := minf(LOCATION_INFO_WIDTH, safe.size.x)
+	bubble.size = Vector2(width, 0)
+	TutorialOverlayScript._settle(bubble, width)
+	bubble.size = Vector2(width, bubble.get_combined_minimum_size().y)
+	var anchor: Rect2 = _window.get_title_rect() if _window != null else Rect2(safe.position, Vector2.ZERO)
+	anchor.position -= get_global_rect().position
+	var position := Vector2(anchor.position.x, anchor.end.y + 4.0)
+	position.x = clampf(position.x, safe.position.x, safe.end.x - bubble.size.x)
+	position.y = clampf(position.y, safe.position.y, safe.end.y - bubble.size.y)
+	bubble.position = position
+
+
 func _open_location(location_id: String) -> void:
 	_selected_location = location_id
 	# Tutorial-Auslöser (T.2); ein fälliges Tutorial zeigt sich über dem Fenster (T.3).
@@ -408,6 +484,7 @@ func _open_location(location_id: String) -> void:
 	var content := LocationWindowScript.new()
 	content.setup(self, _game, location_id)
 	_open_window("location", content)
+	_window.title_pressed.connect(_show_location_info)
 	_map.set_state(_game.locations.get_current(), _selected_location)
 	_open_due_tutorial()
 
@@ -425,24 +502,31 @@ func _open_obligations() -> void:
 	var content := ObligationsWindowScript.new()
 	content.setup(self, _game)
 	_open_window("obligations", content)
+	_open_due_tutorial()
 
 
 func _open_channel() -> void:
+	_game.tutorials.report("first_channel_open")
 	var content := ChannelWindowScript.new()
 	content.setup(self, _game)
 	_open_window("channel", content)
+	_open_due_tutorial()
 
 
 func _open_company() -> void:
+	_game.tutorials.report("first_company_open")
 	var content := CompanyWindowScript.new()
 	content.setup(self, _game)
 	_open_window("company", content)
+	_open_due_tutorial()
 
 
 func _open_ledger() -> void:
+	_game.tutorials.report("first_ledger_open")
 	var content := LedgerWindowScript.new()
 	content.setup(self, _game)
 	_open_window("ledger", content)
+	_open_due_tutorial()
 
 
 func _on_location_pressed(location_id: String) -> void:

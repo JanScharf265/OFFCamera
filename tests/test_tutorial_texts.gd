@@ -40,13 +40,14 @@ func _jump(app: AppScript, minutes: int) -> void:
 
 
 ## Neues Spiel, in dem alle Tutorials außer `only` schon gesehen sind; dann die Situation, die `only` auslöst.
-func _scenario(only: String, trigger: String) -> AppScript:
+func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro Max (Dynamic Island)") -> AppScript:
 	SaveSystemScript.delete_save(SAVE_PATH)
 	var app := AppScript.new()
 	app.save_path = SAVE_PATH
 	app.new_game_seed = Helpers.TEST_SEED
 	(Engine.get_main_loop() as SceneTree).root.add_child(app)
 	_press(app, "NewGameButton")
+	Layout.apply(app, device)  # Gerätegröße vor dem Auslöser (Reiter, Lage der Ziele)
 	for definition in app.game.tutorials.get_catalog().get_all():
 		if definition.id != only:
 			app.game.tutorials.mark_seen(definition.id)
@@ -83,16 +84,60 @@ func _scenario(only: String, trigger: String) -> AppScript:
 			_jump(app, TimeSystemScript.at(2, 8))
 			_press(app, "EventOption_accept")
 			_press(app, "WindowCloseButton")  # Kalender bei Tagesbeginn
+		"first_channel_open":
+			_press(app, "ChannelButton")
+		"first_ledger_open":
+			_press(app, "LedgerButton")
+		"first_content_quality", "first_equipment_offered":
+			app.game.locations.travel("studio")
+			_jump(app, TimeSystemScript.at(1, 10))
+			_press(app, "MapPin_studio")
+		"first_effect_symbols":
+			_jump(app, TimeSystemScript.at(1, 10))
+			_press(app, "MapPin_studio")
+		"first_company_offered":
+			_jump(app, TimeSystemScript.at(1, 10))
+			_press(app, "MapPin_office")
+		"first_branch_offered":
+			_jump(app, TimeSystemScript.at(1, 12))
+			_press(app, "MapPin_label_store")
+		"first_company_open":
+			_found_company(app)
+			_press(app, "CompanyButton")
+		"first_settlement":
+			_found_company(app)
+			_jump(app, TimeSystemScript.at(2, 8))
+			_resolve_events(app)
+			_press(app, "WindowCloseButton")  # Kalender bei Tagesbeginn
+		"first_obligation_due":
+			_jump(app, TimeSystemScript.at(8, 9))
+			_resolve_events(app)
+			if _screen(app).find_child("Window_calendar", false, false) != null:
+				_press(app, "WindowCloseButton")
 		_:
 			assert_true(false, "Kein Testszenario für Auslöser '%s' (%s)" % [trigger, only])
 	return app
+
+
+func _found_company(app: AppScript) -> void:
+	app.game.locations.travel("office")
+	_jump(app, TimeSystemScript.at(1, 10))
+	assert_eq(app.game.company.found("merch_label"), "")
+	_screen(app).call("_refresh")
+
+
+func _resolve_events(app: AppScript) -> void:
+	while app.game.events.has_pending():
+		var instance: String = app.game.events.get_next_pending_id()
+		app.game.events.resolve(instance, app.game.events.get_definition_for(instance).options[-1].id)
+	_screen(app).call("_refresh")
 
 
 func test_every_tutorial_appears_and_fits_every_device() -> void:
 	var problems := PackedStringArray()
 	for definition in _catalog().get_all():
 		for device in Layout.DEVICES:
-			var app := _scenario(definition.id, definition.trigger)
+			var app := _scenario(definition.id, definition.trigger, device)
 			var screen := _screen(app)
 			var where := "%s / %s" % [definition.id, device]
 			Layout.apply(app, device)
@@ -156,15 +201,87 @@ func test_data_rules() -> void:
 		assert_true(not mechanics.has(definition.mechanic), "Mechanik '%s' doppelt" % definition.mechanic)
 		mechanics[definition.mechanic] = true
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
-			"reminder", "conflict", "wait", "trip", "events", "saving"]:
+			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
+			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
+
+
+## T.6: nie mehr als 3 Tutorials hintereinander – der Rest kommt bei der nächsten Gelegenheit.
+func test_at_most_three_in_a_row() -> void:
+	SaveSystemScript.delete_save(SAVE_PATH)
+	var app := AppScript.new()
+	app.save_path = SAVE_PATH
+	app.new_game_seed = Helpers.TEST_SEED
+	(Engine.get_main_loop() as SceneTree).root.add_child(app)
+	_press(app, "NewGameButton")
+	_press(app, "TutorialConfirmButton")
+	_press(app, "TutorialConfirmButton")
+	_jump(app, TimeSystemScript.at(1, 10))
+	_press(app, "MapPin_studio")  # aus der Ferne: Kacheln, Hinfahren, Kombi, Symbole … fällig
+	var shown := []
+	while _screen(app).find_child("TutorialOverlay", false, false) != null and shown.size() < 10:
+		shown.append(_screen(app).find_child("TutorialOverlay", false, false).get("tutorial_id"))
+		_press(app, "TutorialConfirmButton")
+	assert_eq(shown.size(), 3, "hintereinander: %s" % [shown])
+	assert_true(not app.game.tutorials.get_due().is_empty(), "nichts mehr fällig – Test zu schwach")
+	_press(app, "WindowCloseButton")
+	_press(app, "MapPin_studio")  # nächste Gelegenheit
+	assert_true(_screen(app).find_child("TutorialOverlay", false, false) != null, "Rest kommt nicht")
+	app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+
+
+## T.6b: Tipp auf den Ortsnamen öffnet die Info-Blase mit der Beschreibung (in der Safe Area, Schrift ≥ 21 px),
+## Tipp daneben schließt sie; auf allen 4 Geräteklassen.
+func test_location_info_bubble() -> void:
+	for device in Layout.DEVICES:
+		SaveSystemScript.delete_save(SAVE_PATH)
+		var app := AppScript.new()
+		app.save_path = SAVE_PATH
+		(Engine.get_main_loop() as SceneTree).root.add_child(app)
+		_press(app, "NewGameButton")
+		_screen(app).call("close_tutorial")
+		_screen(app).set("show_tutorials", false)
+		_press(app, "MapPin_studio")
+		Layout.apply(app, device)
+		Layout.settle_in_place(_screen(app).find_child("Window_location", false, false))
+		var title_button := app.find_child("WindowTitleButton", true, false) as Button
+		assert_true(title_button != null, "%s: Ortsname nicht antippbar" % device)
+		assert_true(title_button.size.y >= UiStyle.TOUCH_SIZE - 0.5 and title_button.size.x >= UiStyle.TOUCH_SIZE - 0.5,
+				"%s: Tippfläche %s" % [device, title_button.size])
+		assert_eq((app.find_child("LocationWindowContent", true, false) as Control).tooltip_text, "", "Tooltip noch da")
+		title_button.pressed.emit()
+		var text := app.find_child("LocationInfoText", true, false) as Label
+		assert_true(text != null, "%s: keine Info-Blase" % device)
+		if text == null:
+			app.free()
+			continue
+		assert_eq(text.text, app.game.locations.get_catalog().get_definition("studio").description)
+		assert_true(text.get_theme_font_size("font_size") >= UiStyle.MIN_READ_FONT_SIZE)
+		var bubble := app.find_child("LocationInfoBubble", true, false) as Control
+		assert_true(Layout.safe_rect(device).grow(0.5).encloses(Rect2(bubble.position, bubble.size)),
+				"%s: Info-Blase außerhalb der Safe Area" % device)
+		assert_true(text.get_line_count() <= text.get_visible_line_count(), "%s: Text abgeschnitten" % device)
+		var release := InputEventMouseButton.new()
+		release.button_index = MOUSE_BUTTON_LEFT
+		release.pressed = false
+		(app.find_child("LocationInfo", true, false) as Control).gui_input.emit(release)
+		assert_true(app.find_child("LocationInfo", true, false) == null, "%s: schließt nicht" % device)
+		assert_true(_screen(app).find_child("Window_location", false, false) != null, "Ortsfenster mit geschlossen")
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
 
 
 ## Neue Auslöser (T.5) werden gemeldet – jeweils im passenden Moment.
 func test_new_triggers_are_reported() -> void:
 	for pair in [["first_window_closed", "tut_map_swipe"], ["first_action", "tut_stats"],
 			["first_conflict_popup", "tut_conflict"], ["first_wait_offered", "tut_wait"],
-			["first_trip_offered", "tut_trip"], ["first_new_day", "tut_save"]]:
+			["first_trip_offered", "tut_trip"], ["first_new_day", "tut_save"],
+			["first_channel_open", "tut_channel"], ["first_content_quality", "tut_content"],
+			["first_equipment_offered", "tut_equipment"], ["first_effect_symbols", "tut_symbols"],
+			["first_company_offered", "tut_company"], ["first_company_open", "tut_transfer"],
+			["first_branch_offered", "tut_branch"], ["first_settlement", "tut_settlement"],
+			["first_ledger_open", "tut_ledger"], ["first_obligation_due", "tut_obligations"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

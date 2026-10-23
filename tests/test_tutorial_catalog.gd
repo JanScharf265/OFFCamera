@@ -31,7 +31,9 @@ func test_real_file_loads() -> void:
 		assert_true(definition.trigger in TutorialCatalogScript.TRIGGERS)
 		assert_true(definition.text.length() <= TutorialCatalogScript.MAX_TEXT_LENGTH)
 	assert_eq(ids, ["tut_map", "tut_map_tap_building", "tut_map_swipe", "tut_activities", "tut_travel", "tut_trip",
-			"tut_stats", "tut_calendar", "tut_reminder", "tut_conflict", "tut_wait", "tut_event", "tut_save"],
+			"tut_stats", "tut_calendar", "tut_reminder", "tut_conflict", "tut_wait", "tut_event", "tut_save",
+			"tut_channel", "tut_content", "tut_equipment", "tut_symbols", "tut_company", "tut_transfer", "tut_branch",
+			"tut_settlement", "tut_obligations", "tut_ledger"],
 			"sortiert nach order")
 	var tap = catalog.get_definition("tut_map_tap_building")
 	assert_eq(tap.mechanic, "location_open")

@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4 und G5 fertig, T läuft – als Nächstes T.6)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4 und G5 fertig, T läuft – als Nächstes T.7)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -292,8 +292,8 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] T.3 Anzeige (`scripts/ui/tutorial_overlay.gd`): abdunkeln, Ziel (`ui_target` = Knotenname) ausgespart mit pulsierendem Rahmen und Pfeil, Sprechblase (Titel, Text, „Verstanden“) in der Safe Area ohne das Ziel zu verdecken; ohne/fehlendes Ziel mittig (Warnung im Log); „Verstanden“ → `mark_seen`, dann das nächste; Reihenfolge Ereignis → Kalender → Erinnerung → Tutorial, über dem Ortsfenster erlaubt; darunter nichts tippbar; fester Starthinweis „Tippe auf ein Gebäude …“ entfällt (459/459 Tests grün)
 - [x] T.4 Einstellungen: Schalter „Tutorials anzeigen“ (Gerät, Standard an; aus = keine Anzeige, fällige bleiben fällig) und „Tutorials zurücksetzen“ (mit Rückfrage, `TutorialSystem.reset_seen()` im aktuellen Spielstand); Seite in Zeilen umgebaut, damit sie ins Querformat passt; neuer Bildschirm „Hilfe / Lexikon“ (`scripts/ui/lexicon_screen.gd`, über die Einstellungen): nur gesehene Tutorials, nach Bereich, Antippen klappt den Text auf; kein neues Spielstand-Format (467/467 Tests grün)
 - [x] T.5 Texte Grundlagen: 13 Tutorials (Karte, Karte bewegen, Orte antippen, Kacheln, Hinfahren, Hinfahren und starten, Energie/Stimmung, Kalender, Erinnerung, Konflikt, Warten, Ereignisse, Speichern), zum Start höchstens 2; 6 neue Auslöser; `ui_target` mit „*“; Test jedes Tutorials auf 4 Geräteklassen. Korrekturen: Tutorial darf über dem Fenster liegen, das es erklärt (DECISIONS 063); Lexikon mit festem Schließen-Button und in Spielreihenfolge; Einstellungs-Buttons: Löschen mit rotem Rahmen, Zurück/Zurücksetzen grau (474/474 Tests grün)
-- [ ] T.6 Texte Karriere und Firma: Kanal/Content/Ausrüstung, Firma gründen/Einlage/Entnahme, Tagesabschluss, Fristen/Mahnung, Buchungen/Wochenübersicht; dazu die Wirkungs-Symbole der Kacheln (Follower, Community, Ruf, Auslastung)
-- [ ] T.6b Ortsbeschreibung auf dem iPhone wieder sichtbar machen (z. B. Tipp auf den Ortsnamen oder im Lexikon) – seit G4.5b nur noch im Tooltip, wichtig für die Atmosphäre
+- [x] T.6 Texte Karriere und Firma: 10 Tutorials (Kanal, Content und Qualität, Ausrüstung, Wirkungs-Symbole, Firma gründen, Privat und Firma, Ladenlokal, Tagesabschluss, Fristen, Buchungen), 9 neue Auslöser; höchstens 3 Tutorials hintereinander; ein Tutorial wartet, bis sein Ziel sichtbar ist; Test jedes Tutorials auf 4 Geräteklassen (476/476 Tests grün)
+- [x] T.6b Ortsbeschreibung: Tipp auf den Ortsnamen im Ortsfenster öffnet eine Info-Blase (Tippfläche ≥ 84 px, 24 px Schrift, Safe Area, Tipp irgendwo schließt); Tooltip entfernt; Hinweis im Tutorial „Aktivitäten“
 - [ ] T.7 Abdeckungstest (jede Mechanik-ID hat ein Tutorial) + Layout-Test der Texte auf den 4 Geräteklassen; Regel in `CLAUDE.md`
 
 ### U – Unterwelt (Hauptspiel; jedes Ticket mit Tutorial, Daten unter `data/underworld/`)

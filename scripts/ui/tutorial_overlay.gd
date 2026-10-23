@@ -11,6 +11,8 @@ signal confirmed(tutorial_id: String)
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 const BUBBLE_MAX_WIDTH := 560.0
+## Schmalste Sprechblase neben dem Ziel (T.6, nur wenn die volle Breite nirgends passt)
+const MIN_SIDE_WIDTH := 280.0
 ## Abstand zwischen Ziel und Sprechblase (Platz für den Pfeil)
 const GAP := 56.0
 ## Luft um das ausgesparte Ziel
@@ -82,14 +84,35 @@ func place(full_size: Vector2, safe: Rect2) -> void:
 	size = full_size
 	_safe = safe
 	_find_target()
-	var width := minf(BUBBLE_MAX_WIDTH, safe.size.x)
+	var bubble_size := _measure(minf(BUBBLE_MAX_WIDTH, safe.size.x))
+	var spot := _bubble_position(bubble_size)
+	if _has_hole and not _fits(Rect2(spot, bubble_size)):
+		# T.6: Passt die volle Breite nirgends (schmale Geräte), seitlich schmaler und dafür höher versuchen.
+		for side_width in [_safe.end.x - _hole.end.x - GAP, _hole.position.x - GAP - _safe.position.x]:
+			if side_width < MIN_SIDE_WIDTH:
+				continue
+			var narrow := _measure(minf(side_width, BUBBLE_MAX_WIDTH))
+			var narrow_spot := _bubble_position(narrow)
+			if _fits(Rect2(narrow_spot, narrow)):
+				bubble_size = narrow
+				spot = narrow_spot
+				break
+	_measure(bubble_size.x)
+	_bubble.size = bubble_size
+	_bubble.position = spot
+	queue_redraw()
+
+
+## Größe der Sprechblase bei `width` (Container sortiert, umbrechende Texte gemessen).
+func _measure(width: float) -> Vector2:
 	_bubble.custom_minimum_size = Vector2(width, 0)
 	_bubble.size = Vector2(width, 0)
 	_settle(_bubble, width)
-	var bubble_size := Vector2(width, _bubble.get_combined_minimum_size().y)
-	_bubble.size = bubble_size
-	_bubble.position = _bubble_position(bubble_size)
-	queue_redraw()
+	return Vector2(width, _bubble.get_combined_minimum_size().y)
+
+
+func _fits(rect: Rect2) -> bool:
+	return _safe.grow(0.5).encloses(rect) and not rect.intersects(_hole)
 
 
 func _process(delta: float) -> void:
@@ -124,9 +147,8 @@ func _find_target() -> void:
 static func find_target(root: Node, pattern: String) -> Control:
 	if pattern.is_empty() or root == null:
 		return null
-	if not "*" in pattern:
-		var exact := root.find_child(pattern, true, false) as Control
-		return exact if exact != null and exact.is_visible_in_tree() else null
+	# Auch ohne „*“ alle gleichnamigen prüfen (T.6): z. B. „TileChip_singleplayer“ in mehreren Kacheln, teils in
+	# einem verborgenen Reiter.
 	for node in root.find_children(pattern, "Control", true, false):
 		if (node as Control).is_visible_in_tree():
 			return node

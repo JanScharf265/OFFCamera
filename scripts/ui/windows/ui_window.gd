@@ -5,6 +5,8 @@ extends PanelContainer
 ## Antippen eines Buttons, damit Wischen im Fenster nicht als Tippen zählt.
 
 signal close_pressed
+## T.6b: Tipp auf den Titel (nur wenn der Inhalt get_description() hat, z. B. Ortsfenster)
+signal title_pressed
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const RoundButtonScript := preload("res://scripts/ui/round_button.gd")
@@ -14,6 +16,8 @@ const TAP_SCROLL_TOLERANCE := 12
 
 var content: Control
 var _title: Label
+## T.6b: unsichtbarer Button um den Titel (Tippfläche ≥ 84 px), null ohne Beschreibung
+var _title_button: Button
 var _close_button: Button
 var _scroll: ScrollContainer
 var _scroll_at_press := 0
@@ -47,6 +51,27 @@ func _init(kind: String, title: String, window_content: Control, closable: bool 
 		_title.add_theme_font_size_override("font_size", UiStyle.COMPACT_TITLE_FONT_SIZE)
 		extra.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header.add_child(extra)
+	if content.has_method("get_description"):
+		# T.6b: Der Titel wird antippbar (Info-Blase mit der Beschreibung); Label bleibt „WindowTitle“.
+		_title_button = Button.new()
+		_title_button.name = "WindowTitleButton"
+		_title_button.focus_mode = Control.FOCUS_NONE
+		_title_button.mouse_filter = Control.MOUSE_FILTER_PASS
+		for state in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
+			_title_button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+		_title_button.size_flags_horizontal = _title.size_flags_horizontal
+		_title_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		_title_button.tooltip_text = "Mehr über diesen Ort"
+		var index := _title.get_index()
+		header.remove_child(_title)
+		_title.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_title_button.add_child(_title)
+		header.add_child(_title_button)
+		header.move_child(_title_button, index)
+		_title_button.pressed.connect(func() -> void: title_pressed.emit())
+		_size_title_button()
 	# Rund wie die Buttons der Spielansicht (G4.5): Kreis 56 px, Tippfläche 84 px.
 	_close_button = RoundButtonScript.new("", "res://assets/kenney/game-icons/cross.png", UiStyle.CLOSE_ROUND_SIZE)
 	_close_button.name = "WindowCloseButton"
@@ -74,12 +99,32 @@ func body_height() -> float:
 			- float((get_child(0) as VBoxContainer).get_theme_constant("separation"))
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED or what == NOTIFICATION_READY:
+		_size_title_button()  # erst im Baum gilt die Schrift des Themes
+
+
 func is_closable() -> bool:
 	return _close_button.visible
 
 
 func set_title(text: String) -> void:
 	_title.text = text
+	_size_title_button()
+
+
+## Tippfläche des Titels: so breit wie der Text (mind. 84 px), 84 px hoch.
+func _size_title_button() -> void:
+	if _title_button == null:
+		return
+	var width := _title.get_theme_font("font").get_string_size(_title.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
+			_title.get_theme_font_size("font_size")).x
+	_title_button.custom_minimum_size = Vector2(maxf(ceilf(width) + 4.0, UiStyle.TOUCH_SIZE), UiStyle.TOUCH_SIZE)
+
+
+## Rechteck des Titels (für die Info-Blase) in globalen Koordinaten.
+func get_title_rect() -> Rect2:
+	return (_title_button if _title_button != null else _title).get_global_rect()
 
 
 func remember_scroll() -> void:

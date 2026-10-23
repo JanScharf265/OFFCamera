@@ -38,7 +38,7 @@
 		"mechanic": "activities",
 		"trigger": "first_location_open",
 		"title": "Aktivitäten",
-		"text": "Jede Kachel zeigt, wie lange etwas dauert, wann du fertig bist und was es bringt: grün hilft, rot kostet. Ein Tipp auf den Button – und die Uhr läuft.",
+		"text": "Jede Kachel zeigt, wie lange etwas dauert, wann du fertig bist und was es bringt: grün hilft, rot kostet. Ein Tipp auf den Button – und die Uhr läuft. Tipp auf den Ortsnamen für mehr Infos.",
 		"ui_target": "Tile_*",
 		"order": 40,
 		"requires": [
@@ -137,6 +137,106 @@
 		"text": "Keine Sorge ums Speichern: Das Spiel sichert nach jeder Aktion von selbst. Übers Zahnrad kommst du ins Menü, „Fortsetzen“ bringt dich zurück.",
 		"ui_target": "MenuButton",
 		"order": 130,
+		"requires": []
+	},
+	{
+		"id": "tut_channel",
+		"mechanic": "channel",
+		"trigger": "first_channel_open",
+		"title": "Dein Kanal",
+		"text": "Follower sind deine Reichweite, Community zeigt, wie sehr deine Leute dich mögen. Der Ruf entscheidet, wer mit dir arbeiten will – Marken schauen genau hin.",
+		"ui_target": "FollowersLabel",
+		"order": 140,
+		"requires": []
+	},
+	{
+		"id": "tut_content",
+		"mechanic": "content_quality",
+		"trigger": "first_content_quality",
+		"title": "Content und Qualität",
+		"text": "Streams und Videos bringen Follower und Geld. Wie gut sie werden, hängt von deiner Ausrüstung und der Stimmung in der Community ab – gutes Licht lohnt sich.",
+		"ui_target": "TileHint_*",
+		"order": 150,
+		"requires": []
+	},
+	{
+		"id": "tut_equipment",
+		"mechanic": "equipment",
+		"trigger": "first_equipment_offered",
+		"title": "Ausrüstung",
+		"text": "Kamera, Mikro, Licht: Jede Stufe hebt die Qualität deines Contents. Kostet sofort Geld, aber keine Zeit.",
+		"ui_target": "EquipmentButton_*",
+		"order": 160,
+		"requires": []
+	},
+	{
+		"id": "tut_symbols",
+		"mechanic": "effect_symbols",
+		"trigger": "first_effect_symbols",
+		"title": "Was die Symbole heißen",
+		"text": "Person = Follower, Gruppe = Community, Stern = Ruf, Balken = Auslastung deiner Firma. Grün steigt, rot sinkt.",
+		"ui_target": "TileChip_singleplayer",
+		"order": 170,
+		"requires": []
+	},
+	{
+		"id": "tut_company",
+		"mechanic": "company_found",
+		"trigger": "first_company_offered",
+		"title": "Eigene Firma",
+		"text": "Ein Merch-Label: legal, sauber, mit eigenem Firmenkonto. Gründen kostet eine Gebühr und eine Einlage – und in Marbella ist eine saubere Fassade Gold wert.",
+		"ui_target": "CompanyFoundButton_*",
+		"order": 180,
+		"requires": []
+	},
+	{
+		"id": "tut_transfer",
+		"mechanic": "company_money",
+		"trigger": "first_company_open",
+		"title": "Privat und Firma",
+		"text": "Dein Geld und das der Firma sind getrennt. Mit einer Einlage schiebst du Privatgeld in die Firma, mit einer Entnahme holst du Gewinn raus.",
+		"ui_target": "CompanyDepositButton",
+		"order": 190,
+		"requires": []
+	},
+	{
+		"id": "tut_branch",
+		"mechanic": "branch",
+		"trigger": "first_branch_offered",
+		"title": "Ladenlokal",
+		"text": "Ein eigener Laden an der Promenade: bringt jeden Tag Umsatz, kostet aber auch jeden Tag Miete und Personal. Erst gründen, dann eröffnen.",
+		"ui_target": "BranchOpenButton_*",
+		"order": 200,
+		"requires": []
+	},
+	{
+		"id": "tut_settlement",
+		"mechanic": "settlement",
+		"trigger": "first_settlement",
+		"title": "Tagesabschluss",
+		"text": "Um Mitternacht rechnet deine Firma ab: Umsatz rein, laufende Kosten raus – alles aufs Firmenkonto. Oben siehst du den Stand.",
+		"ui_target": "CompanyBlock",
+		"order": 210,
+		"requires": []
+	},
+	{
+		"id": "tut_obligations",
+		"mechanic": "obligations",
+		"trigger": "first_obligation_due",
+		"title": "Fristen",
+		"text": "Miete und Abgaben werden fällig. Reicht das Geld, wird sofort bezahlt – sonst leuchtet der rote Punkt. Wer zu lange wartet, zahlt Mahngebühr.",
+		"ui_target": "ObligationsButton",
+		"order": 220,
+		"requires": []
+	},
+	{
+		"id": "tut_ledger",
+		"mechanic": "ledger",
+		"trigger": "first_ledger_open",
+		"title": "Buchungen",
+		"text": "Jeder Euro mit Datum und Grund. Oben die Wochenübersicht je Konto – so siehst du, ob sich die Woche gelohnt hat.",
+		"ui_target": "LedgerWeeks",
+		"order": 230,
 		"requires": []
 	}
 ]

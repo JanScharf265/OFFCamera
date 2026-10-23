@@ -36,6 +36,16 @@ const TRIGGERS := [
 	"first_wait_offered",
 	"first_trip_offered",
 	"first_new_day",
+	# T.6
+	"first_channel_open",
+	"first_content_quality",
+	"first_equipment_offered",
+	"first_effect_symbols",
+	"first_company_offered",
+	"first_company_open",
+	"first_branch_offered",
+	"first_settlement",
+	"first_ledger_open",
 ]
 const MAX_TEXT_LENGTH := 240
 

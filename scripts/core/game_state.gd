@@ -87,6 +87,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	# den GameState fest (Kreisverweis, Speicherleck – test_memory).
 	events.event_triggered.connect(tutorials.report.bind("first_event").unbind(1))
 	obligations.obligation_due.connect(tutorials.report.bind("first_obligation_due").unbind(1))
+	company.day_settled.connect(tutorials.report.bind("first_settlement").unbind(1))
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).

@@ -120,6 +120,16 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   vorrangiges Fenster (Ereignis/Kalender/Erinnerung) oder das Konflikt-Popup, zeigt `_open_due_tutorial()` nur ein
   Tutorial, dessen Ziel darin liegt; das Overlay liegt dann darüber (in `_layout()` nach dem Popup einsortiert).
   `close_tutorial()` schließt ohne „gesehen“ (Tests).
+- T.6: 23 Tutorials, 22 Auslöser (neu u. a. `first_channel_open`, `first_company_open`, `first_ledger_open` aus der
+  Spielansicht; `first_content_quality`, `first_equipment_offered`, `first_effect_symbols`, `first_company_offered`,
+  `first_branch_offered` aus dem Ortsfenster; `first_settlement` über `CompanySystem.day_settled`). Wirkungs-Symbole
+  heißen `TileChip_<Symbol>` (z. B. `TileChip_singleplayer`). `_open_due_tutorial()` nimmt das erste fällige Tutorial,
+  dessen Ziel jetzt sichtbar ist (ohne Ziel: immer, außer über einem vorrangigen Fenster) – sonst wartet es; erneut
+  geprüft bei jedem Anlass und beim Reiterwechsel (`check_tutorials()`). Höchstens `TUTORIAL_CHAIN_MAX` (3)
+  hintereinander über „Verstanden“. Sprechblase: passt die volle Breite (560 px) nirgends, seitlich schmaler (ab 280 px).
+- Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
+  (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
+  und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.
 - Einstellungen und Lexikon (T.4): Geräte-Schalter `tutorials` (settings.cfg, Standard an) → `GameScreen.show_tutorials`;
   aus = `_open_due_tutorial()` zeigt nichts, das TutorialSystem merkt weiter. „Tutorials zurücksetzen“ →
   `App._reset_tutorials()` → `TutorialSystem.reset_seen()` (gesehen und `seen_triggers` leer, `first_game_start` gilt als

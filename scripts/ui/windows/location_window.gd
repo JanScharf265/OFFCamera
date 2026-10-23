@@ -19,6 +19,8 @@ const CONFLICT_PREFIX := "⚠ Verpasst: "
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
 ## G5.7: Button-Text der Kombi (das Auto-Symbol steht davor)
 const TRIP_TEXT := "Hinfahren und starten"
+## Wirkungs-Symbole, die das Symbole-Tutorial erklärt (T.6): Follower, Community, Ruf, Auslastung
+const SYMBOL_CHIPS := ["singleplayer", "multiplayer", "star", "barsVertical"]
 
 var location_id := ""
 
@@ -91,6 +93,11 @@ func _ready() -> void:
 	refresh()
 
 
+## T.6b: Beschreibung des Orts für die Info-Blase beim Tipp auf den Ortsnamen.
+func get_description() -> String:
+	return _game.locations.get_catalog().get_definition(location_id).description
+
+
 func get_title() -> String:
 	return _game.locations.get_catalog().get_definition(location_id).display_name
 
@@ -120,6 +127,9 @@ func select_tab(tab_id: String) -> void:
 		return
 	_current_tab = tab_id
 	_apply_tab_filter()
+	# T.6: Ein Tutorial, das auf eine Kachel in diesem Reiter wartet, kann jetzt kommen.
+	if is_inside_tree():
+		_screen.call_deferred("check_tutorials")
 
 
 func _build_tabs() -> void:
@@ -210,7 +220,25 @@ func refresh() -> void:
 		_refresh_company_card(type_id, now)
 	for type_id in _branch_cards:
 		_refresh_branch_card(type_id, now)
+	_report_tutorial_triggers()
 
+
+## Tutorial-Auslöser (T.6) – was dieses Fenster gerade anbietet; angezeigt wird erst, wenn das Ziel sichtbar ist.
+func _report_tutorial_triggers() -> void:
+	var tutorials = _game.tutorials
+	var here: bool = location_id == _game.locations.get_current()
+	if here and not _content_cards.is_empty():
+		tutorials.report("first_content_quality")
+	if here and not _equipment_cards.is_empty():
+		tutorials.report("first_equipment_offered")
+	if not _company_cards.is_empty() and not _game.company.is_founded():
+		tutorials.report("first_company_offered")
+	if not _branch_cards.is_empty():
+		tutorials.report("first_branch_offered")
+	for chip in _grid.find_children("TileChip_*", "", true, false):
+		if String(chip.name).get_slice("_", 1) in SYMBOL_CHIPS:
+			tutorials.report("first_effect_symbols")
+			break
 
 ## G5.7: Liegt die Aktion an einem anderen Ort, prüft das TripSystem „Hinfahren und starten“ für die Gesamtzeit.
 ## Frei: Auto + „20 min + 2 h“ in der Zeitzeile, darunter „Ende 15:00“ in der Hinweiszeile (zusammen passte es auf
@@ -274,8 +302,8 @@ func _build_details() -> Control:
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_theme_constant_override("separation", 2)
 	row.add_child(info)
-	# Zwei Zeilen (G4.5b, spart Höhe für die Kacheln): Öffnungszeiten, Entfernung. Die Beschreibung des Orts steht
-	# nur noch im Tooltip des Fensterinhalts (später im Lexikon, Paket T).
+	# Zwei Zeilen (G4.5b, spart Höhe für die Kacheln): Öffnungszeiten, Entfernung. Die Beschreibung des Orts zeigt seit
+	# T.6b ein Tipp auf den Ortsnamen als Info-Blase (get_description(), ui_window.gd + GameScreen).
 	_location_hours = _info_line("LocationHours", UiStyle.TEXT)
 	info.add_child(_location_hours)
 	_location_distance = _info_line("LocationDistance", UiStyle.MUTED)
@@ -318,7 +346,6 @@ func _info_line(node_name: String, color: Color) -> Label:
 
 func _refresh_details() -> void:
 	var definition = _game.locations.get_catalog().get_definition(location_id)
-	tooltip_text = definition.description
 	var now_open: bool = _game.locations.is_open_at(location_id, _game.time.get_minutes())
 	# Kurzform (G4.7), damit die Titelzeile auch mit Reitern und „Hinfahren“ nichts abschneidet.
 	if definition.has_hours:
