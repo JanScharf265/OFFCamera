@@ -876,5 +876,185 @@
 				"label": "Zur Kenntnis nehmen"
 			}
 		]
+	},
+	{
+		"id": "paparazzi",
+		"title": "Paparazzi",
+		"text": "Ein Fotograf hat dich nachts vor einem Club erwischt – mit Leuten, die nicht nach Streaming aussehen. Die Bilder kursieren schon.",
+		"priority": 4,
+		"trigger": {
+			"random": {
+				"chance_percent": 10,
+				"from_day": 3,
+				"cooldown_days": 5,
+				"conditions": {
+					"min_followers": 2000,
+					"min_heat": 15
+				}
+			}
+		},
+		"options": [
+			{
+				"id": "joke",
+				"label": "Im Stream darüber witzeln",
+				"channel": {
+					"community": 3,
+					"reputation": -2
+				},
+				"organisation": {
+					"heat": 3
+				}
+			},
+			{
+				"id": "ignore",
+				"label": "Ignorieren",
+				"channel": {
+					"reputation": -3
+				}
+			}
+		]
+	},
+	{
+		"id": "leak",
+		"title": "Leak",
+		"text": "Ein anonymer Account postet Ausschnitte aus Chats, die nach dir klingen. Echt oder nicht – die Kommentare explodieren.",
+		"priority": 5,
+		"trigger": {
+			"random": {
+				"chance_percent": 8,
+				"from_day": 5,
+				"cooldown_days": 7,
+				"conditions": {
+					"min_followers": 500,
+					"min_heat": 40
+				}
+			}
+		},
+		"options": [
+			{
+				"id": "deny",
+				"label": "Dementieren",
+				"channel": {
+					"reputation": -5
+				}
+			},
+			{
+				"id": "silence",
+				"label": "Schweigen",
+				"channel": {
+					"followers_percent": -3
+				},
+				"organisation": {
+					"heat": 5
+				}
+			}
+		]
+	},
+	{
+		"id": "rumors",
+		"title": "Gerüchte",
+		"text": "Im Chat fragen immer mehr Leute, woher eigentlich das ganze Geld kommt. Ein paar haben sich schon Theorien zurechtgelegt.",
+		"priority": 2,
+		"trigger": {
+			"random": {
+				"chance_percent": 12,
+				"from_day": 3,
+				"cooldown_days": 4,
+				"conditions": {
+					"min_followers": 200,
+					"min_heat": 25
+				}
+			}
+		},
+		"options": [
+			{
+				"id": "counter",
+				"label": "Mit Witz kontern",
+				"channel": {
+					"community": 3,
+					"reputation": -1
+				}
+			},
+			{
+				"id": "moderate",
+				"label": "Chat moderieren",
+				"channel": {
+					"community": -3
+				}
+			}
+		]
+	},
+	{
+		"id": "scandal",
+		"title": "Skandal",
+		"text": "Ein Lokalblatt bringt deinen Namen mit laufenden Ermittlungen in Verbindung. Sponsoren schreiben vorsichtige Mails.",
+		"priority": 7,
+		"trigger": {
+			"random": {
+				"chance_percent": 10,
+				"from_day": 5,
+				"cooldown_days": 14,
+				"conditions": {
+					"min_followers": 5000,
+					"min_police_level": 2
+				}
+			}
+		},
+		"options": [
+			{
+				"id": "pause",
+				"label": "Eine Pause vom Streamen ankündigen",
+				"channel": {
+					"followers_percent": -10
+				},
+				"organisation": {
+					"heat": -10
+				}
+			},
+			{
+				"id": "carry_on",
+				"label": "Einfach weiterstreamen",
+				"channel": {
+					"followers_percent": 5,
+					"reputation": -10
+				},
+				"organisation": {
+					"heat": 10
+				}
+			}
+		]
+	},
+	{
+		"id": "absence",
+		"title": "Wo bist du?",
+		"text": "Seit Tagen kein Stream. Im Chat und unter deinen Videos fragen die Leute, was los ist.",
+		"priority": 3,
+		"trigger": {
+			"random": {
+				"chance_percent": 30,
+				"from_day": 2,
+				"cooldown_days": 3,
+				"conditions": {
+					"min_followers": 100,
+					"min_locked_up": 1
+				}
+			}
+		},
+		"options": [
+			{
+				"id": "excuse",
+				"label": "Eine Auszeit erklären lassen",
+				"channel": {
+					"reputation": -3
+				}
+			},
+			{
+				"id": "say_nothing",
+				"label": "Nichts sagen",
+				"channel": {
+					"followers_percent": -5
+				}
+			}
+		]
 	}
 ]

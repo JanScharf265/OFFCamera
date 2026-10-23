@@ -1027,3 +1027,12 @@ spricht von Verrat“).
 Nachtrag U.20 (GD): Club Medusa lag mit seinem Schild fast in Nueva Andalucía und danach auf dem Café-Schild – jetzt
 Raster 11/12. Gebiete nennen ihre Orte (`locations`); Tests: jeder Ort liegt in seinem Gebiet (beim Club auch das
 Schild), keine zwei Ortsschilder überlappen sich (beide schlagen mit der alten Position an).
+
+## 094 – Doppelleben (U.22)
+Der Kanal wirkt als Faktor auf jeden Hitze-Anstieg, nicht als eigene Hitzequelle: Ruf über 50 tarnt (−1 % je 5 Punkte,
+höchstens −10 %), Follower über 5.000 ziehen Blicke an (+1 % je 1.000, höchstens +30 %). Am Spielanfang (Ruf 50, wenige
+Follower) ändert sich nichts. Abkühlung bleibt unverändert; ein Anstieg um 1 bleibt mindestens 1. Fünf Ereignisse als
+Daten: Paparazzi (ab 2.000 Follower, Hitze ≥ 15), Leak (Hitze ≥ 40), Gerüchte (Hitze ≥ 25), Skandal (ab 5.000
+Follower und nur in der Ermittlung), „Wo bist du?“ (nur in Haft – Antwort auf die offene Frage aus U.21). Folgen nur
+für Kanal und Hitze. Die Zeile steht am Ende des Organisations-Fensters (weiter oben schob sie „Waschen“ aus dem
+Bereich, den das Tutorial erreicht – Reiter kommen mit U.25). Vorläufige Werte, Phase 8.

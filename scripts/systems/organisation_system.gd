@@ -33,6 +33,8 @@ const MAX_VALUE := 100
 const HEAT_WARN_FROM := 30
 const HEAT_DANGER_FROM := 60
 
+## U.22: Doppelleben – Faktor auf Hitze-Anstiege
+var _heat_percent: Callable
 var _time: TimeSystemScript
 var _rules: OrganisationRulesScript
 var _founded := false
@@ -118,6 +120,17 @@ func found(organisation_name: String) -> String:
 
 
 ## Ändert Werte (z. B. {"heat": 5}); Ergebnis wird auf 0–100 begrenzt. Ohne Organisation passiert nichts (false).
+## U.22: Faktor auf positive Hitze-Änderungen (DoubleLifeSystem.heat_gain_percent, 100 = unverändert).
+func set_heat_modifier(percent: Callable) -> void:
+	_heat_percent = percent
+
+
+## U.22: Werte für Ereignis-Bedingungen (min_/max_heat).
+func condition_values() -> Dictionary:
+	return {"heat": get_value("heat") if _founded else 0}
+
+
+@warning_ignore("integer_division")
 func change(deltas: Dictionary) -> bool:
 	if not _founded:
 		return false
@@ -127,7 +140,10 @@ func change(deltas: Dictionary) -> bool:
 			return false
 	for key in deltas:
 		var old_value := get_value(key)
-		var new_value := clampi(old_value + int(deltas[key]), MIN_VALUE, MAX_VALUE)
+		var delta := int(deltas[key])
+		if key == "heat" and delta > 0 and _heat_percent.is_valid():
+			delta = maxi(1, delta * int(_heat_percent.call()) / 100)
+		var new_value := clampi(old_value + delta, MIN_VALUE, MAX_VALUE)
 		_values[key] = new_value
 		if key == "heat" and int(deltas[key]) > 0:
 			_heat_raised_day = _time.get_day()

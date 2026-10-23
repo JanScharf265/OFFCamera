@@ -36,6 +36,7 @@ const LaunderingSystemScript := preload("res://scripts/systems/laundering_system
 const BlackSpendingSystemScript := preload("res://scripts/systems/black_spending_system.gd")
 const PoliceSystemScript := preload("res://scripts/systems/police_system.gd")
 const JusticeSystemScript := preload("res://scripts/systems/justice_system.gd")
+const DoubleLifeSystemScript := preload("res://scripts/systems/double_life_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -92,6 +93,8 @@ var black_spending: BlackSpendingSystemScript
 var police: PoliceSystemScript
 ## Justiz (U.21)
 var justice: JusticeSystemScript
+## Doppelleben (U.22)
+var double_life: DoubleLifeSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -157,6 +160,10 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	locations.set_travel_block(justice.travel_block)
 	events.set_justice_handler(justice.apply_event_action)
 	events.add_text_context(justice.text_context)
+	double_life = DoubleLifeSystemScript.new(data.double_life, channel)
+	organisation.set_heat_modifier(double_life.heat_gain_percent)
+	events.add_condition_values(organisation.condition_values)
+	events.add_condition_values(justice.condition_values)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, police, justice, obligations, events])

@@ -153,6 +153,11 @@ func is_locked_up() -> bool:
 	return _state in [CUSTODY, SERVING]
 
 
+## U.22: Werte für Ereignis-Bedingungen (min_locked_up).
+func condition_values() -> Dictionary:
+	return {"locked_up": 1 if is_locked_up() else 0}
+
+
 ## Für LocationSystem: Grund, warum man nicht reisen kann ("" = frei).
 func travel_block() -> String:
 	return "Du sitzt in Haft." if is_locked_up() else ""

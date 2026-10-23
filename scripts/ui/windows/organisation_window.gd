@@ -8,6 +8,7 @@ const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
 const HudBarScript := preload("res://scripts/ui/hud_bar.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
+const ActivityText := preload("res://scripts/ui/activity_text.gd")
 
 const EXPLANATIONS := {
 	"respect": "Wie ernst dich die Szene nimmt. Wer Respekt hat, bekommt bessere Deals.",
@@ -129,6 +130,9 @@ func _refresh_supply() -> void:
 		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)
 		button.pressed.connect(func() -> void: _screen.open_supplier(supplier.id))
 		_supply_box.add_child(button)
+	# U.22 am Ende: das Fenster ist lang (Reiter folgen in U.25); weiter oben verdrängte es „Waschen“ aus dem
+	# Bereich, in den ein Tutorial noch scrollen kann.
+	_add_double_life()
 
 
 func _row(key: String) -> Control:
@@ -294,3 +298,22 @@ func _add_police() -> void:
 		_supply_box.add_child(lawyer)
 	if level > 0:
 		_game.tutorials.report("first_police_attention")
+
+
+## U.22: Doppelleben – wie Kanal-Ruf und Bekanntheit jeden Hitze-Anstieg verändern (Werte aus dem DoubleLifeSystem).
+func _add_double_life() -> void:
+	var life = _game.double_life
+	_supply_box.add_child(UiStyle.section_label("Doppelleben"))
+	var total: int = life.heat_gain_percent() - 100
+	var status := UiStyle.label("Hitze-Anstieg %s" % ("±0 %%" if total == 0 else "%+d %%" % total), UiStyle.FONT_SIZE,
+			UiStyle.NEGATIVE if total > 0 else UiStyle.POSITIVE if total < 0 else UiStyle.TEXT)
+	status.name = "DoubleLifeStatus"
+	status.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_supply_box.add_child(status)
+	var rules = life.get_rules()
+	var detail := UiStyle.wrapping_label("Tarnung durch den Kanal −%d %% (Ruf %d, ab %d zählt er) · Bekanntheit +%d %% (%s Follower, ab %s fällt man auf)" % [
+			life.cover_percent(), _game.channel.reputation, rules.get_value("cover_reputation_from"), life.fame_percent(),
+			ActivityText.format_int(_game.channel.followers), ActivityText.format_int(rules.get_value("fame_followers_from"))], UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+	detail.name = "DoubleLifeDetail"
+	_supply_box.add_child(detail)
+	_game.tutorials.report("first_double_life_shown")

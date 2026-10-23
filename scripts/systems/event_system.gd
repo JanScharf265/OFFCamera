@@ -141,6 +141,8 @@ func condition_values() -> Dictionary:
 		"company_founded": 1 if founded else 0,
 		"last_week_profit_cents": profit,
 		"police_level": 0,
+		"heat": 0,
+		"locked_up": 0,
 	}
 	for provider in _condition_providers:
 		values.merge(provider.call(), true)

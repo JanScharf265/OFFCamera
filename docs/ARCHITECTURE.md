@@ -181,6 +181,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Doppelleben (U.22, `scripts/systems/double_life_system.gd`, im GameState als `double_life`; Regeln aus
+  `data/underworld/double_life.json`): `heat_gain_percent()` = 100 − Tarnung (Ruf) + Bekanntheit (Follower);
+  `OrganisationSystem.set_heat_modifier` wendet den Faktor auf jede positive Hitze-Änderung an (mindestens +1).
+  Neue Ereignis-Bedingungen `min_/max_heat` (OrganisationSystem.condition_values) und `min_/max_locked_up`
+  (JusticeSystem.condition_values) über `EventSystem.add_condition_values`. Kein eigener Spielstand.
 - Justiz (U.21, `scripts/systems/justice_system.gd`, im GameState als `justice`; Regeln aus
   `data/underworld/justice.json` in `GameData.justice`): Zustand free/custody/bail/prison, Beweislage, Akte (von der
   Polizei), Prozess- und Entlassungstag. `PoliceSystem.set_after_raid(justice.after_raid)` (Festnahme nach Seed),

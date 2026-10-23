@@ -30,6 +30,7 @@ const LaunderingSystemScript := preload("res://scripts/systems/laundering_system
 const BlackSpendingSystemScript := preload("res://scripts/systems/black_spending_system.gd")
 const PoliceSystemScript := preload("res://scripts/systems/police_system.gd")
 const JusticeSystemScript := preload("res://scripts/systems/justice_system.gd")
+const DoubleLifeSystemScript := preload("res://scripts/systems/double_life_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -72,6 +73,8 @@ var black_spending := BlackSpendingSystemScript.Rules.new()
 var police := PoliceSystemScript.Rules.new()
 ## Justizregeln (U.21)
 var justice := JusticeSystemScript.Rules.new()
+## Doppelleben (U.22)
+var double_life := DoubleLifeSystemScript.Rules.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -84,7 +87,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering, black_spending, police, justice]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering, black_spending, police, justice, double_life]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.
@@ -95,7 +98,8 @@ func load_all() -> bool:
 				else LaunderingSystemScript.DEFAULT_PATH if catalog == laundering \
 				else BlackSpendingSystemScript.DEFAULT_PATH if catalog == black_spending \
 				else PoliceSystemScript.DEFAULT_PATH if catalog == police \
-				else JusticeSystemScript.DEFAULT_PATH if catalog == justice else catalog.DEFAULT_PATH
+				else JusticeSystemScript.DEFAULT_PATH if catalog == justice \
+				else DoubleLifeSystemScript.DEFAULT_PATH if catalog == double_life else catalog.DEFAULT_PATH
 		contents += FileAccess.get_file_as_string(path)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():

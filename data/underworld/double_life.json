@@ -1,0 +1,8 @@
+{
+	"cover_reputation_from": 50,
+	"cover_reputation_per_percent": 5,
+	"cover_max_percent": 10,
+	"fame_followers_from": 5000,
+	"fame_followers_per_percent": 1000,
+	"fame_max_percent": 30
+}

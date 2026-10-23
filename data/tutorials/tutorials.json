@@ -480,5 +480,15 @@
 		"ui_target": "JusticeStatus",
 		"order": 520,
 		"requires": []
+	},
+	{
+		"id": "tut_double_life",
+		"mechanic": "double_life",
+		"trigger": "first_double_life_shown",
+		"title": "Zwei Leben",
+		"text": "Dein Kanal ist Tarnung und Risiko zugleich: Ein guter Ruf dämpft jede neue Hitze, viele Follower verstärken sie. Und je bekannter du bist, desto eher schaut jemand genauer hin.",
+		"ui_target": "DoubleLifeStatus",
+		"order": 530,
+		"requires": []
 	}
 ]
