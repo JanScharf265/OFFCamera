@@ -159,6 +159,10 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   (Gruppe Geschäft, nach „Organisation“), Fenster `missions_window.gd` markiert alles als gesehen; Hinweise
   („Neuer Auftrag …“, „Auftrag erledigt … (Respekt +5)“) über `take_notices()` in `_after_action`. Gespeichert:
   `active`, `completed` (ID → Zeitpunkt), `unseen`.
+- Produkte (U.5, `scripts/systems/product_catalog.gd`, Modell `product_definition.gd`, in `GameData.products`):
+  `data/underworld/products.json` – id, Name, kurze Beschreibung, `buy_price_cents`, `sell_price_cents` (> Einkauf),
+  `quality` 0–100, `heat_per_unit` 1–20, order; alles je abstrakter „Einheit“. Noch von keinem System genutzt
+  (Einkauf U.6, Verkauf U.9, Nachfrage je Gebiet U.12).
 - Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
   (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
   und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.

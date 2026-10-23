@@ -18,6 +18,7 @@ const ObligationCatalogScript := preload("res://scripts/systems/obligation_catal
 const TutorialCatalogScript := preload("res://scripts/systems/tutorial_catalog.gd")
 const OrganisationRulesScript := preload("res://scripts/systems/organisation_rules.gd")
 const MissionCatalogScript := preload("res://scripts/systems/mission_catalog.gd")
+const ProductCatalogScript := preload("res://scripts/systems/product_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -36,6 +37,8 @@ var tutorials := TutorialCatalogScript.new()
 var organisation := OrganisationRulesScript.new()
 ## Story-Aufträge (U.4)
 var missions := MissionCatalogScript.new()
+## Produkte der Unterwelt (U.5) – reine Spielwerte je Einheit
+var products := ProductCatalogScript.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -48,7 +51,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions]:
+			tutorials, organisation, missions, products]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		contents += FileAccess.get_file_as_string(catalog.DEFAULT_PATH)

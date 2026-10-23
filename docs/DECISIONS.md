@@ -766,3 +766,13 @@ es schon gibt (Ankunft im Café am Hafen, auch über „Hinfahren und starten“
 Ziel beginnt. Belohnungen sind vorerst Organisationswerte (Respekt); Geld kommt mit den Zielen, die Geld bewegen.
 Aufträge starten automatisch (Story), es gibt kein Ablehnen. Der rote Punkt zählt Neues und Erledigtes, bis das Fenster
 geöffnet wird.
+
+## 073 – Produkte als Spielwerte je „Einheit“ (U.5)
+Die vier Produkte tragen ihre echten Namen (Vision), aber alle Zahlen sind reine Spielwerte je abstrakter „Einheit“ –
+ohne Gewicht oder Menge aus der echten Welt, damit keine realen Mengen- oder Preisbezüge entstehen (harte
+Inhaltsgrenze). Beschreibungen sprechen nur über Spielgefühl (Marge, Aufsehen), nicht über Herkunft, Wege oder
+Verarbeitung. Vorläufige Werte (Einkauf/Verkauf je Einheit): Gras 40/70 €, Haschisch 60/110 €, Pillen 50/100 €,
+Koks 200/380 €; Hitze je Einheit 1/2/2/4; Qualität 60/55/50/65 – Feinschliff in Phase 8, Bestätigung durch den Game
+Director offen. Die „Nachfrage je Gebiet“ kommt mit den Gebieten (U.12). Produkte haben noch keine Anzeige; das
+Tutorial dazu kommt mit dem Lieferanten (U.6), wenn der Spieler die Ware zum ersten Mal sieht – erst dann wird es eine
+Mechanik im Sinne des Abdeckungstests.

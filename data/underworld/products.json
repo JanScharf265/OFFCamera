@@ -1,0 +1,42 @@
+[
+	{
+		"id": "weed",
+		"display_name": "Gras",
+		"description": "Der Klassiker. Kleine Marge, wenig Aufsehen – damit fängt fast jeder an.",
+		"buy_price_cents": 4000,
+		"sell_price_cents": 7000,
+		"quality": 60,
+		"heat_per_unit": 1,
+		"order": 10
+	},
+	{
+		"id": "hash",
+		"display_name": "Haschisch",
+		"description": "Gefragt an der ganzen Küste. Etwas mehr Marge, etwas mehr Aufmerksamkeit.",
+		"buy_price_cents": 6000,
+		"sell_price_cents": 11000,
+		"quality": 55,
+		"heat_per_unit": 2,
+		"order": 20
+	},
+	{
+		"id": "pills",
+		"display_name": "Pillen",
+		"description": "Für die Clubnächte in Puerto Banús. Gute Marge, die Qualität schwankt.",
+		"buy_price_cents": 5000,
+		"sell_price_cents": 10000,
+		"quality": 50,
+		"heat_per_unit": 2,
+		"order": 30
+	},
+	{
+		"id": "coke",
+		"display_name": "Koks",
+		"description": "Teuer im Einkauf, die größte Marge – und hier schaut die Polizei am genauesten hin.",
+		"buy_price_cents": 20000,
+		"sell_price_cents": 38000,
+		"quality": 65,
+		"heat_per_unit": 4,
+		"order": 40
+	}
+]

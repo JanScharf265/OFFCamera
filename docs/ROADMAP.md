@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.5)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.6)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -301,7 +301,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] U.2 Organisation (`scripts/systems/organisation_system.gd`, Regeln `data/underworld/organisation.json`): Name, Respekt, Hitze, Stabilität 0–100, gegründet erst ab U.3; Hitze sinkt an ruhigen Tagen um 3 (Schritt im DayCycle nach dem Tagesabschluss); HUD „Flamme + Zahl“ (ab 30 gelb, ab 60 rot); Tutorial „Hitze“ (Mechanik `heat`); Spielstand Version 17 + Migration + Testdatei; iPhone SE aus den Geräteklassen entfernt (498/498 Tests + 3/3 lange Tests grün)
 - [x] U.3 Einstiegs-Ereignis „Liegeplatz 14“ (El Capitán, Puerto Banús) ab Tag 2 über den Tageswechsel (ein Code-Pfad für neue und alte Spielstände; Ereignisse mit Auslöser „scripted“), „Zuhören“ → Namenseingabe (nicht schließbar) → Organisation gegründet, „Nicht heute“ → nach 2 Tagen wieder; Fenster „Organisation“ + Seitenbutton (Geschäft); Tutorial „Deine Organisation“; Ereignis-Optionen mit `note`; Spielstand Version 18 + Migration + Testdatei; Grenzfall-Gerät gestrichen (510/510 Tests + 3/3 lange Tests grün)
 - [x] U.4 Story-Aufträge als Datenkette (`data/underworld/missions.json`, `MissionCatalog`, `MissionSystem`): aktiv, sobald Organisation + Voraussetzungen; Ziel „visit_location“; Belohnung als Organisationswerte; Fenster „Aufträge“ + Button mit rotem Punkt (Neues/Erledigtes); Kapitel „Erster Deal“, Auftrag 1 „Treffen am Hafen“ (Café am Hafen, Respekt +5) – die weiteren Schritte (Ware, Versteck, Verkauf) folgen mit U.6/U.8/U.9; Tutorial „Aufträge“; Spielstand Version 19 + Migration + Testdatei (520/520 Tests + 3/3 lange Tests grün)
-- [ ] U.5 Produkte als Daten (Gras, Haschisch, Koks, Pillen: Einkaufspreis, Verkaufspreis, Qualität, Hitze je Einheit – nur Spielwerte)
+- [x] U.5 Produkte als Daten (`data/underworld/products.json`, `ProductCatalog`, in `GameData.products`): Gras, Haschisch, Pillen, Koks mit Einkaufs-/Verkaufspreis je abstrakter Einheit, Qualität, Hitze je Einheit – nur Spielwerte, vorläufig; noch ohne Anzeige (Tutorial zur Ware mit U.6), Nachfrage je Gebiet mit U.12 (523/523 Tests + 3/3 lange Tests grün)
 - [ ] U.6 Erfundener Lieferant: Einkauf auf Vorkasse, Bestand, Lieferung kann platzen (Seed)
 - [ ] U.7 Lieferant auf Kredit: Schulden als einmalige Fristen im ObligationSystem, Druck-Ereignisse
 - [ ] U.8 Standorte als Daten (Felder nach Leitfaden 9.3), erstes Versteck, Gebäude auf der Karte (Kenney CC0, `city_layout.gd`, `city_map.gd`), laufende Kosten
