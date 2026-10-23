@@ -170,3 +170,19 @@ func test_ui_button_badge_window_and_notice() -> void:
 	assert_true(app.find_child("Mission_%s" % FIRST, true, false) != null, "erledigt fehlt")
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
+
+
+## Nachtrag GD: Das Treffen zählt nur, wenn das Café offen ist (07–20 Uhr); wer dort bleibt, bis es öffnet, erfüllt es.
+func test_meeting_needs_open_cafe() -> void:
+	var game := _founded_game()
+	game.missions.take_notices()
+	game.time.advance(TimeSystemScript.at(1, 21) - game.time.get_minutes())
+	game.events.resolve(game.events.get_next_pending_id(), "decline")
+	game.locations.travel("cafe_harbor")  # 21:xx, geschlossen
+	assert_eq(game.missions.is_active(FIRST), true, "bei geschlossenem Café erledigt")
+	assert_true(Array(game.missions.take_notices()).has(
+			"„Treffen am Hafen“: Café am Hafen hat gerade zu – komm wieder, wenn geöffnet ist."))
+	game.time.advance(TimeSystemScript.at(2, 6) - game.time.get_minutes())
+	assert_eq(game.missions.is_active(FIRST), true, "06:00 noch zu")
+	game.time.advance(TimeSystemScript.at(2, 7, 30) - game.time.get_minutes())
+	assert_eq(game.missions.is_completed(FIRST), true, "am Ort gewartet, bis offen")

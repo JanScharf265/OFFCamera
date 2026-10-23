@@ -776,3 +776,11 @@ Koks 200/380 €; Hitze je Einheit 1/2/2/4; Qualität 60/55/50/65 – Feinschlif
 Director offen. Die „Nachfrage je Gebiet“ kommt mit den Gebieten (U.12). Produkte haben noch keine Anzeige; das
 Tutorial dazu kommt mit dem Lieferanten (U.6), wenn der Spieler die Ware zum ersten Mal sieht – erst dann wird es eine
 Mechanik im Sinne des Abdeckungstests.
+
+## 074 – Rückmeldungen des Game Directors zu U.3–U.5
+- El Capitán ist nicht dauerhaft ablehnbar; „Nicht heute“ (kommt nach zwei Tagen wieder) bleibt (bestätigt 071).
+- Die vorläufigen Produktwerte aus U.5 bleiben (bestätigt 073).
+- Ein Treffen-Auftrag („visit_location“) zählt nur, wenn der Ort bei der Ankunft offen ist; kommt man bei
+  geschlossenem Ort an, gibt es einen Hinweis, und wer dort bleibt, bis geöffnet ist, erfüllt den Auftrag dann.
+- Roter Punkt an „Aufträge“ nach einem erledigten Auftrag: gewollt (072) – Abschlusstext und Belohnung sollen gesehen
+  werden; der Punkt verschwindet beim Öffnen des Fensters.

@@ -2,7 +2,8 @@ extends RefCounted
 
 ## Story-Aufträge (U.4): eine Kette aus Daten (MissionCatalog). Ein Auftrag wird aktiv, sobald die Organisation
 ## gegründet ist und alle `requires` erledigt sind – auch Aufträge, die ein späteres Update an die Kette hängt.
-## Ziele prüft das System selbst (z. B. Ankunft an einem Ort über LocationSystem.traveled); beim Abschluss gibt es die
+## Ziele prüft das System selbst (z. B. Ankunft an einem offenen Ort über LocationSystem.traveled, oder dort warten,
+## bis er öffnet); beim Abschluss gibt es die
 ## Belohnung (Organisationswerte) und der nächste Auftrag der Kette wird aktiv. Kostet keine Spielzeit.
 ## Neues (gestartet/erledigt) zählt als „ungesehen“ bis zum Öffnen des Fensters – das ergibt den roten Punkt.
 
@@ -15,6 +16,7 @@ signal mission_completed(mission_id: String)
 var _time
 var _catalog: MissionCatalogScript
 var _organisation
+var _locations
 ## mission_id -> true
 var _active := {}
 ## mission_id -> Zeitpunkt des Abschlusses (Minuten)
@@ -29,7 +31,9 @@ func _init(time, catalog: MissionCatalogScript, locations, organisation) -> void
 	_time = time
 	_catalog = catalog
 	_organisation = organisation
+	_locations = locations
 	locations.traveled.connect(_on_traveled)
+	time.time_advanced.connect(_on_time_advanced)
 	organisation.founded.connect(_on_founded)
 
 
@@ -101,9 +105,25 @@ func _on_founded(_name: String) -> void:
 	update_availability()
 
 
+## Ankunft: Ein Treffen zählt nur, wenn der Ort gerade offen ist (Game Director, nach U.4) – sonst ein Hinweis.
 func _on_traveled(_from_id: String, to_id: String) -> void:
 	for definition in get_active():
-		if definition.goal.get("type") == MissionCatalogScript.GOAL_VISIT_LOCATION and definition.goal["location"] == to_id:
+		if definition.goal.get("type") != MissionCatalogScript.GOAL_VISIT_LOCATION or definition.goal["location"] != to_id:
+			continue
+		if _locations.is_open_at(to_id, _time.get_minutes()):
+			_complete(definition)
+		else:
+			var location = _locations.get_catalog().get_definition(to_id)
+			_notices.append("„%s“: %s hat gerade zu – komm wieder, wenn geöffnet ist." % [definition.title,
+					location.display_name if location != null else to_id])
+
+
+## Wer am Ort bleibt (z. B. wartet), bis er öffnet, erfüllt das Treffen dann.
+func _on_time_advanced(_from: int, to_minutes: int) -> void:
+	for definition in get_active():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_VISIT_LOCATION \
+				and definition.goal["location"] == _locations.get_current() \
+				and _locations.is_open_at(definition.goal["location"], to_minutes):
 			_complete(definition)
 
 

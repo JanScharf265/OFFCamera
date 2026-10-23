@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- „Treffen am Hafen“ zählt nur noch, wenn das Café offen ist; nachts gibt es einen Hinweis, wer bis zur Öffnung bleibt, erfüllt den Auftrag dann (Nachtrag U.4)
 - Produkte der Unterwelt als Daten (Gras, Haschisch, Pillen, Koks – Preise, Qualität und Hitze je Einheit, reine Spielwerte); im Spiel noch nicht sichtbar, sie kommen mit dem Lieferanten (U.6) (Ticket U.5)
 - Story-Aufträge: Nach der Gründung gibt El Capitán den ersten Auftrag („Erster Deal: Treffen am Hafen“ – ab ins Café am Hafen, Respekt +5). Neuer Button „Aufträge“ mit rotem Punkt für Neues und Erledigtes, Fenster mit Auftragstext, Ziel und Belohnung, Hinweise bei neuem und erledigtem Auftrag; Erklärung „Aufträge“; Spielstand Version 19 (Ticket U.4)
 - Einstieg in die Unterwelt: Ab Tag 2 meldet sich „El Capitán“ am Hafen von Puerto Banús („Liegeplatz 14“). „Zuhören“ → du gibst deiner Organisation einen Namen; „Nicht heute“ → er meldet sich zwei Tage später wieder. Danach: Fenster „Organisation“ (Respekt, Hitze, Stabilität) mit eigenem Button, Erklärung „Deine Organisation“. Auch alte Spielstände bekommen den Einstieg beim nächsten Tageswechsel; Spielstand Version 18 (Ticket U.3)
