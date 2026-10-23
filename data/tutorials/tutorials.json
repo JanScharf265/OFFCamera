@@ -238,5 +238,15 @@
 		"ui_target": "LedgerWeeks",
 		"order": 230,
 		"requires": []
+	},
+	{
+		"id": "tut_black_money",
+		"mechanic": "black_money",
+		"trigger": "first_black_money",
+		"title": "Schwarzgeld",
+		"text": "Geld, das offiziell nicht existiert. Es liegt getrennt von Privat- und Firmenkonto und lässt sich nicht einfach umbuchen. Wer damit protzt, fällt auf.",
+		"ui_target": "BlackBlock",
+		"order": 300,
+		"requires": []
 	}
 ]

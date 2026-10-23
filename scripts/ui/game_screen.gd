@@ -221,6 +221,7 @@ func _layout() -> void:
 	var right := size.x - _margins[2]
 	var bottom := size.y - _margins[3]
 
+	_hud.fit_to(right - left)
 	_hud.reset_size()
 	_hud.position = Vector2(left, top)
 	_hud.size = Vector2(right - left, _hud.size.y)

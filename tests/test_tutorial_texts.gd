@@ -109,6 +109,10 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 			_jump(app, TimeSystemScript.at(2, 8))
 			_resolve_events(app)
 			_press(app, "WindowCloseButton")  # Kalender bei Tagesbeginn
+		"first_black_money":
+			var black: String = load("res://scripts/systems/ledger_system.gd").BLACK
+			assert_true(app.game.ledger.post(25000, "test", "Test: Schwarzgeld", "test", "", "", false, black) != null)
+			_screen(app).call("_refresh")
 		"first_obligation_due":
 			_jump(app, TimeSystemScript.at(8, 9))
 			_resolve_events(app)
@@ -202,7 +206,8 @@ func test_data_rules() -> void:
 		mechanics[definition.mechanic] = true
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
-			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger"]:
+			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
+			"black_money"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 
@@ -281,7 +286,8 @@ func test_new_triggers_are_reported() -> void:
 			["first_equipment_offered", "tut_equipment"], ["first_effect_symbols", "tut_symbols"],
 			["first_company_offered", "tut_company"], ["first_company_open", "tut_transfer"],
 			["first_branch_offered", "tut_branch"], ["first_settlement", "tut_settlement"],
-			["first_ledger_open", "tut_ledger"], ["first_obligation_due", "tut_obligations"]]:
+			["first_ledger_open", "tut_ledger"], ["first_obligation_due", "tut_obligations"],
+			["first_black_money", "tut_black_money"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

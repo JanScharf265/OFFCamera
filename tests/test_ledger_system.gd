@@ -300,6 +300,7 @@ func test_migrate_single_account_assigns_private() -> void:
 		]}
 	assert_eq(LedgerSystemScript.migrate_single_account(old), "")
 	assert_eq(LedgerSystemScript.migrate_effective_dates(old), "")  # wie die Kette bis Version 10
+	old["opening_balances"]["black"] = 0  # wie die Kette bis Version 16 (U.1)
 	var ledger := _make_ledger(0)
 	assert_eq(ledger.restore(old), "")
 	assert_eq(ledger.get_balance("private"), 55500)
@@ -308,3 +309,49 @@ func test_migrate_single_account_assigns_private() -> void:
 		assert_eq(entry.account, "private", entry.id)
 	assert_eq(ledger.post(100, "misc", "Neu", "test").id, "tx_000003")
 	assert_true(ledger.post(3000, "creator", "Marke", "event", "x", "event:x") == null, "Schutzschlüssel verloren")
+
+
+# --- U.1: Schwarzgeld als drittes Konto --------------------------------------------------
+
+func test_black_money_is_a_third_account() -> void:
+	var ledger := _make_ledger(10000)
+	assert_eq(ledger.get_balance(LedgerSystemScript.BLACK), 0)
+	assert_eq(ledger.is_account_used(LedgerSystemScript.BLACK), false)
+	var entry := ledger.post(50000, "test", "Test: Einnahme", "test", "", "", false, LedgerSystemScript.BLACK)
+	assert_true(entry != null)
+	assert_eq(entry.account, LedgerSystemScript.BLACK)
+	assert_eq(ledger.get_balance(LedgerSystemScript.BLACK), 50000)
+	assert_eq(ledger.get_balance(LedgerSystemScript.PRIVATE), 10000, "Privatkonto unberührt")
+	assert_eq(ledger.is_account_used(LedgerSystemScript.BLACK), true)
+	assert_eq(ledger.recalculate_balance(LedgerSystemScript.BLACK), 50000)
+	# Wie jedes Konto: nicht ins Minus.
+	assert_true(ledger.post(-60000, "test", "Zu viel", "test", "", "", false, LedgerSystemScript.BLACK) == null)
+	assert_eq(ledger.last_rejection, LedgerSystemScript.Rejection.INSUFFICIENT_FUNDS)
+	assert_true(ledger.post(-20000, "test", "Ausgabe", "test", "", "", false, LedgerSystemScript.BLACK) != null)
+	assert_eq(ledger.get_balance(LedgerSystemScript.BLACK), 30000)
+	assert_eq(LedgerSystemScript.ACCOUNT_LABELS[LedgerSystemScript.BLACK], "Schwarzgeld")
+
+
+func test_black_money_cannot_be_transferred() -> void:
+	var ledger := _make_ledger(10000)
+	ledger.post(50000, "test", "Test", "test", "", "", false, LedgerSystemScript.BLACK)
+	for pair in [[LedgerSystemScript.BLACK, LedgerSystemScript.PRIVATE], [LedgerSystemScript.PRIVATE, LedgerSystemScript.BLACK],
+			[LedgerSystemScript.BLACK, LedgerSystemScript.COMPANY]]:
+		print("          (die folgende ERROR-Meldung ist erwartet)")
+		assert_eq(ledger.transfer(1000, pair[0], pair[1], "Umbuchung", "test", "t:%s" % pair[0] + pair[1]).size(), 0,
+				"%s -> %s" % pair)
+		assert_eq(ledger.last_rejection, LedgerSystemScript.Rejection.INVALID)
+	assert_eq(ledger.get_balance(LedgerSystemScript.BLACK), 50000)
+	assert_eq(ledger.get_balance(LedgerSystemScript.PRIVATE), 10000)
+
+
+func test_black_money_survives_save_round_trip() -> void:
+	var ledger := _make_ledger(10000)
+	ledger.post(12345, "test", "Test", "test", "", "", false, LedgerSystemScript.BLACK)
+	var copy := _make_ledger(0)
+	assert_eq(copy.restore(ledger.to_dict()), "")
+	assert_eq(copy.get_balance(LedgerSystemScript.BLACK), 12345)
+	assert_eq(copy.get_opening_balance(LedgerSystemScript.BLACK), 0)
+	var broken := ledger.to_dict()
+	broken["opening_balances"].erase(LedgerSystemScript.BLACK)
+	assert_true(not copy.restore(broken).is_empty(), "fehlender Startwert für Schwarzgeld angenommen")

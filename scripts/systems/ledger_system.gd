@@ -3,8 +3,9 @@ extends RefCounted
 
 ## Einzige Autorität für Geld. Jede Änderung eines Kontostands ist eine Buchung.
 ##
-## Konten (Phase 4): "private" (Privatkonto) und "company" (Firmenkonto) – beide in
-## diesem einen Ledger, jede Buchung trägt ihr Konto. Kontostand je Konto =
+## Konten (Phase 4): "private" (Privatkonto) und "company" (Firmenkonto), seit U.1 "black" (Schwarzgeld) – alle in
+## diesem einen Ledger, jede Buchung trägt ihr Konto. Schwarzgeld lässt sich nicht umbuchen (kein transfer von oder
+## zu "black"): Es kommt nur über eigene Buchungen hinein und hinaus; Waschen (U.16) und Ausgeben (U.17) folgen. Kontostand je Konto =
 ## Startwert des Kontos + Summe seiner Buchungen (ganze Cent).
 ## Regeln:
 ## - Betrag 0, unbekanntes Konto sowie leere Kategorie/Beschreibung/Quelle sind ungültig.
@@ -31,8 +32,12 @@ enum Rejection { NONE, INVALID, INSUFFICIENT_FUNDS, DUPLICATE }
 
 const PRIVATE := "private"
 const COMPANY := "company"
-const ACCOUNTS: Array[String] = [PRIVATE, COMPANY]
-const ACCOUNT_LABELS := {PRIVATE: "Privatkonto", COMPANY: "Firmenkonto"}
+## Schwarzgeld (U.1): Geld aus der Unterwelt – nur Spielwerte.
+const BLACK := "black"
+const ACCOUNTS: Array[String] = [PRIVATE, COMPANY, BLACK]
+const ACCOUNT_LABELS := {PRIVATE: "Privatkonto", COMPANY: "Firmenkonto", BLACK: "Schwarzgeld"}
+## Konten, zwischen denen umgebucht werden darf (Einlage/Entnahme). Schwarzgeld nicht.
+const TRANSFER_ACCOUNTS: Array[String] = [PRIVATE, COMPANY]
 const TRANSFER_CATEGORY := "transfer"
 ## "|" kommt in keinem anderen Schutzschlüssel vor (IDs sind a–z, 0–9, _; sonst ":" und "@").
 const TRANSFER_OUT_SUFFIX := "|out"
@@ -53,7 +58,7 @@ var _used_keys := {}
 ## opening_balance_cents ist der Startwert des Privatkontos; das Firmenkonto beginnt bei 0.
 func _init(time: TimeSystemScript, opening_balance_cents: int = 0) -> void:
 	_time = time
-	_opening = {PRIVATE: opening_balance_cents, COMPANY: 0}
+	_opening = {PRIVATE: opening_balance_cents, COMPANY: 0, BLACK: 0}
 	_balances = _opening.duplicate()
 
 
@@ -83,7 +88,7 @@ func post(amount_cents: int, category: String, description: String, source: Stri
 func transfer(amount_cents: int, from_account: String, to_account: String, description: String,
 		source: String, idempotency_key: String) -> Array[LedgerEntryScript]:
 	var result: Array[LedgerEntryScript] = []
-	if amount_cents <= 0 or from_account not in ACCOUNTS or to_account not in ACCOUNTS \
+	if amount_cents <= 0 or from_account not in TRANSFER_ACCOUNTS or to_account not in TRANSFER_ACCOUNTS \
 			or from_account == to_account or description.is_empty() or source.is_empty() \
 			or idempotency_key.is_empty():
 		push_error("LedgerSystem: ungültige Umbuchung (Betrag %d, %s -> %s, Schlüssel '%s')."
@@ -102,6 +107,16 @@ func transfer(amount_cents: int, from_account: String, to_account: String, descr
 	result.append(_book(-amount_cents, TRANSFER_CATEGORY, description, source, idempotency_key, out_key, from_account))
 	result.append(_book(amount_cents, TRANSFER_CATEGORY, description, source, idempotency_key, in_key, to_account))
 	return result
+
+
+## true, sobald ein Konto benutzt wird (Buchung oder Stand ≠ 0) – die Anzeige zeigt Schwarzgeld erst dann (U.1).
+func is_account_used(account: String) -> bool:
+	if _balances.get(account, 0) != 0:
+		return true
+	for entry in _entries:
+		if entry.account == account:
+			return true
+	return false
 
 
 func can_afford(cost_cents: int, account: String = PRIVATE) -> bool:

@@ -712,3 +712,15 @@ richtigen Moment kommt, prüfen die Szenarien in `test_tutorial_texts.gd` (jedes
 ausgeschaltet. Jetzt hat die App umlenkbare Standardpfade (`App.default_save_path`/`default_settings_path`); der
 Test-Runner setzt sie vor allen Tests auf `user://test_default_…` und vergleicht `user://settings.cfg` und
 `user://savegame.json` (+ .tmp, Backups) vor und nach dem Lauf – jede Änderung ist ein roter Test.
+
+## 068 – Schwarzgeld als drittes Konto (U.1)
+Konto-ID `black`, Anzeige „Schwarzgeld“ bzw. kurz „Schwarz“ (HUD, Filter). Gleiche Ledger-Regeln wie die anderen Konten
+(jede Änderung eine Buchung, nicht ins Minus, Schutz gegen Doppelbuchung). Umbuchungen von oder zu Schwarzgeld sind
+gesperrt: Der Weg vom Schwarz- aufs Privat- oder Firmenkonto ist das spätere „Waschen“ (U.16, Gebühr, Limit, Risiko);
+eine freie Umbuchung würde das unterlaufen. Sichtbar wird Schwarzgeld erst, wenn es welches gibt (`is_account_used`) –
+vor dem Einstieg in die Unterwelt (U.3) bleibt das Spiel so aufgeräumt wie bisher; verdient wird es frühestens mit dem
+ersten Verkauf (U.9). Ereignisse und Fristen können noch nicht auf Schwarzgeld buchen (kommt mit Lieferant/Schulden).
+HUD-Leiste (vgl. 044): Auf den drei echten Geräten passen Privat, Firma und Schwarzgeld (je bis 99.999,99 €) in voller
+Form; wird es zu eng (Grenzfall-Gerät, später zusätzlich Hitze), verdichtet sich die Leiste stufenweise: ohne Datum
+(steht im Kalender), Beträge ab 1.000 € ohne Cent, zuletzt ohne die kleinen Beschriftungen. Spielstand Version 16,
+Migration setzt den Startwert 0.

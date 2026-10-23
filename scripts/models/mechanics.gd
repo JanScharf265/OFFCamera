@@ -32,6 +32,8 @@ const NAMES := {
 	"settlement": "Tagesabschluss",
 	"obligations": "Fristen und Mahnung",
 	"ledger": "Buchungen und Wochenübersicht",
+	# Unterwelt (Paket U)
+	"black_money": "Schwarzgeld",
 }
 
 

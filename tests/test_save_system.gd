@@ -333,7 +333,7 @@ func test_version_5_ledger_is_migrated_to_private_account() -> void:
 	SaveSystemScript.save(loaded, PATH)
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	assert_eq(int(data["version"]), SaveSystemScript.SAVE_VERSION)
-	assert_eq(data["game"]["ledger"]["opening_balances"], {"private": 50000.0, "company": 0.0})
+	assert_eq(data["game"]["ledger"]["opening_balances"], {"private": 50000.0, "company": 0.0, "black": 0.0})
 	assert_true(not data["game"]["ledger"].has("opening_balance_cents"), "altes Feld noch vorhanden")
 
 

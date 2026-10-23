@@ -45,6 +45,12 @@ func report(trigger: String) -> bool:
 	return true
 
 
+## Vom Ledger (Signal entry_posted, U.1): erste Buchung auf dem Schwarzgeld-Konto.
+func on_ledger_entry(entry) -> void:
+	if entry.account == "black":
+		report("first_black_money")
+
+
 func was_reported(trigger: String) -> bool:
 	return _fired.has(trigger)
 

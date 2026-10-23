@@ -1,7 +1,7 @@
 extends VBoxContainer
 
 ## Fensterinhalt „Buchungen“ (G2): Kontostände und die letzten Buchungen, filterbar nach
-## alle / Privatkonto / Firmenkonto.
+## alle / Privatkonto / Firmenkonto / Schwarzgeld (U.1 – Filter, Stand und Wochenübersicht erst, wenn es welches gibt).
 
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
@@ -10,7 +10,7 @@ const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 const SHOWN_COUNT := 20
 ## Filter-ID -> Beschriftung ("" = alle Konten)
-const FILTERS := {"": "Alle", "private": "Privat", "company": "Firma"}
+const FILTERS := {"": "Alle", "private": "Privat", "company": "Firma", "black": "Schwarz"}
 
 var _screen
 var _game
@@ -67,7 +67,11 @@ func refresh() -> void:
 	var text := "Privatkonto: %s" % LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.PRIVATE))
 	if _game.company.is_founded():
 		text += " · Firmenkonto: %s" % LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.COMPANY))
+	var black_used: bool = _game.ledger.is_account_used(LedgerSystemScript.BLACK)
+	if black_used:
+		text += " · Schwarzgeld: %s" % LedgerSystemScript.format_cents(_game.ledger.get_balance(LedgerSystemScript.BLACK))
 	_balances.text = text
+	_filter_buttons[LedgerSystemScript.BLACK].visible = black_used
 	for filter_id in _filter_buttons:
 		_filter_buttons[filter_id].set_pressed_no_signal(filter_id == _filter)
 	_refresh_weeks()
@@ -83,7 +87,8 @@ func refresh() -> void:
 	for i in range(entries.size() - 1, maxi(entries.size() - SHOWN_COUNT, 0) - 1, -1):
 		var entry = entries[i]
 		var row := HBoxContainer.new()
-		var account_mark := " (Firma)" if entry.account == LedgerSystemScript.COMPANY else ""
+		var account_mark: String = {LedgerSystemScript.COMPANY: " (Firma)", LedgerSystemScript.BLACK: " (Schwarz)"}.get(
+				entry.account, "")
 		var label := UiStyle.wrapping_label("%s  %s%s" % [TimeSystemScript.format_stamp(entry.time_minutes),
 				entry.description, account_mark], UiStyle.SMALL_FONT_SIZE)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -102,6 +107,8 @@ func _refresh_weeks() -> void:
 	var accounts := [LedgerSystemScript.PRIVATE]
 	if _game.company.is_founded():
 		accounts.append(LedgerSystemScript.COMPANY)
+	if _game.ledger.is_account_used(LedgerSystemScript.BLACK):
+		accounts.append(LedgerSystemScript.BLACK)
 	for shown_week in [week, week - 1]:
 		if shown_week < 1:
 			continue

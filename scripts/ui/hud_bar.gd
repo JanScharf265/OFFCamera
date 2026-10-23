@@ -23,6 +23,7 @@ const LOCATION_ICON := "res://assets/kenney/game-icons/target.png"
 const ICON_SIZE := 20
 const STAT_BAR_WIDTH := 48
 const CONTENT_MARGIN_X := 18
+const COMPACT_LEVELS := 3
 
 var _date_label: Label
 var _clock_label: Label
@@ -30,6 +31,15 @@ var _location_label: Label
 var _balance_label: Label
 var _company_block: Control
 var _company_balance_label: Label
+## Schwarzgeld (U.1) – sichtbar, sobald es welches gibt
+var _black_block: Control
+var _black_balance_label: Label
+## Kleine Beschriftungen „Privat“/„Firma“/„Schwarz“ (für fit_to)
+var _money_captions: Array[Label] = []
+## Betrag in Cent je Betrags-Label (für fit_to)
+var _amounts := {}
+## U.1: Verdichtungsstufe (0 = alles, 1 = ohne Datum, 2 = + Beträge ab 1.000 € ohne Cent, 3 = + ohne Beschriftungen)
+var _compact := 0
 var _stat_labels := {}
 var _stat_bars := {}
 
@@ -70,7 +80,12 @@ func _init() -> void:
 	_company_block.name = "CompanyBlock"
 	_company_balance_label = _company_block.get_child(1)
 	row.add_child(_company_block)
-	# Ab Paket U: Schwarzgeld und Hitze kommen hier dazu (Plätze nach Entscheidung 042).
+	# Paket U: Schwarzgeld (U.1), Hitze folgt (Plätze nach Entscheidung 042).
+	_black_block = _money("Schwarz", "BlackBalanceLabel")
+	_black_block.name = "BlackBlock"
+	_black_balance_label = _black_block.get_child(1)
+	_black_block.visible = false
+	row.add_child(_black_block)
 	# Platz für das Zahnrad (Menü): Es liegt als eigener Button mit großer Tippfläche über der Leiste (G4.4).
 	var menu_space := Control.new()
 	menu_space.name = "MenuSpace"
@@ -84,17 +99,45 @@ func refresh(game: GameStateScript) -> void:
 	_date_label.text = game.time.format_date()
 	_clock_label.text = game.time.format_clock()
 	_location_label.text = game.locations.get_current_definition().display_name
-	_balance_label.text = LedgerSystemScript.format_cents(game.ledger.get_balance())
+	_amounts[_balance_label] = game.ledger.get_balance()
 	var founded := game.company.is_founded()
 	_company_block.visible = founded
 	_company_balance_label.visible = founded
-	_company_balance_label.text = LedgerSystemScript.format_cents(game.ledger.get_balance(LedgerSystemScript.COMPANY))
+	_amounts[_company_balance_label] = game.ledger.get_balance(LedgerSystemScript.COMPANY)
+	_black_block.visible = game.ledger.is_account_used(LedgerSystemScript.BLACK)
+	_amounts[_black_balance_label] = game.ledger.get_balance(LedgerSystemScript.BLACK)
+	_apply_compact()
 	for key in PlayerStatsScript.KEYS:
 		var value := game.stats.get_value(key)
 		_stat_labels[key].text = str(value)
 		_stat_bars[key].value = value
 		var fill := (_stat_bars[key] as ProgressBar).get_theme_stylebox("fill") as StyleBoxFlat
 		fill.bg_color = bar_color(key, value)
+
+
+## U.1: Passt die Leiste nicht in `width` (schmale Geräte, alle Konten sichtbar), wird sie stufenweise schmaler:
+## erst ohne Datum (steht auch im Kalender), dann Beträge ab 1.000 € ohne Cent, zuletzt ohne die kleinen
+## Beschriftungen. Auf breiten Geräten bleibt alles.
+func fit_to(width: float) -> void:
+	for level in range(0, COMPACT_LEVELS + 1):
+		_compact = level
+		_apply_compact()
+		if get_combined_minimum_size().x <= width + 0.5:
+			return
+
+
+func get_compact_level() -> int:
+	return _compact
+
+
+func _apply_compact() -> void:
+	_date_label.visible = _compact < 1
+	for label in _amounts:
+		var cents: int = _amounts[label]
+		(label as Label).text = LedgerSystemScript.format_cents(cents) if _compact < 2 or absi(cents) < 100000 \
+				else LedgerSystemScript.format_cents(cents).replace(",%02d €" % (absi(cents) % 100), " €")
+	for caption in _money_captions:
+		caption.visible = _compact < 3
 
 
 ## Farbe des Balkens: normal, unter 40 gelb, unter 20 rot (Grenzen in PlayerStats).
@@ -165,6 +208,7 @@ func _money(caption: String, value_name: String) -> HBoxContainer:
 	var block := HBoxContainer.new()
 	block.add_theme_constant_override("separation", 6)
 	var caption_label := UiStyle.mini_label(caption, UiStyle.MUTED)
+	_money_captions.append(caption_label)
 	caption_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	caption_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	block.add_child(caption_label)

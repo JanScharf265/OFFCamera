@@ -127,6 +127,12 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   dessen Ziel jetzt sichtbar ist (ohne Ziel: immer, außer über einem vorrangigen Fenster) – sonst wartet es; erneut
   geprüft bei jedem Anlass und beim Reiterwechsel (`check_tutorials()`). Höchstens `TUTORIAL_CHAIN_MAX` (3)
   hintereinander über „Verstanden“. Sprechblase: passt die volle Breite (560 px) nirgends, seitlich schmaler (ab 280 px).
+- Schwarzgeld (U.1): drittes Konto `LedgerSystem.BLACK` („Schwarzgeld“) im einen Ledger – gleiche Regeln (nicht ins
+  Minus, Schutzschlüssel), aber keine Umbuchung von oder zu ihm (`TRANSFER_ACCOUNTS` = privat, Firma).
+  `is_account_used(konto)` steuert die Anzeige: HUD-Block `BlackBlock` („Schwarz“), im Buchungen-Fenster Stand,
+  Filter „Schwarz“ und Wochenzeile erst, wenn es Buchungen gibt. `HudBar.fit_to(breite)` (aus `_layout()`): passt die
+  Leiste nicht, Stufe 1 ohne Datum, 2 Beträge ab 1.000 € ohne Cent, 3 ohne die kleinen Beschriftungen. Tutorial-Auslöser
+  `first_black_money` über `TutorialSystem.on_ledger_entry` (Signal `entry_posted`).
 - Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
   (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
   und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.
@@ -236,7 +242,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 15, "meta": {…}, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 16, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -254,6 +260,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 15 → 16 (U.1): `ledger.opening_balances.black` = 0 (Schwarzgeld-Konto ohne Buchungen).
 - Migration 14 → 15 (T.2): `tutorials` = {`fired`: [], `seen`: [], `seen_triggers`: [„first_game_start“]} – wer
   schon spielt, bekommt keine Spielstart-Erklärungen; alle anderen Tutorials kommen normal.
 - Migration 13 → 14 (G5.6): `reminders` = {`reminded`: [], `reminded_until_minutes`: gespeicherte Zeit + 30} – Termine,

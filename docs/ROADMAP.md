@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig – als Nächstes U.1)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.2)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -297,7 +297,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] T.7 Feste Mechanik-Liste `scripts/models/mechanics.gd` (23 IDs); Abdeckungstest `tests/test_tutorial_coverage.gd` (jede Mechanik hat ein Tutorial, jedes Tutorial eine bekannte Mechanik, jeder Auslöser wird im Spielcode gemeldet und genutzt); Layout jedes Tutorials auf 4 Geräteklassen (seit T.5/T.6 in `test_tutorial_texts.gd`); Regel in `CLAUDE.md`; Test-Runner schützt echten Spielstand und Einstellungen (481/481 Tests grün)
 
 ### U – Unterwelt (Hauptspiel; jedes Ticket mit Tutorial, Daten unter `data/underworld/`)
-- [ ] U.1 Schwarzgeld als drittes Konto im einen Ledger (`ledger_system.gd`, `consistency_check.gd`, Buchungen-Fenster); Spielstand-Version + Testdatei
+- [x] U.1 Schwarzgeld als drittes Konto „black“ im einen Ledger (keine Umbuchung von/zu Schwarzgeld), HUD-Block „Schwarz“ und Buchungen-Fenster (Stand, Filter, Wochenübersicht) erst, wenn es welches gibt; HUD-Leiste verdichtet sich bei Platzmangel stufenweise; Tutorial „Schwarzgeld“ (Mechanik `black_money`); Spielstand Version 16 + Migration + Testdatei (488/488 Tests + 3/3 lange Tests grün)
 - [ ] U.2 Organisation: Name, Respekt, Hitze 0–100 (sinkt bei Ruhe), Stabilität (neu `scripts/systems/organisation_system.gd`); Schritt im DayCycle; Spielstand-Version
 - [ ] U.3 Einstiegs-Ereignis an Tag 2 mit dem Kontakt am Hafen (ein Code-Pfad für neue und alte Spielstände), Namenseingabe, Fenster „Organisation“ + Seitenbutton
 - [ ] U.4 Story-Aufträge als Datenkette + Fenster + roter Punkt (neu `mission_system.gd`); erster Auftrag „Erster Deal“
