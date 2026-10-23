@@ -29,6 +29,7 @@ const MissionSystemScript := preload("res://scripts/systems/mission_system.gd")
 const SupplySystemScript := preload("res://scripts/systems/supply_system.gd")
 const SiteSystemScript := preload("res://scripts/systems/site_system.gd")
 const SaleSystemScript := preload("res://scripts/systems/sale_system.gd")
+const CrewSystemScript := preload("res://scripts/systems/crew_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -71,6 +72,8 @@ var supply: SupplySystemScript
 var sites: SiteSystemScript
 ## Verkaufen (U.9)
 var sales: SaleSystemScript
+## Crew (U.10)
+var crew: CrewSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -104,9 +107,11 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	missions.set_sites(sites)
 	sales = SaleSystemScript.new(time, ledger, locations, data.sale_spots, supply, organisation, missions.is_completed)
 	missions.set_sales(sales)
+	crew = CrewSystemScript.new(time, ledger, data.crew, organisation, obligations, missions.is_completed, events.get_seed)
+	missions.set_crew(crew)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
-	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, obligations, events])
+	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)
@@ -149,6 +154,7 @@ func to_dict() -> Dictionary:
 		"supply": supply.to_dict(),
 		"sites": sites.to_dict(),
 		"sales": sales.to_dict(),
+		"crew": crew.to_dict(),
 	}
 
 
@@ -157,7 +163,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales"]:
+			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales", "crew"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -193,6 +199,8 @@ func restore(saved: Dictionary) -> String:
 		error = sites.restore(saved["sites"])
 	if error.is_empty():
 		error = sales.restore(saved["sales"])
+	if error.is_empty():
+		error = crew.restore(saved["crew"])
 	if error.is_empty():
 		error = missions.restore(saved["missions"])
 	if error.is_empty():

@@ -20,6 +20,7 @@ var _locations
 var _supply
 var _sites
 var _sales
+var _crew
 ## mission_id -> true
 var _active := {}
 ## mission_id -> Zeitpunkt des Abschlusses (Minuten)
@@ -56,6 +57,21 @@ func set_sites(sites) -> void:
 func set_sales(sales) -> void:
 	_sales = sales
 	sales.sold.connect(_check_sale_goals.unbind(3))
+
+
+## Vom GameState (U.10): Crew für Ziele vom Typ „crew_role“.
+func set_crew(crew) -> void:
+	_crew = crew
+	crew.hired.connect(_check_crew_goals.unbind(2))
+
+
+func _check_crew_goals() -> void:
+	if _crew == null:
+		return
+	for definition in get_active():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_CREW_ROLE \
+				and _crew.count_role(String(definition.goal["role"])) > 0:
+			_complete(definition)
 
 
 func _check_sale_goals() -> void:
@@ -141,6 +157,7 @@ func update_availability() -> void:
 	_check_stock_goals()
 	_check_site_goals()
 	_check_sale_goals()
+	_check_crew_goals()
 
 
 func _on_founded(_name: String) -> void:

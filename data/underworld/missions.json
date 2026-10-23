@@ -76,5 +76,25 @@
 		"requires": [
 			"first_deal_stash"
 		]
+	},
+	{
+		"id": "crew_first_dealer",
+		"chapter": "Die Crew",
+		"title": "Der erste Dealer",
+		"giver": "El Capitán",
+		"briefing": "„Allein an der Kaimauer stehen – so wirst du nie groß“, sagt El Capitán. „Such dir Leute. Wer etwas taugt, kostet. Wer nichts kostet, taugt nichts.“",
+		"goal": {
+			"type": "crew_role",
+			"role": "dealer"
+		},
+		"goal_text": "Stell unter „Organisation“ → „Crew“ einen Dealer ein.",
+		"debrief": "Dein erster Dealer nickt nur, als du ihm die Regeln erklärst. „Gut“, schreibt El Capitán. „Jetzt musst du ihm nur noch trauen können.“",
+		"reward": {
+			"respect": 5
+		},
+		"order": 50,
+		"requires": [
+			"first_deal_sale"
+		]
 	}
 ]

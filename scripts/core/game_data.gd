@@ -22,6 +22,7 @@ const ProductCatalogScript := preload("res://scripts/systems/product_catalog.gd"
 const SupplierCatalogScript := preload("res://scripts/systems/supplier_catalog.gd")
 const SiteCatalogScript := preload("res://scripts/systems/site_catalog.gd")
 const SaleSystemScript := preload("res://scripts/systems/sale_system.gd")
+const CrewSystemScript := preload("res://scripts/systems/crew_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -48,6 +49,8 @@ var suppliers := SupplierCatalogScript.new()
 var sites := SiteCatalogScript.new()
 ## Verkaufsorte (U.9)
 var sale_spots := SaleSystemScript.Catalog.new()
+## Crew-Regeln und Rollen (U.10)
+var crew := CrewSystemScript.Catalog.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -60,11 +63,13 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
-		contents += FileAccess.get_file_as_string(SaleSystemScript.DEFAULT_PATH if catalog == sale_spots
-				else catalog.DEFAULT_PATH)
+		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.
+		var path: String = SaleSystemScript.DEFAULT_PATH if catalog == sale_spots \
+				else CrewSystemScript.DEFAULT_PATH if catalog == crew else catalog.DEFAULT_PATH
+		contents += FileAccess.get_file_as_string(path)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():
 		errors.append_array(check_references())
@@ -117,6 +122,12 @@ func check_references() -> PackedStringArray:
 		for required in site.requires:
 			if not sites.has(required):
 				problems.append("Standort '%s': unbekannter Standort '%s' in 'requires'." % [site.id, required])
+	# U.10: Crew-Freischaltung und Rollen in Auftragszielen.
+	if not missions.has(crew.unlocked_by_mission):
+		problems.append("Crew: unbekannter Auftrag '%s'." % crew.unlocked_by_mission)
+	for definition in missions.get_all():
+		if definition.goal.get("type") == "crew_role" and not crew.has_role(definition.goal["role"]):
+			problems.append("Auftrag '%s': unbekannte Rolle '%s'." % [definition.id, definition.goal["role"]])
 	# U.9: Verkaufsorte verweisen auf Orte und Aufträge.
 	for spot in sale_spots.get_all():
 		if not locations.has(spot.location):

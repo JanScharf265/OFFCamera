@@ -36,6 +36,8 @@ const OrganisationNameWindowScript := preload("res://scripts/ui/windows/organisa
 const MissionsWindowScript := preload("res://scripts/ui/windows/missions_window.gd")
 const SupplierWindowScript := preload("res://scripts/ui/windows/supplier_window.gd")
 const SaleWindowScript := preload("res://scripts/ui/windows/sale_window.gd")
+const CrewWindowScript := preload("res://scripts/ui/windows/crew_window.gd")
+const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
@@ -574,6 +576,38 @@ func on_site_acquire_pressed(site_id: String) -> void:
 				ActivityText.signed_money(-site.start_cost_cents)]))
 
 
+## Fenster „Crew“ (U.10).
+func open_crew() -> void:
+	if _was_scroll():
+		return
+	var content := CrewWindowScript.new()
+	content.setup(self, _game)
+	_open_window("crew", content)
+	_open_due_tutorial()
+
+
+## Einstellen (U.10) über das CrewSystem – sofort, ohne Spielzeit.
+func on_crew_hire(applicant_id: String) -> void:
+	if _was_scroll():
+		return
+	var applicant := {}
+	for candidate in _game.crew.get_applicants():
+		if candidate["id"] == applicant_id:
+			applicant = candidate
+	var role = _game.crew.get_catalog().get_role(applicant.get("role", ""))
+	_after_action(_game.crew.hire(applicant_id), "Eingestellt: %s als %s (%s/Tag)" % [applicant.get("name", applicant_id),
+			role.display_name if role != null else applicant.get("role", ""),
+			LedgerSystemScript.format_cents(applicant.get("wage_cents", 0))])
+
+
+## Feuern (U.10) über das CrewSystem.
+func on_crew_fire(member_id: String) -> void:
+	if _was_scroll():
+		return
+	var member: Dictionary = _game.crew.get_member(member_id)
+	_after_action(_game.crew.fire(member_id), "Gefeuert: %s" % member.get("name", member_id))
+
+
 ## Verkaufsfenster (U.9).
 func open_sale(spot_id: String) -> void:
 	if _was_scroll():
@@ -870,6 +904,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 		for notice in _game.supply.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.sites.take_notices():
+			text += "\n%s" % notice
+		for notice in _game.crew.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice

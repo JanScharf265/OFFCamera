@@ -105,6 +105,10 @@ func _refresh_supply() -> void:
 				UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE if debt["overdue"] else UiStyle.WARNING)
 		line.name = "Debt_%s" % debt["order_id"]
 		_supply_box.add_child(line)
+	if _game.crew.is_available():
+		var crew_button: Button = _screen.scroll_button("Crew (%d)" % _game.crew.get_members().size(), "CrewButton")
+		crew_button.pressed.connect(_screen.open_crew)
+		_supply_box.add_child(crew_button)
 	for supplier in supply.get_unlocked():
 		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)
 		button.pressed.connect(func() -> void: _screen.open_supplier(supplier.id))

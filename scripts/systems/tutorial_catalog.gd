@@ -54,6 +54,7 @@ const TRIGGERS := [
 	"first_credit_offered",
 	"first_site_offered",
 	"first_sale_offered",
+	"first_crew_open",
 ]
 const MAX_TEXT_LENGTH := 240
 

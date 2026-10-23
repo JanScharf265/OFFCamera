@@ -330,5 +330,15 @@
 		"ui_target": "SaleButton_*",
 		"order": 370,
 		"requires": []
+	},
+	{
+		"id": "tut_crew",
+		"mechanic": "crew",
+		"trigger": "first_crew_open",
+		"title": "Deine Crew",
+		"text": "Jeden Tag melden sich ein paar Leute. Wer mehr kann, will mehr Lohn – gezahlt jeden Morgen aus Schwarzgeld oder vom Privatkonto. Loyalität und Gier zeigen, wie sehr du ihnen trauen kannst.",
+		"ui_target": "CrewHireButton_*",
+		"order": 380,
+		"requires": []
 	}
 ]

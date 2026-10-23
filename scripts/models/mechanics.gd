@@ -42,6 +42,7 @@ const NAMES := {
 	"credit": "Kredit beim Lieferanten, Schulden und Druck",
 	"sites": "Standorte der Unterwelt (Versteck, Kosten, Platz)",
 	"selling": "Verkaufen (Zeit, Schwarzgeld, Hitze)",
+	"crew": "Crew (Rollen, Bewerber, Löhne)",
 }
 
 

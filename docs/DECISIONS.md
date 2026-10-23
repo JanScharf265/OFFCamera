@@ -830,3 +830,15 @@ Einnahme = Einheiten × Verkaufspreis des Produkts (U.5) × Prozent des Orts, im
 Hitze = Einheiten × Hitze je Einheit × Prozent. Höchstens 10 Einheiten je Verkauf. Auftrag „Der erste Verkauf“ zählt
 alle verkauften Einheiten (5) und schließt das Kapitel „Erster Deal“. Der Ort hieß zuerst „Am Hafen nach Feierabend“;
 der Name war in der Kachel abgeschnitten. Vorläufige Werte, Bestätigung durch den Game Director offen.
+GD (nach U.9, „weiter“): Empfehlungen angenommen – der Verkaufsort hat vorerst keine Tageszeit-Regel, die Werte bleiben.
+
+## 079 – Crew 1 (U.10)
+Vier Rollen zum Start (Dealer, Läufer, Fahrer, Schutz) – Produktion, Buchhalter und Anwalt kommen mit ihren Mechaniken
+(Produktion U.18, Waschen U.16, Justiz U.21) als weitere Datensätze. Was die Rollen tun, folgt ab U.11 (Dealer
+verkaufen täglich); bis dahin kosten sie nur Lohn. Bewerber: 3 je Tag, aus Seed und Tag berechnet statt gespeichert –
+deterministisch, nach dem Laden gleich, ohne Zufallszustand im Spielstand. Werte 20–80 (keine Extreme am Anfang), Lohn
+wächst mit dem Können innerhalb der Rollen-Spanne. Einstellen und Feuern sind ein Anruf: sofort, ohne Spielzeit und
+ohne Kosten; der erste Lohn fällt am nächsten Morgen an. Feuern hat noch keine Folgen (Verrat, Abwerbung mit U.15).
+Löhne als eine Buchung je Tag (übersichtlicher als eine je Person), bezahlt wie die Versteck-Miete. Höchstens 6
+Leute. Fenster „Crew“ über einen Button im Organisations-Fenster; ein eigener Seitenbutton folgt mit U.25.
+Namen: erfundene Vornamen mit Initiale. Vorläufige Werte, Bestätigung durch den Game Director offen.
