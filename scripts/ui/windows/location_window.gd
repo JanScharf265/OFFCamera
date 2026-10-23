@@ -206,8 +206,8 @@ func refresh() -> void:
 		var definition = _game.activities.get_catalog().get_definition(activity_id)
 		var tile: ActivityTileScript = _cards[activity_id]
 		tile.set_time(ActivityText.duration_with_end(now, definition.duration_minutes))
-		tile.set_effects(ActivityText.effect_chips(definition.effects, definition.money_cents, {},
-				definition.company_effects))
+		tile.set_effects(_mark_cash(ActivityText.effect_chips(definition.effects, definition.money_cents, {},
+				definition.company_effects), -definition.money_cents))
 		tile.set_hint(_conflict_hint(definition.duration_minutes))
 		tile.set_reason(_trip_or(tile, TripSystemScript.KIND_ACTIVITY, activity_id, now,
 				_game.activities.check(activity_id)))
@@ -449,8 +449,8 @@ func _refresh_equipment_card(equipment_id: String) -> void:
 		tile.set_effects([ActivityText.chip("+%d %% Qualität" % definition.get_level(level)["quality_percent"], 1)])
 		tile.set_hint("Höchste Stufe", false)
 	else:
-		tile.set_effects([ActivityText.chip(ActivityText.signed_money(-next["price_cents"]), -1, ActivityText.MONEY_ICON),
-				ActivityText.chip("+%d %% Qualität" % next["quality_percent"], 1)])
+		tile.set_effects(_mark_cash([ActivityText.chip(ActivityText.signed_money(-next["price_cents"]), -1,
+				ActivityText.MONEY_ICON), ActivityText.chip("+%d %% Qualität" % next["quality_percent"], 1)], next["price_cents"]))
 		tile.set_hint("→ %s" % next["name"], false)  # nächste Stufe; kurz, damit nichts abgeschnitten wird
 	tile.set_reason(_game.equipment.check_buy(equipment_id))
 	tile.button.visible = not next.is_empty()
@@ -605,3 +605,14 @@ func _refresh_sale_card(spot_id: String, now: int) -> void:
 	tile.set_info("Bestand: %d Einheiten · bis %d je Verkauf" % [_game.supply.total_stock(), spot.max_units])
 	tile.set_hint(_conflict_hint(spot.minutes))
 	tile.set_reason(_game.sales.check_open(spot_id))
+
+
+## U.25 (GD nach U.17): Würde die Ausgabe gerade aus Schwarzgeld bezahlt („Mit Schwarzgeld bezahlen“ an, genug da,
+## im Tageslimit), bekommt der Geld-Chip „· bar“. Die Entscheidung trifft das BlackSpendingSystem.
+func _mark_cash(chips: Array, cost_cents: int) -> Array:
+	if cost_cents <= 0 or _game.black_spending.account_for(cost_cents) != LedgerSystemScript.BLACK:
+		return chips
+	for chip in chips:
+		if chip.get("icon", "") == ActivityText.MONEY_ICON:
+			chip["text"] = "%s · bar" % chip["text"]
+	return chips

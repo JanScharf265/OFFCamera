@@ -128,3 +128,32 @@ func test_ui_toggle() -> void:
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_black_spending_settings.cfg"))
+
+
+## U.25: Kachel zeigt „· bar“, wenn die Ausgabe aus Schwarzgeld käme.
+func test_ui_tile_marks_cash() -> void:
+	SaveSystemScript.delete_save(SAVE_PATH)
+	var app := AppScript.new()
+	app.save_path = SAVE_PATH
+	app.settings_path = "user://test_black_spending_settings.cfg"
+	(Engine.get_main_loop() as SceneTree).root.add_child(app)
+	(app.find_child("NewGameButton", true, false) as Button).pressed.emit()
+	var screen := app.find_child("CityMap", true, false).get_parent()
+	screen.set("show_tutorials", false)
+	screen.call("on_organisation_name_submitted", "Los Lobos")
+	app.game.time.advance(TimeSystemScript.at(1, 10) - app.game.time.get_minutes())
+	app.game.locations.travel("cafe_harbor")
+	app.game.ledger.post(100000, "test", "Start", "test", "t", "", false, LedgerSystemScript.BLACK)
+	(app.find_child("MapPin_cafe_harbor", true, false) as Button).pressed.emit()
+	var texts := func() -> String:
+		var parts := []
+		for label in app.find_child("TileEffects_eat_out", true, false).find_children("*", "Label", true, false):
+			parts.append(label.text)
+		return " ".join(parts)
+	assert_true(not texts.call().contains("bar"), "aus: kein Hinweis")
+	app.game.black_spending.set_enabled(true)
+	screen.call("_refresh")
+	assert_true(texts.call().contains("-15,00 € · bar"), "an: %s" % texts.call())
+	app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_black_spending_settings.cfg"))

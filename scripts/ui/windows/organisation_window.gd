@@ -3,6 +3,9 @@ extends VBoxContainer
 ## Fenster „Organisation“ (U.3): Name, Respekt in der Szene, Hitze und Stabilität – je als Balken mit Zahl und einem
 ## Satz, was der Wert bedeutet. Seit U.6 darunter: Ware im Bestand, Lieferungen unterwegs und die erreichbaren
 ## Lieferanten („El Rubio anrufen“). Werte aus OrganisationSystem und SupplySystem; zeigt nur an.
+## U.25: drei Reiter (GD nach U.19) – „Geschäft“ (Ware, Standorte, Schulden, Lieferant), „Leute“ (Crew, Kontakte,
+## Rivalen, Werte), „Polizei & Geld“ (Polizei, Verfahren, Doppelleben, Schwarzgeld im Alltag, Waschen). Das Fenster
+## öffnet auf dem Reiter, in dem eine fällige Erklärung ihr Ziel hat, sonst auf „Geschäft“.
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
@@ -21,8 +24,12 @@ var _screen
 var _rows := {}
 ## U.16: gewählter Betrag zum Waschen (Cent), nur solange das Fenster offen ist
 var _launder_cents := 0
-## U.6: Ware, Lieferungen, Lieferanten – wird bei jedem refresh() neu aufgebaut
+## Aktueller Zielbereich beim Aufbau (die _add_*-Funktionen hängen ihre Teile hier an)
 var _supply_box: VBoxContainer
+## U.25: Reiter – id -> {button, box (Inhalt, sichtbar nur im aktiven Reiter), dynamic (bei refresh neu)}
+const TABS := [["business", "Geschäft"], ["people", "Leute"], ["police", "Polizei & Geld"]]
+var _tabs := {}
+var _current_tab := ""
 
 
 func setup(screen, game) -> void:
@@ -33,15 +40,62 @@ func setup(screen, game) -> void:
 func _ready() -> void:
 	name = "OrganisationContent"
 	add_theme_constant_override("separation", 12)
-	# Ware und Lieferant zuerst – das ist, was man hier tut; die Werte darunter (U.6).
-	_supply_box = VBoxContainer.new()
-	_supply_box.name = "OrganisationSupply"
-	_supply_box.add_theme_constant_override("separation", 8)
-	add_child(_supply_box)
-	add_child(UiStyle.section_label("Werte"))
+	var bar := HBoxContainer.new()
+	bar.name = "OrganisationTabs"
+	bar.add_theme_constant_override("separation", 8)
+	add_child(bar)
+	for tab in TABS:
+		var button: Button = _screen.scroll_button(tab[1], "OrgTab_%s" % tab[0])
+		button.pressed.connect(_on_tab_pressed.bind(tab[0]))
+		bar.add_child(button)
+		var page := VBoxContainer.new()
+		page.name = "OrgPage_%s" % tab[0]
+		page.add_theme_constant_override("separation", 8)
+		add_child(page)
+		var dynamic := VBoxContainer.new()
+		dynamic.name = "OrgDynamic_%s" % tab[0]
+		dynamic.add_theme_constant_override("separation", 8)
+		page.add_child(dynamic)
+		_tabs[tab[0]] = {"button": button, "page": page, "dynamic": dynamic}
+	# Die Werte (Balken) stehen im Reiter „Leute“ unter den Buttons.
+	var people_page: VBoxContainer = _tabs["people"]["page"]
+	people_page.add_child(UiStyle.section_label("Werte"))
 	for key in OrganisationSystemScript.KEYS:
-		add_child(_row(key))
+		people_page.add_child(_row(key))
 	refresh()
+	select_tab(_tab_with_due_tutorial())
+
+
+func get_current_tab() -> String:
+	return _current_tab
+
+
+## Reiter wählen (Taste oder beim Öffnen).
+func select_tab(tab_id: String) -> void:
+	if not _tabs.has(tab_id):
+		return
+	_current_tab = tab_id
+	for id in _tabs:
+		(_tabs[id]["page"] as Control).visible = id == tab_id
+		UiStyle.style_tab_button(_tabs[id]["button"], id == tab_id)
+
+
+func _on_tab_pressed(tab_id: String) -> void:
+	select_tab(tab_id)
+	# Eine Erklärung, deren Ziel erst jetzt sichtbar ist, kommt jetzt (T.6: Tutorials warten auf ihr Ziel).
+	_screen.call("_open_due_tutorial")
+
+
+## Reiter mit dem Ziel der ersten fälligen Erklärung, sonst „Geschäft“.
+func _tab_with_due_tutorial() -> String:
+	for tutorial_id in _game.tutorials.get_due():
+		var definition = _game.tutorials.get_catalog().get_definition(tutorial_id)
+		if definition == null or definition.ui_target.is_empty():
+			continue
+		for id in _tabs:
+			if not (_tabs[id]["page"] as Node).find_children(definition.ui_target, "Control", true, false).is_empty():
+				return id
+	return "business"
 
 
 func get_title() -> String:
@@ -60,11 +114,21 @@ func refresh() -> void:
 
 
 func _refresh_supply() -> void:
-	for child in _supply_box.get_children():
-		_supply_box.remove_child(child)
-		child.queue_free()
+	for id in _tabs:
+		var box: VBoxContainer = _tabs[id]["dynamic"]
+		for child in box.get_children():
+			box.remove_child(child)
+			child.queue_free()
+	_fill_business(_tabs["business"]["dynamic"])
+	_fill_people(_tabs["people"]["dynamic"])
+	_fill_police(_tabs["police"]["dynamic"])
+
+
+## Reiter „Geschäft“: Ware, Platz, eigene Standorte, Schulden, Lieferanten.
+func _fill_business(box: VBoxContainer) -> void:
+	_supply_box = box
 	var supply = _game.supply
-	_supply_box.add_child(UiStyle.section_label("Ware"))
+	box.add_child(UiStyle.section_label("Ware"))
 	var any := false
 	for product in supply.get_products().get_all():
 		var units: int = supply.get_stock(product.id)
@@ -73,11 +137,11 @@ func _refresh_supply() -> void:
 			var line := UiStyle.label("%s: %d Einheit%s" % [product.display_name, units, "" if units == 1 else "en"],
 					UiStyle.SMALL_FONT_SIZE, UiStyle.TEXT)
 			line.name = "StockLine_%s" % product.id
-			_supply_box.add_child(line)
+			box.add_child(line)
 	if not any:
 		var empty := UiStyle.label("Noch keine Ware.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
 		empty.name = "StockEmpty"
-		_supply_box.add_child(empty)
+		box.add_child(empty)
 	for order in supply.get_pending_orders():
 		var product = supply.get_products().get_definition(order["product"])
 		var supplier = supply.get_suppliers().get_definition(order["supplier"])
@@ -86,19 +150,19 @@ func _refresh_supply() -> void:
 				supplier.name if supplier != null else order["supplier"], order["due_day"]],
 				UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 		line.name = "PendingOrder_%s" % order["id"]
-		_supply_box.add_child(line)
+		box.add_child(line)
 	var incoming: int = supply.incoming_units()
 	var capacity_text := "Platz für Ware: %d von %d belegt" % [supply.total_stock() + incoming, _game.sites.capacity()]
 	if incoming > 0:
 		capacity_text += " (davon unterwegs %d)" % incoming
 	var capacity_line := UiStyle.label(capacity_text, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 	capacity_line.name = "StockCapacity"
-	_supply_box.add_child(capacity_line)
+	box.add_child(capacity_line)
 	for site in _game.sites.get_owned():
 		var site_line := UiStyle.wrapping_label("%s · Stufe %d · %s/Tag" % [site.display_name, _game.sites.get_level(site.id),
 				LedgerSystemScript.format_cents(_game.sites.effects(site.id)["running"])], UiStyle.MIN_READ_FONT_SIZE, UiStyle.TEXT)
 		site_line.name = "OwnedSite_%s" % site.id
-		_supply_box.add_child(site_line)
+		box.add_child(site_line)
 	for debt in supply.get_debts():
 		var supplier_def = supply.get_suppliers().get_definition(debt["supplier"])
 		var line := UiStyle.wrapping_label("Schulden bei %s: %s · %s" % [
@@ -107,27 +171,25 @@ func _refresh_supply() -> void:
 				"überfällig – unter „Fristen“ bezahlen" if debt["overdue"] else "fällig Tag %d" % debt["due_day"]],
 				UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE if debt["overdue"] else UiStyle.WARNING)
 		line.name = "Debt_%s" % debt["order_id"]
-		_supply_box.add_child(line)
-	# Crew, Kontakte, Rivalen nebeneinander (U.23: das Fenster wurde zu lang; Reiter folgen mit U.25).
+		box.add_child(line)
+	for supplier in supply.get_unlocked():
+		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)
+		button.pressed.connect(func() -> void: _screen.open_supplier(supplier.id))
+		box.add_child(button)
+
+
+## Reiter „Leute“: Crew, Kontakte, Rivalen (nebeneinander); die Werte stehen fest darunter.
+func _fill_people(box: VBoxContainer) -> void:
+	_supply_box = box
 	var people := HBoxContainer.new()
 	people.name = "PeopleButtons"
 	people.add_theme_constant_override("separation", 10)
-	_supply_box.add_child(people)
+	box.add_child(people)
 	if _game.crew.is_available():
 		var crew_button: Button = _screen.scroll_button("Crew (%d)" % _game.crew.get_members().size(), "CrewButton")
 		crew_button.pressed.connect(_screen.open_crew)
 		crew_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		people.add_child(crew_button)
-	_add_police()
-	if _game.justice.has_case():
-		var justice_button: Button = _screen.scroll_button("Verfahren: %s" % _game.justice.state_label(), "JusticeButton")
-		justice_button.custom_minimum_size.y = UiStyle.TOUCH_SIZE
-		justice_button.pressed.connect(_screen.open_justice)
-		_supply_box.add_child(justice_button)
-	if _game.black_spending.is_available():
-		_add_black_spending()
-	if _game.laundering.is_available():
-		_add_laundering()
 	if _game.relationships.is_available():
 		var contacts_button: Button = _screen.scroll_button("Kontakte", "ContactsButton")
 		contacts_button.pressed.connect(_screen.open_contacts)
@@ -140,13 +202,22 @@ func _refresh_supply() -> void:
 		people.add_child(rivals_button)
 	if people.get_child_count() == 0:
 		people.queue_free()
-	for supplier in supply.get_unlocked():
-		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)
-		button.pressed.connect(func() -> void: _screen.open_supplier(supplier.id))
-		_supply_box.add_child(button)
-	# U.22 am Ende: das Fenster ist lang (Reiter folgen in U.25); weiter oben verdrängte es „Waschen“ aus dem
-	# Bereich, in den ein Tutorial noch scrollen kann.
+
+
+## Reiter „Polizei & Geld“: Polizei, Verfahren, Doppelleben, Schwarzgeld im Alltag, Waschen.
+func _fill_police(box: VBoxContainer) -> void:
+	_supply_box = box
+	_add_police()
+	if _game.justice.has_case():
+		var justice_button: Button = _screen.scroll_button("Verfahren: %s" % _game.justice.state_label(), "JusticeButton")
+		justice_button.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+		justice_button.pressed.connect(_screen.open_justice)
+		box.add_child(justice_button)
 	_add_double_life()
+	if _game.black_spending.is_available():
+		_add_black_spending()
+	if _game.laundering.is_available():
+		_add_laundering()
 
 
 func _row(key: String) -> Control:
@@ -319,14 +390,15 @@ func _add_double_life() -> void:
 	var life = _game.double_life
 	_supply_box.add_child(UiStyle.section_label("Doppelleben"))
 	var total: int = life.heat_gain_percent() - 100
-	var status := UiStyle.label("Hitze-Anstieg %s" % ("±0 %%" if total == 0 else "%+d %%" % total), UiStyle.FONT_SIZE,
+	var status := UiStyle.label("Hitze-Anstieg %s" % ("±0 %" if total == 0 else "%+d %%" % total), UiStyle.FONT_SIZE,
 			UiStyle.NEGATIVE if total > 0 else UiStyle.POSITIVE if total < 0 else UiStyle.TEXT)
 	status.name = "DoubleLifeStatus"
 	status.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_supply_box.add_child(status)
 	var rules = life.get_rules()
-	var detail := UiStyle.wrapping_label("Tarnung durch den Kanal −%d %% (Ruf %d, ab %d zählt er) · Bekanntheit +%d %% (%s Follower, ab %s fällt man auf)" % [
-			life.cover_percent(), _game.channel.reputation, rules.get_value("cover_reputation_from"), life.fame_percent(),
+	var detail := UiStyle.wrapping_label("Tarnung durch den Kanal %s (Ruf %d, ab %d zählt er) · Bekanntheit %s (%s Follower, ab %s fällt man auf)" % [
+			"−%d %%" % life.cover_percent() if life.cover_percent() > 0 else "0 %", _game.channel.reputation, rules.get_value("cover_reputation_from"),
+			"+%d %%" % life.fame_percent() if life.fame_percent() > 0 else "0 %",
 			ActivityText.format_int(_game.channel.followers), ActivityText.format_int(rules.get_value("fame_followers_from"))], UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 	detail.name = "DoubleLifeDetail"
 	_supply_box.add_child(detail)

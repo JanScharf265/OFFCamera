@@ -25,9 +25,14 @@ const OrganisationSystemScript := preload("res://scripts/systems/organisation_sy
 const ICON_SIZE := 20
 const STAT_BAR_WIDTH := 48
 const CONTENT_MARGIN_X := 18
-const COMPACT_LEVELS := 3
+## Verdichtung bei Platzmangel (U.25, HUD final): 1 = Beträge ab 1.000 € ohne Cent, 2 = Datum kurz („Tag 12“),
+## 3 = Datum weg, 4 = Konto-Beschriftungen weg. Vorher (U.1) fiel das Datum zuerst weg.
+const COMPACT_LEVELS := 4
 
 var _date_label: Label
+## Volles und kurzes Datum (U.25)
+var _date_full := ""
+var _date_short := ""
 var _clock_label: Label
 var _location_label: Label
 var _balance_label: Label
@@ -112,7 +117,9 @@ func _init() -> void:
 
 
 func refresh(game: GameStateScript) -> void:
-	_date_label.text = game.time.format_date()
+	_date_full = game.time.format_date()
+	_date_short = "Tag %d" % game.time.get_day()
+	_date_label.text = _date_full if _compact < 2 else _date_short
 	_clock_label.text = game.time.format_clock()
 	_location_label.text = game.locations.get_current_definition().display_name
 	_amounts[_balance_label] = game.ledger.get_balance()
@@ -151,13 +158,15 @@ func get_compact_level() -> int:
 
 
 func _apply_compact() -> void:
-	_date_label.visible = _compact < 1
+	_date_label.visible = _compact < 3
+	if not _date_full.is_empty():
+		_date_label.text = _date_full if _compact < 2 else _date_short
 	for label in _amounts:
 		var cents: int = _amounts[label]
-		(label as Label).text = LedgerSystemScript.format_cents(cents) if _compact < 2 or absi(cents) < 100000 \
+		(label as Label).text = LedgerSystemScript.format_cents(cents) if _compact < 1 or absi(cents) < 100000 \
 				else LedgerSystemScript.format_cents(cents).replace(",%02d €" % (absi(cents) % 100), " €")
 	for caption in _money_captions:
-		caption.visible = _compact < 3
+		caption.visible = _compact < 4
 
 
 ## Farbe der Hitze (U.2): ruhig hell, ab 30 gelb, ab 60 rot (Grenzen im OrganisationSystem, nur Anzeige).

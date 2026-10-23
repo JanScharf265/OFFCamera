@@ -1059,3 +1059,19 @@ Startkapital (als Buchung), weil ein Zufalls-Bot kaum streamt und sonst pleite i
 ist ein Test der Abläufe, kein Balancing. Ergebnis über 10 Seeds × 40 Tage: alle gründen eine Organisation, verdienen
 Schwarzgeld und haben Crew; keine Verletzung der Konsistenzprüfung. Ein zweiter langer Test zeigt: Nach Razzia und
 Haft läuft das Spiel weiter. Kein neues Tutorial (keine neue Mechanik); Abdeckungstest grün.
+
+## 097 – Abnahme Paket U (U.25)
+Reiter im Fenster „Organisation“ (GD nach U.19): „Geschäft“ (Ware, Platz, Standorte, Schulden, Lieferant), „Leute“
+(Crew, Kontakte, Rivalen, darunter Respekt/Hitze/Stabilität), „Polizei & Geld“ (Polizei, Verfahren, Doppelleben,
+Schwarzgeld im Alltag, Waschen). Das Fenster öffnet auf dem Reiter, in dem eine fällige Erklärung ihr Ziel hat – sonst
+auf „Geschäft“; so geht keine neue Erklärung in einem verborgenen Reiter verloren.
+„· bar“ (GD nach U.17): Der Geld-Chip von Aktivitäten und Ausrüstung bekommt „· bar“, wenn die Zahlung gerade aus
+Schwarzgeld käme (Schalter an, genug da, im Tageslimit) – die Entscheidung trifft das BlackSpendingSystem.
+HUD final: Im echten Fensterlauf (anders als im kopflosen Test) war die Leiste mit Privat, Firma und Schwarz auf dem
+iPhone 13/14 zu breit, und das Datum verschwand als Erstes. Neue Reihenfolge: Beträge ab 1.000 € ohne Cent → Datum
+kurz („Tag 12“) → Datum weg → Konto-Beschriftungen weg. Das kopflose Testsystem misst Schrift schmaler als das echte
+Rendering; der iPhone-Test prüft die Leiste deshalb ausdrücklich.
+Seitenbuttons final: „LEBEN“ (Kalender, Fristen, Kanal), „GESCHÄFT“ (Organisation, Aufträge, Firma, Buchungen),
+Schalter „Unterwelt/Tag“ unten rechts. Crew, Kontakte, Rivalen, Polizei und Geld sind über „Organisation“ erreichbar,
+Gebiete über die Unterwelt-Ansicht – kein eigener Seitenbutton (VISION: „oder zusammengefasst – Vorschlag machen“).
+Paket U wird erst nach dem bestätigten iPhone-Test (Checkliste `~/Desktop/u25/iphone_test.md`) als ✅ markiert (GD 092).

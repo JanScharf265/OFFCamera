@@ -181,6 +181,10 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Abnahme U (U.25): `OrganisationWindow` mit Reitern (`OrgTab_business/people/police`, Seiten `OrgPage_*`); beim Öffnen
+  der Reiter, der das Ziel der ersten fälligen Erklärung enthält; Reiterwechsel ruft `_open_due_tutorial`.
+  `LocationWindow._mark_cash` hängt „· bar“ an den Geld-Chip, wenn `BlackSpendingSystem.account_for` Schwarzgeld wählt.
+  `HudBar` verdichtet in 4 Stufen (Beträge, Datum kurz, Datum weg, Beschriftungen).
 - Tageswechsel komplett (U.24): DayCycle-Reihenfolge Firma → Organisation (Einstieg) → Lieferungen → Standorte →
   Crew → Gebiete → Rivalen → `organisation.cool_down` (Callable-Schritt) → Polizei → Justiz → Kontakte → Fristen →
   Ereignisse; der Kalender öffnet danach (DayStartSystem). `ConsistencyCheck` prüft auch die Unterwelt. Der Bot
