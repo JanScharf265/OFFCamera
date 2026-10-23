@@ -67,6 +67,7 @@ const TRIGGERS := [
 	"first_site_types_offered",
 	"first_site_upgrade_offered",
 	"first_police_attention",
+	"first_raid_warning",
 ]
 const MAX_TEXT_LENGTH := 240
 

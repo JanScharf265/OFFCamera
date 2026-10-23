@@ -262,11 +262,21 @@ func _add_police() -> void:
 				police.get_since_day(), rules.get_value("investigation_heat"), rules.get_value("days_to_escalate"),
 				rules.get_value("calm_heat"), rules.get_value("days_to_calm")]
 	elif level == 2:
-		detail_text = "Akte %s · seit Tag %d · Stand der Ermittlung %d %% (wächst mit der Hitze)" % [police.get_case(),
-				police.get_since_day(), police.get_progress()]
+		detail_text = "Akte %s · seit Tag %d · Stand der Ermittlung %d %% (wächst mit der Hitze; bei 100 %% kommt die Razzia)" % [
+				police.get_case(), police.get_since_day(), police.get_progress()]
+	var raid: Dictionary = police.get_last_raid()
+	if not raid.is_empty():
+		detail_text += "\nLetzte Razzia Tag %d: %s versiegelt · %d Einheiten · %s beschlagnahmt" % [raid["day"], raid["site"],
+				raid["stock"], LedgerSystemScript.format_cents(raid["money_cents"])]
 	var detail := UiStyle.wrapping_label(detail_text, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 	detail.name = "PoliceDetail"
 	_supply_box.add_child(detail)
+	if police.is_raid_near():
+		var warning := UiStyle.label("Zugriff droht", UiStyle.FONT_SIZE, UiStyle.NEGATIVE)
+		warning.name = "PoliceRaidWarning"
+		warning.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_supply_box.add_child(warning)
+		_game.tutorials.report("first_raid_warning")
 	if level == 2:
 		var reason: String = police.check_lawyer()
 		var lawyer: Button = _screen.scroll_button("Anwalt einschalten · %s (Akte −%d %%)" % [

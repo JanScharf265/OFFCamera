@@ -460,5 +460,15 @@
 		"ui_target": "PoliceStatus",
 		"order": 500,
 		"requires": []
+	},
+	{
+		"id": "tut_raid",
+		"mechanic": "raid",
+		"trigger": "first_raid_warning",
+		"title": "Zugriff droht",
+		"text": "Ist die Akte voll, kommt die Razzia: Ein Standort wird versiegelt, ein Teil der Ware und des Schwarzgelds ist weg. Ein Anwalt oder weniger Hitze verschaffen Zeit.",
+		"ui_target": "PoliceRaidWarning",
+		"order": 510,
+		"requires": []
 	}
 ]

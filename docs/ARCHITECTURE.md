@@ -181,6 +181,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Razzia (U.20, im PoliceSystem): Steht die Akte beim Tageswechsel auf 100 %, `_raid`: `SiteSystem.seize` (eigener
+  Standort mit höchstem `risk`), `SupplySystem.remove_stock` (raid_stock_percent je Produkt), Buchung
+  `underworld_confiscation` (raid_black_percent des Schwarzgelds), Akte 0, Stufe 1, Hitze −raid_heat_drop, dann
+  `trigger_scripted("police_raid")` mit `{site}`, `{stock}`, `{money}`, `{case}`. `set_raid_targets(supply, sites)`
+  (einseitig). Gespeichert: `raids`, `last_raid`.
 - Polizei (U.19, `scripts/systems/police_system.gd`, im GameState als `police`; Regeln aus
   `data/underworld/police.json` in `GameData.police`): Stufe 0–2, Tage in Folge (heiß/ruhig), Akte (Nummer aus dem
   Seed, Fortschritt 0–100), Anwalt (Buchung `underworld_lawyer`, Wartezeit). DayCycle: … Rivalen → Polizei → Fristen
@@ -388,6 +393,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 32 → 33 (U.20): `police.raids` = 0, `police.last_raid` = {}.
 - Migration 31 → 32 (U.19): `police` = Stufe 0, Tag verarbeitet.
 - Migration 30 → 31 (U.18): `sites.levels` = {} (eigene Standorte auf Stufe 1).
 - Migration 29 → 30 (U.17): `black_spending` = Schalter aus.

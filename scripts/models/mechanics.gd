@@ -55,6 +55,7 @@ const NAMES := {
 	"site_types": "Weitere Standorte (Lager, Verkaufspunkt, Club, Produktion, Liegeplatz)",
 	"site_upgrade": "Standorte ausbauen (Stufen)",
 	"police": "Polizei: Beobachtung und Ermittlung nach Hitze, Akte, Anwalt",
+	"raid": "Razzia: Standort versiegelt, Ware und Schwarzgeld beschlagnahmt",
 }
 
 

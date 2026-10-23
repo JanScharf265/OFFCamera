@@ -146,6 +146,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	events.add_condition_values(police.condition_values)
 	events.add_text_context(police.text_context)
 	crew.set_arrest_bonus(police.arrest_bonus)
+	police.set_raid_targets(supply, sites)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, police, obligations, events])

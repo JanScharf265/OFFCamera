@@ -8,5 +8,9 @@
 	"lawyer_cost_cents": 100000,
 	"lawyer_progress": 20,
 	"lawyer_cooldown_days": 3,
-	"arrest_bonus_per_level": 2
+	"arrest_bonus_per_level": 2,
+	"raid_stock_percent": 50,
+	"raid_black_percent": 30,
+	"raid_heat_drop": 20,
+	"raid_warning_progress": 80
 }

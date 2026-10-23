@@ -8,6 +8,9 @@ extends RefCounted
 ##  - In der Ermittlung füllt sich die Akte täglich um Hitze/10 × progress_per_10_heat bis 100 % (Folgen ab U.20).
 ## Jeder Stufenwechsel ist ein Ereignis im EventSystem („scripted“). Ein Anwalt wirft die Akte zurück (Buchung,
 ## Wartezeit). Verbunden mit Phase 5: Ereignis-Bedingung `min_police_level` und mehr Festnahme-Risiko der Crew.
+## U.20: Steht die Akte auf 100 %, kommt beim nächsten Tageswechsel die Razzia („scripted“-Ereignis): der eigene
+## Standort mit dem höchsten Risiko wird versiegelt, raid_stock_percent des Bestands und raid_black_percent des
+## Schwarzgelds (Buchung) werden beschlagnahmt; danach Akte 0, zurück zur Beobachtung, Hitze − raid_heat_drop.
 ## Keine Tricks gegen Ermittlungen – nur Spielwerte.
 
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
@@ -18,9 +21,12 @@ const DEFAULT_PATH := "res://data/underworld/police.json"
 const CATEGORY := "underworld_lawyer"
 const SOURCE := "police"
 const RULE_FIELDS := ["observation_heat", "investigation_heat", "days_to_escalate", "calm_heat", "days_to_calm",
-		"progress_per_10_heat", "lawyer_cost_cents", "lawyer_progress", "lawyer_cooldown_days", "arrest_bonus_per_level"]
+		"progress_per_10_heat", "lawyer_cost_cents", "lawyer_progress", "lawyer_cooldown_days", "arrest_bonus_per_level",
+		"raid_stock_percent", "raid_black_percent", "raid_heat_drop", "raid_warning_progress"]
+const RAID_CATEGORY := "underworld_confiscation"
 const LEVEL_LABELS := ["keine Auffälligkeit", "Beobachtung", "Ermittlung"]
-const EVENTS := {"observation": "police_observation", "investigation": "police_investigation", "calm": "police_calm"}
+const EVENTS := {"observation": "police_observation", "investigation": "police_investigation", "calm": "police_calm",
+		"raid": "police_raid"}
 const MAX_PROGRESS := 100
 
 
@@ -78,6 +84,11 @@ var _since_day := 0
 var _lawyer_day := -100
 var _last_processed_day := 0
 var _notices := PackedStringArray()
+## U.20: Ziele der Razzia (einseitige Verweise) und die letzte Razzia {site, stock, money_cents, day}
+var _supply
+var _sites
+var _last_raid := {}
+var _raids := 0
 
 
 func _init(time, ledger: LedgerSystemScript, rules: Rules, organisation, get_seed: Callable,
@@ -89,6 +100,25 @@ func _init(time, ledger: LedgerSystemScript, rules: Rules, organisation, get_see
 	_get_seed = get_seed
 	_trigger_scripted = trigger_scripted
 	_last_processed_day = time.get_day()
+
+
+## Vom GameState (U.20): Bestand und Standorte für die Razzia.
+func set_raid_targets(supply, sites) -> void:
+	_supply = supply
+	_sites = sites
+
+
+func get_last_raid() -> Dictionary:
+	return _last_raid.duplicate()
+
+
+func count_raids() -> int:
+	return _raids
+
+
+## Zugriff droht (Akte ab raid_warning_progress %).
+func is_raid_near() -> bool:
+	return _level == 2 and _progress >= _rules.get_value("raid_warning_progress")
 
 
 func get_rules() -> Rules:
@@ -127,6 +157,10 @@ func condition_values() -> Dictionary:
 
 ## Für Ereignistexte: {case} = Aktennummer.
 func text_context(instance_id: String) -> Dictionary:
+	if instance_id.begins_with(EVENTS["raid"]):
+		return {"case": _last_raid.get("case", _case), "site": _last_raid.get("site", "nichts"),
+				"stock": str(_last_raid.get("stock", 0)),
+				"money": LedgerSystemScript.format_cents(int(_last_raid.get("money_cents", 0)))}
 	return {"case": _case} if instance_id.begins_with(EVENTS["investigation"]) else {}
 
 
@@ -179,6 +213,9 @@ func on_day_changed(day: int) -> void:
 	_last_processed_day = day
 	if not _organisation.is_founded():
 		return
+	if _level == 2 and _progress >= MAX_PROGRESS:
+		_raid(day)
+		return
 	var heat: int = _organisation.get_value("heat")
 	var threshold := _rules.get_value("observation_heat") if _level == 0 else _rules.get_value("investigation_heat")
 	_hot_days = _hot_days + 1 if _level < 2 and heat >= threshold else 0
@@ -201,6 +238,39 @@ func on_day_changed(day: int) -> void:
 			_notices.append("Akte %s: Die Ermittler haben genug zusammen. Es kann jederzeit so weit sein." % _case)
 
 
+## Razzia: Standort versiegeln, Bestand und Schwarzgeld beschlagnahmen (Buchung), dann zurück zur Beobachtung.
+@warning_ignore("integer_division")
+func _raid(day: int) -> void:
+	var site_name := "nichts"
+	if _sites != null:
+		var target = null
+		for site in _sites.get_owned():
+			if target == null or site.risk > target.risk:
+				target = site
+		if target != null:
+			site_name = target.display_name
+			_sites.seize(target.id)
+	var stock := 0
+	if _supply != null:
+		for product in _supply.get_products().get_all():
+			var units: int = _supply.get_stock(product.id) * _rules.get_value("raid_stock_percent") / 100
+			if units > 0 and _supply.remove_stock(product.id, units):
+				stock += units
+	var money: int = _ledger.get_balance(LedgerSystemScript.BLACK) * _rules.get_value("raid_black_percent") / 100
+	if money > 0:
+		_ledger.post(-money, RAID_CATEGORY, "Beschlagnahmt bei der Razzia (Akte %s)" % _case, SOURCE, _case,
+				"police:raid:%d" % day, false, LedgerSystemScript.BLACK)
+	_last_raid = {"site": site_name, "stock": stock, "money_cents": money, "day": day, "case": _case}
+	_raids += 1
+	_progress = 0
+	_level = 1
+	_hot_days = 0
+	_calm_days = 0
+	_since_day = day
+	_organisation.change({"heat": -_rules.get_value("raid_heat_drop")})
+	_trigger(EVENTS["raid"], day)
+
+
 func _trigger(event_id: String, day: int) -> void:
 	if _trigger_scripted.is_valid():
 		_trigger_scripted.call(event_id, day)
@@ -208,7 +278,8 @@ func _trigger(event_id: String, day: int) -> void:
 
 func to_dict() -> Dictionary:
 	return {"level": _level, "hot_days": _hot_days, "calm_days": _calm_days, "progress": _progress, "case": _case,
-			"since_day": _since_day, "lawyer_day": _lawyer_day, "last_processed_day": _last_processed_day}
+			"since_day": _since_day, "lawyer_day": _lawyer_day, "last_processed_day": _last_processed_day,
+			"raids": _raids, "last_raid": _last_raid.duplicate()}
 
 
 ## "" = ok, sonst Fehlertext (nichts geändert).
@@ -219,6 +290,16 @@ func restore(data: Dictionary) -> String:
 	if int(data["level"]) > 2 or int(data["progress"]) > MAX_PROGRESS or typeof(data.get("case")) != TYPE_STRING \
 			or not DataReaderScript.is_whole_number(data.get("lawyer_day")):
 		return "Polizei: Stufe, Akte oder Anwalt ungültig."
+	if not DataReaderScript.is_whole_number(data.get("raids")) or typeof(data.get("last_raid")) != TYPE_DICTIONARY:
+		return "Polizei: Razzien fehlen oder sind ungültig."
+	var raid: Dictionary = data["last_raid"]
+	if not raid.is_empty() and (typeof(raid.get("site")) != TYPE_STRING or typeof(raid.get("case")) != TYPE_STRING
+			or not DataReaderScript.is_whole_number(raid.get("stock")) or not DataReaderScript.is_whole_number(raid.get("money_cents"))
+			or not DataReaderScript.is_whole_number(raid.get("day"))):
+		return "Polizei: letzte Razzia ungültig."
+	_raids = int(data["raids"])
+	_last_raid = {} if raid.is_empty() else {"site": raid["site"], "stock": int(raid["stock"]),
+			"money_cents": int(raid["money_cents"]), "day": int(raid["day"]), "case": raid["case"]}
 	_level = int(data["level"])
 	_hot_days = int(data["hot_days"])
 	_calm_days = int(data["calm_days"])

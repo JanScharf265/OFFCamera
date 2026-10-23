@@ -778,5 +778,33 @@
 				"note": "Das macht sie neugieriger"
 			}
 		]
+	},
+	{
+		"id": "police_raid",
+		"title": "Razzia",
+		"text": "Morgens um sechs stehen sie da. Durchsuchung, Siegel, Kartons. Versiegelt: {site}. Beschlagnahmt: {stock} Einheiten Ware und {money} Schwarzgeld. Akte {case} ist damit nicht geschlossen – aber dünner.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "swallow",
+				"label": "Die Wut runterschlucken",
+				"organisation": {
+					"respect": -5,
+					"stability": 5
+				},
+				"note": "Die Crew bleibt ruhig"
+			},
+			{
+				"id": "carry_on",
+				"label": "Sofort weitermachen",
+				"organisation": {
+					"respect": 5,
+					"heat": 5
+				},
+				"note": "Zeigt Stärke – und macht neugierig"
+			}
+		]
 	}
 ]

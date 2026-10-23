@@ -242,6 +242,12 @@ func upgrade(site_id: String) -> String:
 	return ""
 
 
+## U.20: Razzia – der Standort ist versiegelt (nicht mehr eigen, Stufe weg; neu anmieten ist möglich).
+func seize(site_id: String) -> void:
+	_owned.erase(site_id)
+	_levels.erase(site_id)
+
+
 ## Tageswechsel: Produktion (in den Bestand, soweit Platz ist) und Verkaufspunkte (aus dem Bestand → Schwarzgeld, Hitze).
 func _work(day: int) -> void:
 	if _supply == null:

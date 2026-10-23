@@ -989,3 +989,12 @@ Ermittlungen (Inhaltsgrenze). Jeder Stufenwechsel ist ein Ereignis (Regel 4).
 Verbindung zu Phase 5: Ereignisse können `min_/max_police_level` als Bedingung haben; neues Behördenereignis
 „Gemeinsame Kontrolle“ (Stadt und Polizei prüfen die Firma) nur unter Beobachtung; Festnahme-Risiko der Crew +2
 Prozentpunkte je Stufe. Behörden sind Institutionen, Beamte und Fälle erfunden. Vorläufige Werte, Phase 8.
+GD nach U.19: Fenster „Organisation“ wird in U.25 in Reiter aufgeteilt (Empfehlung angenommen); Polizei-Werte bleiben.
+
+## 091 – Razzia (U.20)
+Die Razzia ist die Folge einer vollen Akte (U.19), kein Zufall: beim ersten Tageswechsel mit 100 %. So kann man sie
+kommen sehen (Warnung „Zugriff droht“ ab 80 %) und mit Anwalt oder weniger Hitze aufschieben. Folgen, alle als
+Spielwerte: Der eigene Standort mit dem höchsten Risiko (Datenfeld `risk`, U.18) wird versiegelt (kann neu angemietet
+werden), die Hälfte jeder Ware und 30 % des Schwarzgelds werden beschlagnahmt (eine Buchung). Danach ruht die Sache:
+Akte 0, zurück zur Beobachtung, Hitze −20. Die Antworten im Ereignis ändern nur Respekt, Stabilität, Hitze. Eine
+Festnahme der Spielfigur kommt mit U.21. Vorläufige Werte, Phase 8.

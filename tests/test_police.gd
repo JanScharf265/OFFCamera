@@ -157,7 +157,7 @@ func test_ui_section() -> void:
 	(app.find_child("OrganisationButton", true, false) as Button).pressed.emit()
 	assert_eq((app.find_child("PoliceStatus", true, false) as Label).text, "Ermittlung")
 	assert_eq((app.find_child("PoliceDetail", true, false) as Label).text,
-			"Akte MB-0042 · seit Tag 1 · Stand der Ermittlung 40 % (wächst mit der Hitze)")
+			"Akte MB-0042 · seit Tag 1 · Stand der Ermittlung 40 % (wächst mit der Hitze; bei 100 % kommt die Razzia)")
 	(app.find_child("PoliceLawyerButton", true, false) as Button).pressed.emit()
 	assert_eq(app.game.police.get_progress(), 20)
 	app.free()
