@@ -137,5 +137,15 @@
 			{ "id": "listen", "label": "Zuhören", "note": "Du gründest deine eigene Organisation" },
 			{ "id": "not_now", "label": "Nicht heute", "note": "Er meldet sich in zwei Tagen wieder" }
 		]
+	},
+	{
+		"id": "supplier_pressure",
+		"title": "Besuch",
+		"text": "Zwei Männer warten vor deiner Haustür, freundlich und geduldig. „El Rubio lässt fragen, wo sein Geld bleibt.“ Einer klopft dir zum Abschied auf die Schulter – ein bisschen zu fest.",
+		"trigger": { "scripted": true },
+		"options": [
+			{ "id": "promise", "label": "Versprechen, bald zu zahlen", "effects": { "mood": -5 }, "organisation": { "respect": -3 }, "note": "Er wartet – nicht ewig" },
+			{ "id": "brush_off", "label": "Sie abwimmeln", "effects": { "mood": -10 }, "organisation": { "stability": -5 }, "note": "Das spricht sich herum" }
+		]
 	}
 ]

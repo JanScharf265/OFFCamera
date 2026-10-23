@@ -137,10 +137,30 @@ func _find_target() -> void:
 			push_warning("Tutorial '%s': Ziel '%s' nicht gefunden – Sprechblase mittig." % [tutorial_id, target_name])
 		return
 	_target = node
+	_scroll_into_view(node)
 	var rect := node.get_global_rect()
 	rect.position -= get_global_rect().position
 	_hole = rect.grow(HOLE_PADDING).intersection(Rect2(Vector2.ZERO, size))
 	_has_hole = _hole.has_area()
+
+
+## U.7: Liegt das Ziel in einem Scrollbereich (z. B. weiter unten im Lieferanten-Fenster), wird es ins Bild gescrollt.
+func _scroll_into_view(node: Control) -> void:
+	var parent := node.get_parent()
+	while parent != null and parent != _search_root:
+		if parent is ScrollContainer:
+			var scroll := parent as ScrollContainer
+			if scroll.size.y < node.size.y + 16.0 or scroll.get_child_count() == 0:
+				return  # noch nicht angeordnet (oder zu klein) – nichts verschieben
+			# Lage im Inhalt (unabhängig vom Scrollstand – Ziel und Inhalt verschieben sich gemeinsam), damit das
+			# Ergebnis stabil ist, auch wenn die Anordnung erst im nächsten Bild nachzieht.
+			var content := scroll.get_child(0) as Control
+			var in_content := node.get_global_rect().position.y - content.get_global_rect().position.y
+			if in_content < scroll.scroll_vertical or in_content + node.size.y > scroll.scroll_vertical + scroll.size.y:
+				# Ziel oben ins Bild, damit darunter Platz für die Sprechblase bleibt.
+				scroll.scroll_vertical = maxi(int(in_content) - 8, 0)
+			return
+		parent = parent.get_parent()
 
 
 ## Erstes sichtbares Control unter `root`, dessen Name zu `pattern` passt („*“ als Platzhalter, T.5); null = keins.

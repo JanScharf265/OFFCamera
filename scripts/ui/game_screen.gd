@@ -555,6 +555,17 @@ func on_supply_order(supplier_id: String, product_id: String, units: int) -> voi
 			ActivityText.signed_money(-cost)])
 
 
+## Bestellung auf Kredit (U.7) über das SupplySystem.
+func on_supply_credit_order(supplier_id: String, product_id: String, units: int) -> void:
+	if _was_scroll():
+		return
+	var product = _game.supply.get_products().get_definition(product_id)
+	var debt: int = _game.supply.credit_cost(supplier_id, product_id, units)
+	var reason: String = _game.supply.order_on_credit(supplier_id, product_id, units)
+	_after_action(reason, "Auf Kredit bestellt: %d × %s (Schulden %s)" % [units,
+			product.display_name if product != null else product_id, ActivityText.signed_money(-debt)])
+
+
 ## Fenster „Aufträge“ (U.4); Öffnen gilt als gesehen.
 func _open_missions() -> void:
 	var content := MissionsWindowScript.new()

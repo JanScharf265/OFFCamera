@@ -22,3 +22,5 @@ var minutes := 0
 var company: Dictionary
 ## Kurzer Hinweis auf eine Folge, die keine Zahl ist (U.3, z. B. „Er meldet sich in zwei Tagen wieder“); "" = keiner.
 var note := ""
+## Änderungen an der Organisation (U.7): respect, heat, stability – wirken nur mit gegründeter Organisation.
+var organisation: Dictionary = {}

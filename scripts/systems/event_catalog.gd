@@ -12,7 +12,7 @@ extends RefCounted
 ##         company_founded (1/0), min_last_week_profit_cents}}},
 ##     oder vom Spiel ausgelöst (U.3): trigger {"scripted": true} – kommt nur, wenn ein System es auslöst
 ##       (EventSystem.trigger_scripted, z. B. der Einstieg in die Unterwelt).
-##   options [ {id, label, note? (Hinweis auf eine Folge ohne Zahl, U.3), money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
+##   options [ {id, label, note? (Hinweis auf eine Folge ohne Zahl, U.3), organisation? {respect|heat|stability} (U.7), money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
 ##     (mindestens eine, davon mindestens eine ohne Kosten)
 ##     channel {followers?, followers_percent?, community?, reputation?} – ganze Zahlen
 
@@ -29,6 +29,8 @@ const CONDITION_KEYS := ["min_open_obligations", "max_open_obligations", "compan
 		"min_reputation", "max_reputation"]
 const OPTION_CHANNEL_KEYS := ["followers", "followers_percent", "community", "reputation"]
 const OPTION_COMPANY_KEYS := ["utilization", "reputation"]
+## U.7: Folgen für die Organisation (wirken nur, wenn sie gegründet ist)
+const OPTION_ORGANISATION_KEYS := ["respect", "heat", "stability"]
 const ACCOUNTS := ["private", "company"]
 
 var errors: PackedStringArray = []
@@ -166,6 +168,16 @@ func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> E
 	option.minutes = reader.int_field(entry, "minutes", where, false)
 	if option.minutes < 0:
 		reader.errors.append("%s: 'minutes' darf nicht negativ sein." % where)
+	option.organisation = {}
+	var organisation: Variant = entry.get("organisation", {})
+	if typeof(organisation) != TYPE_DICTIONARY:
+		reader.errors.append("%s: 'organisation' muss ein Objekt sein." % where)
+	else:
+		for key in organisation:
+			if key not in OPTION_ORGANISATION_KEYS or not DataReaderScript.is_whole_number(organisation[key]):
+				reader.errors.append("%s: 'organisation' enthält ungültigen Wert '%s'." % [where, key])
+			elif int(organisation[key]) != 0:
+				option.organisation[key] = int(organisation[key])
 	option.company = {}
 	var company: Variant = entry.get("company", {})
 	if typeof(company) != TYPE_DICTIONARY:

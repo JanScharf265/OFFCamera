@@ -4,14 +4,18 @@ extends RefCounted
 ##
 ## Format je Lieferant (alle Felder Pflicht, andere sind ein Fehler):
 ##   id, name, description (≤ 160 Zeichen), products [Produkt-IDs, nicht leer], min_units ≥ 1,
-##   max_units ≥ min_units, delivery_days ≥ 1, failure_percent 0–100, unlocked_by_mission (Auftrags-ID)
+##   max_units ≥ min_units, delivery_days ≥ 1, failure_percent 0–100, unlocked_by_mission (Auftrags-ID),
+##   credit (optional, U.7) {after_deliveries ≥ 0, max_units ≥ 1, markup_percent 0–200, due_days ≥ 1, grace_days ≥ 0,
+##     reminder_fee_percent 0–100, pressure_event (Ereignis-ID, „scripted“), pressure_every_days ≥ 1}
 ## Verweise auf Produkte und Aufträge prüft GameData.check_references().
 
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
 const DEFAULT_PATH := "res://data/underworld/suppliers.json"
 const FIELDS := ["id", "name", "description", "products", "min_units", "max_units", "delivery_days",
-		"failure_percent", "unlocked_by_mission"]
+		"failure_percent", "unlocked_by_mission", "credit"]
+const CREDIT_INT_FIELDS := {"after_deliveries": 0, "max_units": 1, "markup_percent": 0, "due_days": 1, "grace_days": 0,
+		"reminder_fee_percent": 0, "pressure_every_days": 1}
 
 
 ## Ein Lieferant (nur Daten).
@@ -25,6 +29,8 @@ class Supplier extends RefCounted:
 	var delivery_days: int
 	var failure_percent: int
 	var unlocked_by_mission: String
+	## Kredit (U.7); leer = kein Kredit. Felder siehe Kopf.
+	var credit: Dictionary = {}
 
 
 var errors: PackedStringArray = []
@@ -110,6 +116,26 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int):
 	definition.delivery_days = reader.int_field(entry, "delivery_days", where, true)
 	definition.failure_percent = reader.int_field(entry, "failure_percent", where, true)
 	definition.unlocked_by_mission = reader.string_field(entry, "unlocked_by_mission", where, true)
+	var credit: Variant = entry.get("credit")
+	if credit != null:
+		if typeof(credit) != TYPE_DICTIONARY:
+			reader.errors.append("%s: 'credit' muss ein Objekt sein." % where)
+		else:
+			for key in credit:
+				if key not in CREDIT_INT_FIELDS and key != "pressure_event":
+					reader.errors.append("%s: unbekanntes Feld 'credit.%s'." % [where, key])
+			for key in CREDIT_INT_FIELDS:
+				var value: Variant = credit.get(key)
+				if not DataReaderScript.is_whole_number(value) or int(value) < CREDIT_INT_FIELDS[key]:
+					reader.errors.append("%s: 'credit.%s' fehlt oder ist zu klein." % [where, key])
+				else:
+					definition.credit[key] = int(value)
+			if int(credit.get("markup_percent", 0)) > 200 or int(credit.get("reminder_fee_percent", 0)) > 100:
+				reader.errors.append("%s: Kredit-Aufschlag oder Mahnaufschlag zu hoch." % where)
+			if typeof(credit.get("pressure_event")) != TYPE_STRING or String(credit["pressure_event"]).is_empty():
+				reader.errors.append("%s: 'credit.pressure_event' fehlt." % where)
+			else:
+				definition.credit["pressure_event"] = credit["pressure_event"]
 	if reader.errors.size() == error_count:
 		if definition.min_units < 1 or definition.max_units < definition.min_units:
 			reader.errors.append("%s: Mengen ungültig (1 ≤ min_units ≤ max_units)." % where)

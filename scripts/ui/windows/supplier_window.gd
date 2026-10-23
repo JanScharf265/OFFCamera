@@ -49,6 +49,19 @@ func refresh() -> void:
 			UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 	terms.name = "SupplierTerms"
 	add_child(terms)
+	var credit: Dictionary = _game.supply.credit_terms(supplier_id)
+	if not credit.is_empty():
+		var credit_line := UiStyle.wrapping_label("Auf Kredit: ab der %d. angekommenen Lieferung · bis %d Einheiten · +%d %% · fällig nach %d Tagen" % [
+				int(credit["after_deliveries"]), int(credit["max_units"]), int(credit["markup_percent"]),
+				int(credit["due_days"])], UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+		credit_line.name = "SupplierCreditTerms"
+		add_child(credit_line)
+		for debt in _game.supply.get_debts(supplier_id):
+			var debt_line := UiStyle.wrapping_label("Schulden: %s · %s" % [LedgerSystemScript.format_cents(debt["amount_cents"]),
+					"überfällig – unter „Fristen“ bezahlen" if debt["overdue"] else "fällig Tag %d" % debt["due_day"]],
+					UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE if debt["overdue"] else UiStyle.WARNING)
+			debt_line.name = "SupplierDebt_%s" % debt["order_id"]
+			add_child(debt_line)
 	for product in _game.supply.get_products().get_all():
 		if product.id in supplier.products:
 			add_child(_card(product))
@@ -120,7 +133,29 @@ func _card(product) -> Control:
 			UiStyle.NEGATIVE if not reason.is_empty() else UiStyle.MUTED)
 	note.name = "SupplierNote_%s" % product.id
 	box.add_child(note)
+	if not _game.supply.credit_terms(supplier_id).is_empty():
+		_add_credit(box, product.id, units)
 	return card
+
+
+## U.7: „Auf Kredit“ – gesperrt mit Grund (z. B. „Kredit erst nach der ersten Lieferung.“).
+func _add_credit(box: VBoxContainer, product_id: String, units: int) -> void:
+	var debt: int = _game.supply.credit_cost(supplier_id, product_id, units)
+	var credit: Button = _screen.scroll_button("Auf Kredit · %s später" % LedgerSystemScript.format_cents(debt),
+			"SupplierCreditButton_%s" % product_id)
+	credit.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+	credit.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+	UiStyle.style_neutral_button(credit)
+	credit.pressed.connect(func() -> void: _screen.on_supply_credit_order(supplier_id, product_id, _units[product_id]))
+	box.add_child(credit)
+	var reason: String = _game.supply.check_credit_order(supplier_id, product_id, units)
+	credit.disabled = not reason.is_empty()
+	if reason.is_empty():
+		_game.tutorials.report("first_credit_offered")
+	else:
+		var why := UiStyle.wrapping_label(reason, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+		why.name = "SupplierCreditNote_%s" % product_id
+		box.add_child(why)
 
 
 func _change(product_id: String, delta: int) -> void:

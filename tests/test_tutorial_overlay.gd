@@ -216,3 +216,39 @@ func test_confirm_works_only_once() -> void:
 	button.pressed.emit()  # alter Button (schon weg) – darf das nächste nicht mitbestätigen
 	assert_eq(app.game.tutorials.is_seen("tut_map_tap_building"), false)
 	_done(app)
+
+
+## Selbstprüfung U.7: Ein Ziel unten in einem Scrollbereich wird ins Bild gescrollt (Aussparung im Fenster).
+func test_target_in_scroll_area_is_scrolled_into_view() -> void:
+	var app := _app()
+	_press(app, "NewGameButton")
+	Layout.apply(app, "iPhone 15/16 Pro Max (Dynamic Island)")
+	_screen(app).call("close_tutorial")
+	app.game.organisation.found("Los Lobos")
+	app.game.time.advance(120)
+	app.game.locations.travel("cafe_harbor")
+	var data: Dictionary = app.game.supply.to_dict()
+	data["delivered_before_trim"] = {"el_rubio": 1}
+	app.game.supply.restore(data)
+	for definition in app.game.tutorials.get_catalog().get_all():
+		if definition.id != "tut_credit":
+			app.game.tutorials.mark_seen(definition.id)
+	_screen(app).call("open_supplier", "el_rubio")
+	var window := _screen(app).find_child("Window_supplier", false, false) as Control
+	# Wie in zwei Bildern: anordnen, Ziel suchen und scrollen, dann neu anordnen und die Aussparung nachführen.
+	for i in 2:
+		Layout.settle_in_place(window)
+		_screen(app).call("_layout")
+		var scroll_bar := (window.find_child("WindowScroll", true, false) as ScrollContainer).get_v_scroll_bar()
+		scroll_bar.max_value = (window.find_child("SupplierContent", true, false) as Control).get_combined_minimum_size().y
+	var overlay := _overlay(app)
+	assert_true(overlay != null and overlay.get("tutorial_id") == "tut_credit")
+	var hole: Rect2 = overlay.call("get_hole")
+	var scroll := window.find_child("WindowScroll", true, false) as ScrollContainer
+	var scroll_rect := scroll.get_global_rect()
+	scroll_rect.position -= _screen(app).get_global_rect().position
+	assert_true(scroll_rect.grow(HOLE_MARGIN).encloses(hole), "Ziel nicht im sichtbaren Bereich: %s / %s" % [hole, scroll_rect])
+	_done(app)
+
+
+const HOLE_MARGIN := 10.0

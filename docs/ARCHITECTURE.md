@@ -172,6 +172,15 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Auftragsstand werden als Callable gelesen (kein Kreisverweis; Seed stimmt nach dem Laden). UI: Abschnitt „Ware“ +
   „Unterwegs“ + „<Lieferant> anrufen“ oben im Fenster „Organisation“, Fenster `supplier_window.gd` (−/+, Bestellen,
   „Bezahlt aus“, Bestand/unterwegs). Die Rückmeldung (Toast) wird in `_layout()` über ein offenes Fenster gelegt.
+- Kredit und Schulden (U.7): Lieferanten mit `credit` (after_deliveries, max_units, markup_percent, due_days,
+  grace_days, reminder_fee_percent, pressure_event, pressure_every_days). `SupplySystem.order_on_credit()` bucht nichts;
+  am `debt_due_day` (Lieferungen-Schritt im DayCycle) → `ObligationSystem.add_one_off("debt_<bestellung>", …,
+  Konto black, Fälligkeit = Tag 00:00)`: einmalige Frist (`obligation` = "one_off", eigene `grace_days` und
+  `reminder_fee_cents`), automatisch bezahlt, wenn Schwarzgeld – ersatzweise Privatkonto (`_paying_account`) – reicht.
+  Geplatzte Kreditlieferung → Schuld entfällt. Überfällig (nach grace_days) → `EventSystem.trigger_scripted(
+  pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
+  stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
+  ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
 - Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
   (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
   und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.
@@ -281,7 +290,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 20, "meta": {…}, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 21, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -299,6 +308,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 20 → 21 (U.7): Bestellungen bekommen `credit` = false und leere Schuldfelder; `last_pressure_day` = 0,
+  `delivered_before_trim` = {}.
 - Migration 19 → 20 (U.6): `supply` = kein Bestand, keine Bestellungen, gespeicherter Tag gilt als verarbeitet.
 - Migration 18 → 19 (U.4): `missions` = leer; ist die Organisation gegründet, startet die Kette beim Laden.
 - Migration 17 → 18 (U.3): `organisation.intro_state` = „none“ (bzw. „done“, falls gegründet), `next_offer_day` = 2 –

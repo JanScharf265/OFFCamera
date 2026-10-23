@@ -55,6 +55,9 @@ var _resolved := {}
 var restore_notices := PackedStringArray()
 
 
+var _change_organisation: Callable
+
+
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
 		channel: ChannelSystemScript, catalog: EventCatalogScript, p_seed: int) -> void:
 	_time = time
@@ -68,6 +71,12 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStat
 
 ## Phase 5: Unternehmen und Fristen für Bedingungen (offene Fristen, gegründet, Vorwochen-Gewinn)
 ## und Folgen (Firmenkonto, Unternehmenswerte). Wird vom GameState nach dem Aufbau gesetzt.
+## U.7: Folgen für die Organisation (OrganisationSystem.change) – als Callable, weil die Organisation selbst auf das
+## EventSystem verweist (sonst Kreisverweis).
+func set_organisation_changer(change: Callable) -> void:
+	_change_organisation = change
+
+
 func set_world(company, obligations) -> void:
 	_company = company
 	_obligations = obligations
@@ -173,6 +182,8 @@ func resolve(instance_id: String, option_id: String) -> String:
 		_channel.apply(deltas, "event", reason, instance_id, key)
 	if not option.company.is_empty() and _company != null:
 		_company.apply(option.company, "event", reason, instance_id, key)
+	if not option.organisation.is_empty() and _change_organisation.is_valid():
+		_change_organisation.call(option.organisation)
 
 	_pending.remove_at(_pending.find(instance_id))
 	_resolved[instance_id] = option_id

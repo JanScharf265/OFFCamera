@@ -39,6 +39,7 @@ const NAMES := {
 	"missions": "Story-Aufträge",
 	"products": "Ware (Produkte und ihre Werte)",
 	"supplier": "Lieferant, Vorkasse und Bestand",
+	"credit": "Kredit beim Lieferanten, Schulden und Druck",
 }
 
 

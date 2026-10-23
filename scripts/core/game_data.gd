@@ -105,6 +105,11 @@ func check_references() -> PackedStringArray:
 				problems.append("Lieferant '%s': unbekanntes Produkt '%s'." % [supplier.id, product_id])
 		if not missions.has(supplier.unlocked_by_mission):
 			problems.append("Lieferant '%s': unbekannter Auftrag '%s'." % [supplier.id, supplier.unlocked_by_mission])
+		if not supplier.credit.is_empty():
+			var pressure = events.get_definition(supplier.credit["pressure_event"])
+			if pressure == null or not pressure.is_scripted:
+				problems.append("Lieferant '%s': Druck-Ereignis '%s' fehlt oder ist nicht „scripted“." % [supplier.id,
+						supplier.credit["pressure_event"]])
 	# U.3: Der Einstieg in die Unterwelt braucht ein vom Spiel ausgelöstes Ereignis mit der Annehmen-Option.
 	var intro = events.get_definition(organisation.intro_event)
 	if intro == null or not intro.is_scripted:

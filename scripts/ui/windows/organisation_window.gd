@@ -7,6 +7,7 @@ extends VBoxContainer
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
 const HudBarScript := preload("res://scripts/ui/hud_bar.gd")
+const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 
 const EXPLANATIONS := {
 	"respect": "Wie ernst dich die Szene nimmt. Wer Respekt hat, bekommt bessere Deals.",
@@ -82,6 +83,15 @@ func _refresh_supply() -> void:
 				supplier.name if supplier != null else order["supplier"], order["due_day"]],
 				UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 		line.name = "PendingOrder_%s" % order["id"]
+		_supply_box.add_child(line)
+	for debt in supply.get_debts():
+		var supplier_def = supply.get_suppliers().get_definition(debt["supplier"])
+		var line := UiStyle.wrapping_label("Schulden bei %s: %s · %s" % [
+				supplier_def.name if supplier_def != null else debt["supplier"],
+				LedgerSystemScript.format_cents(debt["amount_cents"]),
+				"überfällig – unter „Fristen“ bezahlen" if debt["overdue"] else "fällig Tag %d" % debt["due_day"]],
+				UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE if debt["overdue"] else UiStyle.WARNING)
+		line.name = "Debt_%s" % debt["order_id"]
 		_supply_box.add_child(line)
 	for supplier in supply.get_unlocked():
 		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)

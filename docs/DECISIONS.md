@@ -795,3 +795,18 @@ Lieferung kommt nach `delivery_days` am Morgen (Schritt im DayCycle nach der Hit
 dem Laden. Geplatzt heißt: Geld weg, keine Ware. Ware ist eine abstrakte Zahl von Einheiten je Produkt (073), noch ohne
 Ort – das Versteck kommt mit U.8. Ein bisher übersehener Fehler fiel dabei auf: Die Rückmeldung unten lag hinter jedem
 offenen Fenster; sie liegt jetzt darüber (Popup, Info-Blase und Tutorial bleiben darüber).
+
+## 076 – Kredit, Schulden und Druck (U.7)
+Kredit gibt es erst nach einer angekommenen Lieferung (Vertrauen), höchstens 10 Einheiten, 25 % Aufschlag, fällig nach
+3 Tagen, nur eine laufende Schuld je Lieferant (vorläufige Werte als Daten am Lieferanten). Die Schuld wird erst am
+Fälligkeitstag eine Frist im ObligationSystem („einmalige Frist“, eigene Mahnregel: nach 1 Tag 10 % Aufschlag) – so
+erscheint sie wie Miete im Fristen-Fenster, im Kalender und am roten Punkt, ohne dass das System neue Zustände für „noch
+nicht fällig“ braucht; vorher steht sie im Fenster „Organisation“ und beim Lieferanten. Bezahlt wird aus Schwarzgeld,
+ersatzweise vom Privatkonto (vor dem ersten Verkauf in U.9 gibt es kein Schwarzgeld). Platzt eine Kreditlieferung,
+entfällt die Schuld (keine Ware, kein Geld). Druck: Ist die Schuld über die Mahnfrist hinaus offen, kommt alle zwei Tage
+das Ereignis „Besuch“ (zwei Männer vor der Haustür) – Gewalt nur angedeutet, Folgen als Werte (Stimmung, Respekt,
+Stabilität). Dafür können Ereignis-Antworten jetzt die Organisation verändern. Gefunden und behoben bei der
+Selbstprüfung: Fälligkeitsdatum bei Sprüngen über mehrere Tage, falscher Satz „auf dem Schwarzgeld“, ein Absturz beim
+Laden beschädigter Fristen (langer Störungstest), und Tutorial-Ziele unterhalb des sichtbaren Fensterbereichs (werden
+jetzt ins Bild gescrollt). Offen: Eine lange Rückmeldung (z. B. nach einem Sprung über mehrere Tage) liegt seit U.6 über
+dem offenen Fenster und verdeckt es, bis man sie antippt.

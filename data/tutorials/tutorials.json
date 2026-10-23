@@ -300,5 +300,15 @@
 		"requires": [
 			"tut_products"
 		]
+	},
+	{
+		"id": "tut_credit",
+		"mechanic": "credit",
+		"trigger": "first_credit_offered",
+		"title": "Auf Kredit",
+		"text": "El Rubio vertraut dir jetzt: Ware sofort, Geld später – mit Aufschlag. Bezahlt wird aus Schwarzgeld oder vom Privatkonto. Wer nicht zahlt, bekommt Besuch.",
+		"ui_target": "SupplierCreditButton_*",
+		"order": 350,
+		"requires": []
 	}
 ]

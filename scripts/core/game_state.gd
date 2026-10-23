@@ -87,8 +87,10 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	events.set_world(company, obligations)
 	organisation = OrganisationSystemScript.new(time, data.organisation)
 	organisation.set_events(events)
+	events.set_organisation_changer(organisation.change)
 	missions = MissionSystemScript.new(time, data.missions, locations, organisation)
-	supply = SupplySystemScript.new(time, ledger, data.suppliers, data.products, missions, events.get_seed)
+	supply = SupplySystemScript.new(time, ledger, data.suppliers, data.products, missions, events.get_seed, obligations,
+			events)
 	missions.set_supply(supply)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, organisation, supply, obligations, events])

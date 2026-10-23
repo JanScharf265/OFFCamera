@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Kredit bei El Rubio: Nach der ersten angekommenen Lieferung gibt es Ware auch auf Kredit (25 % Aufschlag, fällig nach 3 Tagen). Am Fälligkeitstag werden die Schulden eine Frist – bezahlt aus Schwarzgeld oder vom Privatkonto, sonst offen mit Mahnaufschlag; wer nicht zahlt, bekommt alle zwei Tage „Besuch“ (kostet Stimmung, Respekt oder Stabilität). Platzt die Lieferung, entfallen die Schulden. Erklärung „Auf Kredit“; Erklärungen scrollen ihr Ziel jetzt ins Bild; Spielstand Version 21 (Ticket U.7)
 - Erster Lieferant „El Rubio“: nach „Treffen am Hafen“ über „Organisation“ anrufen, Ware (Gras, Haschisch, Pillen, Koks) auf Vorkasse bestellen – bezahlt aus Schwarzgeld, wenn genug da ist, sonst vom Privatkonto –, Lieferung am nächsten Morgen, die auch platzen kann (dann ist das Geld weg); Bestand und Lieferungen unterwegs im Fenster „Organisation“; neuer Auftrag „Die erste Ware“; Erklärungen „Die Ware“ und „Vorkasse“. Außerdem: Die Rückmeldung nach einer Aktion ist jetzt auch über offenen Fenstern sichtbar. Spielstand Version 20 (Ticket U.6)
 - „Treffen am Hafen“ zählt nur noch, wenn das Café offen ist; nachts gibt es einen Hinweis, wer bis zur Öffnung bleibt, erfüllt den Auftrag dann (Nachtrag U.4)
 - Produkte der Unterwelt als Daten (Gras, Haschisch, Pillen, Koks – Preise, Qualität und Hitze je Einheit, reine Spielwerte); im Spiel noch nicht sichtbar, sie kommen mit dem Lieferanten (U.6) (Ticket U.5)

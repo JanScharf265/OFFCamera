@@ -16,6 +16,10 @@ extends RefCounted
 ## erst beim Bezahlen, damit kein Konto negativ wird –, und die Folgen (Stimmung bzw. Ruf des
 ## Unternehmens) wirken einmal. pay() bucht Grundbetrag (Wertstellung = Fälligkeit) und Mahngebühr
 ## (Wertstellung = jetzt) zusammen – nur, wenn das Konto den ganzen offenen Betrag deckt.
+##
+## Einmalige Fristen (U.7, z. B. Schulden beim Lieferanten): add_one_off() legt sie am Fälligkeitstag an
+## ("obligation" = ONE_OFF, eigene grace_days und reminder_fee_cents in der Instanz). Konto "black" (Schwarzgeld)
+## zahlt ersatzweise vom Privatkonto, wenn das Schwarzgeld nicht reicht.
 
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
@@ -32,6 +36,8 @@ signal obligation_reminded(instance_id: String)
 const STATUS_PAID := "paid"
 const STATUS_OPEN := "open"
 const STATUS_WAIVED := "waived"
+## Kennung einmaliger Fristen (keine Definition in den Daten)
+const ONE_OFF := "one_off"
 const SOURCE := "obligation"
 const FEE_CATEGORY := "reminder_fee"
 ## Gespeicherte Instanzen (älteste fallen weg, wenn bezahlt/entfallen).
@@ -134,9 +140,57 @@ func on_day_changed(day: int) -> void:
 		_create(definition, instance_id, TimeSystemScript.at(day, 0))
 	for instance in _instances:
 		if instance["status"] == STATUS_OPEN and not instance["reminded"]:
+			if instance["obligation"] == ONE_OFF:
+				if day > TimeSystemScript.day_of(instance["due_minutes"]) + int(instance.get("grace_days", 0)):
+					_remind_one_off(instance)
+				continue
 			var definition := _catalog.get_definition(instance["obligation"])
 			if definition != null and day > TimeSystemScript.day_of(instance["due_minutes"]) + definition.grace_days:
 				_remind(instance, definition)
+
+
+## U.7: einmalige Frist, fällig jetzt (z. B. Schulden). Wird sofort bezahlt, wenn das Konto (bei Schwarzgeld ersatzweise
+## das Privatkonto) reicht, sonst bleibt sie offen. Rückgabe: Instanz-ID ("" wenn es sie schon gibt).
+func add_one_off(instance_id: String, label: String, amount_cents: int, account: String, category: String,
+		grace_days: int, reminder_fee_cents: int, due_minutes: int = -1) -> String:
+	if not get_instance(instance_id).is_empty() or amount_cents <= 0 or account not in LedgerSystemScript.ACCOUNTS:
+		return ""
+	var instance := {
+		"id": instance_id, "obligation": ONE_OFF, "amount_cents": amount_cents,
+		"due_minutes": due_minutes if due_minutes >= 0 else _time.get_minutes(),
+		"fee_cents": 0, "status": STATUS_OPEN, "paid_minutes": -1, "reminded": false, "account": account,
+		"category": category, "label": label, "grace_days": grace_days, "reminder_fee_cents": reminder_fee_cents,
+	}
+	_instances.append(instance)
+	obligation_due.emit(instance_id)
+	var payer := _paying_account(instance, amount_cents)
+	if _ledger.can_afford(amount_cents, payer):
+		_book_payment(instance)
+		_notices.append("%s automatisch bezahlt: %s." % [label, LedgerSystemScript.format_cents(-amount_cents)])
+	else:
+		_notices.append("%s fällig (%s) – das Geld reicht nicht. Bitte bezahlen." % [label,
+				LedgerSystemScript.format_cents(amount_cents)])
+	_trim()
+	return instance_id
+
+
+## Konto, von dem eine Instanz bezahlt wird: ihr Konto – bei Schwarzgeld ersatzweise das Privatkonto, wenn nur das reicht.
+func _paying_account(instance: Dictionary, total: int) -> String:
+	var account: String = instance["account"]
+	if account == LedgerSystemScript.BLACK and not _ledger.can_afford(total, account) \
+			and _ledger.can_afford(total, LedgerSystemScript.PRIVATE):
+		return LedgerSystemScript.PRIVATE
+	return account
+
+
+func _remind_one_off(instance: Dictionary) -> void:
+	instance["reminded"] = true
+	var fee := int(instance.get("reminder_fee_cents", 0))
+	instance["fee_cents"] = int(instance["fee_cents"]) + fee
+	_notices.append("Mahnung: %s – offen jetzt %s (+%s Aufschlag)." % [instance["label"],
+			LedgerSystemScript.format_cents(int(instance["amount_cents"]) + int(instance["fee_cents"])),
+			LedgerSystemScript.format_cents(fee)])
+	obligation_reminded.emit(instance["id"])
 
 
 ## Anzahl offener (überfälliger) Fristen – z. B. für Behördenereignisse.
@@ -152,8 +206,11 @@ func check_pay(instance_id: String) -> String:
 	if instance["status"] != STATUS_OPEN:
 		return "Diese Frist ist nicht offen."
 	var total := open_amount(instance_id)
-	if not _ledger.can_afford(total, instance["account"]):
-		return "Nicht genug Geld auf dem %s (offen: %s)." % [LedgerSystemScript.ACCOUNT_LABELS[instance["account"]],
+	var payer := _paying_account(instance, total)
+	if not _ledger.can_afford(total, payer):
+		if payer == LedgerSystemScript.BLACK:
+			return "Nicht genug Schwarzgeld oder Geld auf dem Privatkonto (offen: %s)." % LedgerSystemScript.format_cents(total)
+		return "Nicht genug Geld auf dem %s (offen: %s)." % [LedgerSystemScript.ACCOUNT_LABELS[payer],
 				LedgerSystemScript.format_cents(total)]
 	return ""
 
@@ -216,11 +273,12 @@ func _create(definition: ObligationDefinitionScript, instance_id: String, due_mi
 func _book_payment(instance: Dictionary) -> void:
 	var label: String = instance["label"]
 	var key := "obligation:%s" % instance["id"]
+	var account := _paying_account(instance, int(instance["amount_cents"]) + int(instance["fee_cents"]))
 	_ledger.post(-int(instance["amount_cents"]), instance["category"], label, SOURCE, instance["id"],
-			key, false, instance["account"], instance["due_minutes"])
+			key, false, account, instance["due_minutes"])
 	if int(instance["fee_cents"]) > 0:
 		_ledger.post(-int(instance["fee_cents"]), FEE_CATEGORY, "Mahngebühr: %s" % label, SOURCE, instance["id"],
-				key + ":fee", false, instance["account"])
+				key + ":fee", false, account)
 	instance["status"] = STATUS_PAID
 	instance["paid_minutes"] = _time.get_minutes()
 	obligation_paid.emit(instance["id"])
@@ -287,6 +345,10 @@ func restore(data: Dictionary) -> String:
 				"category": reader.string_field(entry, "category", where, false),
 				"label": reader.string_field(entry, "label", where, false),
 			}
+			# U.7: einmalige Frist mit eigener Mahnregel (Typ zuerst prüfen – beschädigte Dateien)
+			if typeof(entry.get("obligation")) == TYPE_STRING and entry["obligation"] == ONE_OFF:
+				instance["grace_days"] = reader.int_field(entry, "grace_days", where, true)
+				instance["reminder_fee_cents"] = reader.int_field(entry, "reminder_fee_cents", where, true)
 			_fill_missing_fields(instance, notices)
 			if instance["status"] not in [STATUS_PAID, STATUS_OPEN, STATUS_WAIVED] \
 					or instance["amount_cents"] < 0 or instance["fee_cents"] < 0:
@@ -309,9 +371,12 @@ func restore(data: Dictionary) -> String:
 ## nicht mehr, gelten Privatkonto, Kategorie "obligation" und die ID – offen bleibt sie bezahlbar (Phase 6).
 func _fill_missing_fields(instance: Dictionary, notices: PackedStringArray) -> void:
 	var definition := _catalog.get_definition(instance["obligation"])
-	if definition == null and instance["status"] == STATUS_OPEN:
+	if definition == null and instance["status"] == STATUS_OPEN and instance["obligation"] != ONE_OFF:
 		notices.append("Die Frist „%s“ gibt es nicht mehr – sie bleibt offen und bezahlbar." % instance["obligation"])
-	if String(instance["account"]) not in [LedgerSystemScript.PRIVATE, LedgerSystemScript.COMPANY]:
+	# Einmalige Fristen (U.7) dürfen auf jedes Konto laufen, auch Schwarzgeld.
+	var allowed: Array = LedgerSystemScript.ACCOUNTS if instance["obligation"] == ONE_OFF \
+			else [LedgerSystemScript.PRIVATE, LedgerSystemScript.COMPANY]
+	if String(instance["account"]) not in allowed:
 		instance["account"] = definition.account if definition != null else LedgerSystemScript.PRIVATE
 	if String(instance["category"]).is_empty():
 		instance["category"] = definition.category if definition != null else "obligation"

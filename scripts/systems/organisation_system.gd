@@ -152,6 +152,8 @@ func on_day_changed(day: int) -> void:
 func _offer_intro(day: int) -> void:
 	if _founded or _events == null or _intro_state not in [INTRO_NONE, INTRO_DECLINED] or day < _next_offer_day:
 		return
+	if _events.get_definition_for(_rules.intro_event) == null:
+		return  # Daten ohne Einstiegs-Ereignis (nur in Tests mit eigenen Daten; die echten prüft GameData)
 	if not _events.trigger_scripted(_rules.intro_event, day).is_empty():
 		_intro_state = INTRO_OFFERED
 

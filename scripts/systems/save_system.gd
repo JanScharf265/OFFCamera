@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 20
+const SAVE_VERSION := 21
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -281,6 +281,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		17: return _migrate_17_to_18(game)
 		18: return _migrate_18_to_19(game)
 		19: return _migrate_19_to_20(game)
+		20: return _migrate_20_to_21(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -461,6 +462,24 @@ static func _migrate_19_to_20(game: Dictionary) -> String:
 		return "Zeit fehlt."
 	game["supply"] = {"stock": {}, "orders": [], "next_number": 1,
 			"last_processed_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 20 → 21 (U.7): Kredit beim Lieferanten – bisherige Bestellungen waren bar (keine Schuld), kein Druck bisher;
+## angekommene Lieferungen zählen weiter für die Freischaltung des Kredits.
+static func _migrate_20_to_21(game: Dictionary) -> String:
+	var supply: Variant = game.get("supply")
+	if typeof(supply) != TYPE_DICTIONARY or typeof(supply.get("orders")) != TYPE_ARRAY:
+		return "Lieferungen fehlen."
+	for order in supply["orders"]:
+		if typeof(order) != TYPE_DICTIONARY:
+			return "Bestellung ungültig."
+		order["credit"] = false
+		order["debt_cents"] = 0
+		order["debt_due_day"] = 0
+		order["debt_status"] = ""
+	supply["last_pressure_day"] = 0
+	supply["delivered_before_trim"] = {}
 	return ""
 
 
