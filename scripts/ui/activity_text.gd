@@ -67,6 +67,8 @@ static func event_option_summary(option, channel: Dictionary) -> String:
 	if option.money_cents != 0:
 		var money := signed_money(option.money_cents)
 		parts.append(money + " (Firmenkonto)" if option.account == "company" else money)
+	if not option.note.is_empty():
+		parts.append(option.note)
 	return " · ".join(parts) if not parts.is_empty() else "Keine Folgen"
 
 

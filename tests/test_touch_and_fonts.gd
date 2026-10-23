@@ -394,3 +394,38 @@ func test_lexicon_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## U.3: Einstieg – Ereignis „Liegeplatz 14“, Namenseingabe und Fenster „Organisation“: Tippflächen, Schrift, nichts
+## abgeschnitten, auf allen Geräteklassen.
+func test_underworld_intro_windows_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		_press(app, "NewGameButton")
+		var screen := app.find_child("CityMap", true, false).get_parent() as Control
+		screen.set("show_tutorials", false)
+		app.game.time.advance(TimeSystemScript.at(2, 8) - app.game.time.get_minutes())
+		app.game.events.resolve("first_brand_request", "decline")
+		screen.call("_refresh")
+		for step in ["", "EventOption_listen", "OrganisationName", "OrganisationButton"]:
+			if step == "OrganisationName":
+				app.find_child("OrganisationNameContent", true, false).call("set_name_text", "Los Lobos")
+				_press(app, "OrganisationFoundButton")
+				_press(app, "WindowCloseButton")  # Kalender
+				continue
+			if not step.is_empty():
+				_press(app, step)
+			Layout.apply(app, device)
+			var window: Control = null
+			for child in screen.get_children():
+				if String(child.name).begins_with("Window_"):
+					window = child
+			if window == null:
+				problems.append("%s / %s: kein Fenster" % [device, step])
+				continue
+			Layout.settle_in_place(window)
+			_audit(window, screen, "%s / %s" % [device, window.name], problems)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)

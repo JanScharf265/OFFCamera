@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 17
+const SAVE_VERSION := 18
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -278,6 +278,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		14: return _migrate_14_to_15(game)
 		15: return _migrate_15_to_16(game)
 		16: return _migrate_16_to_17(game)
+		17: return _migrate_17_to_18(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -430,6 +431,18 @@ static func _migrate_16_to_17(game: Dictionary) -> String:
 	game["organisation"] = {"founded": false, "name": "", "respect": defaults.start["respect"],
 			"heat": defaults.start["heat"], "stability": defaults.start["stability"], "heat_raised_day": 0,
 			"last_processed_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 17 → 18 (U.3): Einstieg in die Unterwelt – noch nicht angeboten; das Ereignis kommt beim nächsten Tageswechsel
+## ab Tag 2 (derselbe Code-Pfad wie bei einem neuen Spiel).
+static func _migrate_17_to_18(game: Dictionary) -> String:
+	var organisation: Variant = game.get("organisation")
+	if typeof(organisation) != TYPE_DICTIONARY:
+		return "Organisation fehlt."
+	var defaults = load("res://scripts/systems/organisation_rules.gd").new()
+	organisation["intro_state"] = "done" if organisation.get("founded") == true else "none"
+	organisation["next_offer_day"] = defaults.intro_first_day
 	return ""
 
 

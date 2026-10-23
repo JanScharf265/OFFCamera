@@ -111,6 +111,7 @@ func test_event_and_obligation_signals_trigger() -> void:
 	clock["now"] += 10000
 	game.ledger.post(-45000, "test", "Ausgabe für Test", "test")  # selbst ≥ 100 € → vibriert
 	clock["now"] += 10000
+	game.organisation.found("Los Testigos")  # U.3: kein Einstiegs-Ereignis, damit die Frist allein vibriert
 	game.time.advance(TimeSystemScript.at(8, 9) - game.time.get_minutes())  # Montag: Miete fällig, offen
 	assert_true("obligation" in haptics.history, str(haptics.history))
 

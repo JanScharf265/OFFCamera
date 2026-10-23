@@ -43,10 +43,18 @@ func _screen(app: AppScript) -> Control:
 	return app.find_child("CityMap", true, false).get_parent() as Control
 
 
-## Wie nach einer Aktion: Spielzeit vorstellen, dann aktualisiert die Spielansicht.
+## Wie nach einer Aktion: Spielzeit vorstellen, dann aktualisiert die Spielansicht. Den Einstieg in die Unterwelt
+## (U.3, Ereignis ab Tag 2) lehnt der Test mit „Nicht heute“ ab – hier geht es nur um den Kalender.
 func _advance_to(app: AppScript, day: int, hour: int) -> void:
 	app.game.time.advance(TimeSystemScript.at(day, hour) - app.game.time.get_minutes())
 	_screen(app).call("_refresh")
+	_decline_intro(app)
+
+
+func _decline_intro(app: AppScript) -> void:
+	var button := app.find_child("EventOption_not_now", true, false) as Button
+	if button != null:
+		button.pressed.emit()
 
 
 ## Das feste Ereignis an Tag 1 um 20:00 vorab entscheiden (sonst kommt es zu Recht vor dem Kalender).
@@ -133,6 +141,7 @@ func test_event_first_then_calendar() -> void:
 	assert_eq(_window_kind(app), "event")
 	assert_eq(app.game.day_start.is_calendar_due(), true, "Kalender wartet auf das Ereignis")
 	_press(app, "EventOption_accept")
+	_decline_intro(app)
 	assert_eq(_window_kind(app), "calendar", "nach dem Ereignis der Kalender")
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
@@ -143,8 +152,9 @@ func test_loading_does_not_open_it_twice() -> void:
 	var app := _app()
 	_press(app, "NewGameButton")
 	_advance_to(app, 2, 8)
-	if _window_kind(app) == "event":
+	if app.find_child("EventOption_accept", true, false) != null:
 		_press(app, "EventOption_accept")
+	_decline_intro(app)
 	assert_eq(_window_kind(app), "calendar")
 	_press(app, "WindowCloseButton")
 	_press(app, "MenuButton")  # speichert

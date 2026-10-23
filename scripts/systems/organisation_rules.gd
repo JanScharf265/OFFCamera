@@ -4,7 +4,8 @@ extends RefCounted
 ## ruhigen Tagen sinkt. Vorläufige Spielwerte (Feinschliff in Phase 8). Alles-oder-nichts wie die Kataloge.
 ##
 ## Format: start {respect, heat, stability} (je 0–100), heat_decay_per_quiet_day (0–100),
-##         name_min_length (≥ 1), name_max_length (≥ name_min_length, ≤ 40)
+##         name_min_length (≥ 1), name_max_length (≥ name_min_length, ≤ 40),
+##         intro {event (Ereignis-ID, „scripted“), first_day ≥ 2, retry_days ≥ 1, accept_option (Options-ID)} (U.3)
 
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
@@ -16,6 +17,11 @@ var start := {"respect": 0, "heat": 0, "stability": 50}
 var heat_decay_per_quiet_day := 3
 var name_min_length := 2
 var name_max_length := 24
+## Einstieg in die Unterwelt (U.3)
+var intro_event := "underworld_intro"
+var intro_first_day := 2
+var intro_retry_days := 2
+var intro_accept_option := "listen"
 
 
 func load_file(path: String = DEFAULT_PATH) -> bool:
@@ -53,9 +59,26 @@ func load_data(data: Variant) -> bool:
 	var max_length := reader.int_field(data, "name_max_length", where, true)
 	if min_length < 1 or max_length < min_length or max_length > 40:
 		reader.errors.append("%s: Namenslänge ungültig (1 ≤ min ≤ max ≤ 40)." % where)
+	var intro: Variant = data.get("intro")
+	var parsed_intro := {}
+	if typeof(intro) != TYPE_DICTIONARY:
+		reader.errors.append("%s: 'intro' fehlt oder ist kein Objekt." % where)
+	else:
+		parsed_intro["event"] = reader.string_field(intro, "event", where + " (intro)", true)
+		parsed_intro["accept_option"] = reader.string_field(intro, "accept_option", where + " (intro)", true)
+		parsed_intro["first_day"] = reader.int_field(intro, "first_day", where + " (intro)", true)
+		parsed_intro["retry_days"] = reader.int_field(intro, "retry_days", where + " (intro)", true)
+		if parsed_intro["first_day"] < 2:
+			reader.errors.append("%s: 'intro.first_day' muss mindestens 2 sein (Tag 1 gehört den Grundlagen)." % where)
+		if parsed_intro["retry_days"] < 1:
+			reader.errors.append("%s: 'intro.retry_days' muss mindestens 1 sein." % where)
 	errors = reader.errors
 	if not errors.is_empty():
 		return false
+	intro_event = parsed_intro["event"]
+	intro_accept_option = parsed_intro["accept_option"]
+	intro_first_day = parsed_intro["first_day"]
+	intro_retry_days = parsed_intro["retry_days"]
 	start = parsed_start
 	heat_decay_per_quiet_day = decay
 	name_min_length = min_length

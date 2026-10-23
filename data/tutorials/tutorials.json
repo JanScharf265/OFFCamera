@@ -258,5 +258,15 @@
 		"ui_target": "HeatBlock",
 		"order": 310,
 		"requires": []
+	},
+	{
+		"id": "tut_organisation",
+		"mechanic": "organisation",
+		"trigger": "first_organisation_founded",
+		"title": "Deine Organisation",
+		"text": "Hier steht, was deine Leute in der Szene wert sind: Respekt, Hitze und Stabilität. Noch seid ihr ein Name ohne Ruf – das ändert sich mit jedem Geschäft.",
+		"ui_target": "OrganisationButton",
+		"order": 305,
+		"requires": []
 	}
 ]

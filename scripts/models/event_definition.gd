@@ -15,6 +15,8 @@ var priority: int
 var due_minutes: int
 ## Zufallsereignis (Phase 3): wird an jedem neuen Tag deterministisch gewürfelt.
 var is_random := false
+## U.3: nur von einem System ausgelöst (EventSystem.trigger_scripted), nie zeit- oder zufallsgesteuert
+var is_scripted := false
 ## Chance pro Tag in Prozent (1–100).
 var chance_percent := 0
 ## Frühestens an diesem Tag (≥ 2).

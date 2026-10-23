@@ -84,4 +84,10 @@ func check_references() -> PackedStringArray:
 	for appointment in appointments.get_all():
 		if not locations.has(appointment.location):
 			problems.append("Termin '%s': unbekannter Ort '%s'." % [appointment.id, appointment.location])
+	# U.3: Der Einstieg in die Unterwelt braucht ein vom Spiel ausgelöstes Ereignis mit der Annehmen-Option.
+	var intro = events.get_definition(organisation.intro_event)
+	if intro == null or not intro.is_scripted:
+		problems.append("Organisation: Einstiegs-Ereignis '%s' fehlt oder ist nicht „scripted“." % organisation.intro_event)
+	elif intro.options.filter(func(option) -> bool: return option.id == organisation.intro_accept_option).is_empty():
+		problems.append("Organisation: Einstiegs-Ereignis ohne Option '%s'." % organisation.intro_accept_option)
 	return problems

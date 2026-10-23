@@ -10,7 +10,9 @@ extends RefCounted
 ##       cooldown_days ≥ 0 (optional), max_times ≥ 0 (optional, 0 = unbegrenzt),
 ##       conditions (optional) {min_/max_ followers|community|reputation, min_/max_open_obligations,
 ##         company_founded (1/0), min_last_week_profit_cents}}},
-##   options [ {id, label, money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
+##     oder vom Spiel ausgelöst (U.3): trigger {"scripted": true} – kommt nur, wenn ein System es auslöst
+##       (EventSystem.trigger_scripted, z. B. der Einstieg in die Unterwelt).
+##   options [ {id, label, note? (Hinweis auf eine Folge ohne Zahl, U.3), money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
 ##     (mindestens eine, davon mindestens eine ohne Kosten)
 ##     channel {followers?, followers_percent?, community?, reputation?} – ganze Zahlen
 
@@ -104,6 +106,11 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> EventDefini
 	if typeof(trigger) == TYPE_DICTIONARY and trigger.has("random"):
 		definition.due_minutes = -1
 		_parse_random(reader, definition, trigger["random"], where)
+	elif typeof(trigger) == TYPE_DICTIONARY and trigger.has("scripted"):
+		definition.due_minutes = -1
+		definition.is_scripted = true
+		if trigger.size() != 1 or trigger["scripted"] != true:
+			reader.errors.append("%s: 'trigger.scripted' muss allein stehen und true sein." % where)
 	else:
 		definition.due_minutes = reader.time_point_field(entry, "trigger", where)
 
@@ -139,6 +146,7 @@ func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> E
 	option.money_cents = reader.int_field(entry, "money_cents", where, false)
 	option.category = reader.string_field(entry, "category", where, false)
 	option.effects = reader.effects_field(entry, where)
+	option.note = reader.string_field(entry, "note", where, false)
 	reader.check_money_category(option.money_cents, option.category, where)
 	option.channel = {}
 	var channel: Variant = entry.get("channel", {})

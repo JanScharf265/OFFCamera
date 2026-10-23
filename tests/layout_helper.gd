@@ -15,8 +15,7 @@ const DEVICES := {
 	"iPhone 13/14 (Notch)": {"size": Vector2(1558, 720), "margins": [110.8, 24.0, 110.8, 62.8]},
 	# 2796 × 1290 px = 932 × 430 pt; quer: 59 pt seitlich, 21 pt unten
 	"iPhone 15/16 Pro Max (Dynamic Island)": {"size": Vector2(1560, 720), "margins": [122.8, 24.0, 122.8, 59.2]},
-	# Härtefall: schmal UND große Ränder (rechnerischer Grenzfall, kein echtes Gerät)
-	"Grenzfall schmal + Notch": {"size": Vector2(1280, 720), "margins": [134.0, 24.0, 134.0, 64.0]},
+	# Der rechnerische „Grenzfall schmal + Notch“ (1280 px) ist seit U.3 nicht mehr dabei – Entscheidung 069.
 }
 
 

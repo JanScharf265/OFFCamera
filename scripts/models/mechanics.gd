@@ -35,6 +35,7 @@ const NAMES := {
 	# Unterwelt (Paket U)
 	"black_money": "Schwarzgeld",
 	"heat": "Hitze (Aufmerksamkeit der Polizei)",
+	"organisation": "Organisation (Respekt, Stabilität, Fenster)",
 }
 
 

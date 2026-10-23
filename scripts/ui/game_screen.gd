@@ -31,6 +31,10 @@ const UiWindowScript := preload("res://scripts/ui/windows/ui_window.gd")
 const LocationWindowScript := preload("res://scripts/ui/windows/location_window.gd")
 const CalendarWindowScript := preload("res://scripts/ui/windows/calendar_window.gd")
 const ReminderWindowScript := preload("res://scripts/ui/windows/reminder_window.gd")
+const OrganisationWindowScript := preload("res://scripts/ui/windows/organisation_window.gd")
+const OrganisationNameWindowScript := preload("res://scripts/ui/windows/organisation_name_window.gd")
+## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
+const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
 const DayPlanScript := preload("res://scripts/core/day_plan.gd")
 ## Breite des kleinen Erinnerungsfensters (G5.6)
@@ -58,6 +62,7 @@ const ICONS := {
 	"ObligationsButton": ICON_DIR + "exclamation.png",
 	"ChannelButton": ICON_DIR + "video.png",
 	"CompanyButton": ICON_DIR + "cart.png",
+	"OrganisationButton": "res://assets/icons/organisation.svg",
 	"LedgerButton": ICON_DIR + "menuList.png",
 	"MenuButton": ICON_DIR + "gear.png",
 	"HereButton": ICON_DIR + "target.png",
@@ -77,6 +82,8 @@ var _business_group: PanelContainer
 var _menu_button: RoundButtonScript
 var _here_button: RoundButtonScript
 var _company_button: RoundButtonScript
+## Seitenbutton „Organisation“ (U.3) – sichtbar, sobald es sie gibt
+var _organisation_button: RoundButtonScript
 var _obligations_button: RoundButtonScript
 var _calendar_button: RoundButtonScript
 ## Vibration (G5.9, von der App gesetzt; null = keine) – die Spielansicht meldet nur ihre eigenen Warnungen.
@@ -135,7 +142,9 @@ func _ready() -> void:
 	_add_to_group(_life_group, _obligations_button)
 	_add_to_group(_life_group, _round_button("Kanal", "ChannelButton", _open_channel))
 	_business_group = _button_group("BusinessGroup", "GESCHÄFT")
-	# Ab Paket U kommen hier „Organisation“ und „Aufträge“ dazu (Entscheidung 038).
+	# Paket U: „Organisation“ (U.3) zuerst, „Aufträge“ folgt (Entscheidung 038).
+	_organisation_button = _round_button("Organisation", "OrganisationButton", _open_organisation)
+	_add_to_group(_business_group, _organisation_button)
 	_company_button = _round_button("Firma", "CompanyButton", _open_company)
 	_add_to_group(_business_group, _company_button)
 	_add_to_group(_business_group, _round_button("Buchungen", "LedgerButton", _open_ledger))
@@ -340,7 +349,7 @@ func _open_due_tutorial(chained: bool = false) -> void:
 	if _tutorial_chain >= TUTORIAL_CHAIN_MAX:
 		return
 	var blocking: Control = _popup
-	if blocking == null and _window_kind in ["event", "calendar", "reminder"]:
+	if blocking == null and _window_kind in PRIORITY_WINDOWS:
 		blocking = _window
 	if blocking == null and _game.events.has_pending():
 		return
@@ -390,7 +399,7 @@ func _on_tutorial_confirmed(tutorial_id: String) -> void:
 ## ein Ereignis offen ist oder der Kalender steht; sonst ersetzt sie ein offenes Fenster. Fällig sagt das
 ## ReminderSystem (genau einmal je Termin).
 func _open_due_reminder() -> void:
-	if _game.events.has_pending() or _window_kind in ["event", "calendar", "reminder"]:
+	if _game.events.has_pending() or _game.organisation.needs_name() or _window_kind in PRIORITY_WINDOWS:
 		return
 	var appointment_id := _game.reminders.take_due()
 	if appointment_id.is_empty():
@@ -512,6 +521,22 @@ func _open_channel() -> void:
 	content.setup(self, _game)
 	_open_window("channel", content)
 	_open_due_tutorial()
+
+
+## Fenster „Organisation“ (U.3): Respekt, Hitze, Stabilität.
+func _open_organisation() -> void:
+	var content := OrganisationWindowScript.new()
+	content.setup(self, _game)
+	_open_window("organisation", content)
+	_open_due_tutorial()
+
+
+## Namenseingabe (U.3): gründet die Organisation über das System. Rückgabe: Grund, falls der Name nicht passt.
+func on_organisation_name_submitted(organisation_name: String) -> String:
+	var reason := _game.organisation.found(organisation_name)
+	if reason.is_empty():
+		_after_action("", "„%s“ gegründet" % _game.organisation.get_name())
+	return reason
 
 
 func _open_company() -> void:
@@ -794,6 +819,7 @@ func _refresh() -> void:
 	if _game.time.get_day() > 1:
 		_game.tutorials.report("first_new_day")
 	_company_button.visible = _game.company.is_founded()
+	_organisation_button.visible = _game.organisation.is_founded()
 	# Zählerpunkte (G5.8): Zählungen aus DayPlan bzw. ObligationSystem. Offene Ereignisse bekommen keinen Punkt –
 	# sie öffnen sofort ihr eigenes Fenster, das sich erst nach der Entscheidung schließt.
 	_calendar_button.set_badge(DayPlanScript.count_upcoming_today(_game))
@@ -812,9 +838,18 @@ func _refresh() -> void:
 			_open_window("event", content, false)
 	elif _window_kind == "event":
 		_close_window()
+	# U.3: Nach „Zuhören“ am Hafen fehlt der Name der Organisation – das Fenster kommt direkt nach dem Ereignis und
+	# lässt sich nicht schließen; Kalender, Erinnerung und Tutorial warten.
+	var naming: bool = pending_id.is_empty() and _game.organisation.needs_name()
+	if naming and _window_kind != "organisation_name":
+		var name_content := OrganisationNameWindowScript.new()
+		name_content.setup(self, _game)
+		_open_window("organisation_name", name_content, false)
+	elif not naming and _window_kind == "organisation_name":
+		_close_window()
 	# G5.3: Erst wenn kein Ereignis offen ist, öffnet sich bei Tagesbeginn genau einmal der Kalender (ersetzt ein
 	# offenes Fenster – nie zwei übereinander). Ob er fällig ist, entscheidet das DayStartSystem.
-	if pending_id.is_empty() and _game.day_start.take_calendar_due(auto_calendar):
+	if pending_id.is_empty() and not naming and _game.day_start.take_calendar_due(auto_calendar):
 		_open_appointments()
 	_open_due_reminder()
 

@@ -20,3 +20,5 @@ var account := "private"
 var minutes := 0
 ## Änderungen am Unternehmen (Phase 5): utilization, reputation – wirken nur mit Unternehmen.
 var company: Dictionary
+## Kurzer Hinweis auf eine Folge, die keine Zahl ist (U.3, z. B. „Er meldet sich in zwei Tagen wieder“); "" = keiner.
+var note := ""

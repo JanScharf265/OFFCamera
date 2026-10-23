@@ -262,6 +262,8 @@ func test_order_event_then_calendar_then_reminder() -> void:
 	_jump(app, TimeSystemScript.at(2, 0))
 	assert_eq(_window_kind(app), "event", "zuerst das Ereignis")
 	assert_eq(app.game.reminders.is_reminded("night_call"), false, "Erinnerung wartet")
+	# Erst „Liegeplatz 14“ (U.3, Tageswechsel) – ablehnen –, dann das Ereignis von 20:00.
+	_press(app, "EventOption_not_now")
 	_press(app, "EventOption_accept")
 	assert_eq(_window_kind(app), "calendar", "dann der Kalender")
 	assert_eq(app.game.reminders.is_reminded("night_call"), false, "Erinnerung wartet auf den Kalender")

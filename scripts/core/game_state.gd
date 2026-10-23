@@ -80,6 +80,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	obligations = ObligationSystemScript.new(time, ledger, stats, company, data.obligations)
 	events.set_world(company, obligations)
 	organisation = OrganisationSystemScript.new(time, data.organisation)
+	organisation.set_events(events)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, organisation, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.

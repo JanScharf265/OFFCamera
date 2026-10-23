@@ -306,12 +306,26 @@ func _is_eligible(definition: EventDefinitionScript, day: int) -> bool:
 func _on_time_advanced(from_minutes: int, to_minutes: int) -> void:
 	var due: Array[EventDefinitionScript] = []
 	for definition in _catalog.get_all():
-		if not definition.is_random and not _triggered.has(definition.id) \
+		if not definition.is_random and not definition.is_scripted and not _triggered.has(definition.id) \
 				and definition.due_minutes > from_minutes and definition.due_minutes <= to_minutes:
 			due.append(definition)
 	due.sort_custom(_comes_before)
 	for definition in due:
 		_trigger(definition.id)
+
+
+## U.3: Löst ein vom Spiel gesteuertes Ereignis („scripted“) aus – Instanz "<id>@<tag>", höchstens einmal je Tag.
+## Rückgabe: Instanz-ID oder "" (unbekannt, nicht „scripted“ oder an diesem Tag schon ausgelöst).
+func trigger_scripted(event_id: String, day: int) -> String:
+	var definition := _catalog.get_definition(event_id)
+	if definition == null or not definition.is_scripted:
+		push_error("EventSystem: '%s' ist kein vom Spiel ausgelöstes Ereignis." % event_id)
+		return ""
+	var instance_id := "%s%s%d" % [event_id, INSTANCE_SEPARATOR, day]
+	if _triggered.has(instance_id):
+		return ""
+	_trigger(instance_id)
+	return instance_id
 
 
 func _trigger(instance_id: String) -> void:

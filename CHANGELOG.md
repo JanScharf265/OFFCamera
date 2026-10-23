@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Einstieg in die Unterwelt: Ab Tag 2 meldet sich „El Capitán“ am Hafen von Puerto Banús („Liegeplatz 14“). „Zuhören“ → du gibst deiner Organisation einen Namen; „Nicht heute“ → er meldet sich zwei Tage später wieder. Danach: Fenster „Organisation“ (Respekt, Hitze, Stabilität) mit eigenem Button, Erklärung „Deine Organisation“. Auch alte Spielstände bekommen den Einstieg beim nächsten Tageswechsel; Spielstand Version 18 (Ticket U.3)
 - Grundlage der Organisation: Name, Respekt, Hitze und Stabilität; die Hitze steht als Flamme mit Zahl in der HUD-Leiste (ab 30 gelb, ab 60 rot) und kühlt an ruhigen Tagen langsam ab; noch unsichtbar, bis die Organisation mit dem Einstieg in die Unterwelt (U.3) entsteht; Erklärung „Hitze“; Spielstand Version 17 (Ticket U.2)
 - Schwarzgeld als drittes Konto: eigene Zeile „Schwarz“ in der HUD-Leiste, Stand, Filter und Wochenübersicht im Buchungen-Fenster – alles erst sichtbar, wenn es Schwarzgeld gibt (verdient wird es ab U.9); lässt sich nicht auf Privat- oder Firmenkonto umbuchen; Erklärung „Schwarzgeld“; Spielstand Version 16 (alte Spielstände laden weiter) (Ticket U.1)
 - Paket T abgeschlossen: feste Liste der Spielmechaniken mit Abdeckungstest (jede Mechanik hat ihr Tutorial, jeder Auslöser wird wirklich gemeldet); die Tests können den echten Spielstand und die Einstellungen am Mac nicht mehr verändern (Ticket T.7)

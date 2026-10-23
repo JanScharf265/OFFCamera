@@ -729,7 +729,9 @@ Migration setzt den Startwert 0.
 Entscheidung des Game Directors am 23.10.2026: Das iPhone SE (16:9, ohne Notch) wird für Layout und Tests nicht
 mehr berücksichtigt. Die Geräteklasse ist aus `tests/layout_helper.gd` entfernt; geprüft werden iPhone 13/14,
 iPhone 15/16 Pro Max und der rechnerische „Grenzfall schmal + Notch“ (1280 px breit mit großen Rändern – noch enger als
-das SE). Ob der Grenzfall bleibt, ist eine offene Frage an den Game Director.
+das SE). Nachtrag (U.3): Auf Wunsch des Game Directors ist auch der Grenzfall gestrichen – geprüft werden nur noch die
+echten Geräte iPhone 13/14 und iPhone 15/16 Pro Max. Die Anpassungen für schmale Geräte (z. B. Verdichtung der
+HUD-Leiste, schmalere Sprechblase) bleiben als Sicherheitsnetz im Code.
 
 ## 070 – Organisation und Hitze (U.2)
 Die Organisation ist ein eigenes System mit vier Werten: Name, Respekt, Hitze, Stabilität (je 0–100, reine Spielwerte).
@@ -741,3 +743,16 @@ Stabilität 50) – sie wirken erst, wenn ab U.9 etwas Hitze erzeugt; Feinschlif
 Director. Anzeige: Flamme + Zahl ohne Beschriftung (wie Energie/Stimmung), ab 30 gelb, ab 60 rot (nur Farbe). Die
 Organisation mit Respekt und Stabilität bekommt ihr Fenster und ihr Tutorial in U.3, wenn sie sichtbar wird; in U.2 ist
 nur die Hitze zu sehen (Tutorial „Hitze“). Migration 16 → 17: noch nicht gegründet, Standard-Startwerte.
+
+## 071 – Einstieg in die Unterwelt (U.3)
+Ein Code-Pfad für neue und alte Spielstände (Entscheidung 037): Nicht ein festes Datum löst den Einstieg aus, sondern
+der Tageswechsel – sobald der Tag ≥ 2 ist und noch nichts angeboten wurde. Ein neues Spiel bekommt ihn am Morgen von
+Tag 2, ein alter Stand (z. B. Tag 9) beim nächsten Tageswechsel. Dafür gibt es Ereignisse mit dem Auslöser „scripted“,
+die nur ein System auslösen kann (`EventSystem.trigger_scripted`) – deterministisch, je Tag höchstens einmal, mit den
+üblichen Regeln (zentral, nie doppelt). Ablauf (Empfehlung, vom Game Director zu bestätigen): „Zuhören“ führt zur
+Namenseingabe, „Nicht heute“ verschiebt um zwei Tage – die Unterwelt ist das Hauptspiel, ein endgültiges Nein gibt es
+nicht. Die Namenseingabe ist nicht schließbar und kommt nach dem Laden wieder, solange der Name fehlt; erst danach
+kommen Kalender, Erinnerung und Tutorials. Bei einem Sprung über Mitternacht steht der Einstieg vor einem Ereignis vom
+Vorabend (Tageswechsel vor Zeitereignissen, wie schon bei Zufallsereignissen) – bewusst unverändert. Der Kontakt „El
+Capitán“ ist eine erfundene Figur. Ereignis-Optionen können eine `note` haben, damit eine Antwort ohne Zahlen nicht
+„Keine Folgen“ anzeigt.

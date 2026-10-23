@@ -127,5 +127,15 @@
 		"options": [
 			{ "id": "accept", "label": "Annehmen", "money_cents": 10000, "category": "funding", "account": "company", "company": { "reputation": 2 } }
 		]
+	},
+	{
+		"id": "underworld_intro",
+		"title": "Liegeplatz 14",
+		"text": "Eine Nachricht von unbekannter Nummer: „Hafen Puerto Banús, Liegeplatz 14. Komm allein.“ Zwischen den Yachten wartet ein Mann, den alle nur El Capitán nennen. „Du hast Reichweite, ein sauberes Gesicht und eine Firma im Rücken. Leute wie du verdienen in dieser Stadt mehr als mit Streams.“",
+		"trigger": { "scripted": true },
+		"options": [
+			{ "id": "listen", "label": "Zuhören", "note": "Du gründest deine eigene Organisation" },
+			{ "id": "not_now", "label": "Nicht heute", "note": "Er meldet sich in zwei Tagen wieder" }
+		]
 	}
 ]

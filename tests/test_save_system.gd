@@ -88,7 +88,8 @@ func test_loading_does_not_retrigger_or_rebook_events() -> void:
 	var on_triggered := func(id: String) -> void: triggered.append(id)
 	loaded.events.event_triggered.connect(on_triggered)
 	loaded.time.advance(2 * TimeSystemScript.MINUTES_PER_DAY)
-	assert_eq(triggered, [])
+	# U.3: Der Einstieg in die Unterwelt ab Tag 2 ist ein neues Ereignis, kein erneut ausgelöstes.
+	assert_eq(triggered.filter(func(id: String) -> bool: return not id.begins_with("underworld_intro@")), [])
 	assert_eq(loaded.events.resolve("first_brand_request", "accept"), "Dieses Ereignis ist nicht offen.")
 	var again := loaded.ledger.post(3000, "creator", "Test", "event", "", "event:first_brand_request")
 	assert_true(again == null, "Schutzschlüssel nach dem Laden verloren")

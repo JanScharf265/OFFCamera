@@ -28,7 +28,8 @@ func test_real_rules_load() -> void:
 
 func test_bad_rules_are_rejected() -> void:
 	var good := {"start": {"respect": 0, "heat": 0, "stability": 50}, "heat_decay_per_quiet_day": 3,
-			"name_min_length": 2, "name_max_length": 24}
+			"name_min_length": 2, "name_max_length": 24,
+			"intro": {"event": "underworld_intro", "first_day": 2, "retry_days": 2, "accept_option": "listen"}}
 	var rules := OrganisationRulesScript.new()
 	assert_true(rules.load_data(good), "; ".join(rules.errors))
 	for change in [{"start": {"respect": 0, "heat": 101, "stability": 50}}, {"start": {"respect": 0, "heat": 0}},

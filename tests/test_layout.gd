@@ -361,11 +361,11 @@ func test_locations_that_fit_show_no_tabs() -> void:
 			var content := window.find_child("LocationWindowContent", true, false)
 			assert_eq(content.call("has_tabs"), false, "%s / %s: Reiter ohne Not" % [device, location_id])
 			assert_eq((window.find_child("LocationTabs", true, false) as Control).visible, false)
-		# Das Studio passt auf echten Geräten ohne Reiter, nur im „Grenzfall“ (3 Spalten) braucht es sie.
+		# Das Studio passt auf allen geprüften Geräten ohne Reiter.
 		_press(app, "MapPin_studio")
 		Layout.apply(app, device)
 		var studio := app.find_child("LocationWindowContent", true, false)
-		assert_eq(studio.call("has_tabs"), device.begins_with("Grenzfall"), "%s / studio" % device)
+		assert_eq(studio.call("has_tabs"), false, "%s / studio" % device)
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 

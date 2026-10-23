@@ -82,7 +82,7 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 			_jump(app, TimeSystemScript.at(1, 21))
 		"first_new_day":
 			_jump(app, TimeSystemScript.at(2, 8))
-			_press(app, "EventOption_accept")
+			_resolve_events(app)  # 20:00-Ereignis und „Liegeplatz 14“ (U.3, „Nicht heute“)
 			_press(app, "WindowCloseButton")  # Kalender bei Tagesbeginn
 		"first_channel_open":
 			_press(app, "ChannelButton")
@@ -210,7 +210,7 @@ func test_data_rules() -> void:
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
 			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
-			"black_money", "heat"]:
+			"black_money", "heat", "organisation"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 

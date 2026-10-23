@@ -140,6 +140,16 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   (jeder Tag einmal über `last_processed_day`). Regeln: `OrganisationRules` aus `data/underworld/organisation.json`
   (in `GameData.organisation`). HUD: `HeatBlock` (Flamme `assets/icons/flame.svg` + Zahl), sichtbar ab Gründung,
   Farbe über `OrganisationSystem.heat_level()` (ab 30 gelb, ab 60 rot – nur Anzeige).
+- Einstieg in die Unterwelt (U.3): Ereignisse mit `trigger {"scripted": true}` kommen nur über
+  `EventSystem.trigger_scripted(id, tag)` (Instanz "<id>@<tag>"). Das OrganisationSystem (Schritt im DayCycle) löst
+  ab `intro.first_day` das Ereignis `underworld_intro` aus (`intro_state` none/declined → offered) und hört auf
+  `event_resolved`: Annehmen-Option → „accepted“ (`needs_name()`), sonst „declined“ mit `next_offer_day` = heute +
+  `retry_days`. Die Spielansicht öffnet nach dem Ereignis das nicht schließbare Fenster „organisation_name“
+  (`organisation_name_window.gd`, LineEdit), gründet über `on_organisation_name_submitted()` → `found()`; Kalender,
+  Erinnerung und Tutorial warten (`PRIORITY_WINDOWS`). Fenster „Organisation“ (`organisation_window.gd`: Balken + Zahl +
+  Erklärung je Wert), Seitenbutton `OrganisationButton` (Gruppe Geschäft, sichtbar ab Gründung). Ereignis-Optionen
+  können `note` haben (Folge ohne Zahl, ersetzt „Keine Folgen“). `GameData.check_references()` prüft das
+  Einstiegs-Ereignis.
 - Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
   (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
   und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.
@@ -249,7 +259,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 17, "meta": {…}, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 18, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -267,6 +277,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 17 → 18 (U.3): `organisation.intro_state` = „none“ (bzw. „done“, falls gegründet), `next_offer_day` = 2 –
+  der Einstieg kommt beim nächsten Tageswechsel.
 - Migration 16 → 17 (U.2): `organisation` = nicht gegründet, Startwerte der Standardregeln, gespeicherter Tag gilt
   als verarbeitet.
 - Migration 15 → 16 (U.1): `ledger.opening_balances.black` = 0 (Schwarzgeld-Konto ohne Buchungen).
