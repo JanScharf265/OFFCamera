@@ -2,8 +2,9 @@ extends RefCounted
 
 ## Die Organisation (U.2): Name, Respekt in der Szene, Hitze (Aufmerksamkeit der Polizei) und Stabilität, je 0–100 –
 ## reine Spielwerte. Gegründet wird sie erst durch den Einstieg in die Unterwelt (U.3); bis dahin ist nichts
-## sichtbar und nichts ändert sich. Hitze sinkt an jedem ruhigen Tag (ohne neue Hitze am Vortag) um
-## `heat_decay_per_quiet_day` – als Schritt im DayCycle, jeder Tag höchstens einmal (auch nach dem Laden).
+## sichtbar und nichts ändert sich. Hitze sinkt an jedem Tag um `heat_decay_per_day` (GD 086: auch an Tagen mit
+## neuer Hitze) – als Schritt im DayCycle, jeder Tag höchstens einmal (auch nach dem Laden). `heat_raised_day` wird
+## weiter gespeichert, entscheidet aber nichts mehr.
 ## Werte ändern nur Systeme über change(); die UI zeigt an.
 ##
 ## Einstieg (U.3): Ab `intro.first_day` löst der Tageswechsel das Ereignis „Liegeplatz 14“ aus (EventSystem,
@@ -135,16 +136,16 @@ func change(deltas: Dictionary) -> bool:
 	return true
 
 
-## Vom DayCycle: Ruhige Tage kühlen ab. Ein Tag ist ruhig, wenn am Vortag keine Hitze dazukam.
+## Vom DayCycle: Jeder Tag kühlt ab (GD 086).
 func on_day_changed(day: int) -> void:
 	if day <= _last_processed_day:
 		return
 	_last_processed_day = day
 	_offer_intro(day)
-	if not _founded or get_value("heat") <= 0 or _heat_raised_day >= day - 1:
+	if not _founded or get_value("heat") <= 0:
 		return
 	var old_value := get_value("heat")
-	_values["heat"] = maxi(old_value - _rules.heat_decay_per_quiet_day, MIN_VALUE)
+	_values["heat"] = maxi(old_value - _rules.heat_decay_per_day, MIN_VALUE)
 	if _values["heat"] != old_value:
 		changed.emit("heat", old_value, _values["heat"])
 

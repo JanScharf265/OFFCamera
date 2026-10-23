@@ -925,3 +925,18 @@ zusätzlich Hitze +5 („redet“).
 Texte nennen die Person beim Namen (Platzhalter `{name}`) und kommen ohne „er/sie“ aus, weil die Crew Frauen- und
 Männernamen hat; dabei auch den Abschlusstext von „Der erste Dealer“ und einen Ärger-Text der Grises angepasst.
 Vorläufige Werte, Bestätigung durch den Game Director offen.
+
+## 086 – Antworten des Game Directors nach U.15 (23.10.2026)
+- Hitze sinkt jetzt an jedem Tag um 3 (`heat_decay_per_day`, vorher nur an ruhigen Tagen). Rechnung: Ein Dealer mit
+  Können 50 verkauft 4–5 Einheiten Gras (Hitze je Einheit 1) bei 75 % Hitze → 3 Hitze am Tag, minus 3 Abkühlung = ±0;
+  drei solche Dealer → 9 − 3 = +6 am Tag. Test `test_heat_with_one_and_three_dealers`: 1 Dealer bleibt in 14 Tagen
+  ≤ 60, 3 Dealer steigen. Hitze-Tutorial: „… jeder Tag kühlt ein wenig ab.“ `heat_raised_day` bleibt im Spielstand,
+  entscheidet aber nichts mehr (keine neue Version nötig).
+- Ereignisfenster: Jede Antwort ist eine Zeile – Folgen links, Button rechts (430 px breit, 84 px hoch), damit auch
+  drei Antworten ohne Scrollen passen. Test `test_all_event_buttons_visible_without_scrolling` prüft jedes Ereignis
+  aus den Daten auf iPhone 13/14 und 15/16 Pro Max (mit dem alten Fenster schlug er bei den Rivalen-Ereignissen fehl).
+  Kein Text gekürzt.
+- Angenommen: Werte bleiben (Balancing in Phase 8), Befördern bleibt, 4 Gebiete bleiben, Zuteilen per Tipp bleibt,
+  Schalter „Ansicht“ bleibt unten rechts, Rivalen übernehmen selbst erst nach Paket U.
+- Sicherheit: Vor jedem Commit `git diff --stat` prüfen; schrumpft eine Datei unerwartet stark, steht es im Bericht.
+- U.16 Waschen: nur Spielwert (Gebühr %, Tageslimit, Risiko), ein Button und Zahlen – keine realen Abläufe.

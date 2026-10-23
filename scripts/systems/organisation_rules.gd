@@ -1,9 +1,9 @@
 extends RefCounted
 
-## Regeln der Organisation (U.2) aus data/underworld/organisation.json – Startwerte und wie schnell die Hitze an
-## ruhigen Tagen sinkt. Vorläufige Spielwerte (Feinschliff in Phase 8). Alles-oder-nichts wie die Kataloge.
+## Regeln der Organisation (U.2) aus data/underworld/organisation.json – Startwerte und wie schnell die Hitze
+## jeden Tag sinkt (seit GD 086 an jedem Tag, vorher nur an ruhigen Tagen). Vorläufige Spielwerte (Feinschliff in Phase 8). Alles-oder-nichts wie die Kataloge.
 ##
-## Format: start {respect, heat, stability} (je 0–100), heat_decay_per_quiet_day (0–100),
+## Format: start {respect, heat, stability} (je 0–100), heat_decay_per_day (0–100),
 ##         name_min_length (≥ 1), name_max_length (≥ name_min_length, ≤ 40),
 ##         intro {event (Ereignis-ID, „scripted“), first_day ≥ 2, retry_days ≥ 1, accept_option (Options-ID)} (U.3)
 
@@ -14,7 +14,7 @@ const VALUE_KEYS := ["respect", "heat", "stability"]
 
 var errors: PackedStringArray = []
 var start := {"respect": 0, "heat": 0, "stability": 50}
-var heat_decay_per_quiet_day := 3
+var heat_decay_per_day := 3
 var name_min_length := 2
 var name_max_length := 24
 ## Einstieg in die Unterwelt (U.3)
@@ -52,9 +52,9 @@ func load_data(data: Variant) -> bool:
 		for key in raw_start:
 			if String(key) not in VALUE_KEYS:
 				reader.errors.append("%s: unbekannter Startwert '%s'." % [where, key])
-	var decay := reader.int_field(data, "heat_decay_per_quiet_day", where, true)
+	var decay := reader.int_field(data, "heat_decay_per_day", where, true)
 	if decay < 0 or decay > 100:
-		reader.errors.append("%s: 'heat_decay_per_quiet_day' muss zwischen 0 und 100 liegen." % where)
+		reader.errors.append("%s: 'heat_decay_per_day' muss zwischen 0 und 100 liegen." % where)
 	var min_length := reader.int_field(data, "name_min_length", where, true)
 	var max_length := reader.int_field(data, "name_max_length", where, true)
 	if min_length < 1 or max_length < min_length or max_length > 40:
@@ -80,7 +80,7 @@ func load_data(data: Variant) -> bool:
 	intro_first_day = parsed_intro["first_day"]
 	intro_retry_days = parsed_intro["retry_days"]
 	start = parsed_start
-	heat_decay_per_quiet_day = decay
+	heat_decay_per_day = decay
 	name_min_length = min_length
 	name_max_length = max_length
 	return true

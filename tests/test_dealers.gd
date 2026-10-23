@@ -89,7 +89,7 @@ func test_dealer_sells_at_next_morning() -> void:
 	var gross := units * 7000
 	assert_eq(entries[0].amount_cents, gross - gross * 10 / 100, "10 % abgezweigt (Gier 50)")
 	assert_eq(entries[0].account, LedgerSystemScript.BLACK)
-	assert_eq(game.organisation.get_value("heat"), heat + units * 80 / 100, "Hitze 80 % (Können 40)")
+	assert_eq(game.organisation.get_value("heat"), heat - 3 + units * 80 / 100, "Hitze 80 % (Können 40), abzüglich 3 je Tag (GD 086)")
 	assert_eq(game.ledger.get_balance(LedgerSystemScript.BLACK),
 			black + entries[0].amount_cents - member["wage_cents"] - 2000, "Abrechnung – Lohn – Garage")
 	assert_true(" ".join(game.crew.take_notices()).contains("Abrechnung: Deine Dealer haben %d Einheiten verkauft" % units))
@@ -215,3 +215,30 @@ func test_ui_dealer_card_and_promote() -> void:
 	assert_eq(app.game.crew.get_member("d1")["rank"], 2)
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
+
+
+## GD 086: Hitze sinkt jeden Tag um 3. Mit 1 Dealer (Können 50) bleibt sie in 14 Tagen höchstens bei 60, mit 3 Dealern
+## steigt sie. Ohne Vorfälle (loyal, nicht gierig) – es geht nur um Verkauf und Abkühlung.
+func test_heat_with_one_and_three_dealers() -> void:
+	for count in [1, 3]:
+		var game := _ready_game(500)
+		for i in count:
+			_add(game, "d%d" % i, 50, 0, 100)
+		var start := game.organisation.get_value("heat")
+		var highest := start
+		for day in 14:
+			_next_morning(game)
+			while game.events.has_pending():
+				var id: String = game.events.get_next_pending_id()
+				var options = game.events.get_definition_for(id).options
+				var pick: String = options[-1].id
+				for option in options:
+					if option.id == "lawyer":
+						pick = option.id
+				game.events.resolve(id, pick)
+			highest = maxi(highest, game.organisation.get_value("heat"))
+		if count == 1:
+			assert_true(highest <= 60, "1 Dealer: Hitze bis %d" % highest)
+		else:
+			assert_true(game.organisation.get_value("heat") > start + 20, "3 Dealer: Hitze steigt nicht (%d → %d)" % [
+					start, game.organisation.get_value("heat")])

@@ -1,7 +1,7 @@
 extends "res://tests/base_test.gd"
 
 ## Ticket U.2: Organisation – Name, Respekt, Hitze, Stabilität (0–100); vor der Gründung unsichtbar und unveränderlich;
-## Hitze sinkt an ruhigen Tagen (DayCycle, jeder Tag einmal, auch nach Laden); Regeln aus den Daten; Migration v16 → v17.
+## Hitze sinkt jeden Tag (GD 086) (DayCycle, jeder Tag einmal, auch nach Laden); Regeln aus den Daten; Migration v16 → v17.
 
 const Helpers := preload("res://tests/helpers.gd")
 const GameStateScript := preload("res://scripts/core/game_state.gd")
@@ -23,17 +23,17 @@ func test_real_rules_load() -> void:
 	var rules := OrganisationRulesScript.new()
 	assert_true(rules.load_file(), "; ".join(rules.errors))
 	assert_eq(rules.start, {"respect": 0, "heat": 0, "stability": 50})
-	assert_eq(rules.heat_decay_per_quiet_day, 3)
+	assert_eq(rules.heat_decay_per_day, 3)
 
 
 func test_bad_rules_are_rejected() -> void:
-	var good := {"start": {"respect": 0, "heat": 0, "stability": 50}, "heat_decay_per_quiet_day": 3,
+	var good := {"start": {"respect": 0, "heat": 0, "stability": 50}, "heat_decay_per_day": 3,
 			"name_min_length": 2, "name_max_length": 24,
 			"intro": {"event": "underworld_intro", "first_day": 2, "retry_days": 2, "accept_option": "listen"}}
 	var rules := OrganisationRulesScript.new()
 	assert_true(rules.load_data(good), "; ".join(rules.errors))
 	for change in [{"start": {"respect": 0, "heat": 101, "stability": 50}}, {"start": {"respect": 0, "heat": 0}},
-			{"start": {"respect": 0, "heat": 0, "stability": 50, "fear": 1}}, {"heat_decay_per_quiet_day": -1},
+			{"start": {"respect": 0, "heat": 0, "stability": 50, "fear": 1}}, {"heat_decay_per_day": -1},
 			{"name_min_length": 5, "name_max_length": 3}, {"name_max_length": 99}]:
 		var data := good.duplicate(true)
 		data.merge(change, true)
@@ -76,18 +76,17 @@ func test_values_are_clamped() -> void:
 	assert_eq(game.organisation.change({"fear": 3}), false)
 
 
-func test_heat_cools_on_quiet_days_only() -> void:
+## GD 086: Hitze sinkt an jedem Tag um 3 – auch nach einem Tag mit neuer Hitze.
+func test_heat_cools_every_day() -> void:
 	var game := Helpers.new_game()
 	game.organisation.found("Los Testigos")
 	game.organisation.change({"heat": 20})  # Tag 1
 	_to_day(game, 2)
-	assert_eq(game.organisation.get_value("heat"), 20, "Tag 1 war nicht ruhig")
+	assert_eq(game.organisation.get_value("heat"), 17, "auch nach einem Tag mit Hitze: -3")
+	game.organisation.change({"heat": 5})  # Tag 2 → 22
 	_to_day(game, 3)
-	assert_eq(game.organisation.get_value("heat"), 17, "Tag 2 ruhig: -3")
-	game.organisation.change({"heat": 5})  # Tag 3 → 22
-	_to_day(game, 4)
-	assert_eq(game.organisation.get_value("heat"), 22, "Tag 3 nicht ruhig")
-	_to_day(game, 12)  # 8 ruhige Tage auf einmal: 22 - 8 × 3 → 0, nicht darunter
+	assert_eq(game.organisation.get_value("heat"), 19)
+	_to_day(game, 12)  # 9 Tage auf einmal: 19 - 9 × 3 → 0, nicht darunter
 	assert_eq(game.organisation.get_value("heat"), 0)
 
 
@@ -95,12 +94,12 @@ func test_each_day_once_even_after_load() -> void:
 	var game := Helpers.new_game()
 	game.organisation.found("Los Testigos")
 	game.organisation.change({"heat": 30})
-	_to_day(game, 3)  # 30 → 27
-	assert_eq(game.organisation.get_value("heat"), 27)
+	_to_day(game, 3)  # 30 → 27 → 24
+	assert_eq(game.organisation.get_value("heat"), 24)
 	var copy := Helpers.new_game()
 	assert_eq(copy.restore(game.to_dict()), "")
 	copy.organisation.on_day_changed(3)  # derselbe Tag noch einmal: nichts
-	assert_eq(copy.organisation.get_value("heat"), 27)
+	assert_eq(copy.organisation.get_value("heat"), 24)
 	assert_eq(copy.organisation.get_name(), "Los Testigos")
 	assert_eq(copy.organisation.to_dict(), game.organisation.to_dict())
 
