@@ -144,3 +144,24 @@ func test_effective_dates_survive_save_and_load() -> void:
 		var sales = loaded.ledger.get_entries_by_category("sales")[0]
 		assert_eq(sales.effective_minutes, TimeSystemScript.at(1, 23, 59))
 	SaveSystemScript.delete_save(PATH)
+
+
+## U.24: Reihenfolge am Tageswechsel – Abrechnung vor Abkühlung, Abkühlung vor Polizei, Fristen und Ereignisse zuletzt.
+func test_full_day_order() -> void:
+	var game := Helpers.new_game()
+	var steps: Array = game.day_cycle.get("_steps")
+	var names := []
+	for step in steps:
+		names.append(String(step.get_method()) if step is Callable else step.get_script().resource_path.get_file().get_basename())
+	assert_eq(names, ["company_system", "organisation_system", "supply_system", "site_system", "crew_system",
+			"territory_system", "rival_system", "cool_down", "police_system", "justice_system", "relationship_system",
+			"obligation_system", "event_system"])
+
+
+## U.24: Ein Dealer, der am Vortag Hitze gebracht hat, wird am selben Morgen erst abgerechnet, dann kühlt es ab.
+func test_cooling_after_settlement() -> void:
+	var game := Helpers.new_game()
+	game.organisation.found("Los Lobos")
+	game.organisation.change({"heat": 2})
+	game.time.advance(TimeSystemScript.at(2, 8) - game.time.get_minutes())
+	assert_eq(game.organisation.get_value("heat"), 0, "ohne Abrechnung: 2 − 3 → 0")

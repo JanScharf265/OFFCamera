@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 35
+const SAVE_VERSION := 36
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -296,6 +296,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		32: return _migrate_32_to_33(game)
 		33: return _migrate_33_to_34(game)
 		34: return _migrate_34_to_35(game)
+		35: return _migrate_35_to_36(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -623,6 +624,15 @@ static func _migrate_34_to_35(game: Dictionary) -> String:
 	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
 		return "Zeit fehlt."
 	game["relationships"] = {"contacts": {}, "instances": {}, "last_processed_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 35 → 36 (U.24): Abkühlung ist ein eigener Schritt – der gespeicherte Tag gilt als abgekühlt.
+static func _migrate_35_to_36(game: Dictionary) -> String:
+	var organisation: Variant = game.get("organisation")
+	if typeof(organisation) != TYPE_DICTIONARY or not DataReaderScript.is_whole_number(organisation.get("last_processed_day")):
+		return "Organisation fehlt."
+	organisation["last_cooled_day"] = int(organisation["last_processed_day"])
 	return ""
 
 

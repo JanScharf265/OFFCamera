@@ -58,4 +58,28 @@ static func check(game) -> PackedStringArray:
 			problems.append("Frist %s ist offen, aber schon gebucht." % instance["id"])
 		if int(instance["due_minutes"]) > now:
 			problems.append("Frist %s ist erst in der Zukunft fällig." % instance["id"])
+
+	# U.24: Unterwelt
+	if game.ledger.get_balance("black") < 0:
+		problems.append("Schwarzgeld ist negativ.")
+	for product in game.supply.get_products().get_all():
+		if game.supply.get_stock(product.id) < 0:
+			problems.append("Bestand von %s ist negativ." % product.id)
+	if game.crew.get_members().size() > game.crew.get_catalog().max_members:
+		problems.append("Mehr Crew als erlaubt.")
+	for member in game.crew.get_members():
+		if int(member["hired_day"]) > today:
+			problems.append("Crew-Mitglied %s wurde in der Zukunft eingestellt." % member["id"])
+	for district in game.territory.get_districts().get_all():
+		if game.territory.is_controlled(district.id) and game.territory.controlled_since(district.id) > today:
+			problems.append("Gebiet %s gehört dir erst in der Zukunft." % district.id)
+	for system in [game.organisation, game.supply, game.sites, game.crew, game.territory, game.rivals, game.police,
+			game.justice, game.relationships]:
+		var state: Dictionary = system.to_dict()
+		if int(state.get("last_processed_day", 0)) > today:
+			problems.append("Ein Tageswechsel wurde für einen Tag in der Zukunft verarbeitet.")
+	if game.justice.is_locked_up() and game.locations.get_current() != "prison":
+		problems.append("In Haft, aber nicht in der Haftanstalt.")
+	if game.organisation.to_dict()["last_cooled_day"] > today:
+		problems.append("Abkühlung für einen Tag in der Zukunft.")
 	return problems

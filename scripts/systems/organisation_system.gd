@@ -44,6 +44,8 @@ var _values := {}
 var _heat_raised_day := 0
 ## Letzter Tag, dessen Tageswechsel verarbeitet wurde.
 var _last_processed_day := 0
+## U.24: letzter Tag, an dem abgekühlt wurde (eigener Schritt im Tageswechsel)
+var _last_cooled_day := 0
 var _intro_state := INTRO_NONE
 ## Ab diesem Tag kommt das Einstiegs-Ereignis (wieder).
 var _next_offer_day := 2
@@ -55,6 +57,7 @@ func _init(time: TimeSystemScript, rules: OrganisationRulesScript) -> void:
 	_rules = rules
 	_values = rules.start.duplicate()
 	_last_processed_day = time.get_day()
+	_last_cooled_day = time.get_day()
 	_next_offer_day = rules.intro_first_day
 
 
@@ -152,12 +155,19 @@ func change(deltas: Dictionary) -> bool:
 	return true
 
 
-## Vom DayCycle: Jeder Tag kühlt ab (GD 086).
+## Vom DayCycle (früh): Einstiegs-Angebot.
 func on_day_changed(day: int) -> void:
 	if day <= _last_processed_day:
 		return
 	_last_processed_day = day
 	_offer_intro(day)
+
+
+## Vom DayCycle (U.24, nach allen Abrechnungen, vor der Polizei): Jeder Tag kühlt ab (GD 086).
+func cool_down(day: int) -> void:
+	if day <= _last_cooled_day:
+		return
+	_last_cooled_day = day
 	if not _founded or get_value("heat") <= 0:
 		return
 	var old_value := get_value("heat")
@@ -188,7 +198,8 @@ func _on_event_resolved(instance_id: String, option_id: String) -> void:
 func to_dict() -> Dictionary:
 	return {"founded": _founded, "name": _name, "respect": get_value("respect"), "heat": get_value("heat"),
 			"stability": get_value("stability"), "heat_raised_day": _heat_raised_day,
-			"last_processed_day": _last_processed_day, "intro_state": _intro_state, "next_offer_day": _next_offer_day}
+			"last_processed_day": _last_processed_day, "last_cooled_day": _last_cooled_day, "intro_state": _intro_state,
+			"next_offer_day": _next_offer_day}
 
 
 ## "" = ok, sonst Fehlertext (Zustand bleibt dann unverändert).
@@ -207,7 +218,7 @@ func restore(data: Dictionary) -> String:
 		return "Organisation: 'intro_state' fehlt oder ist ungültig."
 	if data["founded"] != (data["intro_state"] == INTRO_DONE) and data["founded"]:
 		return "Organisation: gegründet, aber Einstieg nicht abgeschlossen."
-	for key in ["heat_raised_day", "last_processed_day", "next_offer_day"]:
+	for key in ["heat_raised_day", "last_processed_day", "last_cooled_day", "next_offer_day"]:
 		if not DataReaderScript.is_whole_number(data.get(key)) or int(data[key]) < 0:
 			return "Organisation: '%s' fehlt oder ist ungültig." % key
 	if data["founded"] and String(data["name"]).strip_edges().is_empty():
@@ -217,6 +228,7 @@ func restore(data: Dictionary) -> String:
 	_values = values
 	_heat_raised_day = int(data["heat_raised_day"])
 	_last_processed_day = int(data["last_processed_day"])
+	_last_cooled_day = int(data["last_cooled_day"])
 	_intro_state = data["intro_state"]
 	_next_offer_day = int(data["next_offer_day"])
 	return ""

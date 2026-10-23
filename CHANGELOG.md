@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Tageswechsel komplett: Erst werden alle Geschäfte abgerechnet, dann kühlt die Hitze ab, dann reagieren Polizei, Justiz und Kontakte, danach Fristen, Ereignisse und Kalender. Der Test-Bot spielt jetzt auch die Unterwelt; neue lange Tests. Spielstand Version 36 (Ticket U.24)
 - Beziehungen: Neues Fenster „Kontakte“ (unter „Organisation“) mit El Capitán, Alex und Inspektor Ruiz – je mit Vertrauen und Wissen und einer Aktion (Kaffee, Abend zu zweit, Umschlag). Ohne Kontakt sinkt das Vertrauen; wer viel weiß und wenig vertraut, macht Ärger („Fragen“, „Ruiz will mehr“). Erklärung „Menschen“; Spielstand Version 35 (Ticket U.23)
 - Doppelleben: Ein guter Ruf des Kanals dämpft jede neue Hitze ein wenig, viele Follower verstärken sie. Neue Ereignisse: Paparazzi, Leak, Gerüchte, Skandal und – während einer Haft – „Wo bist du?“. Abschnitt „Doppelleben“ im Fenster „Organisation“, Erklärung „Zwei Leben“ (Ticket U.22)
 - Justiz: Nach einer Razzia kann man festgenommen werden. In der Haftanstalt (nur dann auf der Karte) wartet man auf den Prozess oder zahlt Kaution. Bei der Festnahme: Anwalt, Bestechung (teuer, riskant) oder schweigen; im Prozess: ein Crew-Mitglied belasten, kooperieren oder auf das Urteil warten. Die Beweislage entscheidet über Freispruch oder ein paar Tage Haft – kein Game Over, Organisation und Crew laufen weiter. Neues Fenster „Verfahren“, Erklärung „Vor Gericht“; Spielstand Version 34 (Ticket U.21). Club Medusa liegt jetzt klar in Puerto Banús (Nachtrag U.20)

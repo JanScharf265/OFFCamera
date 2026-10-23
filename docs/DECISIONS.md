@@ -1048,3 +1048,14 @@ Hitze +15). Höchstens eins je Tag, Abstand 5 Tage.
 Nebenbei: Tutorial-Ziele weit unten in einem Fenster wurden nicht gefunden, weil die Lage vor dem Scrollen gemessen
 wurde – das Overlay ordnet den Scrollbereich jetzt sofort neu an. Crew, Kontakte, Rivalen stehen im
 Organisations-Fenster nebeneinander (bis zu den Reitern in U.25). Vorläufige Werte, Phase 8.
+
+## 096 – Tageswechsel komplett (U.24)
+Reihenfolge wie in der ROADMAP: erst alle Abrechnungen des Vortags (Firma, Lieferungen und Schulden, Standorte, Crew,
+Gebiete, Rivalen), dann die Abkühlung der Hitze, dann Polizei (sieht die Hitze nach Abkühlung), Justiz, Kontakte,
+Fristen (sehen alle neuen Buchungen und Fristen), Ereignisse (sehen den fertigen Stand), zuletzt der Kalender. Bisher
+kühlte die Hitze vor den Abrechnungen ab; jetzt danach – eigener Schritt `cool_down`, eigener Zähler im Spielstand.
+Bot und lange Tests: Der Zufalls-Bot spielt auch die Unterwelt. Im Test „Bot spielt die Unterwelt“ bekommt er 10.000 €
+Startkapital (als Buchung), weil ein Zufalls-Bot kaum streamt und sonst pleite ist, bevor er Ware kaufen kann – das
+ist ein Test der Abläufe, kein Balancing. Ergebnis über 10 Seeds × 40 Tage: alle gründen eine Organisation, verdienen
+Schwarzgeld und haben Crew; keine Verletzung der Konsistenzprüfung. Ein zweiter langer Test zeigt: Nach Razzia und
+Haft läuft das Spiel weiter. Kein neues Tutorial (keine neue Mechanik); Abdeckungstest grün.

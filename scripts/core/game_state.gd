@@ -172,7 +172,8 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	events.set_contact_handler(relationships.apply_event_change)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
-	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, police, justice, relationships, obligations, events])
+	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, organisation.cool_down, police, justice,
+			relationships, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)

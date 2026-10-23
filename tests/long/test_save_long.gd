@@ -26,7 +26,7 @@ const HARD_LOAD_LIMIT_MS := 1000
 
 func _check_invariants(game: GameStateScript, label: String) -> bool:
 	var problems := ConsistencyCheckScript.check(game)
-	for account in ["private", "company"]:
+	for account in ["private", "company", "black"]:
 		if game.ledger.get_balance(account) < 0:
 			problems.append("%s negativ" % account)
 	assert_true(problems.is_empty(), "%s: %s" % [label, "; ".join(problems)])
@@ -170,3 +170,54 @@ func test_measure_size_and_speed() -> void:
 		assert_true(size < HARD_SIZE_LIMIT, "Spielstand größer als %d Byte" % HARD_SIZE_LIMIT)
 		assert_true(load_ms < HARD_LOAD_LIMIT_MS, "Laden dauert länger als %d ms" % HARD_LOAD_LIMIT_MS)
 	SaveSystemScript.delete_save(PATH)
+
+
+## U.24: Der Bot kommt in die Unterwelt – über alle Seeds gründet er Organisationen, verdient Schwarzgeld, stellt
+## Crew ein; und ein langer Lauf übersteht Razzia und Haft ohne Game Over (Spiel läuft danach weiter).
+func test_bot_plays_the_underworld() -> void:
+	var data := Helpers.game_data()
+	var founded := 0
+	var earned := 0
+	var hired := 0
+	for game_seed in range(1, 11):
+		var game := GameStateScript.new(data, game_seed)
+		# Ein Zufalls-Bot streamt kaum und ist sonst bald pleite – Startkapital, damit er Ware kaufen kann (Buchung).
+		game.ledger.post(1000000, "test", "Startkapital für den Bot", "test", "bot")
+		var rng := RandomNumberGenerator.new()
+		rng.seed = game_seed
+		var end := TimeSystemScript.at(41, 0)
+		var steps := 0
+		while game.time.get_minutes() < end and steps < 8000:
+			steps += 1
+			Bot.step(game, rng)
+		_check_invariants(game, "Unterwelt Seed %d" % game_seed)
+		if game.organisation.is_founded():
+			founded += 1
+		if not game.ledger.get_entries_for_account("black").is_empty():
+			earned += 1
+		if game.crew.get_members().size() > 0 or game.crew.to_dict()["incidents"].size() > 0:
+			hired += 1
+	print("          Unterwelt nach 40 Tagen: %d/10 gegründet, %d/10 mit Schwarzgeld, %d/10 mit Crew" % [founded, earned, hired])
+	assert_true(founded >= 8, "Organisation zu selten gegründet (%d/10)" % founded)
+	assert_true(earned >= 7, "zu selten Schwarzgeld (%d/10)" % earned)
+	assert_true(hired >= 5, "zu selten Crew (%d/10)" % hired)
+
+
+func test_raid_and_prison_do_not_end_the_game() -> void:
+	var data := Helpers.game_data()
+	var game := GameStateScript.new(data, 5)
+	game.organisation.found("Los Bots")
+	var police := game.police.to_dict()
+	police.merge({"level": 2, "case": "MB-5", "progress": 100}, true)
+	game.police.restore(police)
+	game.justice.arrest(game.time.get_day())
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var end := TimeSystemScript.at(40, 0)
+	var steps := 0
+	while game.time.get_minutes() < end and steps < 8000:
+		steps += 1
+		Bot.step(game, rng)
+	_check_invariants(game, "nach Haft")
+	assert_true(game.justice.count_arrests() >= 1)
+	assert_true(game.time.get_minutes() >= end, "Spiel lief weiter bis Tag 40")

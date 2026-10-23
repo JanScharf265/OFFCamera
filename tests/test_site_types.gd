@@ -87,7 +87,7 @@ func test_sales_point_sells_daily() -> void:
 	_next_morning(game)
 	assert_eq(game.supply.get_stock("weed"), 6)
 	assert_eq(game.ledger.get_balance(LedgerSystemScript.BLACK), black + 4 * 7000 - 3000, "Verkauf − Miete")
-	assert_eq(game.organisation.get_value("heat"), maxi(0, heat - 3) + 4, "erst Abkühlung (DayCycle), dann Hitze 4")
+	assert_eq(game.organisation.get_value("heat"), maxi(0, heat + 4 - 3), "U.24: erst Verkauf (Hitze 4), dann Abkühlung")
 
 
 func test_club_raises_laundering_limit() -> void:

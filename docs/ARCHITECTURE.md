@@ -181,6 +181,10 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Tageswechsel komplett (U.24): DayCycle-Reihenfolge Firma → Organisation (Einstieg) → Lieferungen → Standorte →
+  Crew → Gebiete → Rivalen → `organisation.cool_down` (Callable-Schritt) → Polizei → Justiz → Kontakte → Fristen →
+  Ereignisse; der Kalender öffnet danach (DayStartSystem). `ConsistencyCheck` prüft auch die Unterwelt. Der Bot
+  (`tests/long/bot.gd`) wählt unter Unterwelt-Aktionen.
 - Beziehungen (U.23, `scripts/systems/relationship_system.gd`, im GameState als `relationships`; Katalog
   `RelationshipSystem.Catalog` aus `data/underworld/relationships.json`): Vertrauen/Wissen je Kontakt (Startwerte aus
   den Daten, erst bei Bedarf im Zustand), Aktion (`check_action`/`act`: Buchung `underworld_contacts`, Werte,
@@ -411,6 +415,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 35 → 36 (U.24): `organisation.last_cooled_day` = `last_processed_day`.
 - Migration 34 → 35 (U.23): `relationships` leer (Startwerte aus den Daten), Tag verarbeitet.
 - Migration 33 → 34 (U.21): `justice` = frei, Tag verarbeitet.
 - Migration 32 → 33 (U.20): `police.raids` = 0, `police.last_raid` = {}.
