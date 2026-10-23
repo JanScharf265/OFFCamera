@@ -33,6 +33,7 @@ const CalendarWindowScript := preload("res://scripts/ui/windows/calendar_window.
 const ReminderWindowScript := preload("res://scripts/ui/windows/reminder_window.gd")
 const OrganisationWindowScript := preload("res://scripts/ui/windows/organisation_window.gd")
 const OrganisationNameWindowScript := preload("res://scripts/ui/windows/organisation_name_window.gd")
+const MissionsWindowScript := preload("res://scripts/ui/windows/missions_window.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
@@ -63,6 +64,7 @@ const ICONS := {
 	"ChannelButton": ICON_DIR + "video.png",
 	"CompanyButton": ICON_DIR + "cart.png",
 	"OrganisationButton": "res://assets/icons/organisation.svg",
+	"MissionsButton": "res://assets/icons/missions.svg",
 	"LedgerButton": ICON_DIR + "menuList.png",
 	"MenuButton": ICON_DIR + "gear.png",
 	"HereButton": ICON_DIR + "target.png",
@@ -84,6 +86,8 @@ var _here_button: RoundButtonScript
 var _company_button: RoundButtonScript
 ## Seitenbutton „Organisation“ (U.3) – sichtbar, sobald es sie gibt
 var _organisation_button: RoundButtonScript
+## Seitenbutton „Aufträge“ (U.4) mit rotem Punkt
+var _missions_button: RoundButtonScript
 var _obligations_button: RoundButtonScript
 var _calendar_button: RoundButtonScript
 ## Vibration (G5.9, von der App gesetzt; null = keine) – die Spielansicht meldet nur ihre eigenen Warnungen.
@@ -145,6 +149,8 @@ func _ready() -> void:
 	# Paket U: „Organisation“ (U.3) zuerst, „Aufträge“ folgt (Entscheidung 038).
 	_organisation_button = _round_button("Organisation", "OrganisationButton", _open_organisation)
 	_add_to_group(_business_group, _organisation_button)
+	_missions_button = _round_button("Aufträge", "MissionsButton", _open_missions)
+	_add_to_group(_business_group, _missions_button)
 	_company_button = _round_button("Firma", "CompanyButton", _open_company)
 	_add_to_group(_business_group, _company_button)
 	_add_to_group(_business_group, _round_button("Buchungen", "LedgerButton", _open_ledger))
@@ -523,6 +529,15 @@ func _open_channel() -> void:
 	_open_due_tutorial()
 
 
+## Fenster „Aufträge“ (U.4); Öffnen gilt als gesehen.
+func _open_missions() -> void:
+	var content := MissionsWindowScript.new()
+	content.setup(self, _game)
+	_open_window("missions", content)
+	_missions_button.set_badge(_game.missions.count_unseen())
+	_open_due_tutorial()
+
+
 ## Fenster „Organisation“ (U.3): Respekt, Hitze, Stabilität.
 func _open_organisation() -> void:
 	var content := OrganisationWindowScript.new()
@@ -773,6 +788,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 			text += "\nTagesabschluss %s" % settlement
 		for notice in _game.obligations.take_notices():
 			text += "\n%s" % notice
+		for notice in _game.missions.take_notices():
+			text += "\n%s" % notice
 		_show_feedback(text, UiStyle.TEXT if reason.is_empty() else UiStyle.NEGATIVE)
 	else:
 		_show_feedback(reason, UiStyle.NEGATIVE)
@@ -820,6 +837,8 @@ func _refresh() -> void:
 		_game.tutorials.report("first_new_day")
 	_company_button.visible = _game.company.is_founded()
 	_organisation_button.visible = _game.organisation.is_founded()
+	_missions_button.visible = _game.organisation.is_founded()
+	_missions_button.set_badge(_game.missions.count_unseen())
 	# Zählerpunkte (G5.8): Zählungen aus DayPlan bzw. ObligationSystem. Offene Ereignisse bekommen keinen Punkt –
 	# sie öffnen sofort ihr eigenes Fenster, das sich erst nach der Entscheidung schließt.
 	_calendar_button.set_badge(DayPlanScript.count_upcoming_today(_game))

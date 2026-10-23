@@ -17,6 +17,7 @@ const CompanyTypeCatalogScript := preload("res://scripts/systems/company_type_ca
 const ObligationCatalogScript := preload("res://scripts/systems/obligation_catalog.gd")
 const TutorialCatalogScript := preload("res://scripts/systems/tutorial_catalog.gd")
 const OrganisationRulesScript := preload("res://scripts/systems/organisation_rules.gd")
+const MissionCatalogScript := preload("res://scripts/systems/mission_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -33,6 +34,8 @@ var obligations := ObligationCatalogScript.new()
 var tutorials := TutorialCatalogScript.new()
 ## Regeln der Organisation (U.2)
 var organisation := OrganisationRulesScript.new()
+## Story-Aufträge (U.4)
+var missions := MissionCatalogScript.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -45,7 +48,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation]:
+			tutorials, organisation, missions]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		contents += FileAccess.get_file_as_string(catalog.DEFAULT_PATH)
@@ -84,6 +87,11 @@ func check_references() -> PackedStringArray:
 	for appointment in appointments.get_all():
 		if not locations.has(appointment.location):
 			problems.append("Termin '%s': unbekannter Ort '%s'." % [appointment.id, appointment.location])
+	# U.4: Ziele der Aufträge verweisen auf bestehende Orte.
+	for definition in missions.get_all():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_VISIT_LOCATION \
+				and not locations.has(definition.goal["location"]):
+			problems.append("Auftrag '%s': unbekannter Ort '%s'." % [definition.id, definition.goal["location"]])
 	# U.3: Der Einstieg in die Unterwelt braucht ein vom Spiel ausgelöstes Ereignis mit der Annehmen-Option.
 	var intro = events.get_definition(organisation.intro_event)
 	if intro == null or not intro.is_scripted:

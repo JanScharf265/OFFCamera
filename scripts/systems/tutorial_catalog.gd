@@ -49,6 +49,7 @@ const TRIGGERS := [
 	# Paket U
 	"first_black_money",
 	"first_organisation_founded",
+	"first_mission_available",
 ]
 const MAX_TEXT_LENGTH := 240
 

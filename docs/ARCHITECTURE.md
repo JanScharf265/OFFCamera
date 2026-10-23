@@ -150,6 +150,15 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Erklärung je Wert), Seitenbutton `OrganisationButton` (Gruppe Geschäft, sichtbar ab Gründung). Ereignis-Optionen
   können `note` haben (Folge ohne Zahl, ersetzt „Keine Folgen“). `GameData.check_references()` prüft das
   Einstiegs-Ereignis.
+- Story-Aufträge (U.4, `scripts/systems/mission_system.gd`, im GameState als `missions`): Katalog
+  `MissionCatalog` (`data/underworld/missions.json`: Kapitel, Titel, Auftraggeber, Briefing, Ziel, Zieltext,
+  Debriefing, Belohnung in Organisationswerten, order, requires). `update_availability()` startet jeden Auftrag, dessen
+  `requires` erledigt sind, sobald die Organisation steht – nach der Gründung, nach jedem Abschluss und nach dem Laden
+  (so werden Aufträge, die ein Update anhängt, auch in alten Ständen aktiv). Zieltyp `visit_location` über
+  `LocationSystem.traveled` (auch bei „Hinfahren und starten“). `count_unseen()` → roter Punkt am `MissionsButton`
+  (Gruppe Geschäft, nach „Organisation“), Fenster `missions_window.gd` markiert alles als gesehen; Hinweise
+  („Neuer Auftrag …“, „Auftrag erledigt … (Respekt +5)“) über `take_notices()` in `_after_action`. Gespeichert:
+  `active`, `completed` (ID → Zeitpunkt), `unseen`.
 - Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
   (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
   und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.
@@ -259,7 +268,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 18, "meta": {…}, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 19, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -277,6 +286,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 18 → 19 (U.4): `missions` = leer; ist die Organisation gegründet, startet die Kette beim Laden.
 - Migration 17 → 18 (U.3): `organisation.intro_state` = „none“ (bzw. „done“, falls gegründet), `next_offer_day` = 2 –
   der Einstieg kommt beim nächsten Tageswechsel.
 - Migration 16 → 17 (U.2): `organisation` = nicht gegründet, Startwerte der Standardregeln, gespeicherter Tag gilt

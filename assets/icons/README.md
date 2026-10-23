@@ -6,3 +6,4 @@ Eigene, einfache UI-Symbole (eigenes Werk, keine Fremdlizenz). Weiß, werden im 
 - `car.svg`: Fahrt (G5.7) – „Hinfahren“ in der Titelzeile und „Hinfahren und starten“ in den Kacheln.
 - `flame.svg`: Hitze in der HUD-Leiste (U.2).
 - `organisation.svg`: Seitenbutton „Organisation“ (U.3).
+- `missions.svg`: Seitenbutton „Aufträge“ (U.4).

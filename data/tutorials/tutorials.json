@@ -268,5 +268,15 @@
 		"ui_target": "OrganisationButton",
 		"order": 305,
 		"requires": []
+	},
+	{
+		"id": "tut_missions",
+		"mechanic": "missions",
+		"trigger": "first_mission_available",
+		"title": "Aufträge",
+		"text": "El Capitán hat Pläne mit dir. Hier stehen deine Aufträge: was zu tun ist und was es bringt. Der rote Punkt zeigt, wenn es etwas Neues gibt.",
+		"ui_target": "MissionsButton",
+		"order": 320,
+		"requires": []
 	}
 ]

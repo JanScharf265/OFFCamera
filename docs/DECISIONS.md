@@ -756,3 +756,13 @@ kommen Kalender, Erinnerung und Tutorials. Bei einem Sprung über Mitternacht st
 Vorabend (Tageswechsel vor Zeitereignissen, wie schon bei Zufallsereignissen) – bewusst unverändert. Der Kontakt „El
 Capitán“ ist eine erfundene Figur. Ereignis-Optionen können eine `note` haben, damit eine Antwort ohne Zahlen nicht
 „Keine Folgen“ anzeigt.
+
+## 072 – Story-Aufträge als Kette (U.4)
+Aufträge sind Daten mit `requires` statt einer festen Liste von Schritten: Ein Auftrag startet, sobald die Organisation
+steht und seine Voraussetzungen erledigt sind. So hängen spätere Tickets einfach Aufträge an die Kette (Kapitel
+„Erster Deal“: Ware besorgen in U.6, Versteck in U.8, erster Verkauf in U.9), und auch alte Spielstände bekommen sie
+beim Laden – ohne neue Spielstand-Version für jeden neuen Auftrag. Der erste Auftrag „Treffen am Hafen“ nutzt nur, was
+es schon gibt (Ankunft im Café am Hafen, auch über „Hinfahren und starten“), damit die Kette nicht mit einem unlösbaren
+Ziel beginnt. Belohnungen sind vorerst Organisationswerte (Respekt); Geld kommt mit den Zielen, die Geld bewegen.
+Aufträge starten automatisch (Story), es gibt kein Ablehnen. Der rote Punkt zählt Neues und Erledigtes, bis das Fenster
+geöffnet wird.

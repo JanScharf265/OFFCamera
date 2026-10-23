@@ -25,6 +25,7 @@ const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd"
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
 const TutorialSystemScript := preload("res://scripts/systems/tutorial_system.gd")
 const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
+const MissionSystemScript := preload("res://scripts/systems/mission_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -59,6 +60,8 @@ var trips: TripSystemScript
 var tutorials: TutorialSystemScript
 ## Organisation in der Unterwelt (U.2): Name, Respekt, Hitze, Stabilität.
 var organisation: OrganisationSystemScript
+## Story-Aufträge (U.4)
+var missions: MissionSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -81,6 +84,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	events.set_world(company, obligations)
 	organisation = OrganisationSystemScript.new(time, data.organisation)
 	organisation.set_events(events)
+	missions = MissionSystemScript.new(time, data.missions, locations, organisation)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, organisation, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
@@ -95,6 +99,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	company.day_settled.connect(tutorials.report.bind("first_settlement").unbind(1))
 	ledger.entry_posted.connect(tutorials.on_ledger_entry)
 	organisation.founded.connect(tutorials.report.bind("first_organisation_founded").unbind(1))
+	missions.mission_started.connect(tutorials.report.bind("first_mission_available").unbind(1))
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).
@@ -120,6 +125,7 @@ func to_dict() -> Dictionary:
 		"reminders": reminders.to_dict(),
 		"tutorials": tutorials.to_dict(),
 		"organisation": organisation.to_dict(),
+		"missions": missions.to_dict(),
 	}
 
 
@@ -128,7 +134,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders", "tutorials", "organisation"]:
+			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -158,6 +164,10 @@ func restore(saved: Dictionary) -> String:
 		error = tutorials.restore(saved["tutorials"])
 	if error.is_empty():
 		error = organisation.restore(saved["organisation"])
+	if error.is_empty():
+		error = missions.restore(saved["missions"])
+	if error.is_empty():
+		missions.update_availability()  # Aufträge, die ein Update an die Kette gehängt hat
 	return error
 
 

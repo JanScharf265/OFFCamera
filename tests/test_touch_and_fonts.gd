@@ -429,3 +429,34 @@ func test_underworld_intro_windows_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## U.4: Fenster „Aufträge“ (offen und erledigt) und die Gruppe „Geschäft“ mit vier Buttons – Tippflächen, Schrift.
+func test_missions_window_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		var screen := _game(app)  # im Büro, Firma gegründet
+		screen.set("show_tutorials", false)
+		screen.call("on_organisation_name_submitted", "Los Lobos")
+		for step in ["MissionsButton", "Complete"]:
+			if step == "Complete":
+				_press(app, "WindowCloseButton")
+				app.game.locations.travel("cafe_harbor")
+				screen.call("_refresh")
+				_press(app, "MissionsButton")
+			else:
+				_press(app, step)
+			Layout.apply(app, device)
+			var window := screen.find_child("Window_missions", false, false) as Control
+			Layout.settle_in_place(window)
+			_audit(window, screen, "%s / Aufträge %s" % [device, step], problems)
+		_press(app, "WindowCloseButton")
+		Layout.settle_in_place(screen)
+		_audit(screen.find_child("BusinessGroup", false, false), screen, "%s / Geschäft" % device, problems)
+		var group := Layout.rect_of(screen.find_child("BusinessGroup", false, false))
+		if not Layout.safe_rect(device).grow(0.5).encloses(group):
+			problems.append("%s: Gruppe „Geschäft“ ragt heraus: %s" % [device, group])
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)

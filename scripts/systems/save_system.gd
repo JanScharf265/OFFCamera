@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 18
+const SAVE_VERSION := 19
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -279,6 +279,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		15: return _migrate_15_to_16(game)
 		16: return _migrate_16_to_17(game)
 		17: return _migrate_17_to_18(game)
+		18: return _migrate_18_to_19(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -443,6 +444,12 @@ static func _migrate_17_to_18(game: Dictionary) -> String:
 	var defaults = load("res://scripts/systems/organisation_rules.gd").new()
 	organisation["intro_state"] = "done" if organisation.get("founded") == true else "none"
 	organisation["next_offer_day"] = defaults.intro_first_day
+	return ""
+
+
+## 18 → 19 (U.4): Story-Aufträge – noch keine; ist die Organisation schon gegründet, startet die Kette beim Laden.
+static func _migrate_18_to_19(game: Dictionary) -> String:
+	game["missions"] = {"active": [], "completed": {}, "unseen": []}
 	return ""
 
 

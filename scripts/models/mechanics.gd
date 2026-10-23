@@ -36,6 +36,7 @@ const NAMES := {
 	"black_money": "Schwarzgeld",
 	"heat": "Hitze (Aufmerksamkeit der Polizei)",
 	"organisation": "Organisation (Respekt, Stabilität, Fenster)",
+	"missions": "Story-Aufträge",
 }
 
 
