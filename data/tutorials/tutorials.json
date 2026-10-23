@@ -470,5 +470,15 @@
 		"ui_target": "PoliceRaidWarning",
 		"order": 510,
 		"requires": []
+	},
+	{
+		"id": "tut_justice",
+		"mechanic": "justice",
+		"trigger": "first_justice_open",
+		"title": "Vor Gericht",
+		"text": "Die Beweislage entscheidet: Unter 40 % gibt es einen Freispruch, sonst Haft für ein paar Tage. Eine Kaution bringt dich bis zum Prozess raus. Das Spiel geht in jedem Fall weiter.",
+		"ui_target": "JusticeStatus",
+		"order": 520,
+		"requires": []
 	}
 ]

@@ -694,6 +694,20 @@ func apply_event_action(action: String, instance_id: String) -> void:
 			_notices.append("%s arbeitet jetzt für %s." % [name, incident.get("gang_name", "die Konkurrenz")])
 
 
+## U.21: Im Prozess ein Mitglied belasten – das am wenigsten loyale ist raus, die übrigen verlieren Loyalität.
+## Rückgabe: Name oder "" (niemand da).
+func sacrifice(loyalty_loss: int) -> String:
+	if _members.is_empty():
+		return ""
+	var target: Dictionary = _members[0]
+	for member in _members:
+		if int(member["loyalty"]) < int(target["loyalty"]):
+			target = member
+	_remove(target["id"])
+	_change_loyalty_all(-loyalty_loss)
+	return target["name"]
+
+
 func _remove(member_id: String) -> void:
 	for i in _members.size():
 		if _members[i]["id"] == member_id:

@@ -7,6 +7,7 @@ extends RefCounted
 ##   id, display_name, description (optional), map_position [x, y] mit 0–1,
 ##   opening_hours {open, close} in vollen Stunden (optional, sonst immer offen),
 ##   unlocked_by_mission (optional, U.8): Auftrags-ID – bis dahin ist der Ort unbekannt (nicht auf der Karte, nicht anfahrbar)
+##   only_when_here (optional, U.21): true = nur bekannt, solange man dort ist (Haftanstalt)
 
 const LocationDefinitionScript := preload("res://scripts/models/location_definition.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -111,5 +112,10 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> LocationDef
 			definition.close_hour = close_hour
 
 	definition.unlocked_by_mission = reader.string_field(entry, "unlocked_by_mission", where, false)
+	var only_here: Variant = entry.get("only_when_here", false)
+	if typeof(only_here) != TYPE_BOOL:
+		reader.errors.append("%s: 'only_when_here' muss true oder false sein." % where)
+	else:
+		definition.only_when_here = only_here
 
 	return definition if reader.errors.size() == error_count else null

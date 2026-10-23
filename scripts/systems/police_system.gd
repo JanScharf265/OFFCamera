@@ -88,6 +88,8 @@ var _notices := PackedStringArray()
 var _supply
 var _sites
 var _last_raid := {}
+## U.21: nach einer Razzia folgt vielleicht die Festnahme (JusticeSystem.after_raid)
+var _after_raid: Callable
 var _raids := 0
 
 
@@ -106,6 +108,10 @@ func _init(time, ledger: LedgerSystemScript, rules: Rules, organisation, get_see
 func set_raid_targets(supply, sites) -> void:
 	_supply = supply
 	_sites = sites
+
+
+func set_after_raid(hook: Callable) -> void:
+	_after_raid = hook
 
 
 func get_last_raid() -> Dictionary:
@@ -269,6 +275,8 @@ func _raid(day: int) -> void:
 	_since_day = day
 	_organisation.change({"heat": -_rules.get_value("raid_heat_drop")})
 	_trigger(EVENTS["raid"], day)
+	if _after_raid.is_valid():
+		_after_raid.call(day)
 
 
 func _trigger(event_id: String, day: int) -> void:

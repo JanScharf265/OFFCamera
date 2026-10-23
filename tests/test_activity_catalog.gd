@@ -12,7 +12,7 @@ func test_real_data_file_loads_without_errors() -> void:
 	var ok := catalog.load_file()
 	assert_true(ok, "Fehler: %s" % "; ".join(catalog.errors))
 	assert_eq(catalog.get_ids(), PackedStringArray(["rest", "sleep", "eat_out", "coffee", "training", "plan_week",
-			"order_stock", "plan_campaign", "merch_shoutout", "run_store"]))
+			"order_stock", "plan_campaign", "merch_shoutout", "run_store", "prison_yard", "prison_read"]))
 	assert_eq(catalog.get_ids_at("cafe_harbor"), PackedStringArray(["eat_out", "coffee"]))
 
 

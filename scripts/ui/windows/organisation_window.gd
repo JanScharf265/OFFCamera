@@ -112,6 +112,11 @@ func _refresh_supply() -> void:
 		crew_button.pressed.connect(_screen.open_crew)
 		_supply_box.add_child(crew_button)
 	_add_police()
+	if _game.justice.has_case():
+		var justice_button: Button = _screen.scroll_button("Verfahren: %s" % _game.justice.state_label(), "JusticeButton")
+		justice_button.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+		justice_button.pressed.connect(_screen.open_justice)
+		_supply_box.add_child(justice_button)
 	if _game.black_spending.is_available():
 		_add_black_spending()
 	if _game.laundering.is_available():

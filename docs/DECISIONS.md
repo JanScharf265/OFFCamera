@@ -998,3 +998,32 @@ Spielwerte: Der eigene Standort mit dem höchsten Risiko (Datenfeld `risk`, U.18
 werden), die Hälfte jeder Ware und 30 % des Schwarzgelds werden beschlagnahmt (eine Buchung). Danach ruht die Sache:
 Akte 0, zurück zur Beobachtung, Hitze −20. Die Antworten im Ereignis ändern nur Respekt, Stabilität, Hitze. Eine
 Festnahme der Spielfigur kommt mit U.21. Vorläufige Werte, Phase 8.
+
+## 092 – Antworten des Game Directors nach U.20 (23.10.2026)
+- Alle Empfehlungen aus U.16–U.20 angenommen: Gewaschenes Geld zählt als Firmenumsatz; „· bar“ in den Kacheln kommt
+  mit U.25; Standort-Werte bleiben (Balancing Phase 8); `risk` wirkt bei der Razzia, `staff_slots` erst nach Paket U;
+  Organisation bekommt Reiter in U.25; Polizei-Werte bleiben; Razzia-Folgen bleiben (50 % Ware, 30 % Schwarzgeld,
+  ein Standort).
+- Club Medusa lag auf der Karte fast in Nueva Andalucía – verschoben, sodass Gebäude und Schild klar in Puerto Banús
+  liegen. Gebiete nennen ihre Orte (`districts.json` → `locations`); Test: jeder zugeordnete Ort liegt in der Fläche.
+- U.21 Justiz: kein Game Over; Haft sind Spieltage mit eingeschränkten Aktionen; Optionen nur als Entscheidungen mit
+  Zahlen (Anwalt, Bestechung teuer und riskant, stillhalten, Crew-Mitglied opfern, kooperieren); Gerichte, Richter,
+  Beamte erfunden; keine realen Verfahrenstricks; Zeit nur über das TimeSystem; jede Zahlung eine Buchung.
+- U.25 ergänzt: Reiter im Fenster „Organisation“, „· bar“ in den Aktivitäts-Kacheln, Checkliste für einen echten
+  iPhone-Test (`~/Desktop/u25/iphone_test.md`); Paket U erst nach bestätigtem iPhone-Test als ✅.
+
+## 093 – Justiz (U.21)
+Kein Game Over (GD 092): Eine Festnahme ist eine Phase mit Spieltagen. Ablauf: Nach einer Razzia folgt mit 50 % (Seed)
+die Festnahme → Untersuchungshaft am Ort „Haftanstalt“ (nur auf der Karte, solange man dort ist; Reisen gesperrt;
+Hofgang und Lesen möglich; Organisation, Crew, Telefon laufen weiter) → optional Kaution (Beweislage × 50 €, eine
+Buchung) → Prozess nach 5 Tagen → Urteil: Beweislage < 40 % Freispruch, sonst Beweislage/10 × 2 Tage Haft →
+Entlassung nach Hause. Warten geht nur über das TimeSystem („Warten bis Tag X“), keine zweite Uhr.
+Entscheidungen als Zahlen: bei der Festnahme Anwalt (2.000 €, −25), Bestechung (5.000 €, 50 % Erfolg = Verfahren
+eingestellt, sonst +30 und Hitze +20) oder schweigen (−10); im Prozess ein Crew-Mitglied belasten (das am wenigsten
+loyale ist raus, −40, Stabilität −15, Loyalität aller −10), kooperieren (−50, Respekt −20, Stabilität −10) oder
+warten. Fehlt Geld, wird automatisch geschwiegen. Gericht („Bezirksgericht an der Küste“), Richterin Vidal und Akte
+sind erfunden; keine realen Verfahrenstricks. Texte ohne Annahme über das Geschlecht der Spielfigur („die Szene
+spricht von Verrat“).
+Nachtrag U.20 (GD): Club Medusa lag mit seinem Schild fast in Nueva Andalucía und danach auf dem Café-Schild – jetzt
+Raster 11/12. Gebiete nennen ihre Orte (`locations`); Tests: jeder Ort liegt in seinem Gebiet (beim Club auch das
+Schild), keine zwei Ortsschilder überlappen sich (beide schlagen mit der alten Position an).

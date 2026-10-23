@@ -12,6 +12,7 @@ const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
 const SettingsScript := preload("res://scripts/core/settings.gd")
 const DistrictCatalogScript := preload("res://scripts/systems/district_catalog.gd")
+const CityLayoutScript := preload("res://scripts/ui/city_layout.gd")
 
 const SAVE_PATH := "user://test_view_save.json"
 const SETTINGS_PATH := "user://test_view_settings.cfg"
@@ -50,7 +51,7 @@ func test_real_districts_load() -> void:
 
 
 func test_bad_districts_are_rejected() -> void:
-	var good := {"id": "a", "display_name": "A", "description": "D.", "area": [0, 0, 1, 1], "label_cell": [0, 0],
+	var good := {"id": "a", "display_name": "A", "description": "D.", "area": [0, 0, 1, 1], "label_cell": [0, 0], "locations": [],
 			"color": "#ff0000",
 			"demand": 1, "police": 1, "rivals": 1}
 	var catalog := DistrictCatalogScript.new()
@@ -203,3 +204,58 @@ func test_every_location_pin_reachable() -> void:
 			for rect in blocked:
 				assert_true(not rect.intersects(pin), "%s: Schild %s unter den Buttons (%s)" % [device, id, pin])
 		_cleanup(app)
+
+
+## Nachtrag U.20 (GD): Jeder Ort, den ein Gebiet nennt, liegt mit seinem Bauplatz in der Fläche des Gebiets – und
+## sein Schild steht über dieser Fläche (Schild-Mitte auf dem Raster innerhalb der Fläche, mit einer Zelle Spielraum
+## nach oben, weil das Schild über dem Gebäude hängt).
+func test_district_locations_lie_in_their_area() -> void:
+	var data := Helpers.game_data()
+	var layout := CityLayoutScript.new(data.locations)
+	for district in data.districts.get_all():
+		for location_id in district.locations:
+			var cell := layout.get_location_cell(location_id)
+			assert_true(district.area.has_point(cell), "%s liegt nicht in %s (Zelle %s, Fläche %s)" % [location_id,
+					district.id, cell, district.area])
+			for other in data.districts.get_all():
+				if other != district:
+					assert_true(not other.area.has_point(cell), "%s liegt in %s" % [location_id, other.id])
+			if location_id != "club":
+				continue
+			# Club (GD): Gebäude und Schild klar in Puerto Banús. Das Schild hängt über dem Gebäude – auf dem Raster etwa zwei
+			# Zellen schräg nach oben (x − k, y − k); auch diese Zellen gehören zum Gebiet.
+			for k in [1, 2]:
+				var above = data.districts.get_at(cell - Vector2i(k, k))
+				assert_true(above == district, "Schild von %s ragt nach %s" % [location_id, above.id if above != null else "außen"])
+			for direction in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var neighbour = data.districts.get_at(cell + direction)
+				assert_true(neighbour == null or neighbour == district, "%s grenzt direkt an %s" % [location_id,
+						neighbour.id if neighbour != null else ""])
+
+
+## Nachtrag U.20: Keine zwei Ortsschilder überdecken sich (Standard-Zoom, alle Orte bekannt) – sonst ist eines nicht
+## antippbar (beim ersten Verschieben des Clubs lag sein Schild auf „Café am Hafen“).
+func test_location_signs_do_not_overlap() -> void:
+	var app := _app()
+	var screen := _screen(app)
+	screen.call("on_organisation_name_submitted", "Los Lobos")
+	var missions: Dictionary = app.game.missions.to_dict()
+	for id in ["first_deal_meeting", "first_deal_goods", "first_deal_stash", "first_deal_sale", "crew_first_dealer",
+			"territory_first"]:
+		missions["completed"][id] = 0
+	missions["active"] = []
+	app.game.missions.restore(missions)
+	screen.call("_refresh")
+	Layout.apply(app, Layout.DEVICES.keys()[0])
+	var map := app.find_child("CityMap", true, false)
+	map.call("_layout_overlays")
+	var ids: PackedStringArray = app.game.locations.get_catalog().get_ids()
+	for i in ids.size():
+		for j in range(i + 1, ids.size()):
+			var a := Layout.screen_rect(app.find_child("MapPin_%s" % ids[i], true, false) as Control, screen)
+			var b := Layout.screen_rect(app.find_child("MapPin_%s" % ids[j], true, false) as Control, screen)
+			# Sichtbares Schild (PIN_HEIGHT), nicht die unsichtbar größere Tippfläche
+			a = Rect2(a.position + Vector2(0, (a.size.y - 64.0) / 2.0), Vector2(a.size.x, 64.0))
+			b = Rect2(b.position + Vector2(0, (b.size.y - 64.0) / 2.0), Vector2(b.size.x, 64.0))
+			assert_true(not a.intersects(b), "Schilder %s und %s überlappen" % [ids[i], ids[j]])
+	_cleanup(app)

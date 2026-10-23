@@ -181,6 +181,13 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Justiz (U.21, `scripts/systems/justice_system.gd`, im GameState als `justice`; Regeln aus
+  `data/underworld/justice.json` in `GameData.justice`): Zustand free/custody/bail/prison, Beweislage, Akte (von der
+  Polizei), Prozess- und Entlassungstag. `PoliceSystem.set_after_raid(justice.after_raid)` (Festnahme nach Seed),
+  `LocationSystem.set_travel_block(justice.travel_block)` und `place()` (Versetzen ohne Fahrzeit), Ort `prison` mit
+  `only_when_here`. Ereignis-Optionsfeld `justice` → `set_justice_handler`; Platzhalter `{case}`, `{days}`,
+  `{evidence}`, `{verdict}`. CrewSystem `sacrifice(loyalty_loss)`. DayCycle: … Polizei → Justiz (Prozess, Entlassung)
+  → Fristen. `wait()` stellt die Zeit über das TimeSystem vor. Fenster `JusticeWindow`.
 - Razzia (U.20, im PoliceSystem): Steht die Akte beim Tageswechsel auf 100 %, `_raid`: `SiteSystem.seize` (eigener
   Standort mit höchstem `risk`), `SupplySystem.remove_stock` (raid_stock_percent je Produkt), Buchung
   `underworld_confiscation` (raid_black_percent des Schwarzgelds), Akte 0, Stufe 1, Hitze −raid_heat_drop, dann
@@ -393,6 +400,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 33 → 34 (U.21): `justice` = frei, Tag verarbeitet.
 - Migration 32 → 33 (U.20): `police.raids` = 0, `police.last_raid` = {}.
 - Migration 31 → 32 (U.19): `police` = Stufe 0, Tag verarbeitet.
 - Migration 30 → 31 (U.18): `sites.levels` = {} (eigene Standorte auf Stufe 1).

@@ -8,7 +8,8 @@ extends RefCounted
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 
 const DEFAULT_PATH := "res://data/underworld/districts.json"
-const FIELDS := ["id", "display_name", "description", "area", "label_cell", "color", "demand", "police", "rivals"]
+const FIELDS := ["id", "display_name", "description", "area", "label_cell", "locations", "color", "demand", "police",
+		"rivals"]
 const VALUE_KEYS := ["demand", "police", "rivals"]
 const VALUE_LABELS := {"demand": "Nachfrage", "police": "Polizei", "rivals": "Rivalen"}
 ## Rasterbereich der Stadt (wie CityLayout: 15 Spalten, Land bis zur Promenade in Zeile 13)
@@ -24,6 +25,8 @@ class District extends RefCounted:
 	var area: Rect2i
 	## Zelle für das Namensschild (innerhalb der Fläche, frei von Ortsschildern)
 	var label_cell: Vector2i
+	## Orte in diesem Gebiet (U.20-Nachtrag, für Test und Anzeige)
+	var locations: PackedStringArray
 	var color: Color
 	var demand: int
 	var police: int
@@ -95,6 +98,11 @@ func load_data(data: Variant) -> bool:
 			if x0 < 0 or y0 < 0 or x1 < x0 or y1 < y0 or x1 > GRID_MAX.x or y1 > GRID_MAX.y:
 				reader.errors.append("%s: 'area' liegt außerhalb der Stadt." % where)
 			district.area = Rect2i(x0, y0, x1 - x0 + 1, y1 - y0 + 1)
+		var locations: Variant = entry.get("locations")
+		if typeof(locations) != TYPE_ARRAY or locations.any(func(value) -> bool: return typeof(value) != TYPE_STRING):
+			reader.errors.append("%s: 'locations' muss eine Liste von Orts-IDs sein." % where)
+		else:
+			district.locations = PackedStringArray(locations)
 		var label: Variant = entry.get("label_cell")
 		if typeof(label) != TYPE_ARRAY or label.size() != 2 \
 				or label.any(func(value) -> bool: return not DataReaderScript.is_whole_number(value)):

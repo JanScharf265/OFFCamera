@@ -1,0 +1,21 @@
+{
+	"arrest_chance_percent": 50,
+	"start_evidence": 60,
+	"lawyer_cost_cents": 200000,
+	"lawyer_evidence": 25,
+	"bribe_cost_cents": 500000,
+	"bribe_success_percent": 50,
+	"bribe_fail_evidence": 30,
+	"bribe_fail_heat": 20,
+	"silent_evidence": 10,
+	"sacrifice_evidence": 40,
+	"sacrifice_stability": 15,
+	"sacrifice_loyalty": 10,
+	"cooperate_evidence": 50,
+	"cooperate_respect": 20,
+	"cooperate_stability": 10,
+	"trial_after_days": 5,
+	"bail_cents_per_evidence": 5000,
+	"conviction_min_evidence": 40,
+	"days_per_10_evidence": 2
+}

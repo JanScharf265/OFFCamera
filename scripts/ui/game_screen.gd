@@ -41,6 +41,7 @@ const SaleWindowScript := preload("res://scripts/ui/windows/sale_window.gd")
 const CrewWindowScript := preload("res://scripts/ui/windows/crew_window.gd")
 const DistrictWindowScript := preload("res://scripts/ui/windows/district_window.gd")
 const RivalsWindowScript := preload("res://scripts/ui/windows/rivals_window.gd")
+const JusticeWindowScript := preload("res://scripts/ui/windows/justice_window.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
@@ -652,6 +653,32 @@ func _on_district_pressed(district_id: String) -> void:
 	_open_due_tutorial()
 
 
+## Fenster „Verfahren“ (U.21).
+func open_justice() -> void:
+	if _was_scroll():
+		return
+	var content := JusticeWindowScript.new()
+	content.setup(self, _game)
+	_open_window("justice", content)
+	_open_due_tutorial()
+
+
+## U.21: Kaution über das JusticeSystem.
+func on_justice_bail() -> void:
+	if _was_scroll():
+		return
+	var cost: int = _game.justice.bail_cents()
+	_after_action(_game.justice.pay_bail(), "Kaution gezahlt (%s) – frei bis zum Prozess am Tag %d" % [
+			ActivityText.signed_money(-cost), _game.justice.get_trial_day()])
+
+
+## U.21: Warten bis Prozess oder Entlassung (TimeSystem über das JusticeSystem).
+func on_justice_wait() -> void:
+	if _was_scroll():
+		return
+	_after_action(_game.justice.wait(), "Gewartet")
+
+
 ## U.19: Anwalt gegen die Ermittlung über das PoliceSystem.
 func on_police_lawyer() -> void:
 	if _was_scroll():
@@ -1079,6 +1106,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 		for notice in _game.black_spending.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.police.take_notices():
+			text += "\n%s" % notice
+		for notice in _game.justice.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice

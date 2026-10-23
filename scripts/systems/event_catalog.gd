@@ -36,6 +36,8 @@ const OPTION_ORGANISATION_KEYS := ["respect", "heat", "stability"]
 ## U.14: Aktionen gegenüber Rivalen (Feld „rival“ einer Option)
 const OPTION_RIVAL_ACTIONS := ["fight", "negotiate", "retreat"]
 ## U.15: Aktionen zu Crew-Vorfällen (Feld „crew“ einer Option)
+## U.21: Aktionen im Verfahren (Feld „justice“ einer Option)
+const OPTION_JUSTICE_ACTIONS := ["lawyer", "bribe", "silent", "sacrifice", "cooperate", "await"]
 const OPTION_CREW_ACTIONS := ["lawyer", "drop", "betray_hunt", "betray_let_go", "inform_fire", "inform_keep", "raise",
 		"release"]
 const ACCOUNTS := ["private", "company"]
@@ -188,6 +190,9 @@ func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> E
 	option.rival = reader.string_field(entry, "rival", where, false)
 	if not option.rival.is_empty() and option.rival not in OPTION_RIVAL_ACTIONS:
 		reader.errors.append("%s: 'rival' muss fight, negotiate oder retreat sein." % where)
+	option.justice = reader.string_field(entry, "justice", where, false)
+	if not option.justice.is_empty() and option.justice not in OPTION_JUSTICE_ACTIONS:
+		reader.errors.append("%s: 'justice' ist keine bekannte Aktion." % where)
 	option.crew = reader.string_field(entry, "crew", where, false)
 	if not option.crew.is_empty() and option.crew not in OPTION_CREW_ACTIONS:
 		reader.errors.append("%s: 'crew' ist keine bekannte Crew-Aktion." % where)

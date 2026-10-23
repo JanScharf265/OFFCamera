@@ -17,7 +17,7 @@ func _location(id: String, extra: Dictionary = {}) -> Dictionary:
 func test_real_location_data_loads() -> void:
 	var catalog := LocationCatalogScript.new()
 	assert_true(catalog.load_file(), "; ".join(catalog.errors))
-	assert_eq(catalog.get_ids(), PackedStringArray(["home", "studio", "cafe_harbor", "gym", "office", "label_store", "garage", "club", "finca"]))
+	assert_eq(catalog.get_ids(), PackedStringArray(["home", "studio", "cafe_harbor", "gym", "office", "label_store", "garage", "club", "finca", "prison"]))
 	var cafe := catalog.get_definition("cafe_harbor")
 	assert_eq(cafe.display_name, "Café am Hafen")
 	assert_eq(cafe.has_hours, true)

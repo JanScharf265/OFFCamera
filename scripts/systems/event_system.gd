@@ -60,6 +60,8 @@ var _change_organisation: Callable
 var _rival_action: Callable
 ## U.15: CrewSystem.apply_event_action(action, instance_id) und Text-Kontext je Instanz ({name}, {gang} …)
 var _crew_action: Callable
+## U.21: JusticeSystem.apply_event_action(action, instance_id)
+var _justice_action: Callable
 var _text_context: Array[Callable] = []
 ## U.19: weitere Werte für Bedingungen (z. B. PoliceSystem.condition_values → police_level)
 var _condition_providers: Array[Callable] = []
@@ -82,6 +84,11 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStat
 ## EventSystem verweist (sonst Kreisverweis).
 func set_organisation_changer(change: Callable) -> void:
 	_change_organisation = change
+
+
+## Vom GameState (U.21): Aktionen im Verfahren.
+func set_justice_handler(handler: Callable) -> void:
+	_justice_action = handler
 
 
 ## Vom GameState (U.15): Crew-Aktionen aus Ereignis-Optionen.
@@ -230,6 +237,8 @@ func resolve(instance_id: String, option_id: String) -> String:
 		_rival_action.call(option.rival, instance_id)
 	if not option.crew.is_empty() and _crew_action.is_valid():
 		_crew_action.call(option.crew, instance_id)
+	if not option.justice.is_empty() and _justice_action.is_valid():
+		_justice_action.call(option.justice, instance_id)
 
 	_pending.remove_at(_pending.find(instance_id))
 	_resolved[instance_id] = option_id

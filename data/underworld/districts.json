@@ -5,6 +5,10 @@
 		"description": "Ruhige Straßen im Westen. Wenig Streife, aber andere haben hier schon Fuß gefasst.",
 		"area": [0, 0, 2, 13],
 		"label_cell": [1, 11],
+		"locations": [
+			"garage",
+			"gym"
+		],
 		"color": "#7c5cff",
 		"demand": 40,
 		"police": 20,
@@ -16,6 +20,10 @@
 		"description": "Enge Gassen, viele Touristen, eine Wache an der Plaza.",
 		"area": [3, 0, 7, 8],
 		"label_cell": [5, 2],
+		"locations": [
+			"home",
+			"finca"
+		],
 		"color": "#ff9f43",
 		"demand": 50,
 		"police": 50,
@@ -27,6 +35,10 @@
 		"description": "Villen, Golfplätze, Partys hinter hohen Mauern. Kunden mit Geld.",
 		"area": [8, 0, 14, 8],
 		"label_cell": [11, 4],
+		"locations": [
+			"studio",
+			"office"
+		],
 		"color": "#2ed3c6",
 		"demand": 60,
 		"police": 30,
@@ -38,6 +50,11 @@
 		"description": "Yachten, Clubs und Kameras an jeder Ecke. Das meiste Geld – und die meisten Augen.",
 		"area": [3, 9, 14, 13],
 		"label_cell": [5, 12],
+		"locations": [
+			"cafe_harbor",
+			"label_store",
+			"club"
+		],
 		"color": "#ff3d8b",
 		"demand": 80,
 		"police": 60,

@@ -22,6 +22,7 @@ const BASE_TRAVEL_MINUTES := 5
 const MINUTES_PER_KM := 3
 const TRAVEL_ROUNDING_MINUTES := 5
 
+var _travel_block: Callable
 var _time: TimeSystemScript
 var _catalog: LocationCatalogScript
 var _start_id: String
@@ -42,6 +43,20 @@ func _init(time: TimeSystemScript, catalog: LocationCatalogScript, start_id: Str
 var _is_mission_completed: Callable
 
 
+## U.21: Grund, warum gerade niemand reisen kann (JusticeSystem.travel_block, "" = frei).
+func set_travel_block(block: Callable) -> void:
+	_travel_block = block
+
+
+## U.21: Versetzt ohne Fahrzeit (Festnahme, Entlassung).
+func place(location_id: String) -> void:
+	if not _catalog.has(location_id) or location_id == _current:
+		return
+	var from := _current
+	_current = location_id
+	traveled.emit(from, location_id)
+
+
 func set_mission_check(check: Callable) -> void:
 	_is_mission_completed = check
 
@@ -51,6 +66,8 @@ func is_known(location_id: String) -> bool:
 	var definition := _catalog.get_definition(location_id)
 	if definition == null:
 		return false
+	if definition.only_when_here:
+		return location_id == _current
 	if definition.unlocked_by_mission.is_empty() or location_id == _current:
 		return true
 	return _is_mission_completed.is_valid() and _is_mission_completed.call(definition.unlocked_by_mission)
@@ -110,6 +127,10 @@ func check_travel(location_id: String) -> String:
 		return "Du bist schon hier."
 	if not is_known(location_id):
 		return "Diesen Ort kennst du noch nicht."
+	if _travel_block.is_valid():
+		var blocked: String = _travel_block.call()
+		if not blocked.is_empty():
+			return blocked
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
 	return ""

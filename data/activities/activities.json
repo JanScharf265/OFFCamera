@@ -6,7 +6,10 @@
 		"description": "Eine Stunde abschalten.",
 		"location": "home",
 		"duration_minutes": 60,
-		"effects": { "energy": 15, "mood": 3 }
+		"effects": {
+			"energy": 15,
+			"mood": 3
+		}
 	},
 	{
 		"id": "sleep",
@@ -15,7 +18,9 @@
 		"description": "Acht Stunden Schlaf.",
 		"location": "home",
 		"duration_minutes": 480,
-		"effects": { "energy": 60 }
+		"effects": {
+			"energy": 60
+		}
 	},
 	{
 		"id": "eat_out",
@@ -26,7 +31,10 @@
 		"duration_minutes": 60,
 		"money_cents": -1500,
 		"category": "food",
-		"effects": { "energy": 10, "mood": 5 }
+		"effects": {
+			"energy": 10,
+			"mood": 5
+		}
 	},
 	{
 		"id": "coffee",
@@ -37,7 +45,10 @@
 		"duration_minutes": 30,
 		"money_cents": -350,
 		"category": "food",
-		"effects": { "energy": 10, "mood": 3 }
+		"effects": {
+			"energy": 10,
+			"mood": 3
+		}
 	},
 	{
 		"id": "training",
@@ -46,7 +57,10 @@
 		"description": "Anderthalb Stunden Kraft und Ausdauer.",
 		"location": "gym",
 		"duration_minutes": 90,
-		"effects": { "energy": -15, "mood": 10 }
+		"effects": {
+			"energy": -15,
+			"mood": 10
+		}
 	},
 	{
 		"id": "plan_week",
@@ -55,7 +69,10 @@
 		"description": "Termine sortieren, Ideen sammeln, Prioritäten setzen.",
 		"location": "office",
 		"duration_minutes": 60,
-		"effects": { "energy": -5, "mood": 6 }
+		"effects": {
+			"energy": -5,
+			"mood": 6
+		}
 	},
 	{
 		"id": "order_stock",
@@ -65,8 +82,12 @@
 		"location": "office",
 		"duration_minutes": 60,
 		"requires": "company",
-		"effects": { "energy": -5 },
-		"company": { "utilization": 6 }
+		"effects": {
+			"energy": -5
+		},
+		"company": {
+			"utilization": 6
+		}
 	},
 	{
 		"id": "plan_campaign",
@@ -76,8 +97,14 @@
 		"location": "office",
 		"duration_minutes": 90,
 		"requires": "company",
-		"effects": { "energy": -10, "mood": 2 },
-		"company": { "utilization": 2, "reputation": 3 }
+		"effects": {
+			"energy": -10,
+			"mood": 2
+		},
+		"company": {
+			"utilization": 2,
+			"reputation": 3
+		}
 	},
 	{
 		"id": "merch_shoutout",
@@ -87,8 +114,12 @@
 		"location": "studio",
 		"duration_minutes": 30,
 		"requires": "company",
-		"effects": { "energy": -5 },
-		"company": { "utilization": 5 }
+		"effects": {
+			"energy": -5
+		},
+		"company": {
+			"utilization": 5
+		}
 	},
 	{
 		"id": "run_store",
@@ -98,7 +129,37 @@
 		"location": "label_store",
 		"duration_minutes": 240,
 		"requires": "branch",
-		"effects": { "energy": -20, "mood": 3 },
-		"company": { "utilization": 12, "reputation": 2 }
+		"effects": {
+			"energy": -20,
+			"mood": 3
+		},
+		"company": {
+			"utilization": 12,
+			"reputation": 2
+		}
+	},
+	{
+		"id": "prison_yard",
+		"display_name": "Hofgang",
+		"tab": "alltag",
+		"description": "Eine Stunde an der frischen Luft, im Kreis.",
+		"location": "prison",
+		"duration_minutes": 60,
+		"effects": {
+			"energy": 5,
+			"mood": 2
+		}
+	},
+	{
+		"id": "prison_read",
+		"display_name": "Lesen",
+		"tab": "alltag",
+		"description": "Zwei Stunden mit einem Buch aus der Anstaltsbücherei.",
+		"location": "prison",
+		"duration_minutes": 120,
+		"effects": {
+			"energy": 10,
+			"mood": 3
+		}
 	}
 ]

@@ -806,5 +806,75 @@
 				"note": "Zeigt Stärke – und macht neugierig"
 			}
 		]
+	},
+	{
+		"id": "justice_arrest",
+		"title": "Festnahme",
+		"text": "Diesmal nehmen sie dich mit. Ein Raum ohne Fenster, ein Becher Kaffee, eine Akte auf dem Tisch: {case}. Bis zum Prozess vor dem Bezirksgericht an der Küste sind es {days} Tage. Was jetzt?",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "lawyer",
+				"label": "Anwalt nehmen",
+				"justice": "lawyer",
+				"note": "2.000 € – Beweislage −25"
+			},
+			{
+				"id": "bribe",
+				"label": "Jemanden bestechen",
+				"justice": "bribe",
+				"note": "5.000 € – klappt es, ist alles vorbei; sonst wird es schlimmer"
+			},
+			{
+				"id": "silent",
+				"label": "Schweigen",
+				"justice": "silent",
+				"note": "Kostenlos – Beweislage −10"
+			}
+		]
+	},
+	{
+		"id": "justice_trial",
+		"title": "Prozess",
+		"text": "Bezirksgericht an der Küste, Saal 3. Richterin Vidal blättert lange in der Akte {case}. Beweislage: {evidence} %. Bevor sie das Urteil spricht, bleibt dir ein letzter Zug.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "sacrifice",
+				"label": "Ein Crew-Mitglied belasten",
+				"justice": "sacrifice",
+				"note": "Beweislage −40 – die Crew vergisst das nicht"
+			},
+			{
+				"id": "cooperate",
+				"label": "Kooperieren",
+				"justice": "cooperate",
+				"note": "Beweislage −50 – die Szene spricht von Verrat"
+			},
+			{
+				"id": "await",
+				"label": "Auf das Urteil warten",
+				"justice": "await",
+				"note": "Keine Zugeständnisse"
+			}
+		]
+	},
+	{
+		"id": "justice_verdict",
+		"title": "Urteil",
+		"text": "{verdict}",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "ok",
+				"label": "Zur Kenntnis nehmen"
+			}
+		]
 	}
 ]

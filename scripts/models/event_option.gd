@@ -29,3 +29,5 @@ var organisation: Dictionary = {}
 var rival := ""
 ## U.15: Aktion zu einem Crew-Vorfall (z. B. "lawyer", "drop"); das Mitglied kennt das CrewSystem zur Instanz. "" = keine.
 var crew := ""
+## U.21: Aktion im Verfahren (lawyer, bribe, silent, sacrifice, cooperate, await); "" = keine.
+var justice := ""

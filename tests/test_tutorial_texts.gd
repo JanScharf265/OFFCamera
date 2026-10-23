@@ -255,6 +255,12 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 			assert_eq(app.game.police.restore(file), "")
 			_screen(app).call("_refresh")
 			_press(app, "OrganisationButton")
+		"first_justice_open":
+			assert_eq(app.game.organisation.found("Los Lobos"), "")
+			app.game.justice.arrest(app.game.time.get_day())
+			_resolve_events(app)
+			_screen(app).call("_refresh")
+			_screen(app).call("open_justice")
 		"first_obligation_due":
 			_jump(app, TimeSystemScript.at(8, 9))
 			_resolve_events(app)
@@ -362,7 +368,7 @@ func test_data_rules() -> void:
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
 			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
-			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion", "underworld_view", "districts", "district_control", "rivals", "crew_risks", "laundering", "black_spending", "site_types", "site_upgrade", "police", "raid"]:
+			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion", "underworld_view", "districts", "district_control", "rivals", "crew_risks", "laundering", "black_spending", "site_types", "site_upgrade", "police", "raid", "justice"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 
@@ -453,7 +459,7 @@ func test_new_triggers_are_reported() -> void:
 			["first_laundering_offered", "tut_laundering"],
 			["first_black_spending_offered", "tut_black_spending"], ["first_site_types_offered", "tut_site_types"],
 			["first_site_upgrade_offered", "tut_site_upgrade"], ["first_police_attention", "tut_police"],
-			["first_raid_warning", "tut_raid"]]:
+			["first_raid_warning", "tut_raid"], ["first_justice_open", "tut_justice"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

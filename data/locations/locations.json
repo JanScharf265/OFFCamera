@@ -89,7 +89,7 @@
 		"description": "Ein Club in Puerto Banús. Tagsüber geschlossene Rollläden, nachts eine Schlange bis zur Straße.",
 		"map_position": [
 			0.85,
-			0.72
+			0.92
 		],
 		"unlocked_by_mission": "territory_first"
 	},
@@ -102,5 +102,15 @@
 			0.0
 		],
 		"unlocked_by_mission": "territory_first"
+	},
+	{
+		"id": "prison",
+		"display_name": "Haftanstalt",
+		"description": "Graue Mauern am Stadtrand. Die Tage sind lang, die Telefonate kurz.",
+		"map_position": [
+			0.0,
+			0.95
+		],
+		"only_when_here": true
 	}
 ]
