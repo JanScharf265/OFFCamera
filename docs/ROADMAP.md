@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.2)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.3)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -298,7 +298,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 
 ### U – Unterwelt (Hauptspiel; jedes Ticket mit Tutorial, Daten unter `data/underworld/`)
 - [x] U.1 Schwarzgeld als drittes Konto „black“ im einen Ledger (keine Umbuchung von/zu Schwarzgeld), HUD-Block „Schwarz“ und Buchungen-Fenster (Stand, Filter, Wochenübersicht) erst, wenn es welches gibt; HUD-Leiste verdichtet sich bei Platzmangel stufenweise; Tutorial „Schwarzgeld“ (Mechanik `black_money`); Spielstand Version 16 + Migration + Testdatei (488/488 Tests + 3/3 lange Tests grün)
-- [ ] U.2 Organisation: Name, Respekt, Hitze 0–100 (sinkt bei Ruhe), Stabilität (neu `scripts/systems/organisation_system.gd`); Schritt im DayCycle; Spielstand-Version
+- [x] U.2 Organisation (`scripts/systems/organisation_system.gd`, Regeln `data/underworld/organisation.json`): Name, Respekt, Hitze, Stabilität 0–100, gegründet erst ab U.3; Hitze sinkt an ruhigen Tagen um 3 (Schritt im DayCycle nach dem Tagesabschluss); HUD „Flamme + Zahl“ (ab 30 gelb, ab 60 rot); Tutorial „Hitze“ (Mechanik `heat`); Spielstand Version 17 + Migration + Testdatei; iPhone SE aus den Geräteklassen entfernt (498/498 Tests + 3/3 lange Tests grün)
 - [ ] U.3 Einstiegs-Ereignis an Tag 2 mit dem Kontakt am Hafen (ein Code-Pfad für neue und alte Spielstände), Namenseingabe, Fenster „Organisation“ + Seitenbutton
 - [ ] U.4 Story-Aufträge als Datenkette + Fenster + roter Punkt (neu `mission_system.gd`); erster Auftrag „Erster Deal“
 - [ ] U.5 Produkte als Daten (Gras, Haschisch, Koks, Pillen: Einkaufspreis, Verkaufspreis, Qualität, Hitze je Einheit – nur Spielwerte)

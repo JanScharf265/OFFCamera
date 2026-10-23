@@ -113,6 +113,9 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 			var black: String = load("res://scripts/systems/ledger_system.gd").BLACK
 			assert_true(app.game.ledger.post(25000, "test", "Test: Schwarzgeld", "test", "", "", false, black) != null)
 			_screen(app).call("_refresh")
+		"first_organisation_founded":
+			assert_eq(app.game.organisation.found("Los Testigos"), "")
+			_screen(app).call("_refresh")
 		"first_obligation_due":
 			_jump(app, TimeSystemScript.at(8, 9))
 			_resolve_events(app)
@@ -207,7 +210,7 @@ func test_data_rules() -> void:
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
 			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
-			"black_money"]:
+			"black_money", "heat"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 
@@ -287,7 +290,7 @@ func test_new_triggers_are_reported() -> void:
 			["first_company_offered", "tut_company"], ["first_company_open", "tut_transfer"],
 			["first_branch_offered", "tut_branch"], ["first_settlement", "tut_settlement"],
 			["first_ledger_open", "tut_ledger"], ["first_obligation_due", "tut_obligations"],
-			["first_black_money", "tut_black_money"]]:
+			["first_black_money", "tut_black_money"], ["first_organisation_founded", "tut_heat"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

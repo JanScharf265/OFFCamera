@@ -48,6 +48,7 @@ const TRIGGERS := [
 	"first_ledger_open",
 	# Paket U
 	"first_black_money",
+	"first_organisation_founded",
 ]
 const MAX_TEXT_LENGTH := 240
 

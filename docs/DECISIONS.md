@@ -724,3 +724,20 @@ HUD-Leiste (vgl. 044): Auf den drei echten Geräten passen Privat, Firma und Sch
 Form; wird es zu eng (Grenzfall-Gerät, später zusätzlich Hitze), verdichtet sich die Leiste stufenweise: ohne Datum
 (steht im Kalender), Beträge ab 1.000 € ohne Cent, zuletzt ohne die kleinen Beschriftungen. Spielstand Version 16,
 Migration setzt den Startwert 0.
+
+## 069 – iPhone SE wird nicht mehr berücksichtigt
+Entscheidung des Game Directors am 23.10.2026: Das iPhone SE (16:9, ohne Notch) wird für Layout und Tests nicht
+mehr berücksichtigt. Die Geräteklasse ist aus `tests/layout_helper.gd` entfernt; geprüft werden iPhone 13/14,
+iPhone 15/16 Pro Max und der rechnerische „Grenzfall schmal + Notch“ (1280 px breit mit großen Rändern – noch enger als
+das SE). Ob der Grenzfall bleibt, ist eine offene Frage an den Game Director.
+
+## 070 – Organisation und Hitze (U.2)
+Die Organisation ist ein eigenes System mit vier Werten: Name, Respekt, Hitze, Stabilität (je 0–100, reine Spielwerte).
+Sie existiert erst nach der Gründung im Einstiegs-Ereignis (U.3); vorher ist nichts sichtbar und `change()` wirkungslos –
+so bleibt Tag 1 den Grundlagen. Hitze sinkt an „ruhigen“ Tagen: ein Tag, an dem keine Hitze dazukam; der Abbau läuft als
+Schritt im DayCycle direkt nach dem Tagesabschluss (Reihenfolge laut U.24: Abrechnung → Hitze → Fristen → Ereignisse).
+Vorläufige Werte in `data/underworld/organisation.json` (Abbau 3 je ruhigem Tag, Start: Respekt 0, Hitze 0,
+Stabilität 50) – sie wirken erst, wenn ab U.9 etwas Hitze erzeugt; Feinschliff in Phase 8, Rückfrage an den Game
+Director. Anzeige: Flamme + Zahl ohne Beschriftung (wie Energie/Stimmung), ab 30 gelb, ab 60 rot (nur Farbe). Die
+Organisation mit Respekt und Stabilität bekommt ihr Fenster und ihr Tutorial in U.3, wenn sie sichtbar wird; in U.2 ist
+nur die Hitze zu sehen (Tutorial „Hitze“). Migration 16 → 17: noch nicht gegründet, Standard-Startwerte.

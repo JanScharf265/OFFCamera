@@ -10,7 +10,7 @@ const PADDING := 24.0
 
 ## Name -> {size: Vector2, margins: [links, oben, rechts, unten]}
 const DEVICES := {
-	"iPhone SE (16:9, ohne Notch)": {"size": Vector2(1280, 720), "margins": [24.0, 24.0, 24.0, 24.0]},
+	# iPhone SE (16:9, ohne Notch) ist seit U.2 nicht mehr dabei – Entscheidung des Game Directors (069).
 	# 2532 × 1170 px = 844 × 390 pt; quer: 47 pt seitlich, 21 pt unten
 	"iPhone 13/14 (Notch)": {"size": Vector2(1558, 720), "margins": [110.8, 24.0, 110.8, 62.8]},
 	# 2796 × 1290 px = 932 × 430 pt; quer: 59 pt seitlich, 21 pt unten

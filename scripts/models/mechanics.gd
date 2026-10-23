@@ -34,6 +34,7 @@ const NAMES := {
 	"ledger": "Buchungen und Wochenübersicht",
 	# Unterwelt (Paket U)
 	"black_money": "Schwarzgeld",
+	"heat": "Hitze (Aufmerksamkeit der Polizei)",
 }
 
 

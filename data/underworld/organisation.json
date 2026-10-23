@@ -1,0 +1,6 @@
+{
+	"start": { "respect": 0, "heat": 0, "stability": 50 },
+	"heat_decay_per_quiet_day": 3,
+	"name_min_length": 2,
+	"name_max_length": 24
+}

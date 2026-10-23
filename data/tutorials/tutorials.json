@@ -248,5 +248,15 @@
 		"ui_target": "BlackBlock",
 		"order": 300,
 		"requires": []
+	},
+	{
+		"id": "tut_heat",
+		"mechanic": "heat",
+		"trigger": "first_organisation_founded",
+		"title": "Hitze",
+		"text": "Die Flamme zeigt, wie genau die Polizei hinschaut: 0 heißt unsichtbar, 100 heißt Ärger. Auffällige Geschäfte heizen auf, ruhige Tage kühlen langsam ab.",
+		"ui_target": "HeatBlock",
+		"order": 310,
+		"requires": []
 	}
 ]

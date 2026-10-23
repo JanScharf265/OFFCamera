@@ -133,6 +133,13 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Filter „Schwarz“ und Wochenzeile erst, wenn es Buchungen gibt. `HudBar.fit_to(breite)` (aus `_layout()`): passt die
   Leiste nicht, Stufe 1 ohne Datum, 2 Beträge ab 1.000 € ohne Cent, 3 ohne die kleinen Beschriftungen. Tutorial-Auslöser
   `first_black_money` über `TutorialSystem.on_ledger_entry` (Signal `entry_posted`).
+- Organisation (U.2, `scripts/systems/organisation_system.gd`, im GameState als `organisation`): `found(name)`
+  (Name 2–24 Zeichen, Signal `founded` → Tutorial-Auslöser `first_organisation_founded`), `change({respect, heat,
+  stability})` auf 0–100 begrenzt, ohne Gründung wirkungslos. DayCycle: Tagesabschluss → Organisation → Fristen →
+  Ereignisse; `on_day_changed(tag)` senkt die Hitze um `heat_decay_per_quiet_day`, wenn am Vortag keine Hitze dazukam
+  (jeder Tag einmal über `last_processed_day`). Regeln: `OrganisationRules` aus `data/underworld/organisation.json`
+  (in `GameData.organisation`). HUD: `HeatBlock` (Flamme `assets/icons/flame.svg` + Zahl), sichtbar ab Gründung,
+  Farbe über `OrganisationSystem.heat_level()` (ab 30 gelb, ab 60 rot – nur Anzeige).
 - Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
   (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
   und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.
@@ -242,7 +249,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Gespeichert: `last_processed_day`, `instances` (offene immer, erledigte bis 100).
 
 ### Speichern/Laden (`scripts/systems/save_system.gd`)
-- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 16, "meta": {…}, "game": GameState.to_dict()}`.
+- Datei `user://savegame.json` (JSON, lesbar). Inhalt: `{"version": 17, "meta": {…}, "game": GameState.to_dict()}`.
   Jedes System hat `to_dict()` und `restore(data) -> String` (prüft erst alles, ändert nur bei Erfolg,
   sendet keine Signale). Der Kontostand wird beim Laden aus Startwert + Buchungen neu berechnet.
 - Gespeichert: Spielzeit, Ledger (Startwert, Buchungen, nächste ID, verwendete Schutzschlüssel),
@@ -260,6 +267,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 16 → 17 (U.2): `organisation` = nicht gegründet, Startwerte der Standardregeln, gespeicherter Tag gilt
+  als verarbeitet.
 - Migration 15 → 16 (U.1): `ledger.opening_balances.black` = 0 (Schwarzgeld-Konto ohne Buchungen).
 - Migration 14 → 15 (T.2): `tutorials` = {`fired`: [], `seen`: [], `seen_triggers`: [„first_game_start“]} – wer
   schon spielt, bekommt keine Spielstart-Erklärungen; alle anderen Tutorials kommen normal.

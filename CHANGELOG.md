@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Grundlage der Organisation: Name, Respekt, Hitze und Stabilität; die Hitze steht als Flamme mit Zahl in der HUD-Leiste (ab 30 gelb, ab 60 rot) und kühlt an ruhigen Tagen langsam ab; noch unsichtbar, bis die Organisation mit dem Einstieg in die Unterwelt (U.3) entsteht; Erklärung „Hitze“; Spielstand Version 17 (Ticket U.2)
 - Schwarzgeld als drittes Konto: eigene Zeile „Schwarz“ in der HUD-Leiste, Stand, Filter und Wochenübersicht im Buchungen-Fenster – alles erst sichtbar, wenn es Schwarzgeld gibt (verdient wird es ab U.9); lässt sich nicht auf Privat- oder Firmenkonto umbuchen; Erklärung „Schwarzgeld“; Spielstand Version 16 (alte Spielstände laden weiter) (Ticket U.1)
 - Paket T abgeschlossen: feste Liste der Spielmechaniken mit Abdeckungstest (jede Mechanik hat ihr Tutorial, jeder Auslöser wird wirklich gemeldet); die Tests können den echten Spielstand und die Einstellungen am Mac nicht mehr verändern (Ticket T.7)
 - Tutorial-Texte für Karriere und Firma: Kanal, Content und Qualität, Ausrüstung, die Symbole auf den Kacheln, Firma gründen, Privat und Firma, Ladenlokal, Tagesabschluss, Fristen, Buchungen – nie mehr als drei hintereinander, und eine Erklärung kommt erst, wenn das Erklärte zu sehen ist. Tipp auf den Ortsnamen im Ortsfenster zeigt die Beschreibung des Orts (Tickets T.6, T.6b)

@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 16
+const SAVE_VERSION := 17
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -277,6 +277,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		13: return _migrate_13_to_14(game)
 		14: return _migrate_14_to_15(game)
 		15: return _migrate_15_to_16(game)
+		16: return _migrate_16_to_17(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -416,6 +417,19 @@ static func _migrate_15_to_16(game: Dictionary) -> String:
 	if typeof(ledger) != TYPE_DICTIONARY or typeof(ledger.get("opening_balances")) != TYPE_DICTIONARY:
 		return "Ledger: Startwerte fehlen."
 	ledger["opening_balances"][LedgerSystemScript.BLACK] = 0
+	return ""
+
+
+## 16 → 17 (U.2): Organisation – noch nicht gegründet, Startwerte wie bei einem neuen Spiel (aus den Daten beim
+## Laden nicht bekannt, daher die Standardwerte der Regeln), der gespeicherte Tag gilt als verarbeitet.
+static func _migrate_16_to_17(game: Dictionary) -> String:
+	var minutes: Variant = _saved_minutes(game)
+	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
+		return "Zeit fehlt."
+	var defaults = load("res://scripts/systems/organisation_rules.gd").new()
+	game["organisation"] = {"founded": false, "name": "", "respect": defaults.start["respect"],
+			"heat": defaults.start["heat"], "stability": defaults.start["stability"], "heat_raised_day": 0,
+			"last_processed_day": TimeSystemScript.day_of(int(minutes))}
 	return ""
 
 

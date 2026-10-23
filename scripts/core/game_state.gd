@@ -24,6 +24,7 @@ const DayStartSystemScript := preload("res://scripts/systems/day_start_system.gd
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
 const TutorialSystemScript := preload("res://scripts/systems/tutorial_system.gd")
+const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -56,6 +57,8 @@ var reminders: ReminderSystemScript
 var trips: TripSystemScript
 ## Tutorials (T.2): Auslöser, fällig, gesehen.
 var tutorials: TutorialSystemScript
+## Organisation in der Unterwelt (U.2): Name, Respekt, Hitze, Stabilität.
+var organisation: OrganisationSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -76,8 +79,9 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	content = ContentSystemScript.new(time, ledger, stats, locations, channel, equipment, data.formats)
 	obligations = ObligationSystemScript.new(time, ledger, stats, company, data.obligations)
 	events.set_world(company, obligations)
-	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Fristen → Ereignisse.
-	day_cycle = DayCycleScript.new(time, [company, obligations, events])
+	organisation = OrganisationSystemScript.new(time, data.organisation)
+	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Fristen → Ereignisse.
+	day_cycle = DayCycleScript.new(time, [company, organisation, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)
@@ -89,6 +93,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	obligations.obligation_due.connect(tutorials.report.bind("first_obligation_due").unbind(1))
 	company.day_settled.connect(tutorials.report.bind("first_settlement").unbind(1))
 	ledger.entry_posted.connect(tutorials.on_ledger_entry)
+	organisation.founded.connect(tutorials.report.bind("first_organisation_founded").unbind(1))
 
 
 ## Zufälliger Seed für ein neues Spiel (0 … 2^31 − 1).
@@ -113,6 +118,7 @@ func to_dict() -> Dictionary:
 		"day_start": day_start.to_dict(),
 		"reminders": reminders.to_dict(),
 		"tutorials": tutorials.to_dict(),
+		"organisation": organisation.to_dict(),
 	}
 
 
@@ -121,7 +127,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders", "tutorials"]:
+			"obligations", "day_start", "reminders", "tutorials", "organisation"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -149,6 +155,8 @@ func restore(saved: Dictionary) -> String:
 		error = reminders.restore(saved["reminders"])
 	if error.is_empty():
 		error = tutorials.restore(saved["tutorials"])
+	if error.is_empty():
+		error = organisation.restore(saved["organisation"])
 	return error
 
 

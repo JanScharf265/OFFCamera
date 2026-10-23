@@ -75,6 +75,8 @@ func test_hud_with_all_accounts_fits_every_device() -> void:
 		app.game.locations.travel("office")
 		assert_eq(app.game.company.found("merch_label"), "")
 		app.game.ledger.post(9999999, "test", "Test", "test", "", "", false, BLACK)  # 99.999,99 €
+		assert_eq(app.game.organisation.found("Los Testigos"), "")  # U.2: Hitze dazu
+		app.game.organisation.change({"heat": 100})
 		_screen(app).call("_refresh")
 		Layout.apply(app, device)
 		var hud := app.find_child("HudBar", true, false) as Control
@@ -84,7 +86,7 @@ func test_hud_with_all_accounts_fits_every_device() -> void:
 		assert_true(Layout.safe_rect(device).grow(0.5).encloses(Layout.rect_of(hud)), "%s: Leiste außerhalb %s / safe %s / min %d" % [
 				device, Layout.rect_of(hud), Layout.safe_rect(device), hud.get_combined_minimum_size().x])
 		levels[device] = hud.call("get_compact_level")
-		for name in ["BalanceLabel", "CompanyBalanceLabel", "BlackBalanceLabel"]:
+		for name in ["BalanceLabel", "CompanyBalanceLabel", "BlackBalanceLabel", "HeatValue"]:
 			var label := app.find_child(name, true, false) as Label
 			assert_true(label.is_visible_in_tree(), "%s: %s nicht sichtbar" % [device, name])
 			var width := label.get_theme_font("font").get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1,

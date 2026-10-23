@@ -20,6 +20,8 @@ const STAT_COLORS := {"energy": Color("#7FD38A"), "mood": Color("#7FB4F2")}
 const LOW_COLOR := UiStyle.WARNING
 const CRITICAL_COLOR := UiStyle.BADGE
 const LOCATION_ICON := "res://assets/kenney/game-icons/target.png"
+const HEAT_ICON := "res://assets/icons/flame.svg"
+const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
 const ICON_SIZE := 20
 const STAT_BAR_WIDTH := 48
 const CONTENT_MARGIN_X := 18
@@ -36,6 +38,10 @@ var _black_block: Control
 var _black_balance_label: Label
 ## Kleine Beschriftungen „Privat“/„Firma“/„Schwarz“ (für fit_to)
 var _money_captions: Array[Label] = []
+## Hitze (U.2) – sichtbar, sobald es eine Organisation gibt: Flamme + Zahl, Farbe nach Stufe
+var _heat_block: Control
+var _heat_icon: TextureRect
+var _heat_label: Label
 ## Betrag in Cent je Betrags-Label (für fit_to)
 var _amounts := {}
 ## U.1: Verdichtungsstufe (0 = alles, 1 = ohne Datum, 2 = + Beträge ab 1.000 € ohne Cent, 3 = + ohne Beschriftungen)
@@ -86,6 +92,16 @@ func _init() -> void:
 	_black_balance_label = _black_block.get_child(1)
 	_black_block.visible = false
 	row.add_child(_black_block)
+	_heat_block = HBoxContainer.new()
+	_heat_block.name = "HeatBlock"
+	_heat_block.tooltip_text = "Hitze"
+	_heat_block.add_theme_constant_override("separation", 6)
+	_heat_icon = _icon(HEAT_ICON, UiStyle.TEXT)
+	_heat_block.add_child(_heat_icon)
+	_heat_label = _label("HeatValue", UiStyle.SMALL_FONT_SIZE, UiStyle.TEXT)
+	_heat_block.add_child(_heat_label)
+	_heat_block.visible = false
+	row.add_child(_heat_block)
 	# Platz für das Zahnrad (Menü): Es liegt als eigener Button mit großer Tippfläche über der Leiste (G4.4).
 	var menu_space := Control.new()
 	menu_space.name = "MenuSpace"
@@ -106,6 +122,10 @@ func refresh(game: GameStateScript) -> void:
 	_amounts[_company_balance_label] = game.ledger.get_balance(LedgerSystemScript.COMPANY)
 	_black_block.visible = game.ledger.is_account_used(LedgerSystemScript.BLACK)
 	_amounts[_black_balance_label] = game.ledger.get_balance(LedgerSystemScript.BLACK)
+	_heat_block.visible = game.organisation.is_founded()
+	var heat: int = game.organisation.get_value("heat")
+	_heat_label.text = str(heat)
+	_heat_icon.modulate = heat_color(heat)
 	_apply_compact()
 	for key in PlayerStatsScript.KEYS:
 		var value := game.stats.get_value(key)
@@ -138,6 +158,16 @@ func _apply_compact() -> void:
 				else LedgerSystemScript.format_cents(cents).replace(",%02d €" % (absi(cents) % 100), " €")
 	for caption in _money_captions:
 		caption.visible = _compact < 3
+
+
+## Farbe der Hitze (U.2): ruhig hell, ab 30 gelb, ab 60 rot (Grenzen im OrganisationSystem, nur Anzeige).
+static func heat_color(value: int) -> Color:
+	match OrganisationSystemScript.heat_level(value):
+		2:
+			return CRITICAL_COLOR
+		1:
+			return LOW_COLOR
+	return UiStyle.TEXT
 
 
 ## Farbe des Balkens: normal, unter 40 gelb, unter 20 rot (Grenzen in PlayerStats).
