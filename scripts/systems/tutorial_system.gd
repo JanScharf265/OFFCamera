@@ -79,14 +79,9 @@ func mark_seen(tutorial_id: String) -> String:
 	return ""
 
 
-## Alle gesehenen Tutorials (für das Lexikon), sortiert nach Bereich (mechanic), dann order und ID.
+## Alle gesehenen Tutorials (für das Lexikon) in Spielreihenfolge (order, dann ID – wie der Katalog, T.5).
 func get_seen() -> Array:
-	var result := _catalog.get_all().filter(func(definition) -> bool: return is_seen(definition.id))
-	result.sort_custom(func(a, b) -> bool:
-		if a.mechanic != b.mechanic:
-			return a.mechanic < b.mechanic
-		return a.order < b.order or (a.order == b.order and a.id < b.id))
-	return result
+	return _catalog.get_all().filter(func(definition) -> bool: return is_seen(definition.id))
 
 
 ## „Tutorials zurücksetzen“ (T.4): nichts mehr gesehen (auch nicht über `seen_triggers`). Gemeldete Auslöser bleiben –

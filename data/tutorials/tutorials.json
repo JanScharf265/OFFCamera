@@ -3,8 +3,8 @@
 		"id": "tut_map",
 		"mechanic": "map",
 		"trigger": "first_game_start",
-		"title": "Marbella",
-		"text": "Das ist deine Stadt. Wische, um dich umzusehen, und zoome mit zwei Fingern.",
+		"title": "Willkommen in Marbella",
+		"text": "Sonne, Yachten, große Träume. Tagsüber bist du Streamer – aber in dieser Stadt gibt es mehr zu holen. Schau dich um, hier beginnt deine Geschichte.",
 		"ui_target": "",
 		"order": 10,
 		"requires": []
@@ -14,19 +14,129 @@
 		"mechanic": "location_open",
 		"trigger": "first_game_start",
 		"title": "Orte antippen",
-		"text": "Tippe auf ein Gebäude oder sein Schild, um zu sehen, was du dort tun kannst.",
+		"text": "Tipp auf ein Gebäude oder sein Schild. Dann siehst du, was du dort tun kannst – im Studio zum Beispiel streamen.",
 		"ui_target": "MapPin_studio",
 		"order": 20,
-		"requires": ["tut_map"]
+		"requires": [
+			"tut_map"
+		]
+	},
+	{
+		"id": "tut_map_swipe",
+		"mechanic": "map_navigation",
+		"trigger": "first_window_closed",
+		"title": "Karte bewegen",
+		"text": "Wisch über die Karte, um dich umzusehen, und zoom mit zwei Fingern. „Hier“ bringt dich jederzeit zurück zu dir.",
+		"ui_target": "HereButton",
+		"order": 30,
+		"requires": [
+			"tut_map_tap_building"
+		]
+	},
+	{
+		"id": "tut_activities",
+		"mechanic": "activities",
+		"trigger": "first_location_open",
+		"title": "Aktivitäten",
+		"text": "Jede Kachel zeigt, wie lange etwas dauert, wann du fertig bist und was es bringt: grün hilft, rot kostet. Ein Tipp auf den Button – und die Uhr läuft.",
+		"ui_target": "Tile_*",
+		"order": 40,
+		"requires": [
+			"tut_map_tap_building"
+		]
 	},
 	{
 		"id": "tut_travel",
 		"mechanic": "travel",
 		"trigger": "first_location_elsewhere",
 		"title": "Hinfahren",
-		"text": "Du bist nicht vor Ort. „Hinfahren“ kostet Spielzeit, aber kein Geld.",
+		"text": "Du bist nicht vor Ort. „Hinfahren“ kostet nur Zeit, kein Geld – Marbella ist klein, aber nicht so klein.",
 		"ui_target": "TravelButton",
-		"order": 10,
-		"requires": ["tut_map_tap_building"]
+		"order": 50,
+		"requires": [
+			"tut_map_tap_building"
+		]
+	},
+	{
+		"id": "tut_trip",
+		"mechanic": "trip",
+		"trigger": "first_trip_offered",
+		"title": "Hinfahren und starten",
+		"text": "Keine Lust auf zwei Schritte? Das Auto auf der Kachel heißt: erst hinfahren, dann direkt loslegen. Die Zeit zeigt Fahrt plus Dauer.",
+		"ui_target": "TileTripIcon_*",
+		"order": 60,
+		"requires": [
+			"tut_travel"
+		]
+	},
+	{
+		"id": "tut_stats",
+		"mechanic": "player_stats",
+		"trigger": "first_action",
+		"title": "Energie und Stimmung",
+		"text": "Oben siehst du Energie und Stimmung. Wird ein Balken gelb, wird’s knapp, bei Rot geht kaum noch was. Schlaf, Pausen und ein Kaffee am Hafen helfen.",
+		"ui_target": "Stat_energy",
+		"order": 70,
+		"requires": []
+	},
+	{
+		"id": "tut_calendar",
+		"mechanic": "calendar",
+		"trigger": "first_calendar_open",
+		"title": "Dein Kalender",
+		"text": "Hier steht dein Tag: Termine mit Uhrzeit, Ort und Fahrzeit, dazu fällige Zahlungen. Die rote Linie ist jetzt.",
+		"ui_target": "CalendarNowLine",
+		"order": 80,
+		"requires": []
+	},
+	{
+		"id": "tut_reminder",
+		"mechanic": "reminder",
+		"trigger": "first_appointment_reminder",
+		"title": "Gleich geht’s los",
+		"text": "Ein Termin steht kurz bevor. Hier siehst du, ob du es noch rechtzeitig schaffst – und kannst direkt hinfahren.",
+		"ui_target": "ReminderVerdict",
+		"order": 90,
+		"requires": []
+	},
+	{
+		"id": "tut_conflict",
+		"mechanic": "conflict",
+		"trigger": "first_conflict_popup",
+		"title": "Termin in Gefahr",
+		"text": "Was du starten willst, dauert zu lange – ein Termin würde platzen. Verpasste Termine drücken auf die Stimmung. Du entscheidest.",
+		"ui_target": "ConflictTitle",
+		"order": 100,
+		"requires": []
+	},
+	{
+		"id": "tut_wait",
+		"mechanic": "wait",
+		"trigger": "first_wait_offered",
+		"title": "Warten",
+		"text": "Zu früh dran? „Warten bis …“ spult genau bis zum Terminbeginn vor. Kostet nichts – außer Zeit.",
+		"ui_target": "WaitButton*",
+		"order": 110,
+		"requires": []
+	},
+	{
+		"id": "tut_event",
+		"mechanic": "events",
+		"trigger": "first_event",
+		"title": "Ereignisse",
+		"text": "In Marbella passiert immer was. Ereignisse verlangen eine Entscheidung – und jede hat Folgen für Geld, Stimmung oder deinen Ruf.",
+		"ui_target": "WindowTitle",
+		"order": 120,
+		"requires": []
+	},
+	{
+		"id": "tut_save",
+		"mechanic": "saving",
+		"trigger": "first_new_day",
+		"title": "Speichern",
+		"text": "Keine Sorge ums Speichern: Das Spiel sichert nach jeder Aktion von selbst. Übers Zahnrad kommst du ins Menü, „Fortsetzen“ bringt dich zurück.",
+		"ui_target": "MenuButton",
+		"order": 130,
+		"requires": []
 	}
 ]

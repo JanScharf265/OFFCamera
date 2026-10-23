@@ -224,6 +224,7 @@ func _trip_or(tile: ActivityTileScript, kind: String, id: String, now: int, here
 	var reason: String = _game.trips.check(kind, id)
 	tile.set_trip(reason.is_empty(), TRIP_TEXT)
 	if reason.is_empty():
+		_game.tutorials.report("first_trip_offered")  # T.5
 		var travel: int = _game.trips.travel_minutes(kind, id)
 		var minutes: int = _game.trips.action_minutes(kind, id)
 		tile.set_time(ActivityText.trip_duration(travel, minutes))
@@ -359,6 +360,8 @@ func _refresh_wait() -> void:
 	var start: int = _game.appointments.get_catalog().get_definition(_appointment_id).start_minutes
 	_wait_button.text = "Warten bis %s" % TimeSystemScript.format_stamp(start).get_slice(" · ", 1)
 	_wait_button.disabled = not _game.appointments.check_wait(_appointment_id).is_empty()
+	if not _wait_button.disabled:
+		_game.tutorials.report("first_wait_offered")  # T.5
 
 
 # --- Kacheln -----------------------------------------------------------------------

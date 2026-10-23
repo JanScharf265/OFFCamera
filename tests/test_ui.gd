@@ -208,17 +208,17 @@ func test_conflict_popup_for_activity() -> void:
 	_press(app, "NewGameButton")
 	app.game.time.advance(TimeSystemScript.at(1, 13, 30) - app.game.time.get_minutes())
 	_press(app, "HereButton")
-	var before := JSON.stringify(app.game.to_dict())
+	var before := _game_state_text(app)
 	_press(app, "StartButton_rest")  # 1 h – der Termin um 14:00 würde verpasst
 	assert_true(_find(app, "ConflictPopup") != null, "kein Popup")
 	assert_eq((_find(app, "ConflictTitle") as Label).text, "Termin verpassen?")
 	assert_eq((_find(app, "ConflictAction") as Label).text, "Ausruhen · 1 h · Ende 14:30")
 	assert_true(_screen_has_text(app, "„Treffen mit der Kamerafrau“ · Tag 1 · 14:00 · Studio"), "Termin fehlt")
 	assert_true(_screen_has_text(app, "Verpasst: Stimmung -10"), "Kosten fehlen")
-	assert_eq(JSON.stringify(app.game.to_dict()), before, "Popup allein ändert etwas")
+	assert_eq(_game_state_text(app), before, "Popup allein ändert etwas")
 	_press(app, "ConflictCancelButton")
 	assert_true(_find(app, "ConflictPopup") == null, "Popup nach Abbrechen noch da")
-	assert_eq(JSON.stringify(app.game.to_dict()), before, "Abbrechen ändert etwas")
+	assert_eq(_game_state_text(app), before, "Abbrechen ändert etwas")
 	_press(app, "StartButton_rest")
 	var confirm := _find(app, "ConflictConfirmButton") as Button
 	confirm.pressed.emit()
@@ -775,6 +775,13 @@ func test_unloadable_save_keeps_copies_when_starting_new_game() -> void:
 	_press(app, "DeleteSaveButton")
 	assert_eq(SaveSystemScript.corrupt_files(TEST_SAVE_PATH).size(), 0)
 	app.free()
+
+
+## Spielstand als Text, ohne die Tutorial-Buchführung (T.5: das Erscheinen des Popups meldet einen Auslöser).
+func _game_state_text(app: Node) -> String:
+	var state: Dictionary = app.game.to_dict()
+	state.erase("tutorials")
+	return JSON.stringify(state)
 
 
 func _travel(app: Node, location_id: String) -> void:

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Tutorial-Texte für die Grundlagen: 13 kurze Erklärungen (Marbella, Karte bewegen, Orte antippen, Kacheln, Hinfahren, Hinfahren und starten, Energie und Stimmung, Kalender, Erinnerung, Konflikt, Warten, Ereignisse, Speichern) – zum Start nur zwei, der Rest beim ersten Benutzen; Tutorials liegen jetzt auch über dem Fenster, das sie erklären (z. B. Kalender). Lexikon mit festem Schließen-Button und in Spielreihenfolge; in den Einstellungen ist „Spielstand löschen“ nur rot umrandet, „Zurück“ grau (Ticket T.5)
 - Einstellungen: Schalter „Tutorials anzeigen“ und „Tutorials zurücksetzen“ (mit Rückfrage); neuer Bildschirm „Hilfe / Lexikon“ mit allen schon gesehenen Erklärungen (Antippen zeigt den Text). Die Einstellungsseite ist kompakter (Buttons paarweise nebeneinander), damit sie ohne Scrollen passt (Ticket T.4)
 - Tutorials werden angezeigt: Der Bildschirm wird abgedunkelt, das erklärte Element hervorgehoben (Rahmen, Pfeil), daneben eine Sprechblase mit „Verstanden“; danach kommt das nächste. Zuerst kommen Ereignis, Kalender und Erinnerung, nie zwei Fenster übereinander. Der feste Hinweis „Tippe auf ein Gebäude …“ beim Start entfällt (Ticket T.3)
 - Tutorials: Das Spiel merkt sich jetzt, wann eine Erklärung fällig ist und welche schon bestätigt wurden – jede genau einmal, auch über Speichern/Laden; angezeigt wird noch nichts (kommt mit T.3); Spielstand Version 15 – alte Spielstände laden weiter und bekommen keine Spielstart-Erklärungen (Ticket T.2)

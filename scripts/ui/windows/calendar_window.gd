@@ -183,7 +183,9 @@ func _add_wait(box: VBoxContainer, appointment_id: String) -> void:
 	box.add_child(button)
 	var reason: String = _game.appointments.check_wait(appointment_id)
 	button.disabled = not reason.is_empty()
-	if not reason.is_empty():
+	if reason.is_empty():
+		_game.tutorials.report("first_wait_offered")  # T.5
+	else:
 		var label := UiStyle.wrapping_label(reason, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 		label.name = "WaitReason_%s" % appointment_id
 		box.add_child(label)

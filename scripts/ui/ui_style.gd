@@ -283,6 +283,32 @@ static func style_travel_button(target: Button, visible_height: float) -> void:
 	grow_touch_area(target, visible_height)
 
 
+## Neutraler Button (T.5, z. B. „Zurück“): graue Fläche, heller Text – tritt hinter den Haupt-Button zurück.
+static func style_neutral_button(target: Button) -> void:
+	_style_flat_button(target, SURFACE_PRESSED, Color(0, 0, 0, 0), TEXT)
+
+
+## Gefahr-Button (T.5, z. B. „Spielstand löschen“): nur roter Rahmen und rote Schrift, keine volle Fläche.
+static func style_danger_button(target: Button) -> void:
+	_style_flat_button(target, SURFACE, ACCENT, PURCHASE_TEXT)
+
+
+static func _style_flat_button(target: Button, fill: Color, border: Color, text_color: Color) -> void:
+	var normal := _box(fill, 16)
+	normal.border_color = border
+	normal.set_border_width_all(2 if border.a > 0.0 else 0)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = fill.lightened(0.15)
+	for state in ["normal", "hover"]:
+		target.add_theme_stylebox_override(state, normal)
+	for state in ["pressed", "hover_pressed"]:
+		target.add_theme_stylebox_override(state, pressed)
+	target.add_theme_stylebox_override("disabled", _box(DISABLED, 16))
+	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		target.add_theme_color_override(color_name, text_color)
+
+
 ## Schalter auf der Einstellungsseite (G5.1): Fläche wie eine Karte statt der Akzentfarbe der Buttons.
 static func style_setting_toggle(target: CheckButton) -> void:
 	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:

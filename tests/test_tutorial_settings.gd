@@ -8,6 +8,7 @@ const AppScript := preload("res://scripts/ui/app.gd")
 const Helpers := preload("res://tests/helpers.gd")
 const SaveSystemScript := preload("res://scripts/systems/save_system.gd")
 const SettingsScript := preload("res://scripts/core/settings.gd")
+const UiStyle := preload("res://scripts/ui/ui_style.gd")
 
 const SAVE_PATH := "user://test_tutorial_settings_save.json"
 const SETTINGS_PATH := "user://test_tutorial_settings.cfg"
@@ -161,6 +162,45 @@ func test_lexicon_from_saved_game_and_without_game() -> void:
 	var names := []
 	for node in again.find_children("LexiconEntry_*", "", true, false):
 		names.append(String(node.name))
-	assert_eq(names, ["LexiconEntry_location_open".replace("location_open", "tut_map_tap_building"),
-			"LexiconEntry_tut_map", "LexiconEntry_tut_travel"], "nach Bereich (mechanic) sortiert")
+	assert_eq(names, ["LexiconEntry_tut_map", "LexiconEntry_tut_map_tap_building", "LexiconEntry_tut_travel"],
+			"in Spielreihenfolge (order) sortiert")
 	_done(again)
+
+
+## Korrektur T.5: Schließen-Button im Lexikon immer sichtbar oben rechts (außerhalb der Liste), auch bei langer Liste.
+func test_lexicon_close_button_always_visible() -> void:
+	var game := Helpers.new_game()
+	for definition in game.tutorials.get_catalog().get_all():
+		game.tutorials.mark_seen(definition.id)
+	assert_eq(SaveSystemScript.save(game, SAVE_PATH), "")
+	var app := _app(true)
+	_press(app, "SettingsButton")
+	_press(app, "LexiconButton")
+	var close := app.find_child("LexiconCloseButton", true, false) as Control
+	var scroll := app.find_child("LexiconScroll", true, false) as ScrollContainer
+	assert_true(close != null and close.is_visible_in_tree(), "Schließen-Button fehlt")
+	assert_true(not scroll.is_ancestor_of(close), "Schließen-Button scrollt mit")
+	assert_eq(app.find_children("LexiconEntry_*", "", true, false).size(),
+			game.tutorials.get_catalog().get_all().size())
+	_press(app, "LexiconCloseButton")
+	assert_true(app.find_child("SettingTutorials", true, false) != null, "zurück zu den Einstellungen")
+	_done(app)
+
+
+## Korrektur T.5: Nur „Hilfe / Lexikon“ voll rot; „Spielstand löschen“ nur mit rotem Rahmen, „Zurück“ und
+## „Tutorials zurücksetzen“ neutral.
+func test_settings_button_styles() -> void:
+	var app := _app()
+	_press(app, "NewGameButton")
+	_press(app, "MenuButton")
+	_press(app, "SettingsButton")
+	var accent := UiStyle.ACCENT
+	var delete := (app.find_child("DeleteSaveButton", true, false) as Button).get_theme_stylebox("normal") as StyleBoxFlat
+	assert_true(delete.bg_color != accent, "Löschen voll rot")
+	assert_eq(delete.border_color, accent, "Löschen ohne roten Rahmen")
+	for name in ["BackButton", "ResetTutorialsButton"]:
+		var box := (app.find_child(name, true, false) as Button).get_theme_stylebox("normal") as StyleBoxFlat
+		assert_true(box.bg_color != accent and box.border_width_left == 0, "%s nicht neutral" % name)
+	var lexicon := (app.find_child("LexiconButton", true, false) as Button).get_theme_stylebox("normal") as StyleBoxFlat
+	assert_eq(lexicon.bg_color, accent, "Hauptbutton nicht rot")
+	_done(app)

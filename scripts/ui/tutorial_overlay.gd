@@ -107,8 +107,8 @@ func _find_target() -> void:
 	_target = null
 	if target_name.is_empty():
 		return
-	var node := _search_root.find_child(target_name, true, false) as Control
-	if node == null or not node.is_visible_in_tree():
+	var node := find_target(_search_root, target_name)
+	if node == null:
 		if not _warned:
 			_warned = true
 			push_warning("Tutorial '%s': Ziel '%s' nicht gefunden – Sprechblase mittig." % [tutorial_id, target_name])
@@ -118,6 +118,19 @@ func _find_target() -> void:
 	rect.position -= get_global_rect().position
 	_hole = rect.grow(HOLE_PADDING).intersection(Rect2(Vector2.ZERO, size))
 	_has_hole = _hole.has_area()
+
+
+## Erstes sichtbares Control unter `root`, dessen Name zu `pattern` passt („*“ als Platzhalter, T.5); null = keins.
+static func find_target(root: Node, pattern: String) -> Control:
+	if pattern.is_empty() or root == null:
+		return null
+	if not "*" in pattern:
+		var exact := root.find_child(pattern, true, false) as Control
+		return exact if exact != null and exact.is_visible_in_tree() else null
+	for node in root.find_children(pattern, "Control", true, false):
+		if (node as Control).is_visible_in_tree():
+			return node
+	return null
 
 
 ## Unter, über, rechts oder links vom Ziel – die erste Lage, die ganz in die Safe Area passt; sonst die mit dem

@@ -271,14 +271,14 @@ func _layout() -> void:
 		_window.custom_minimum_size = Vector2(width, bottom - top)
 		_window.size = _window.custom_minimum_size
 		_window.position = Vector2((left + right - width) / 2.0, top)
-	if _tutorial != null:
-		# Tutorial ganz oben (T.3): Aussparung und Sprechblase in der Safe Area.
-		move_child(_tutorial, get_child_count() - 1)
-		_tutorial.place(size, Rect2(left, top, right - left, bottom - top))
 	if _popup != null:
 		# Konflikt-Popup immer ganz oben, Panel mittig in der Safe Area (G5.4).
 		move_child(_popup, get_child_count() - 1)
 		_popup.place(size, Rect2(left, top, right - left, bottom - top))
+	if _tutorial != null:
+		# Tutorial ganz oben, auch über dem Konflikt-Popup (T.3/T.5): Aussparung und Sprechblase in der Safe Area.
+		move_child(_tutorial, get_child_count() - 1)
+		_tutorial.place(size, Rect2(left, top, right - left, bottom - top))
 
 
 # --- Fenster ----------------------------------------------------------------------
@@ -311,24 +311,43 @@ func _on_dim_input(event: InputEvent) -> void:
 ## danach ein wartendes Tutorial (T.3).
 func _on_window_closed() -> void:
 	_close_window()
+	_game.tutorials.report("first_window_closed")
 	_open_due_reminder()
 	_open_due_tutorial()
 
 
-## Reihenfolge Ereignis → Kalender → Erinnerung → Tutorial (T.3): Das Tutorial wartet, solange eines dieser Fenster
-## oder das Konflikt-Popup offen ist; über einem Ortsfenster darf es liegen (dort zeigt es z. B. auf „Hinfahren“).
+## Reihenfolge Ereignis → Kalender → Erinnerung → Tutorial (T.3): Steht eines dieser Fenster oder das Konflikt-Popup,
+## wartet ein Tutorial – außer es erklärt genau dieses Fenster, d. h. sein Ziel liegt darin (T.5, z. B. Kalender-
+## Tutorial mit Pfeil auf die Jetzt-Linie). Über einem Ortsfenster darf es immer liegen (z. B. „Hinfahren“).
 ## Welches fällig ist, entscheidet das TutorialSystem; „Verstanden“ markiert es als gesehen, dann kommt das nächste.
 func _open_due_tutorial() -> void:
-	if not show_tutorials or _tutorial != null or _popup != null or _game.events.has_pending() \
-			or _window_kind in ["event", "calendar", "reminder"]:
+	if not show_tutorials or _tutorial != null:
 		return
 	var tutorial_id := _game.tutorials.get_next_due()
 	if tutorial_id.is_empty():
 		return
-	_tutorial = TutorialOverlayScript.new(_game.tutorials.get_catalog().get_definition(tutorial_id), self)
+	var definition = _game.tutorials.get_catalog().get_definition(tutorial_id)
+	var blocking: Control = _popup
+	if blocking == null and _window_kind in ["event", "calendar", "reminder"]:
+		blocking = _window
+	if blocking != null:
+		_layout()  # Inhalt des Fensters steht, bevor das Ziel gesucht wird
+		if TutorialOverlayScript.find_target(blocking, definition.ui_target) == null:
+			return
+	elif _game.events.has_pending():
+		return
+	_tutorial = TutorialOverlayScript.new(definition, self)
 	_tutorial.confirmed.connect(_on_tutorial_confirmed)
 	add_child(_tutorial)
 	_layout()
+
+
+## Schließt ein offenes Tutorial, ohne es als gesehen zu markieren (es bleibt fällig).
+func close_tutorial() -> void:
+	if _tutorial != null:
+		remove_child(_tutorial)
+		_tutorial.queue_free()
+		_tutorial = null
 
 
 func _on_tutorial_confirmed(tutorial_id: String) -> void:
@@ -399,6 +418,7 @@ func _open_appointments() -> void:
 	var content := CalendarWindowScript.new()
 	content.setup(self, _game)
 	_open_window("calendar", content)
+	_open_due_tutorial()
 
 
 func _open_obligations() -> void:
@@ -473,9 +493,11 @@ func _guard(minutes: int, action_name: String, run: Callable, except_id: String 
 	_popup = ConflictPopupScript.new("Termin verpassen?", action_line, lines, run)
 	if haptics != null:
 		haptics.warn("conflict")
+	_game.tutorials.report("first_conflict_popup")
 	_popup.closed.connect(func() -> void: _popup = null)
 	add_child(_popup)
 	_layout()
+	_open_due_tutorial()
 
 
 func _close_popup() -> void:
@@ -628,6 +650,8 @@ func on_event_option_pressed(instance_id: String, option_id: String, option_labe
 ## Rückmeldung nach einer Aktion, inklusive verpasster Termine und Tagesabschlüsse.
 ## changed_anyway (G5.7): gescheitert, aber der Zustand hat sich geändert (angekommen) – trotzdem speichern.
 func _after_action(reason: String, success_text: String, changed_anyway: bool = false) -> void:
+	if reason.is_empty():
+		_game.tutorials.report("first_action")
 	if reason.is_empty() or changed_anyway:
 		var text := "%s – jetzt %s." % [success_text, _game.time.format_clock()] if reason.is_empty() \
 				else "%s – jetzt %s." % [reason.trim_suffix("."), _game.time.format_clock()]
@@ -682,6 +706,8 @@ func _on_toast_input(event: InputEvent) -> void:
 
 func _refresh() -> void:
 	_hud.refresh(_game)
+	if _game.time.get_day() > 1:
+		_game.tutorials.report("first_new_day")
 	_company_button.visible = _game.company.is_founded()
 	# Zählerpunkte (G5.8): Zählungen aus DayPlan bzw. ObligationSystem. Offene Ereignisse bekommen keinen Punkt –
 	# sie öffnen sofort ihr eigenes Fenster, das sich erst nach der Entscheidung schließt.

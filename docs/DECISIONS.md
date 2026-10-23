@@ -648,10 +648,11 @@ der GameState-Konstruktor (der auch beim Laden läuft).
 
 ## 063 – Tutorial-Anzeige (T.3)
 Das Overlay ist kein Fenster der Ein-Fenster-Regel, sondern liegt darüber: Es muss auf Elemente IN Fenstern zeigen
-können (z. B. „Hinfahren“ im Ortsfenster). Deshalb wartet es nur auf die Fenster, die vorrangig sind (Ereignis,
-Kalender, Erinnerung) und auf das Konflikt-Popup; über einem Ortsfenster darf es liegen. Wörtlich nach Ticket gilt das
-auch für ein künftiges Kalender-Tutorial: Es erscheint nach dem Schließen des Kalenders – soll es auf Elemente im
-Kalender zeigen, muss das in T.5 neu entschieden werden. Das Platzhalter-Tutorial „Karte“ zeigt auf nichts
+können (z. B. „Hinfahren“ im Ortsfenster). Über einem Ortsfenster darf es immer liegen. Bei den vorrangigen Fenstern
+(Ereignis, Kalender, Erinnerung) und beim Konflikt-Popup wartet es – außer es erklärt genau dieses Fenster, d. h. sein
+Ziel liegt darin (geändert in T.5 auf Wunsch des Game Directors: das Kalender-Tutorial liegt über dem offenen Kalender
+und zeigt auf die Jetzt-Linie; ebenso Erinnerung, Konflikt-Popup, Ereignis). Ein Tutorial ohne Ziel oder mit Ziel
+anderswo wartet weiter, bis diese Fenster zu sind. Das Platzhalter-Tutorial „Karte“ zeigt auf nichts
 (`ui_target` leer statt `CityMap`): Die Karte füllt den ganzen Bildschirm, eine Aussparung ließe keinen Platz für die
 Sprechblase. Die Lage der Sprechblase: unter, über, rechts, links vom Ziel – die erste, die ganz in der Safe Area liegt
 und das Ziel nicht verdeckt (Test auf allen 4 Geräteklassen). „Verstanden“ speichert sofort (gesehen bleibt gesehen,
@@ -671,3 +672,18 @@ Spoiler), auch Tutorials, die per Migration als gesehen gelten; sortiert nach Be
 Erreichbar über Zahnrad → Einstellungen → „Hilfe / Lexikon“. Die Einstellungsseite wurde mit dem dritten Schalter
 und zwei Buttons zu hoch fürs Querformat (719 statt höchstens 632 px) – Buttons stehen jetzt paarweise in Zeilen,
 Abstände 8 statt 12 px. Kein neues Spielstand-Format: Die gesehenen IDs aus T.2 reichen.
+
+## 065 – Tutorial-Texte Grundlagen (T.5)
+13 Tutorials, eines je Grundlagen-Mechanik. Zum Spielstart nur zwei („Willkommen in Marbella“, „Orte antippen“), der
+Rest kommt beim ersten Benutzen. Dafür sechs neue Auslöser: `first_window_closed` (erstes Schließen eines Fensters →
+„Karte bewegen“, dann ist man zurück auf der Karte), `first_action` (erste erfolgreiche Aktion → Energie/Stimmung),
+`first_conflict_popup`, `first_wait_offered` und `first_trip_offered` (erst wenn der Button wirklich frei angeboten
+wird), `first_new_day` (ab Tag 2 → Speichern/Fortsetzen; kommt nach Ereignis und Kalender des Tages). Wer ein Ortsfenster
+aus der Ferne zuerst öffnet, sieht dort nacheinander bis zu drei Erklärungen (Kacheln, Hinfahren, Hinfahren und
+starten) – sie gehören zu genau diesem Bildschirm. `ui_target` darf „*“ enthalten (erstes sichtbares passendes
+Element, z. B. `Tile_*`, `TileTripIcon_*`, `WaitButton*`), weil Kacheln und Buttons je Ort anders heißen. Konflikt-
+und Ereignis-Tutorial zeigen auf den Titel des Popups bzw. Fensters: Die Konfliktkarte und die Ereignis-Optionen sind
+so breit und mittig, dass auf keinem Gerät Platz für eine Sprechblase daneben bleibt. Jedes Tutorial wird in seiner
+echten Situation auf allen 4 Geräteklassen geprüft (`tests/test_tutorial_texts.gd`). Lexikon (Korrektur): eigener
+Bildschirm mit festem rundem Schließen-Button oben rechts, Liste in Spielreihenfolge. Einstellungen (Korrektur): nur
+„Hilfe / Lexikon“ voll rot, „Spielstand löschen“ mit rotem Rahmen (Gefahr), „Tutorials zurücksetzen“ und „Zurück“ grau.

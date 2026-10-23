@@ -114,12 +114,19 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   Tests). `GameScreen._open_due_tutorial()` nach `_refresh()`, nach dem Öffnen eines Orts, nach dem Schließen eines
   Fensters und nach „Später“: wartet, solange ein Ereignis offen ist, der Kalender oder die Erinnerung steht oder das
   Konflikt-Popup offen ist; über einem Ortsfenster darf es liegen. „Verstanden“ → `mark_seen`, speichern, nächstes.
+- T.5: 13 Tutorials, 13 Auslöser (neu: `first_window_closed`, `first_action`, `first_conflict_popup`,
+  `first_wait_offered`, `first_trip_offered`, `first_new_day` – gemeldet von Spielansicht, Ortsfenster, Kalender).
+  `ui_target` mit „*“ → `TutorialOverlay.find_target()` nimmt das erste sichtbare passende Control. Steht ein
+  vorrangiges Fenster (Ereignis/Kalender/Erinnerung) oder das Konflikt-Popup, zeigt `_open_due_tutorial()` nur ein
+  Tutorial, dessen Ziel darin liegt; das Overlay liegt dann darüber (in `_layout()` nach dem Popup einsortiert).
+  `close_tutorial()` schließt ohne „gesehen“ (Tests).
 - Einstellungen und Lexikon (T.4): Geräte-Schalter `tutorials` (settings.cfg, Standard an) → `GameScreen.show_tutorials`;
   aus = `_open_due_tutorial()` zeigt nichts, das TutorialSystem merkt weiter. „Tutorials zurücksetzen“ →
   `App._reset_tutorials()` → `TutorialSystem.reset_seen()` (gesehen und `seen_triggers` leer, `first_game_start` gilt als
   gemeldet) im Spiel im Speicher oder im geladenen Spielstand, dann speichern. „Hilfe / Lexikon“
-  (`scripts/ui/lexicon_screen.gd`, Menü-Bildschirm mit Scrollbereich): `TutorialSystem.get_seen()` (nach mechanic,
-  order, ID), Titel als Button, Antippen klappt den Text auf.
+  (`scripts/ui/lexicon_screen.gd`, seit T.5 eigener Bildschirm über die Safe Area: Titelzeile mit rundem
+  Schließen-Button, darunter `LexiconScroll`): `TutorialSystem.get_seen()` in Spielreihenfolge (order, ID), Titel als
+  Button, Antippen klappt den Text auf. Button-Stile: `UiStyle.style_neutral_button`, `style_danger_button`.
 - TutorialSystem (T.2, `scripts/systems/tutorial_system.gd`, im GameState als `tutorials`): `report(trigger)` merkt
   einen Auslöser (unbekannte → Fehler, nichts passiert; mehrfach schadet nicht; Signal `tutorial_due` beim ersten
   Mal). Fällig (`get_due()`, nach `order`): Auslöser gemeldet, nicht gesehen, alle `requires` gesehen.

@@ -9,7 +9,8 @@ extends RefCounted
 ##   trigger    eine ID aus TRIGGERS
 ##   title      kurzer Titel
 ##   text       kurzer Lesetext (höchstens MAX_TEXT_LENGTH Zeichen, etwa 2–3 Sätze)
-##   ui_target  stabile UI-ID (Knotenname, A–Z, a–z, 0–9, _) des hervorgehobenen Elements, "" = keins
+##   ui_target  stabile UI-ID (Knotenname, A–Z, a–z, 0–9, _) des hervorgehobenen Elements, "" = keins;
+##              „*“ als Platzhalter (T.5): das erste sichtbare passende Element, z. B. „Tile_*“
 ##   order      ganze Zahl ≥ 0, Reihenfolge bei mehreren gleichzeitig fälligen (kleiner zuerst)
 ##   requires   Liste von Tutorial-IDs, die vorher gesehen sein müssen (darf leer sein; keine Zyklen)
 ## Noch nicht in GameData eingebunden – das TutorialSystem (T.2) lädt den Katalog.
@@ -28,13 +29,21 @@ const TRIGGERS := [
 	"first_appointment_reminder",
 	"first_event",
 	"first_obligation_due",
+	# T.5
+	"first_window_closed",
+	"first_action",
+	"first_conflict_popup",
+	"first_wait_offered",
+	"first_trip_offered",
+	"first_new_day",
 ]
 const MAX_TEXT_LENGTH := 240
 
 var errors: PackedStringArray = []
 
 var _definitions: Array = []
-var _ui_target_regex := RegEx.create_from_string("^[A-Za-z0-9_]*$")
+## T.5: „*“ erlaubt (Muster, z. B. „Tile_*“ = erste sichtbare Kachel), weil manche Ziele je Ort anders heißen.
+var _ui_target_regex := RegEx.create_from_string("^[A-Za-z0-9_*]*$")
 var _mechanic_regex := RegEx.create_from_string("^[a-z0-9_]+$")
 
 
@@ -136,7 +145,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int):
 				MAX_TEXT_LENGTH])
 	var target: Variant = entry.get("ui_target")
 	if typeof(target) != TYPE_STRING or _ui_target_regex.search(target) == null:
-		reader.errors.append("%s: 'ui_target' fehlt oder ist ungültig (Text aus A–Z, a–z, 0–9, _; leer erlaubt)." % where)
+		reader.errors.append("%s: 'ui_target' fehlt oder ist ungültig (Text aus A–Z, a–z, 0–9, _, *; leer erlaubt)." % where)
 	else:
 		definition.ui_target = target
 	definition.order = reader.int_field(entry, "order", where, true)

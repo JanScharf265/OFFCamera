@@ -106,6 +106,11 @@ func _ready() -> void:
 	for button in [_delete_button, back_button]:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+	# T.5: Nur der wichtigste Button („Hilfe / Lexikon“) bleibt voll rot; Löschen nur mit rotem Rahmen (Gefahr),
+	# Zurücksetzen und Zurück neutral grau.
+	UiStyle.style_danger_button(_delete_button)
+	UiStyle.style_neutral_button(back_button)
+	UiStyle.style_neutral_button(_reset_button)
 
 
 ## Zurücksetzen mit Rückfrage (zweimal tippen, wie beim Löschen).
