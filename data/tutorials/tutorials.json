@@ -420,5 +420,15 @@
 		"ui_target": "LaunderButton",
 		"order": 460,
 		"requires": []
+	},
+	{
+		"id": "tut_black_spending",
+		"mechanic": "black_spending",
+		"trigger": "first_black_spending_offered",
+		"title": "Bar bezahlen",
+		"text": "Schwarzgeld kannst du im Alltag ausgeben – für Aktivitäten und Ausrüstung, nicht für Miete oder die Firma. Aber Bargeld fällt auf: Jede Zahlung macht etwas Hitze.",
+		"ui_target": "BlackSpendingToggle",
+		"order": 470,
+		"requires": []
 	}
 ]

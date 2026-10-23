@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 29
+const SAVE_VERSION := 30
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -290,6 +290,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		26: return _migrate_26_to_27(game)
 		27: return _migrate_27_to_28(game)
 		28: return _migrate_28_to_29(game)
+		29: return _migrate_29_to_30(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -562,6 +563,12 @@ static func _migrate_27_to_28(game: Dictionary) -> String:
 ## 28 → 29 (U.16): Waschen – noch nichts gewaschen.
 static func _migrate_28_to_29(game: Dictionary) -> String:
 	game["laundering"] = {"day": 0, "today_cents": 0, "total_cents": 0, "count": 0}
+	return ""
+
+
+## 29 → 30 (U.17): Schwarzgeld ausgeben – Schalter aus.
+static func _migrate_29_to_30(game: Dictionary) -> String:
+	game["black_spending"] = {"enabled": false, "day": 0, "spent_today_cents": 0}
 	return ""
 
 

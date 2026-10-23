@@ -21,6 +21,9 @@ signal equipment_bought(equipment_id: String, level: int)
 
 const EXPENSE_CATEGORY := "equipment"
 
+## U.17: Konto-Wahl für Ausgaben (Schwarzgeld oder privat) und Meldung danach
+var _choose_account: Callable
+var _record_black: Callable
 var _time: TimeSystemScript
 var _ledger: LedgerSystemScript
 var _locations: LocationSystemScript
@@ -84,7 +87,7 @@ func check_buy(equipment_id: String) -> String:
 	if definition.location != _locations.get_current():
 		var location := _locations.get_catalog().get_definition(definition.location)
 		return "Nur vor Ort erhältlich: %s." % (location.display_name if location != null else definition.location)
-	if not _ledger.can_afford(next["price_cents"]):
+	if not _ledger.can_afford(next["price_cents"], _account_for(next["price_cents"])):
 		return "Nicht genug Geld (kostet %s)." % LedgerSystemScript.format_cents(next["price_cents"])
 	return ""
 
@@ -97,12 +100,15 @@ func buy(equipment_id: String) -> String:
 	var definition := _catalog.get_definition(equipment_id)
 	var level := get_level(equipment_id) + 1
 	var data := definition.get_level(level)
+	var account := _account_for(data["price_cents"])
 	var entry := _ledger.post(-data["price_cents"], EXPENSE_CATEGORY,
 			"%s: %s" % [definition.display_name, data["name"]], "equipment",
-			"%s:%d" % [equipment_id, level], "equipment:%s:%d" % [equipment_id, level])
+			"%s:%d" % [equipment_id, level], "equipment:%s:%d" % [equipment_id, level], false, account)
 	if entry == null:
 		push_error("EquipmentSystem: Buchung für '%s' Stufe %d abgelehnt." % [equipment_id, level])
 		return "Die Buchung ist fehlgeschlagen."
+	if account == LedgerSystemScript.BLACK and _record_black.is_valid():
+		_record_black.call(data["price_cents"], "%s: %s" % [definition.display_name, data["name"]])
 	_levels[equipment_id] = level
 	equipment_bought.emit(equipment_id, level)
 	return ""
@@ -135,3 +141,13 @@ func restore(data: Dictionary) -> String:
 	_levels = levels
 	restore_notices = notices
 	return ""
+
+
+## U.17: Schwarzgeld ausgeben – BlackSpendingSystem.account_for / record (vom GameState).
+func set_black_spending(account_for: Callable, record: Callable) -> void:
+	_choose_account = account_for
+	_record_black = record
+
+
+func _account_for(cost_cents: int) -> String:
+	return _choose_account.call(cost_cents) if _choose_account.is_valid() else LedgerSystemScript.PRIVATE

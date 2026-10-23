@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–7 sowie G1 und G2 abgeschlossen; der gebündelte iPhone-Test von Build 0.7.0 ist bestanden (13.10.2026, 338/338 Tests + 3/3 lange Tests grün). Neue Ausrichtung: Die Unterwelt wird das Hauptspiel (`docs/VISION.md`). Pakete G3 (Icon/Logo), G4 (UI-Layout), G5 (Komfort) und T (Tutorials, 23 Erklärungen mit Abdeckungstest) sind fertig (23.10.2026); U (Unterwelt) läuft – U.1–U.16 fertig (Schwarzgeld, Organisation/Hitze, Einstieg am Hafen, Story-Aufträge, Produkte, Lieferant, Kredit, Versteck, Verkaufen, Crew, Dealer-Abrechnung, Gebiete und Unterwelt-Ansicht, Gebiete übernehmen, Rivalen, Crew-Folgen, Waschen; 639/639 Tests grün, Spielstand Version 29), als Nächstes U.17, dann Phase 8.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–7 sowie G1 und G2 abgeschlossen; der gebündelte iPhone-Test von Build 0.7.0 ist bestanden (13.10.2026, 338/338 Tests + 3/3 lange Tests grün). Neue Ausrichtung: Die Unterwelt wird das Hauptspiel (`docs/VISION.md`). Pakete G3 (Icon/Logo), G4 (UI-Layout), G5 (Komfort) und T (Tutorials, 23 Erklärungen mit Abdeckungstest) sind fertig (23.10.2026); U (Unterwelt) läuft – U.1–U.17 fertig (Schwarzgeld, Organisation/Hitze, Einstieg am Hafen, Story-Aufträge, Produkte, Lieferant, Kredit, Versteck, Verkaufen, Crew, Dealer-Abrechnung, Gebiete und Unterwelt-Ansicht, Gebiete übernehmen, Rivalen, Crew-Folgen, Waschen, Schwarzgeld ausgeben; 647/647 Tests grün, Spielstand Version 30), als Nächstes U.18, dann Phase 8.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |

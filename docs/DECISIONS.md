@@ -952,3 +952,12 @@ Nebenbei: Die Gruppe „Ansicht“ (U.12) hat keine Überschrift mehr – mit ge
 länger, und auf dem iPhone 13/14 lagen die Gruppen 1 px übereinander (Layout-Test jetzt mit Firma). Die Erklärung der
 Hitze im Organisations-Fenster folgt der neuen Regel („Jeder Tag kühlt ein wenig ab.“).
 Vorläufige Werte, Balancing in Phase 8.
+
+## 088 – Schwarzgeld ausgeben (U.17)
+„Eingeschränkt bzw. erhöht Hitze“ als ein Schalter statt einer Kontowahl bei jedem Kauf: Ist „Mit Schwarzgeld
+bezahlen“ an, zahlen nur Alltagsausgaben (Aktivitäten, Ausrüstung) aus Schwarzgeld – solange es reicht und höchstens
+300 € am Tag; sonst automatisch privat (nie gesperrt wegen des Schalters). Miete, Fristen, Firma, Termine und
+Ereignisse zahlen nie aus Schwarzgeld (Firmengeld nur über das Waschen, U.16). Jede Zahlung aus Schwarzgeld: Hitze
++2 je 100 €, mindestens +1; die Rückmeldung nennt sie („Bezahlt mit Schwarzgeld: … (Hitze +1)“). Der Schalter ist ein
+Spielzustand (bestimmt Geldflüsse) und steht deshalb im Spielstand, nicht in den Geräte-Einstellungen. Unterwelt-
+Ausgaben (Lieferant, Versteck, Löhne, Rivalen) zahlten schon vorher Schwarzgeld zuerst. Vorläufige Werte, Phase 8.

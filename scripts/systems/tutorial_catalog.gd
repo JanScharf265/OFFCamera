@@ -63,6 +63,7 @@ const TRIGGERS := [
 	"first_rivals_open",
 	"first_crew_risk_shown",
 	"first_laundering_offered",
+	"first_black_spending_offered",
 ]
 const MAX_TEXT_LENGTH := 240
 

@@ -111,6 +111,8 @@ func _refresh_supply() -> void:
 		var crew_button: Button = _screen.scroll_button("Crew (%d)" % _game.crew.get_members().size(), "CrewButton")
 		crew_button.pressed.connect(_screen.open_crew)
 		_supply_box.add_child(crew_button)
+	if _game.black_spending.is_available():
+		_add_black_spending()
 	if _game.laundering.is_available():
 		_add_laundering()
 	if _game.rivals.is_available():
@@ -217,3 +219,25 @@ func _change_launder(delta: int) -> void:
 
 func _launder() -> void:
 	_screen.on_launder(_launder_cents)
+
+
+## U.17: Schalter „Alltag mit Schwarzgeld bezahlen“ – Regeln und Zustand aus dem BlackSpendingSystem.
+func _add_black_spending() -> void:
+	var spending = _game.black_spending
+	var rules = spending.get_rules()
+	_supply_box.add_child(UiStyle.section_label("Schwarzgeld im Alltag"))
+	var terms := UiStyle.wrapping_label("Aktivitäten und Ausrüstung · heute noch %s · Hitze +%d je 100 €, mindestens +%d je Zahlung · Miete, Fristen und Firma nie" % [
+			LedgerSystemScript.format_cents(spending.remaining_today()), rules.get_value("heat_per_100_euro"),
+			rules.get_value("min_heat")], UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+	terms.name = "BlackSpendingTerms"
+	_supply_box.add_child(terms)
+	var on: bool = spending.is_enabled()
+	var toggle: Button = _screen.scroll_button("Mit Schwarzgeld bezahlen: An" if on else "Mit Schwarzgeld bezahlen: Aus",
+			"BlackSpendingToggle")
+	if not on:
+		UiStyle.style_neutral_button(toggle)
+	toggle.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+	toggle.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+	toggle.pressed.connect(_screen.on_black_spending_toggle.bind(not on))
+	_supply_box.add_child(toggle)
+	_game.tutorials.report("first_black_spending_offered")

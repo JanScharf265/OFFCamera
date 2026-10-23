@@ -1,0 +1,5 @@
+{
+	"daily_limit_cents": 30000,
+	"heat_per_100_euro": 2,
+	"min_heat": 1
+}

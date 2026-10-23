@@ -51,6 +51,7 @@ const NAMES := {
 	"rivals": "Rivalen-Banden (Stärke, Aggression, Konflikt, Verhandlung, Waffenstillstand)",
 	"crew_risks": "Crew-Folgen (Verhaftung, Verrat, Spitzel, Abwerbung, Feuern)",
 	"laundering": "Waschen über die Tarnfirma (Gebühr, Tageslimit, Hitze)",
+	"black_spending": "Schwarzgeld im Alltag ausgeben (eingeschränkt, Hitze)",
 }
 
 

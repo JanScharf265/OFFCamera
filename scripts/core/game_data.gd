@@ -27,6 +27,7 @@ const DistrictCatalogScript := preload("res://scripts/systems/district_catalog.g
 const TerritorySystemScript := preload("res://scripts/systems/territory_system.gd")
 const RivalSystemScript := preload("res://scripts/systems/rival_system.gd")
 const LaunderingSystemScript := preload("res://scripts/systems/laundering_system.gd")
+const BlackSpendingSystemScript := preload("res://scripts/systems/black_spending_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -63,6 +64,8 @@ var territory := TerritorySystemScript.Rules.new()
 var rivals := RivalSystemScript.Catalog.new()
 ## Waschregeln (U.16)
 var laundering := LaunderingSystemScript.Rules.new()
+## Regeln fürs Schwarzgeld-Ausgeben (U.17)
+var black_spending := BlackSpendingSystemScript.Rules.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -75,7 +78,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering, black_spending]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.
@@ -83,7 +86,8 @@ func load_all() -> bool:
 				else CrewSystemScript.DEFAULT_PATH if catalog == crew \
 				else TerritorySystemScript.DEFAULT_PATH if catalog == territory \
 				else RivalSystemScript.DEFAULT_PATH if catalog == rivals \
-				else LaunderingSystemScript.DEFAULT_PATH if catalog == laundering else catalog.DEFAULT_PATH
+				else LaunderingSystemScript.DEFAULT_PATH if catalog == laundering \
+				else BlackSpendingSystemScript.DEFAULT_PATH if catalog == black_spending else catalog.DEFAULT_PATH
 		contents += FileAccess.get_file_as_string(path)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():

@@ -23,6 +23,9 @@ const CompanySystemScript := preload("res://scripts/systems/company_system.gd")
 
 signal activity_completed(activity_id: String)
 
+## U.17: Konto-Wahl für Ausgaben (Schwarzgeld oder privat) und Meldung danach
+var _choose_account: Callable
+var _record_black: Callable
 var _time: TimeSystemScript
 var _ledger: LedgerSystemScript
 var _stats: PlayerStatsScript
@@ -76,7 +79,7 @@ func _check(activity_id: String, assume_there: bool, start_minutes: int) -> Stri
 	var energy_change := definition.get_effect("energy")
 	if energy_change < 0 and _stats.energy + energy_change < 0:
 		return "Zu wenig Energie (benötigt %d)." % -energy_change
-	if definition.money_cents < 0 and not _ledger.can_afford(-definition.money_cents):
+	if definition.money_cents < 0 and not _ledger.can_afford(-definition.money_cents, _account_for(-definition.money_cents)):
 		return "Nicht genug Geld (kostet %s)." % LedgerSystemScript.format_cents(-definition.money_cents)
 	return ""
 
@@ -89,14 +92,27 @@ func start(activity_id: String) -> String:
 
 	var definition := _catalog.get_definition(activity_id)
 	if definition.money_cents != 0:
+		var account := _account_for(-definition.money_cents) if definition.money_cents < 0 else LedgerSystemScript.PRIVATE
 		var entry := _ledger.post(definition.money_cents, definition.category,
-				definition.display_name, "activity", definition.id)
+				definition.display_name, "activity", definition.id, "", false, account)
 		if entry == null:
 			push_error("ActivitySystem: Buchung für '%s' trotz Prüfung abgelehnt." % activity_id)
 			return "Die Buchung ist fehlgeschlagen."
+		if account == LedgerSystemScript.BLACK and _record_black.is_valid():
+			_record_black.call(-definition.money_cents, definition.display_name)
 	_stats.apply(definition.effects)
 	if not definition.company_effects.is_empty():
 		_company.apply(definition.company_effects, "activity", definition.display_name, definition.id)
 	_time.advance(definition.duration_minutes)
 	activity_completed.emit(definition.id)
 	return ""
+
+
+## U.17: Schwarzgeld ausgeben – BlackSpendingSystem.account_for / record (vom GameState).
+func set_black_spending(account_for: Callable, record: Callable) -> void:
+	_choose_account = account_for
+	_record_black = record
+
+
+func _account_for(cost_cents: int) -> String:
+	return _choose_account.call(cost_cents) if _choose_account.is_valid() else LedgerSystemScript.PRIVATE

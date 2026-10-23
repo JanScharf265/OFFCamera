@@ -219,6 +219,10 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 			app.game.ledger.post(200000, "test", "Start", "test", "t", "", false, "black")
 			_screen(app).call("_refresh")
 			_press(app, "OrganisationButton")
+		"first_black_spending_offered":
+			assert_eq(app.game.organisation.found("Los Lobos"), "")
+			_screen(app).call("_refresh")
+			_press(app, "OrganisationButton")
 		"first_obligation_due":
 			_jump(app, TimeSystemScript.at(8, 9))
 			_resolve_events(app)
@@ -326,7 +330,7 @@ func test_data_rules() -> void:
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
 			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
-			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion", "underworld_view", "districts", "district_control", "rivals", "crew_risks", "laundering"]:
+			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion", "underworld_view", "districts", "district_control", "rivals", "crew_risks", "laundering", "black_spending"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 
@@ -414,7 +418,8 @@ func test_new_triggers_are_reported() -> void:
 			["first_view_toggle_shown", "tut_underworld_view"], ["first_underworld_view", "tut_districts"],
 			["first_district_window", "tut_district_control"],
 			["first_rivals_open", "tut_rivals"], ["first_crew_risk_shown", "tut_crew_risks"],
-			["first_laundering_offered", "tut_laundering"]]:
+			["first_laundering_offered", "tut_laundering"],
+			["first_black_spending_offered", "tut_black_spending"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

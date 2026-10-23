@@ -33,6 +33,7 @@ const CrewSystemScript := preload("res://scripts/systems/crew_system.gd")
 const TerritorySystemScript := preload("res://scripts/systems/territory_system.gd")
 const RivalSystemScript := preload("res://scripts/systems/rival_system.gd")
 const LaunderingSystemScript := preload("res://scripts/systems/laundering_system.gd")
+const BlackSpendingSystemScript := preload("res://scripts/systems/black_spending_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -83,6 +84,8 @@ var territory: TerritorySystemScript
 var rivals: RivalSystemScript
 ## Waschen über die Tarnfirma (U.16)
 var laundering: LaunderingSystemScript
+## Schwarzgeld ausgeben (U.17)
+var black_spending: BlackSpendingSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -130,6 +133,9 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	events.set_crew_handler(crew.apply_event_action)
 	events.add_text_context(crew.text_context)
 	laundering = LaunderingSystemScript.new(time, ledger, data.laundering, organisation, company)
+	black_spending = BlackSpendingSystemScript.new(time, ledger, data.black_spending, organisation)
+	activities.set_black_spending(black_spending.account_for, black_spending.record)
+	equipment.set_black_spending(black_spending.account_for, black_spending.record)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, obligations, events])
@@ -179,6 +185,7 @@ func to_dict() -> Dictionary:
 		"territory": territory.to_dict(),
 		"rivals": rivals.to_dict(),
 		"laundering": laundering.to_dict(),
+		"black_spending": black_spending.to_dict(),
 	}
 
 
@@ -187,7 +194,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales", "crew", "territory", "rivals", "laundering"]:
+			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales", "crew", "territory", "rivals", "laundering", "black_spending"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -231,6 +238,8 @@ func restore(saved: Dictionary) -> String:
 		error = rivals.restore(saved["rivals"])
 	if error.is_empty():
 		error = laundering.restore(saved["laundering"])
+	if error.is_empty():
+		error = black_spending.restore(saved["black_spending"])
 	if error.is_empty():
 		error = missions.restore(saved["missions"])
 	if error.is_empty():

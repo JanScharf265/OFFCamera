@@ -633,6 +633,14 @@ func _on_district_pressed(district_id: String) -> void:
 	_open_due_tutorial()
 
 
+## U.17: Schalter „Alltag mit Schwarzgeld bezahlen“ (keine Spielzeit, keine Buchung – nur die Wahl).
+func on_black_spending_toggle(on: bool) -> void:
+	if _was_scroll():
+		return
+	_game.black_spending.set_enabled(on)
+	_after_action("", "Alltag zahlst du jetzt %s" % ("mit Schwarzgeld, solange es reicht" if on else "wieder vom Privatkonto"))
+
+
 ## U.16: Waschen über das LaunderingSystem – ohne Spielzeit.
 func on_launder(amount_cents: int) -> void:
 	if _was_scroll():
@@ -1039,6 +1047,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 		for notice in _game.territory.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.rivals.take_notices():
+			text += "\n%s" % notice
+		for notice in _game.black_spending.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice
