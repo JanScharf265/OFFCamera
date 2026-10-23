@@ -56,6 +56,8 @@ const TRANSFER_STEP_CENTS := 10000
 ## Kurze Hinweise verschwinden nach dieser Zeit (Echtzeit, nur Anzeige); lange bleiben bis zum Antippen.
 const TOAST_SECONDS := 4.0
 const TOAST_STICKY_LENGTH := 90
+## Über einem offenen Fenster zeigt die Rückmeldung höchstens so viele Zeilen (U.7, GD-Entscheidung) – der Rest per Tipp.
+const TOAST_LINES_OVER_WINDOW := 3
 const GAP := 16.0
 ## Icons (Kenney „Game Icons“, CC0). Fehlt eine Datei, bleibt der Button ohne Icon.
 const ICON_DIR := "res://assets/kenney/game-icons/"
@@ -108,6 +110,10 @@ var _tutorial: TutorialOverlayScript
 var show_tutorials := true
 ## Wie viele Tutorials gerade hintereinander kamen (T.6, höchstens TUTORIAL_CHAIN_MAX)
 var _tutorial_chain := 0
+## Rückmeldung: ganzer Text, ob er gerade gekürzt ist und ob der Spieler „alle anzeigen“ angetippt hat
+var _toast_text := ""
+var _toast_truncated := false
+var _toast_expanded := false
 ## T.6b: Info-Blase mit der Ortsbeschreibung; null = keine
 var _location_info: Control
 
@@ -260,6 +266,8 @@ func _layout() -> void:
 	# Umbrechende Labels berechnen ihre Mindesthöhe für die Breite, die sie gerade haben (anfangs ~1 px →
 	# riesig). Breite setzen, Umbruch erzwingen (get_line_count) und Mindestgröße neu berechnen lassen –
 	# dann stimmt die Höhe sofort, nicht erst ein Bild später (gemessen in Phase 7).
+	if _toast.visible:
+		_apply_toast_text()  # Fenster auf/zu ändert, ob gekürzt wird
 	_feedback_label.custom_minimum_size.x = toast_width - 28.0
 	_feedback_label.size = Vector2(toast_width - 28.0, 0.0)
 	_feedback_label.get_line_count()
@@ -850,7 +858,9 @@ func show_error(text: String) -> void:
 
 
 func _show_feedback(text: String, color: Color) -> void:
-	_feedback_label.text = text
+	_toast_text = text
+	_toast_expanded = false
+	_apply_toast_text()
 	_feedback_label.add_theme_color_override("font_color", color)
 	_toast.visible = true
 	var sticky := text.length() > TOAST_STICKY_LENGTH or "\n" in text
@@ -863,9 +873,29 @@ func _show_feedback(text: String, color: Color) -> void:
 	_layout()
 
 
+## Über einem offenen Fenster höchstens TOAST_LINES_OVER_WINDOW Zeilen, dazu „… alle anzeigen (+N)“; ohne Fenster
+## oder nach dem Antippen der ganze Text.
+func _apply_toast_text() -> void:
+	var lines := _toast_text.split("\n")
+	if _window != null and not _toast_expanded and lines.size() > TOAST_LINES_OVER_WINDOW:
+		var shown := lines.slice(0, TOAST_LINES_OVER_WINDOW)
+		shown.append("… alle anzeigen (+%d)" % (lines.size() - TOAST_LINES_OVER_WINDOW))
+		_feedback_label.text = "\n".join(shown)
+		_toast_truncated = true
+	else:
+		_feedback_label.text = _toast_text
+		_toast_truncated = false
+
+
+## Antippen: gekürzt → alles zeigen, sonst schließen.
 func _on_toast_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and not event.pressed:
-		_toast.visible = false
+		if _toast_truncated:
+			_toast_expanded = true
+			_apply_toast_text()
+			_layout()
+		else:
+			_toast.visible = false
 
 
 # --- Anzeige ----------------------------------------------------------------------

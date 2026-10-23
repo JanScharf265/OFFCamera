@@ -808,5 +808,5 @@ das Ereignis „Besuch“ (zwei Männer vor der Haustür) – Gewalt nur angedeu
 Stabilität). Dafür können Ereignis-Antworten jetzt die Organisation verändern. Gefunden und behoben bei der
 Selbstprüfung: Fälligkeitsdatum bei Sprüngen über mehrere Tage, falscher Satz „auf dem Schwarzgeld“, ein Absturz beim
 Laden beschädigter Fristen (langer Störungstest), und Tutorial-Ziele unterhalb des sichtbaren Fensterbereichs (werden
-jetzt ins Bild gescrollt). Offen: Eine lange Rückmeldung (z. B. nach einem Sprung über mehrere Tage) liegt seit U.6 über
-dem offenen Fenster und verdeckt es, bis man sie antippt.
+jetzt ins Bild gescrollt). Nachtrag (GD bestätigt die Empfehlung): Über einem offenen Fenster zeigt die Rückmeldung höchstens 3 Zeilen und
+„… alle anzeigen (+N)“; ein Tipp zeigt alles, ein weiterer schließt sie. Ohne offenes Fenster bleibt sie vollständig.

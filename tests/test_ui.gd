@@ -830,3 +830,30 @@ func _press(root: Node, node_name: String) -> bool:
 
 func _find(root: Node, node_name: String) -> Node:
 	return root.find_child(node_name, true, false)
+
+
+## U.7 (GD): Über einem offenen Fenster zeigt die Rückmeldung höchstens 3 Zeilen + „… alle anzeigen (+N)“; Antippen
+## zeigt alles, noch einmal schließt; ohne Fenster der ganze Text.
+func test_long_feedback_over_window_is_shortened() -> void:
+	var app := _start_app()
+	if app == null:
+		return
+	_press(app, "NewGameButton")
+	var screen := _find(app, "CityMap").get_parent()
+	var text := "Eins\nZwei\nDrei\nVier\nFünf"
+	screen.call("show_message", text)
+	var label := _find(app, "FeedbackLabel") as Label
+	assert_eq(label.text, text, "ohne Fenster gekürzt")
+	_press(app, "AppointmentsButton")
+	screen.call("show_message", text)
+	assert_eq(label.text, "Eins\nZwei\nDrei\n… alle anzeigen (+2)")
+	var tap := InputEventMouseButton.new()
+	tap.button_index = MOUSE_BUTTON_LEFT
+	tap.pressed = false
+	var toast := _find(app, "Toast") as Control
+	toast.gui_input.emit(tap)
+	assert_eq(label.text, text, "nach dem Antippen alles")
+	assert_eq(toast.visible, true)
+	toast.gui_input.emit(tap)
+	assert_eq(toast.visible, false, "zweites Antippen schließt")
+	app.free()
