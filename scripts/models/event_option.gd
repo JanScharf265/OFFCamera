@@ -24,3 +24,6 @@ var company: Dictionary
 var note := ""
 ## Änderungen an der Organisation (U.7): respect, heat, stability – wirken nur mit gegründeter Organisation.
 var organisation: Dictionary = {}
+## U.14: Aktion gegenüber einer Rivalen-Bande ("fight", "negotiate", "retreat"); die Bande und das Gebiet kennt das
+## RivalSystem zur Ereignis-Instanz. "" = keine.
+var rival := ""

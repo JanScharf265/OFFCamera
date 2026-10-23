@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 26
+const SAVE_VERSION := 27
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -287,6 +287,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		23: return _migrate_23_to_24(game)
 		24: return _migrate_24_to_25(game)
 		25: return _migrate_25_to_26(game)
+		26: return _migrate_26_to_27(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -535,6 +536,15 @@ static func _migrate_25_to_26(game: Dictionary) -> String:
 		if typeof(member) == TYPE_DICTIONARY:
 			member["district"] = ""
 	game["territory"] = {"influence": {}, "controlled": {}, "last_processed_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 26 → 27 (U.14): Rivalen – alle neutral in Ausgangsstärke, gespeicherter Tag gilt als verarbeitet.
+static func _migrate_26_to_27(game: Dictionary) -> String:
+	var minutes: Variant = _saved_minutes(game)
+	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
+		return "Zeit fehlt."
+	game["rivals"] = {"gangs": {}, "clashes": {}, "last_processed_day": TimeSystemScript.day_of(int(minutes))}
 	return ""
 
 

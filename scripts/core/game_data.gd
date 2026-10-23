@@ -25,6 +25,7 @@ const SaleSystemScript := preload("res://scripts/systems/sale_system.gd")
 const CrewSystemScript := preload("res://scripts/systems/crew_system.gd")
 const DistrictCatalogScript := preload("res://scripts/systems/district_catalog.gd")
 const TerritorySystemScript := preload("res://scripts/systems/territory_system.gd")
+const RivalSystemScript := preload("res://scripts/systems/rival_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -57,6 +58,8 @@ var crew := CrewSystemScript.Catalog.new()
 var districts := DistrictCatalogScript.new()
 ## Gebietsregeln (U.13)
 var territory := TerritorySystemScript.Rules.new()
+## Rivalen (U.14)
+var rivals := RivalSystemScript.Catalog.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -69,13 +72,14 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.
 		var path: String = SaleSystemScript.DEFAULT_PATH if catalog == sale_spots \
 				else CrewSystemScript.DEFAULT_PATH if catalog == crew \
-				else TerritorySystemScript.DEFAULT_PATH if catalog == territory else catalog.DEFAULT_PATH
+				else TerritorySystemScript.DEFAULT_PATH if catalog == territory \
+				else RivalSystemScript.DEFAULT_PATH if catalog == rivals else catalog.DEFAULT_PATH
 		contents += FileAccess.get_file_as_string(path)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():
@@ -129,6 +133,16 @@ func check_references() -> PackedStringArray:
 		for required in site.requires:
 			if not sites.has(required):
 				problems.append("Standort '%s': unbekannter Standort '%s' in 'requires'." % [site.id, required])
+	# U.14: Rivalen – Freischalt-Auftrag, Reviere, „Ärger“-Ereignisse (vom Spiel ausgelöst).
+	if not missions.has(rivals.unlocked_by_mission):
+		problems.append("Rivalen: unbekannter Auftrag '%s'." % rivals.unlocked_by_mission)
+	for gang in rivals.get_all():
+		for district in gang.districts:
+			if districts.get_definition(district) == null:
+				problems.append("Bande '%s': unbekanntes Gebiet '%s'." % [gang.id, district])
+		var clash = events.get_definition(gang.clash_event)
+		if clash == null or not clash.is_scripted:
+			problems.append("Bande '%s': Ereignis '%s' fehlt oder ist nicht „scripted“." % [gang.id, gang.clash_event])
 	# U.10: Crew-Freischaltung und Rollen in Auftragszielen.
 	if not missions.has(crew.unlocked_by_mission):
 		problems.append("Crew: unbekannter Auftrag '%s'." % crew.unlocked_by_mission)

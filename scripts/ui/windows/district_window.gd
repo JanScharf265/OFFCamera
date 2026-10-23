@@ -6,6 +6,7 @@ extends VBoxContainer
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const DistrictCatalogScript := preload("res://scripts/systems/district_catalog.gd")
+const RivalSystemScript := preload("res://scripts/systems/rival_system.gd")
 
 var district_id := ""
 
@@ -47,6 +48,14 @@ func refresh() -> void:
 	values.name = "DistrictValues"
 	add_child(values)
 
+	var gang = _game.rivals.get_catalog().get_for_district(district_id)
+	if gang != null:
+		var relation: String = _game.rivals.get_relation(gang.id)
+		var rival_line := UiStyle.wrapping_label("Revier von %s · Stärke %d · %s" % [gang.display_name,
+				_game.rivals.get_strength(gang.id), RivalSystemScript.RELATION_LABELS[relation]],
+				UiStyle.MIN_READ_FONT_SIZE, UiStyle.NEGATIVE if relation == RivalSystemScript.CONFLICT else UiStyle.TEXT)
+		rival_line.name = "DistrictRival"
+		add_child(rival_line)
 	var controlled: bool = territory.is_controlled(district_id)
 	var status := UiStyle.wrapping_label("Gehört dir seit Tag %d." % territory.controlled_since(district_id) if controlled
 			else "Gehört dir nicht.", UiStyle.FONT_SIZE, UiStyle.ACCENT if controlled else UiStyle.TEXT)

@@ -109,6 +109,10 @@ func _refresh_supply() -> void:
 		var crew_button: Button = _screen.scroll_button("Crew (%d)" % _game.crew.get_members().size(), "CrewButton")
 		crew_button.pressed.connect(_screen.open_crew)
 		_supply_box.add_child(crew_button)
+	if _game.rivals.is_available():
+		var rivals_button: Button = _screen.scroll_button("Rivalen", "RivalsButton")
+		rivals_button.pressed.connect(_screen.open_rivals)
+		_supply_box.add_child(rivals_button)
 	for supplier in supply.get_unlocked():
 		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)
 		button.pressed.connect(func() -> void: _screen.open_supplier(supplier.id))

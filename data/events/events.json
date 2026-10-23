@@ -3,10 +3,27 @@
 		"id": "first_brand_request",
 		"title": "Anfrage einer kleinen Marke",
 		"text": "Eine junge Getränkemarke aus Marbella schreibt dir: Ob du sie im nächsten Stream kurz erwähnst?",
-		"trigger": { "day": 1, "hour": 20 },
+		"trigger": {
+			"day": 1,
+			"hour": 20
+		},
 		"options": [
-			{ "id": "accept", "label": "Zusagen", "money_cents": 3000, "category": "creator", "effects": { "mood": 5 } },
-			{ "id": "decline", "label": "Höflich absagen", "effects": { "mood": 2 } }
+			{
+				"id": "accept",
+				"label": "Zusagen",
+				"money_cents": 3000,
+				"category": "creator",
+				"effects": {
+					"mood": 5
+				}
+			},
+			{
+				"id": "decline",
+				"label": "Höflich absagen",
+				"effects": {
+					"mood": 2
+				}
+			}
 		]
 	},
 	{
@@ -14,10 +31,35 @@
 		"title": "Kooperationsanfrage",
 		"text": "Eine Modemarke von der Costa del Sol will ein gesponsertes Video. Gutes Geld – aber passt es zu deinem Kanal?",
 		"priority": 2,
-		"trigger": { "random": { "chance_percent": 25, "from_day": 3, "cooldown_days": 5, "conditions": { "min_followers": 500, "min_reputation": 60 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 25,
+				"from_day": 3,
+				"cooldown_days": 5,
+				"conditions": {
+					"min_followers": 500,
+					"min_reputation": 60
+				}
+			}
+		},
 		"options": [
-			{ "id": "accept", "label": "Annehmen", "money_cents": 15000, "category": "creator", "channel": { "community": -2, "reputation": -3 } },
-			{ "id": "decline", "label": "Ablehnen", "channel": { "reputation": 1 } }
+			{
+				"id": "accept",
+				"label": "Annehmen",
+				"money_cents": 15000,
+				"category": "creator",
+				"channel": {
+					"community": -2,
+					"reputation": -3
+				}
+			},
+			{
+				"id": "decline",
+				"label": "Ablehnen",
+				"channel": {
+					"reputation": 1
+				}
+			}
 		]
 	},
 	{
@@ -25,10 +67,39 @@
 		"title": "Shitstorm",
 		"text": "Ein alter Clip wird aus dem Zusammenhang gerissen. Die Kommentare kochen.",
 		"priority": 3,
-		"trigger": { "random": { "chance_percent": 30, "from_day": 3, "cooldown_days": 4, "conditions": { "max_community": 35 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 30,
+				"from_day": 3,
+				"cooldown_days": 4,
+				"conditions": {
+					"max_community": 35
+				}
+			}
+		},
 		"options": [
-			{ "id": "apologize", "label": "Entschuldigen und erklären", "effects": { "mood": -5 }, "channel": { "community": 8, "reputation": -2 } },
-			{ "id": "ignore", "label": "Aussitzen", "effects": { "mood": -2 }, "channel": { "followers_percent": -5, "reputation": -6 } }
+			{
+				"id": "apologize",
+				"label": "Entschuldigen und erklären",
+				"effects": {
+					"mood": -5
+				},
+				"channel": {
+					"community": 8,
+					"reputation": -2
+				}
+			},
+			{
+				"id": "ignore",
+				"label": "Aussitzen",
+				"effects": {
+					"mood": -2
+				},
+				"channel": {
+					"followers_percent": -5,
+					"reputation": -6
+				}
+			}
 		]
 	},
 	{
@@ -36,9 +107,28 @@
 		"title": "Raid",
 		"text": "Ein größerer Kanal schickt seine Zuschauer zu dir.",
 		"priority": 1,
-		"trigger": { "random": { "chance_percent": 10, "from_day": 3, "cooldown_days": 6, "conditions": { "min_followers": 300 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 10,
+				"from_day": 3,
+				"cooldown_days": 6,
+				"conditions": {
+					"min_followers": 300
+				}
+			}
+		},
 		"options": [
-			{ "id": "thank", "label": "Herzlich bedanken", "effects": { "mood": 5 }, "channel": { "followers": 150, "community": 3 } }
+			{
+				"id": "thank",
+				"label": "Herzlich bedanken",
+				"effects": {
+					"mood": 5
+				},
+				"channel": {
+					"followers": 150,
+					"community": 3
+				}
+			}
 		]
 	},
 	{
@@ -46,10 +136,34 @@
 		"title": "Technikpanne",
 		"text": "Mitten in der Woche streikt die Technik. Reparieren lassen oder improvisieren?",
 		"priority": 0,
-		"trigger": { "random": { "chance_percent": 8, "from_day": 3, "cooldown_days": 7 } },
+		"trigger": {
+			"random": {
+				"chance_percent": 8,
+				"from_day": 3,
+				"cooldown_days": 7
+			}
+		},
 		"options": [
-			{ "id": "repair", "label": "Reparieren lassen", "money_cents": -6000, "category": "repair", "effects": { "mood": -3 } },
-			{ "id": "improvise", "label": "Improvisieren", "effects": { "mood": -5 }, "channel": { "community": -4, "reputation": -1 } }
+			{
+				"id": "repair",
+				"label": "Reparieren lassen",
+				"money_cents": -6000,
+				"category": "repair",
+				"effects": {
+					"mood": -3
+				}
+			},
+			{
+				"id": "improvise",
+				"label": "Improvisieren",
+				"effects": {
+					"mood": -5
+				},
+				"channel": {
+					"community": -4,
+					"reputation": -1
+				}
+			}
 		]
 	},
 	{
@@ -57,10 +171,39 @@
 		"title": "Kurzvideo geht viral",
 		"text": "Eines deiner Kurzvideos taucht plötzlich überall auf.",
 		"priority": 1,
-		"trigger": { "random": { "chance_percent": 5, "from_day": 3, "cooldown_days": 10, "conditions": { "min_followers": 150 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 5,
+				"from_day": 3,
+				"cooldown_days": 10,
+				"conditions": {
+					"min_followers": 150
+				}
+			}
+		},
 		"options": [
-			{ "id": "ride_wave", "label": "Welle nutzen und nachlegen", "effects": { "energy": -10, "mood": 8 }, "channel": { "followers": 100, "followers_percent": 20 } },
-			{ "id": "stay_calm", "label": "Gelassen bleiben", "effects": { "mood": 4 }, "channel": { "followers_percent": 8 } }
+			{
+				"id": "ride_wave",
+				"label": "Welle nutzen und nachlegen",
+				"effects": {
+					"energy": -10,
+					"mood": 8
+				},
+				"channel": {
+					"followers": 100,
+					"followers_percent": 20
+				}
+			},
+			{
+				"id": "stay_calm",
+				"label": "Gelassen bleiben",
+				"effects": {
+					"mood": 4
+				},
+				"channel": {
+					"followers_percent": 8
+				}
+			}
 		]
 	},
 	{
@@ -68,10 +211,35 @@
 		"title": "Vollstreckungsankündigung",
 		"text": "Die Stadtkasse kündigt an, offene Beträge einzutreiben. Ein strenger Brief – mehr erst einmal nicht.",
 		"priority": 10,
-		"trigger": { "random": { "chance_percent": 100, "from_day": 8, "cooldown_days": 7, "conditions": { "min_open_obligations": 3 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 100,
+				"from_day": 8,
+				"cooldown_days": 7,
+				"conditions": {
+					"min_open_obligations": 3
+				}
+			}
+		},
 		"options": [
-			{ "id": "acknowledge", "label": "Zur Kenntnis nehmen", "effects": { "mood": -10 }, "company": { "reputation": -5 } },
-			{ "id": "payment_plan", "label": "Zahlungsplan anfragen (1 h)", "minutes": 60, "effects": { "mood": -5 } }
+			{
+				"id": "acknowledge",
+				"label": "Zur Kenntnis nehmen",
+				"effects": {
+					"mood": -10
+				},
+				"company": {
+					"reputation": -5
+				}
+			},
+			{
+				"id": "payment_plan",
+				"label": "Zahlungsplan anfragen (1 h)",
+				"minutes": 60,
+				"effects": {
+					"mood": -5
+				}
+			}
 		]
 	},
 	{
@@ -79,10 +247,35 @@
 		"title": "Gewerbekontrolle",
 		"text": "Eine Kontrolle der Stadtverwaltung möchte die Unterlagen deines Labels sehen.",
 		"priority": 4,
-		"trigger": { "random": { "chance_percent": 8, "from_day": 8, "cooldown_days": 10, "conditions": { "company_founded": 1 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 8,
+				"from_day": 8,
+				"cooldown_days": 10,
+				"conditions": {
+					"company_founded": 1
+				}
+			}
+		},
 		"options": [
-			{ "id": "show_documents", "label": "Unterlagen zeigen (1 h)", "minutes": 60, "company": { "reputation": 2 } },
-			{ "id": "postpone", "label": "Später nachreichen", "effects": { "mood": -2 }, "company": { "reputation": -3 } }
+			{
+				"id": "show_documents",
+				"label": "Unterlagen zeigen (1 h)",
+				"minutes": 60,
+				"company": {
+					"reputation": 2
+				}
+			},
+			{
+				"id": "postpone",
+				"label": "Später nachreichen",
+				"effects": {
+					"mood": -2
+				},
+				"company": {
+					"reputation": -3
+				}
+			}
 		]
 	},
 	{
@@ -90,10 +283,36 @@
 		"title": "Nachforderung der Stadtkasse",
 		"text": "Für die letzte Woche fordert die Stadtkasse einen kleinen Betrag nach.",
 		"priority": 3,
-		"trigger": { "random": { "chance_percent": 15, "from_day": 8, "cooldown_days": 14, "conditions": { "company_founded": 1, "min_last_week_profit_cents": 5000 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 15,
+				"from_day": 8,
+				"cooldown_days": 14,
+				"conditions": {
+					"company_founded": 1,
+					"min_last_week_profit_cents": 5000
+				}
+			}
+		},
 		"options": [
-			{ "id": "pay", "label": "Bezahlen (Firmenkonto)", "money_cents": -4000, "category": "levy", "account": "company", "company": { "reputation": 1 } },
-			{ "id": "object", "label": "Einspruch einlegen (1 h 30 min)", "minutes": 90, "effects": { "mood": -3 } }
+			{
+				"id": "pay",
+				"label": "Bezahlen (Firmenkonto)",
+				"money_cents": -4000,
+				"category": "levy",
+				"account": "company",
+				"company": {
+					"reputation": 1
+				}
+			},
+			{
+				"id": "object",
+				"label": "Einspruch einlegen (1 h 30 min)",
+				"minutes": 90,
+				"effects": {
+					"mood": -3
+				}
+			}
 		]
 	},
 	{
@@ -101,10 +320,39 @@
 		"title": "Prüfungstermin",
 		"text": "Wegen offener Fristen bittet die Stadtkasse zu einem Gespräch.",
 		"priority": 5,
-		"trigger": { "random": { "chance_percent": 20, "from_day": 8, "cooldown_days": 7, "conditions": { "company_founded": 1, "min_open_obligations": 1 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 20,
+				"from_day": 8,
+				"cooldown_days": 7,
+				"conditions": {
+					"company_founded": 1,
+					"min_open_obligations": 1
+				}
+			}
+		},
 		"options": [
-			{ "id": "attend", "label": "Termin wahrnehmen (2 h)", "minutes": 120, "effects": { "energy": -10 }, "company": { "reputation": 3 } },
-			{ "id": "postpone", "label": "Verschieben", "effects": { "mood": -3 }, "company": { "reputation": -4 } }
+			{
+				"id": "attend",
+				"label": "Termin wahrnehmen (2 h)",
+				"minutes": 120,
+				"effects": {
+					"energy": -10
+				},
+				"company": {
+					"reputation": 3
+				}
+			},
+			{
+				"id": "postpone",
+				"label": "Verschieben",
+				"effects": {
+					"mood": -3
+				},
+				"company": {
+					"reputation": -4
+				}
+			}
 		]
 	},
 	{
@@ -112,10 +360,33 @@
 		"title": "Lärmbeschwerde am Studio",
 		"text": "Die Nachbarn im Studiohaus beschweren sich über laute Streams.",
 		"priority": 1,
-		"trigger": { "random": { "chance_percent": 6, "from_day": 4, "cooldown_days": 12, "conditions": { "min_followers": 200 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 6,
+				"from_day": 4,
+				"cooldown_days": 12,
+				"conditions": {
+					"min_followers": 200
+				}
+			}
+		},
 		"options": [
-			{ "id": "soundproofing", "label": "Schallschutz kaufen", "money_cents": -3000, "category": "equipment", "channel": { "community": 2 } },
-			{ "id": "quieter", "label": "Leiser streamen", "channel": { "community": -3 } }
+			{
+				"id": "soundproofing",
+				"label": "Schallschutz kaufen",
+				"money_cents": -3000,
+				"category": "equipment",
+				"channel": {
+					"community": 2
+				}
+			},
+			{
+				"id": "quieter",
+				"label": "Leiser streamen",
+				"channel": {
+					"community": -3
+				}
+			}
 		]
 	},
 	{
@@ -123,29 +394,179 @@
 		"title": "Förderbescheid",
 		"text": "Ein fiktives Förderprogramm der Stadt unterstützt junge Labels ohne offene Fristen.",
 		"priority": 2,
-		"trigger": { "random": { "chance_percent": 5, "from_day": 8, "cooldown_days": 21, "conditions": { "company_founded": 1, "max_open_obligations": 0 } } },
+		"trigger": {
+			"random": {
+				"chance_percent": 5,
+				"from_day": 8,
+				"cooldown_days": 21,
+				"conditions": {
+					"company_founded": 1,
+					"max_open_obligations": 0
+				}
+			}
+		},
 		"options": [
-			{ "id": "accept", "label": "Annehmen", "money_cents": 10000, "category": "funding", "account": "company", "company": { "reputation": 2 } }
+			{
+				"id": "accept",
+				"label": "Annehmen",
+				"money_cents": 10000,
+				"category": "funding",
+				"account": "company",
+				"company": {
+					"reputation": 2
+				}
+			}
 		]
 	},
 	{
 		"id": "underworld_intro",
 		"title": "Liegeplatz 14",
 		"text": "Eine Nachricht von unbekannter Nummer: „Hafen Puerto Banús, Liegeplatz 14. Komm allein.“ Zwischen den Yachten wartet ein Mann, den alle nur El Capitán nennen. „Du hast Reichweite, ein sauberes Gesicht und eine Firma im Rücken. Leute wie du verdienen in dieser Stadt mehr als mit Streams.“",
-		"trigger": { "scripted": true },
+		"trigger": {
+			"scripted": true
+		},
 		"options": [
-			{ "id": "listen", "label": "Zuhören", "note": "Du gründest deine eigene Organisation" },
-			{ "id": "not_now", "label": "Nicht heute", "note": "Er meldet sich in zwei Tagen wieder" }
+			{
+				"id": "listen",
+				"label": "Zuhören",
+				"note": "Du gründest deine eigene Organisation"
+			},
+			{
+				"id": "not_now",
+				"label": "Nicht heute",
+				"note": "Er meldet sich in zwei Tagen wieder"
+			}
 		]
 	},
 	{
 		"id": "supplier_pressure",
 		"title": "Besuch",
 		"text": "Zwei Männer warten vor deiner Haustür, freundlich und geduldig. „El Rubio lässt fragen, wo sein Geld bleibt.“ Einer klopft dir zum Abschied auf die Schulter – ein bisschen zu fest.",
-		"trigger": { "scripted": true },
+		"trigger": {
+			"scripted": true
+		},
 		"options": [
-			{ "id": "promise", "label": "Versprechen, bald zu zahlen", "effects": { "mood": -5 }, "organisation": { "respect": -3 }, "note": "Er wartet – nicht ewig" },
-			{ "id": "brush_off", "label": "Sie abwimmeln", "effects": { "mood": -10 }, "organisation": { "stability": -5 }, "note": "Das spricht sich herum" }
+			{
+				"id": "promise",
+				"label": "Versprechen, bald zu zahlen",
+				"effects": {
+					"mood": -5
+				},
+				"organisation": {
+					"respect": -3
+				},
+				"note": "Er wartet – nicht ewig"
+			},
+			{
+				"id": "brush_off",
+				"label": "Sie abwimmeln",
+				"effects": {
+					"mood": -10
+				},
+				"organisation": {
+					"stability": -5
+				},
+				"note": "Das spricht sich herum"
+			}
+		]
+	},
+	{
+		"id": "rival_clash_halcones",
+		"title": "Ärger mit Los Halcones",
+		"text": "Am Hafen warten zwei Männer von Los Halcones auf deine Leute. Ein umgeworfener Tisch, ein paar laute Worte: „Das ist unser Wasser. Verschwindet.“",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "fight",
+				"label": "Dagegenhalten",
+				"organisation": {
+					"respect": 5,
+					"heat": 5,
+					"stability": -5
+				},
+				"rival": "fight",
+				"note": "Sie werden schwächer – und wütend"
+			},
+			{
+				"id": "negotiate",
+				"label": "Verhandeln",
+				"rival": "negotiate",
+				"note": "Waffenstillstand gegen Geld"
+			},
+			{
+				"id": "retreat",
+				"label": "Sich zurückziehen",
+				"rival": "retreat",
+				"note": "Einfluss −20, Respekt −5"
+			}
+		]
+	},
+	{
+		"id": "rival_clash_marea",
+		"title": "Ärger mit La Marea",
+		"text": "Eine höfliche Nachricht von La Marea: Man habe bemerkt, dass deine Leute in Nueva Andalucía unterwegs sind. Man sei überrascht. Man hoffe, es bleibe bei der Überraschung.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "fight",
+				"label": "Dagegenhalten",
+				"organisation": {
+					"respect": 5,
+					"heat": 5,
+					"stability": -5
+				},
+				"rival": "fight",
+				"note": "Sie werden schwächer – und wütend"
+			},
+			{
+				"id": "negotiate",
+				"label": "Verhandeln",
+				"rival": "negotiate",
+				"note": "Waffenstillstand gegen Geld"
+			},
+			{
+				"id": "retreat",
+				"label": "Sich zurückziehen",
+				"rival": "retreat",
+				"note": "Einfluss −20, Respekt −5"
+			}
+		]
+	},
+	{
+		"id": "rival_clash_grises",
+		"title": "Ärger mit Los Grises",
+		"text": "Los Grises haben einem deiner Dealer den Weg versperrt und ihn wieder nach Hause geschickt – mit einer Botschaft: „Hier gehört alles schon jemandem.“",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "fight",
+				"label": "Dagegenhalten",
+				"organisation": {
+					"respect": 5,
+					"heat": 5,
+					"stability": -5
+				},
+				"rival": "fight",
+				"note": "Sie werden schwächer – und wütend"
+			},
+			{
+				"id": "negotiate",
+				"label": "Verhandeln",
+				"rival": "negotiate",
+				"note": "Waffenstillstand gegen Geld"
+			},
+			{
+				"id": "retreat",
+				"label": "Sich zurückziehen",
+				"rival": "retreat",
+				"note": "Einfluss −20, Respekt −5"
+			}
 		]
 	}
 ]

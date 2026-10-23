@@ -74,6 +74,8 @@ var _influence := {}
 var _controlled := {}
 var _last_processed_day := 0
 var _notices := PackedStringArray()
+## U.14: RivalSystem.pressure_percent(district_id) – Gewicht des Drucks (Beziehung, Stärke); ungesetzt = 100 %
+var _pressure_percent: Callable
 
 
 func _init(time, ledger: LedgerSystemScript, districts: DistrictCatalogScript, rules: Rules, organisation) -> void:
@@ -83,6 +85,11 @@ func _init(time, ledger: LedgerSystemScript, districts: DistrictCatalogScript, r
 	_rules = rules
 	_organisation = organisation
 	_last_processed_day = time.get_day()
+
+
+## Vom GameState (U.14).
+func set_pressure_modifier(pressure_percent: Callable) -> void:
+	_pressure_percent = pressure_percent
 
 
 func get_districts() -> DistrictCatalogScript:
@@ -122,6 +129,8 @@ func rival_pressure(district_id: String) -> int:
 	if district == null:
 		return 0
 	var pressure: int = district.rivals / _rules.get_value("rival_divisor")
+	if _pressure_percent.is_valid():
+		pressure = pressure * int(_pressure_percent.call(district_id)) / 100
 	if is_controlled(district_id):
 		pressure = pressure * _rules.get_value("controlled_pressure_percent") / 100
 	return pressure
@@ -137,6 +146,17 @@ func add_influence(district_id: String, amount: int) -> void:
 	if _districts.get_definition(district_id) == null or amount <= 0:
 		return
 	_influence[district_id] = mini(MAX_INFLUENCE, get_influence(district_id) + amount)
+
+
+## U.14: Einfluss verlieren (Rückzug vor Rivalen). Ein eigenes Gebiet geht dabei erst beim Tageswechsel verloren.
+func reduce_influence(district_id: String, amount: int) -> void:
+	if amount <= 0 or get_influence(district_id) <= 0:
+		return
+	var left := maxi(0, get_influence(district_id) - amount)
+	if left == 0:
+		_influence.erase(district_id)
+	else:
+		_influence[district_id] = left
 
 
 ## Konto für eine Zahlung: Schwarzgeld, wenn es reicht, sonst Privatkonto.

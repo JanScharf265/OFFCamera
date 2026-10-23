@@ -60,6 +60,7 @@ const TRIGGERS := [
 	"first_view_toggle_shown",
 	"first_underworld_view",
 	"first_district_window",
+	"first_rivals_open",
 ]
 const MAX_TEXT_LENGTH := 240
 

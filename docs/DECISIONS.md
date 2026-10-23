@@ -899,3 +899,15 @@ Wert aus den Gebietsdaten. Nachfrage und Polizei wirken noch nicht auf den Verka
 nur Zahlen und Folgen. Vorläufige Werte, Bestätigung durch den Game Director offen.
 Das Gebietsfenster ersetzt die Rückmeldung beim Tipp auf den Gebietsnamen (U.12). Das Tutorial zeigt auf
 „Beanspruchen“ (die Einfluss-Zeile ist fensterbreit, die Sprechblase hätte sie verdeckt).
+
+## 084 – Rivalen (U.14)
+Drei erfundene Banden mit eigenem Revier (je Gebiet höchstens eine): Los Halcones (Puerto Banús, aggressiv), La Marea
+(Nueva Andalucía, ruhig), Los Grises (San Pedro und Altstadt). Konflikte sind Ereignisse im EventSystem (Regel 4):
+Hat man im Revier einer Bande mindestens 20 Einfluss, löst der Tageswechsel mit Aggression/5 % Chance (Konflikt
+doppelt; Seed, deterministisch, höchstens ein Ärger je Tag) „Ärger mit …“ aus. Antworten: dagegenhalten (Respekt +5,
+Hitze +5, Stabilität −5; Bande −10 Stärke, Konflikt 5 Tage – Druck 150 % × Stärke/50), verhandeln (Waffenstillstand
+gegen Stärke × 8 €, aus Schwarzgeld sonst privat; ohne Geld: Respekt −3), zurückziehen (Einfluss −20, Respekt −5).
+Waffenstillstand gibt es auch ohne Ärger im Fenster „Rivalen“ (7 Tage, kein Druck, kein Ärger). Stärke erholt sich um
+1 je Tag. Die Rivalen handeln noch nicht selbst (keine eigenen Übernahmen) – das wäre ein späteres Ticket. Gewalt
+nur angedeutet (umgeworfener Tisch, versperrter Weg) mit Zahlen als Folge. Vorläufige Werte, Bestätigung durch den
+Game Director offen.

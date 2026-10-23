@@ -181,6 +181,12 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Rivalen (U.14, `scripts/systems/rival_system.gd`, im GameState als `rivals`; Katalog `RivalSystem.Catalog` aus
+  `data/underworld/rivals.json` in `GameData.rivals`): Zustand je Bande (Stärke, Beziehung neutral/conflict/truce,
+  bis Tag) und Kontext der „Ärger“-Ereignisse (Instanz → Bande, Gebiet). `TerritorySystem.set_pressure_modifier`
+  bekommt `rivals.pressure_percent`, `EventSystem.set_rival_handler` bekommt `rivals.apply_event_action` (gebundene
+  Methoden, keine Zyklen). Ereignis-Optionen haben das Feld `rival` (fight/negotiate/retreat). DayCycle: … Crew →
+  Gebiete → Rivalen (Ablauf, Erholung, Ärger per `trigger_scripted`) → Fristen → Ereignisse. Fenster `RivalsWindow`.
 - Gebiete übernehmen (U.13, `scripts/systems/territory_system.gd`, im GameState als `territory`; Regeln
   `TerritorySystem.Rules` aus `data/underworld/territory.json` in `GameData.territory`): Einfluss und eigene Gebiete
   je District-ID. Das CrewSystem bekommt Callables (`add_influence`, `unit_bonus`, `influence_for_skill`,
@@ -353,6 +359,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 26 → 27 (U.14): `rivals` = alle neutral in Ausgangsstärke, Tag verarbeitet.
 - Migration 25 → 26 (U.13): `territory` leer (Tag verarbeitet), Crew-Mitglieder `district` = "".
 - Migration 24 → 25 (U.11): Crew-Mitglieder bekommen `rank` = 1.
 - Migration 23 → 24 (U.10): `crew` = keine Mitglieder, gespeicherter Tag gilt als verarbeitet.

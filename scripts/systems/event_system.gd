@@ -56,6 +56,8 @@ var restore_notices := PackedStringArray()
 
 
 var _change_organisation: Callable
+## U.14: RivalSystem.apply_event_action(action, instance_id)
+var _rival_action: Callable
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
@@ -75,6 +77,11 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStat
 ## EventSystem verweist (sonst Kreisverweis).
 func set_organisation_changer(change: Callable) -> void:
 	_change_organisation = change
+
+
+## Vom GameState (U.14): Rivalen-Aktionen aus Ereignis-Optionen.
+func set_rival_handler(handler: Callable) -> void:
+	_rival_action = handler
 
 
 func set_world(company, obligations) -> void:
@@ -184,6 +191,8 @@ func resolve(instance_id: String, option_id: String) -> String:
 		_company.apply(option.company, "event", reason, instance_id, key)
 	if not option.organisation.is_empty() and _change_organisation.is_valid():
 		_change_organisation.call(option.organisation)
+	if not option.rival.is_empty() and _rival_action.is_valid():
+		_rival_action.call(option.rival, instance_id)
 
 	_pending.remove_at(_pending.find(instance_id))
 	_resolved[instance_id] = option_id

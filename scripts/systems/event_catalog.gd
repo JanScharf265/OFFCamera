@@ -12,7 +12,8 @@ extends RefCounted
 ##         company_founded (1/0), min_last_week_profit_cents}}},
 ##     oder vom Spiel ausgelöst (U.3): trigger {"scripted": true} – kommt nur, wenn ein System es auslöst
 ##       (EventSystem.trigger_scripted, z. B. der Einstieg in die Unterwelt).
-##   options [ {id, label, note? (Hinweis auf eine Folge ohne Zahl, U.3), organisation? {respect|heat|stability} (U.7), money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
+##   options [ {id, label, note? (Hinweis auf eine Folge ohne Zahl, U.3), organisation? {respect|heat|stability} (U.7),
+##     rival? ("fight" | "negotiate" | "retreat", U.14 – nur bei Ereignissen, die das RivalSystem auslöst), money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
 ##     (mindestens eine, davon mindestens eine ohne Kosten)
 ##     channel {followers?, followers_percent?, community?, reputation?} – ganze Zahlen
 
@@ -31,6 +32,8 @@ const OPTION_CHANNEL_KEYS := ["followers", "followers_percent", "community", "re
 const OPTION_COMPANY_KEYS := ["utilization", "reputation"]
 ## U.7: Folgen für die Organisation (wirken nur, wenn sie gegründet ist)
 const OPTION_ORGANISATION_KEYS := ["respect", "heat", "stability"]
+## U.14: Aktionen gegenüber Rivalen (Feld „rival“ einer Option)
+const OPTION_RIVAL_ACTIONS := ["fight", "negotiate", "retreat"]
 const ACCOUNTS := ["private", "company"]
 
 var errors: PackedStringArray = []
@@ -178,6 +181,9 @@ func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> E
 				reader.errors.append("%s: 'organisation' enthält ungültigen Wert '%s'." % [where, key])
 			elif int(organisation[key]) != 0:
 				option.organisation[key] = int(organisation[key])
+	option.rival = reader.string_field(entry, "rival", where, false)
+	if not option.rival.is_empty() and option.rival not in OPTION_RIVAL_ACTIONS:
+		reader.errors.append("%s: 'rival' muss fight, negotiate oder retreat sein." % where)
 	option.company = {}
 	var company: Variant = entry.get("company", {})
 	if typeof(company) != TYPE_DICTIONARY:

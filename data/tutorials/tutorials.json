@@ -390,5 +390,15 @@
 		"ui_target": "DistrictClaimButton",
 		"order": 430,
 		"requires": []
+	},
+	{
+		"id": "tut_rivals",
+		"mechanic": "rivals",
+		"trigger": "first_rivals_open",
+		"title": "Die Rivalen",
+		"text": "Drei Banden teilen sich die Stadt. Wer in ihr Revier drängt, bekommt Ärger: dagegenhalten, verhandeln oder zurückziehen. Ein Waffenstillstand kostet Geld, verschafft dir aber eine ruhige Woche.",
+		"ui_target": "RivalTruceButton_*",
+		"order": 440,
+		"requires": []
 	}
 ]

@@ -31,6 +31,7 @@ const SiteSystemScript := preload("res://scripts/systems/site_system.gd")
 const SaleSystemScript := preload("res://scripts/systems/sale_system.gd")
 const CrewSystemScript := preload("res://scripts/systems/crew_system.gd")
 const TerritorySystemScript := preload("res://scripts/systems/territory_system.gd")
+const RivalSystemScript := preload("res://scripts/systems/rival_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -77,6 +78,8 @@ var sales: SaleSystemScript
 var crew: CrewSystemScript
 ## Gebiete übernehmen, halten, verlieren (U.13)
 var territory: TerritorySystemScript
+## Rivalen (U.14)
+var rivals: RivalSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -116,9 +119,13 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	crew.set_territory(territory.add_influence, territory.unit_bonus, territory.influence_for_skill,
 			data.districts.get_definition)
 	missions.set_territory(territory)
+	rivals = RivalSystemScript.new(time, ledger, data.rivals, organisation, territory, missions.is_completed,
+			events.get_seed, events.trigger_scripted)
+	territory.set_pressure_modifier(rivals.pressure_percent)
+	events.set_rival_handler(rivals.apply_event_action)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
-	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, obligations, events])
+	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)
@@ -163,6 +170,7 @@ func to_dict() -> Dictionary:
 		"sales": sales.to_dict(),
 		"crew": crew.to_dict(),
 		"territory": territory.to_dict(),
+		"rivals": rivals.to_dict(),
 	}
 
 
@@ -171,7 +179,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales", "crew", "territory"]:
+			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales", "crew", "territory", "rivals"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -211,6 +219,8 @@ func restore(saved: Dictionary) -> String:
 		error = crew.restore(saved["crew"])
 	if error.is_empty():
 		error = territory.restore(saved["territory"])
+	if error.is_empty():
+		error = rivals.restore(saved["rivals"])
 	if error.is_empty():
 		error = missions.restore(saved["missions"])
 	if error.is_empty():

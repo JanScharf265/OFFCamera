@@ -40,6 +40,7 @@ const SupplierWindowScript := preload("res://scripts/ui/windows/supplier_window.
 const SaleWindowScript := preload("res://scripts/ui/windows/sale_window.gd")
 const CrewWindowScript := preload("res://scripts/ui/windows/crew_window.gd")
 const DistrictWindowScript := preload("res://scripts/ui/windows/district_window.gd")
+const RivalsWindowScript := preload("res://scripts/ui/windows/rivals_window.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
@@ -629,6 +630,28 @@ func _on_district_pressed(district_id: String) -> void:
 	_open_due_tutorial()
 
 
+## Fenster „Rivalen“ (U.14).
+func open_rivals() -> void:
+	if _was_scroll():
+		return
+	_game.tutorials.report("first_rivals_open")
+	var content := RivalsWindowScript.new()
+	content.setup(self, _game)
+	_open_window("rivals", content)
+	_open_due_tutorial()
+
+
+## U.14: Waffenstillstand anbieten über das RivalSystem.
+func on_rival_truce(gang_id: String) -> void:
+	if _was_scroll():
+		return
+	var gang = _game.rivals.get_catalog().get_definition(gang_id)
+	var cost: int = _game.rivals.truce_cost(gang_id)
+	var reason: String = _game.rivals.offer_truce(gang_id)
+	_after_action(reason, "Waffenstillstand mit %s bis Tag %d (%s)" % [gang.display_name if gang != null else gang_id,
+			_game.rivals.get_until_day(gang_id), ActivityText.signed_money(-cost)])
+
+
 ## U.13: Gebiet beanspruchen über das TerritorySystem.
 func on_district_claim(district_id: String) -> void:
 	if _was_scroll():
@@ -1000,6 +1023,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 		for notice in _game.crew.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.territory.take_notices():
+			text += "\n%s" % notice
+		for notice in _game.rivals.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice

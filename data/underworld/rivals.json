@@ -1,0 +1,47 @@
+{
+	"unlocked_by_mission": "crew_first_dealer",
+	"clash_min_influence": 20,
+	"clash_chance_per_10_aggression": 2,
+	"conflict_days": 5,
+	"conflict_pressure_percent": 150,
+	"conflict_chance_percent": 200,
+	"fight_strength_loss": 10,
+	"strength_regen_per_day": 1,
+	"truce_days": 7,
+	"truce_cost_per_strength": 800,
+	"retreat_influence_loss": 20,
+	"retreat_respect_loss": 5,
+	"broke_respect_loss": 3,
+	"gangs": [
+		{
+			"id": "halcones",
+			"display_name": "Los Halcones",
+			"description": "Schnelle Boote, teure Uhren, kurze Geduld. Sie halten den Hafen und wollen ihn behalten.",
+			"strength": 50,
+			"aggression": 60,
+			"districts": ["puerto_banus"],
+			"clash_event": "rival_clash_halcones",
+			"order": 10
+		},
+		{
+			"id": "marea",
+			"display_name": "La Marea",
+			"description": "Leise, gut vernetzt, mit Freunden in den Villen. Sie drohen selten – und meinen es dann ernst.",
+			"strength": 50,
+			"aggression": 30,
+			"districts": ["nueva_andalucia"],
+			"clash_event": "rival_clash_marea",
+			"order": 20
+		},
+		{
+			"id": "grises",
+			"display_name": "Los Grises",
+			"description": "Alte Garde aus San Pedro. Wenig Glanz, viele Leute, und sie vergessen nichts.",
+			"strength": 50,
+			"aggression": 45,
+			"districts": ["san_pedro", "altstadt"],
+			"clash_event": "rival_clash_grises",
+			"order": 30
+		}
+	]
+}
