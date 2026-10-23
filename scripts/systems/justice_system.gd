@@ -78,6 +78,7 @@ var _get_seed: Callable
 var _trigger_scripted: Callable
 var _sacrifice: Callable
 var _get_case: Callable
+var _crew_count: Callable
 var _state := FREE
 var _evidence := 0
 var _case := ""
@@ -102,10 +103,19 @@ func _init(time, ledger: LedgerSystemScript, rules: Rules, organisation, locatio
 	_last_processed_day = time.get_day()
 
 
-## Vom GameState: Crew-Mitglied belasten (CrewSystem.sacrifice → Name oder "") und Aktenzeichen (PoliceSystem).
-func set_hooks(sacrifice: Callable, get_case: Callable) -> void:
+## Vom GameState: Crew-Mitglied belasten (CrewSystem.sacrifice → Name oder ""), Aktenzeichen (PoliceSystem) und
+## Größe der Crew (CrewSystem.member_count, für die Sperre von „belasten“).
+func set_hooks(sacrifice: Callable, get_case: Callable, crew_count: Callable = Callable()) -> void:
 	_sacrifice = sacrifice
 	_get_case = get_case
+	_crew_count = crew_count
+
+
+## Für das EventSystem (Nachtrag U.25): „Ein Crew-Mitglied belasten“ nur, wenn es jemanden gibt.
+func check_option(_instance_id: String, option) -> String:
+	if option.justice == "sacrifice" and _crew_count.is_valid() and int(_crew_count.call()) == 0:
+		return "Niemand in der Crew, den du belasten könntest."
+	return ""
 
 
 func get_rules() -> Rules:

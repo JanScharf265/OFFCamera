@@ -185,6 +185,8 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   der Reiter, der das Ziel der ersten fälligen Erklärung enthält; Reiterwechsel ruft `_open_due_tutorial`.
   `LocationWindow._mark_cash` hängt „· bar“ an den Geld-Chip, wenn `BlackSpendingSystem.account_for` Schwarzgeld wählt.
   `HudBar` verdichtet in 4 Stufen (Beträge, Datum kurz, Datum weg, Beschriftungen).
+  Nachtrag: `EventSystem.add_option_check`/`check_option` sperren Antworten (Fenster: ausgegraut mit Grund);
+  `JusticeSystem.check_option` sperrt „belasten“ ohne Crew.
 - Tageswechsel komplett (U.24): DayCycle-Reihenfolge Firma → Organisation (Einstieg) → Lieferungen → Standorte →
   Crew → Gebiete → Rivalen → `organisation.cool_down` (Callable-Schritt) → Polizei → Justiz → Kontakte → Fristen →
   Ereignisse; der Kalender öffnet danach (DayStartSystem). `ConsistencyCheck` prüft auch die Unterwelt. Der Bot

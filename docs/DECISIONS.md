@@ -1075,3 +1075,15 @@ Seitenbuttons final: „LEBEN“ (Kalender, Fristen, Kanal), „GESCHÄFT“ (Or
 Schalter „Unterwelt/Tag“ unten rechts. Crew, Kontakte, Rivalen, Polizei und Geld sind über „Organisation“ erreichbar,
 Gebiete über die Unterwelt-Ansicht – kein eigener Seitenbutton (VISION: „oder zusammengefasst – Vorschlag machen“).
 Paket U wird erst nach dem bestätigten iPhone-Test (Checkliste `~/Desktop/u25/iphone_test.md`) als ✅ markiert (GD 092).
+
+## 098 – Antworten des Game Directors nach U.25 (23.10.2026)
+- Angenommen: Haftdauer bleibt; Werte aus U.22 und U.23 bleiben (Balancing Phase 8); Seitenbuttons wie in 097.
+- Kein Test-Spielstand für Razzia und Haft – erst die iPhone-Checkliste. Die Desktop-Ordner u6–u20 hat der GD verschoben.
+- Prüfung a) Prozess ohne Crew: „Ein Crew-Mitglied belasten“ war wählbar und lief ins Leere (nur Hinweis, Urteil ohne
+  Abzug). Jetzt gibt es Sperren für Ereignis-Antworten (`EventSystem.add_option_check`/`check_option`): Die Antwort
+  ist ausgegraut, links steht der Grund („Niemand in der Crew, den du belasten könntest.“), `resolve` lehnt sie ab.
+  Tests im System und im Fenster.
+- Prüfung b) Reiter im Fenster „Organisation“, gemessen im Fensterlauf auf beiden iPhones: sichtbar 52 px hoch
+  (Geschäft 121 × 52, Leute 89 × 52, Polizei & Geld 170 × 52), Tippfläche 84 px hoch und mindestens 89 px breit
+  (unsichtbar über und unter dem sichtbaren Teil, wie die Reiter im Ortsfenster). Keine Änderung nötig.
+- Paket U bleibt bis zur Rückmeldung „iPhone-Test U ok“ offen.

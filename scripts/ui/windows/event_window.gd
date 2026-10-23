@@ -44,6 +44,11 @@ func _ready() -> void:
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		button.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var blocked: String = _game.events.check_option(instance_id, option.id)
+		if not blocked.is_empty():
+			button.disabled = true
+			summary.text = blocked
+			summary.add_theme_color_override("font_color", UiStyle.MUTED)
 		var option_id: String = option.id
 		var label: String = option.label
 		button.pressed.connect(func() -> void: _screen.on_event_option_pressed(instance_id, option_id, label))

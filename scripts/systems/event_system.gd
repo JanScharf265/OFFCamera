@@ -64,6 +64,8 @@ var _crew_action: Callable
 var _justice_action: Callable
 ## U.23: RelationshipSystem.apply_event_change(change, instance_id)
 var _contact_change: Callable
+## Nachtrag U.25: Sperren für Antworten
+var _option_checks: Array[Callable] = []
 var _text_context: Array[Callable] = []
 ## U.19: weitere Werte für Bedingungen (z. B. PoliceSystem.condition_values → police_level)
 var _condition_providers: Array[Callable] = []
@@ -86,6 +88,25 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStat
 ## EventSystem verweist (sonst Kreisverweis).
 func set_organisation_changer(change: Callable) -> void:
 	_change_organisation = change
+
+
+## Vom GameState (Nachtrag U.25): Prüfungen, ob eine Antwort gerade möglich ist – Callable(instance_id, option)
+## → "" oder Grund. Eine gesperrte Antwort wird mit Grund angezeigt und lässt sich nicht wählen.
+func add_option_check(check: Callable) -> void:
+	_option_checks.append(check)
+
+
+## "" wenn die Antwort jetzt gewählt werden kann, sonst ein Grund.
+func check_option(instance_id: String, option_id: String) -> String:
+	var definition := get_definition_for(instance_id)
+	var option = definition.get_option(option_id) if definition != null else null
+	if option == null:
+		return "Unbekannte Auswahl: %s" % option_id
+	for check in _option_checks:
+		var reason: String = check.call(instance_id, option)
+		if not reason.is_empty():
+			return reason
+	return ""
 
 
 ## Vom GameState (U.23): Änderungen an Kontakten.
@@ -217,6 +238,9 @@ func resolve(instance_id: String, option_id: String) -> String:
 	var option := definition.get_option(option_id)
 	if option == null:
 		return "Unbekannte Auswahl: %s" % option_id
+	var blocked := check_option(instance_id, option_id)
+	if not blocked.is_empty():
+		return blocked
 	if option.money_cents < 0 and not _ledger.can_afford(-option.money_cents, option.account):
 		return "Nicht genug Geld auf dem %s (kostet %s)." % [LedgerSystemScript.ACCOUNT_LABELS[option.account],
 				LedgerSystemScript.format_cents(-option.money_cents)]

@@ -301,6 +301,10 @@ func get_member(member_id: String) -> Dictionary:
 	return {}
 
 
+func member_count() -> int:
+	return _members.size()
+
+
 func count_role(role_id: String) -> int:
 	return _members.filter(func(member) -> bool: return member["role"] == role_id).size()
 

@@ -201,3 +201,44 @@ func test_ui_window() -> void:
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_justice_settings.cfg"))
+
+
+## Nachtrag U.25 (GD): Ohne Crew ist „Ein Crew-Mitglied belasten“ gesperrt – mit Grund, im System und im Fenster.
+func test_sacrifice_blocked_without_crew() -> void:
+	var game := _arrested()
+	game.justice.wait()
+	var trial := _pending(game, "justice_trial")
+	assert_eq(game.crew.member_count(), 0)
+	assert_eq(game.events.check_option(trial, "sacrifice"), "Niemand in der Crew, den du belasten könntest.")
+	var evidence := game.justice.get_evidence()
+	assert_eq(game.events.resolve(trial, "sacrifice"), "Niemand in der Crew, den du belasten könntest.")
+	assert_eq([game.justice.get_evidence(), game.justice.get_state()], [evidence, "custody"], "nichts passiert")
+	assert_eq(game.events.check_option(trial, "await"), "", "andere Antworten bleiben frei")
+
+
+func test_ui_sacrifice_button_disabled() -> void:
+	SaveSystemScript.delete_save(SAVE_PATH)
+	var app := AppScript.new()
+	app.save_path = SAVE_PATH
+	app.settings_path = "user://test_justice_settings.cfg"
+	(Engine.get_main_loop() as SceneTree).root.add_child(app)
+	(app.find_child("NewGameButton", true, false) as Button).pressed.emit()
+	var screen := app.find_child("CityMap", true, false).get_parent()
+	screen.set("show_tutorials", false)
+	screen.call("on_organisation_name_submitted", "Los Lobos")
+	app.game.justice.arrest(app.game.time.get_day())
+	app.game.events.resolve(_pending(app.game, "justice_arrest"), "silent")
+	app.game.justice.wait()
+	while not app.game.events.get_next_pending_id().begins_with("justice_trial"):
+		var id: String = app.game.events.get_next_pending_id()
+		app.game.events.resolve(id, app.game.events.get_definition_for(id).options[-1].id)
+	screen.call("_close_window")
+	screen.call("_refresh")
+	var button := app.find_child("EventOption_sacrifice", true, false) as Button
+	assert_true(button != null and button.disabled, "Belasten-Button nicht gesperrt")
+	var row := app.find_child("EventOptionRow_sacrifice", true, false)
+	assert_true((row.get_child(0) as Label).text == "Niemand in der Crew, den du belasten könntest.")
+	assert_eq((app.find_child("EventOption_await", true, false) as Button).disabled, false)
+	app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_justice_settings.cfg"))

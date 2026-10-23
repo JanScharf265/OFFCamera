@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Ereignis-Antworten, die gerade nicht gehen, sind ausgegraut und nennen den Grund – z. B. „Ein Crew-Mitglied belasten“ im Prozess ohne Crew (Nachtrag U.25)
 - Abnahme Paket U: Das Fenster „Organisation“ hat drei Reiter (Geschäft, Leute, Polizei & Geld). Kacheln zeigen „· bar“, wenn aus Schwarzgeld bezahlt würde. Die obere Leiste kürzt bei Platzmangel zuerst Beträge und das Datum („Tag 12“), statt das Datum gleich auszublenden. Checkliste für den iPhone-Test (Ticket U.25)
 - Tageswechsel komplett: Erst werden alle Geschäfte abgerechnet, dann kühlt die Hitze ab, dann reagieren Polizei, Justiz und Kontakte, danach Fristen, Ereignisse und Kalender. Der Test-Bot spielt jetzt auch die Unterwelt; neue lange Tests. Spielstand Version 36 (Ticket U.24)
 - Beziehungen: Neues Fenster „Kontakte“ (unter „Organisation“) mit El Capitán, Alex und Inspektor Ruiz – je mit Vertrauen und Wissen und einer Aktion (Kaffee, Abend zu zweit, Umschlag). Ohne Kontakt sinkt das Vertrauen; wer viel weiß und wenig vertraut, macht Ärger („Fragen“, „Ruiz will mehr“). Erklärung „Menschen“; Spielstand Version 35 (Ticket U.23)

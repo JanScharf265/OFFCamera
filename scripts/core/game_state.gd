@@ -158,7 +158,8 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	police.set_raid_targets(supply, sites)
 	justice = JusticeSystemScript.new(time, ledger, data.justice, organisation, locations, events.get_seed,
 			events.trigger_scripted)
-	justice.set_hooks(crew.sacrifice, police.get_case)
+	justice.set_hooks(crew.sacrifice, police.get_case, crew.member_count)
+	events.add_option_check(justice.check_option)
 	police.set_after_raid(justice.after_raid)
 	locations.set_travel_block(justice.travel_block)
 	events.set_justice_handler(justice.apply_event_action)
