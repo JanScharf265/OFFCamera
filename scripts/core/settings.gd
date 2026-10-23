@@ -16,8 +16,11 @@ const CALENDAR_AUTO_OPEN := "calendar_auto_open"
 const VIBRATION := "vibration"
 ## Tutorials anzeigen (T.4). Aus = keine Anzeige; fällige Tutorials bleiben fällig.
 const TUTORIALS := "tutorials"
-## Schlüssel -> Standardwert. Alle Schalter sind standardmäßig an.
-const DEFAULTS := {CALENDAR_AUTO_OPEN: true, VIBRATION: true, TUTORIALS: true}
+## Unterwelt-Ansicht der Karte (U.12) – reine Optik, daher Geräte-Einstellung statt Spielstand. Schalter auf der Karte.
+const UNDERWORLD_VIEW := "underworld_view"
+## Schlüssel -> Standardwert. Die Schalter der Einstellungsseite sind standardmäßig an; die Kartenansicht startet
+## mit „Tag“.
+const DEFAULTS := {CALENDAR_AUTO_OPEN: true, VIBRATION: true, TUTORIALS: true, UNDERWORLD_VIEW: false}
 
 var path := DEFAULT_PATH
 ## Grund, warum beim Laden die Standardwerte gelten ("" = Datei gelesen oder einfach noch keine da).

@@ -45,6 +45,8 @@ const NAMES := {
 	"crew": "Crew (Rollen, Bewerber, Löhne)",
 	"dealer_sales": "Dealer verkaufen täglich (Unterwelt-Abrechnung, Können, Gier, Loyalität)",
 	"promotion": "Crew befördern (Rang, Kosten, Lohn)",
+	"underworld_view": "Unterwelt-Ansicht der Karte (Schalter Tag/Unterwelt)",
+	"districts": "Gebiete (Nachfrage, Polizei, Rivalen)",
 }
 
 

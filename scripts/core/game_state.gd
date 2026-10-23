@@ -215,3 +215,15 @@ func load_notices() -> PackedStringArray:
 		notices.append_array(system.restore_notices)
 	return notices
 
+
+## U.12: Orte mit Unterwelt-Bezug für die Unterwelt-Ansicht der Karte – Orte eigener oder bekannter Standorte und
+## verfügbarer Verkaufsorte. Nur zur Anzeige.
+func underworld_location_ids() -> PackedStringArray:
+	var ids := PackedStringArray()
+	for site in sites.get_catalog().get_all():
+		if (sites.is_owned(site.id) or sites.is_unlocked(site.id)) and site.location not in ids:
+			ids.append(site.location)
+	for spot in sales.get_catalog().get_all():
+		if sales.is_available(spot.id) and spot.location not in ids:
+			ids.append(spot.location)
+	return ids

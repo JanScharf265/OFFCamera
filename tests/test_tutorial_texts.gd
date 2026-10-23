@@ -179,6 +179,12 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 				_resolve_events(app)
 			_screen(app).call("_refresh")
 			_screen(app).call("open_crew")
+		"first_view_toggle_shown", "first_underworld_view":
+			assert_eq(app.game.organisation.found("Los Lobos"), "")
+			if trigger == "first_underworld_view":
+				_screen(app).call("set_underworld_view", true)
+			_screen(app).call("_refresh")
+			_screen(app).call("_open_due_tutorial")
 		"first_obligation_due":
 			_jump(app, TimeSystemScript.at(8, 9))
 			_resolve_events(app)
@@ -286,7 +292,7 @@ func test_data_rules() -> void:
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
 			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
-			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion"]:
+			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion", "underworld_view", "districts"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 
@@ -370,7 +376,8 @@ func test_new_triggers_are_reported() -> void:
 			["first_mission_available", "tut_missions"], ["first_supplier_open", "tut_supplier"],
 			["first_credit_offered", "tut_credit"], ["first_site_offered", "tut_sites"],
 			["first_sale_offered", "tut_selling"], ["first_crew_open", "tut_crew"],
-			["first_dealer_in_crew", "tut_dealer_sales"], ["first_promotion_possible", "tut_promotion"]]:
+			["first_dealer_in_crew", "tut_dealer_sales"], ["first_promotion_possible", "tut_promotion"],
+			["first_view_toggle_shown", "tut_underworld_view"], ["first_underworld_view", "tut_districts"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

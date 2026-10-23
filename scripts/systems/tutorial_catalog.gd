@@ -57,6 +57,8 @@ const TRIGGERS := [
 	"first_crew_open",
 	"first_dealer_in_crew",
 	"first_promotion_possible",
+	"first_view_toggle_shown",
+	"first_underworld_view",
 ]
 const MAX_TEXT_LENGTH := 240
 

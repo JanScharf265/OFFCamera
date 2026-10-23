@@ -23,6 +23,7 @@ const SupplierCatalogScript := preload("res://scripts/systems/supplier_catalog.g
 const SiteCatalogScript := preload("res://scripts/systems/site_catalog.gd")
 const SaleSystemScript := preload("res://scripts/systems/sale_system.gd")
 const CrewSystemScript := preload("res://scripts/systems/crew_system.gd")
+const DistrictCatalogScript := preload("res://scripts/systems/district_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -51,6 +52,8 @@ var sites := SiteCatalogScript.new()
 var sale_spots := SaleSystemScript.Catalog.new()
 ## Crew-Regeln und Rollen (U.10)
 var crew := CrewSystemScript.Catalog.new()
+## Gebiete (U.12)
+var districts := DistrictCatalogScript.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -63,7 +66,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.

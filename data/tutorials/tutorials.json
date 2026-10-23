@@ -360,5 +360,25 @@
 		"ui_target": "CrewPromoteButton_*",
 		"order": 400,
 		"requires": []
+	},
+	{
+		"id": "tut_underworld_view",
+		"mechanic": "underworld_view",
+		"trigger": "first_view_toggle_shown",
+		"title": "Zwei Gesichter der Stadt",
+		"text": "Marbella hat zwei Gesichter. Hier wechselst du zwischen Tag und Unterwelt – gleiche Stadt, anderer Blick. Das kostet keine Zeit.",
+		"ui_target": "ViewToggleButton",
+		"order": 410,
+		"requires": []
+	},
+	{
+		"id": "tut_districts",
+		"mechanic": "districts",
+		"trigger": "first_underworld_view",
+		"title": "Gebiete",
+		"text": "Die Stadt ist in Gebiete aufgeteilt. Jedes hat seine Nachfrage, seine Streifen und seine Rivalen. Tipp auf einen Namen, um mehr zu sehen.",
+		"ui_target": "DistrictLabel_*",
+		"order": 420,
+		"requires": []
 	}
 ]

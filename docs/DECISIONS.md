@@ -871,3 +871,19 @@ Befördern: frühestens nach 3 Tagen, kostet 5 Tageslöhne (Schwarzgeld, sonst p
 etwa 4–5 Einheiten × 70 € abzüglich Abzweigung ≈ 300 € am Tag gegen ~50 € Lohn – plus Einkauf (40 €/Einheit).
 Bekannte Folge: Solange Dealer verkaufen, steigt die Hitze täglich, also sinkt sie an keinem Tag (ruhiger Tag = ohne
 Hitze-Anstieg). Vorläufige Werte, Bestätigung durch den Game Director offen.
+
+## 082 – Unterwelt-Ansicht und Gebiete (U.12)
+Ist-Zustand: Die Karte zeichnet alles selbst (`_draw`, Kenney-Grafiken aus einem Atlas). `draw_texture` nimmt eine
+Farbmodulation – die Unterwelt-Ansicht braucht deshalb keine neuen Grafiken: Boden, Häuser und Bäume bläulich-dunkel,
+Meer nachtblau, Unterwelt-Orte hell mit Neon-Rand (Magenta der App), Streamer-Gebäude dunkler, ihre Schilder
+halbtransparent (weiter antippbar). Kleiner bis mittlerer Umbau, daher direkt gebaut.
+Gespeichert wird die Ansicht in den Geräte-Einstellungen (`underworld_view`), nicht im Spielstand: Sie ist reine Optik
+ohne Spielregel; so braucht es keine Spielstand-Version, und „Spielstand löschen“ setzt sie nicht zurück. Vor El
+Capitán gibt es den Schalter nicht, die Karte zeigt dann immer „Tag“.
+Der Schalter liegt in einer eigenen Gruppe „ANSICHT“ unten rechts (dunkler Grund wie „Leben“/„Geschäft“ – ohne ihn
+war die Beschriftung auf der hellen Karte kaum lesbar); er zeigt die Ansicht, zu der er wechselt (Mond „Unterwelt“ /
+Sonne „Tag“, eigene SVG-Symbole).
+Gebiete: vier Viertel als Rechtecke auf dem Kartenraster (San Pedro, Altstadt, Nueva Andalucía, Puerto Banús – reale
+Ortsnamen, Werte erfunden), mit eigener Schildzelle, damit Gebietsnamen keine Ortsschilder verdecken (beim ersten
+Versuch mittig – San Pedro lag auf „Fitnessstudio“, Puerto Banús auf „Ladenlokal“). Tipp auf den Namen zeigt die
+Werte als Rückmeldung. Vorläufige Werte, Bestätigung durch den Game Director offen.

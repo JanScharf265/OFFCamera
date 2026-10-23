@@ -15,6 +15,8 @@ extends Control
 ## Würde eine Aktion einen Termin verpassen lassen, fragt zuerst ein Popup nach (G5.4, conflict_popup.gd).
 
 signal menu_pressed
+## U.12: Kartenansicht gewechselt (nur Optik; die App speichert sie in den Einstellungen)
+signal view_changed(underworld: bool)
 ## Nach jeder erfolgreichen Aktion – die App speichert dann.
 signal state_changed
 
@@ -74,6 +76,8 @@ const ICONS := {
 	"LedgerButton": ICON_DIR + "menuList.png",
 	"MenuButton": ICON_DIR + "gear.png",
 	"HereButton": ICON_DIR + "target.png",
+	"ViewToggleButton": "res://assets/icons/underworld.svg",
+	"ViewToggleButtonDay": "res://assets/icons/day.svg",
 }
 ## Abstand zwischen den beiden Button-Spalten und zwischen den Buttons einer Spalte.
 const COLUMN_GAP := 8.0
@@ -89,6 +93,11 @@ var _life_group: PanelContainer
 var _business_group: PanelContainer
 var _menu_button: RoundButtonScript
 var _here_button: RoundButtonScript
+## U.12: Schalter Tag/Unterwelt (unten rechts, erst nach El Capitán) – zeigt die Ansicht, zu der er wechselt.
+var _view_buttons := {}
+var _view_group: PanelContainer
+## Gewählte Ansicht; die App setzt sie vor dem Aufbau aus den Einstellungen und speichert Änderungen (view_changed).
+var underworld_view := false
 var _company_button: RoundButtonScript
 ## Seitenbutton „Organisation“ (U.3) – sichtbar, sobald es sie gibt
 var _organisation_button: RoundButtonScript
@@ -174,6 +183,19 @@ func _ready() -> void:
 	_here_button.tooltip_text = "Hier"
 	_here_button.pressed.connect(_on_here_pressed)
 	add_child(_here_button)
+	# U.12: zwei Buttons an derselben Stelle – je nach Ansicht ist einer sichtbar (eigene Beschriftung und Symbol);
+	# auf dunklem Grund wie die anderen Gruppen, damit die Beschriftung auch auf der hellen Tag-Karte lesbar ist.
+	_view_group = _button_group("ViewGroup", "ANSICHT")
+	for to_underworld in [true, false]:
+		var view_button := RoundButtonScript.new("Unterwelt" if to_underworld else "Tag",
+				ICONS["ViewToggleButton" if to_underworld else "ViewToggleButtonDay"])
+		view_button.name = "ViewToggleButton" if to_underworld else "ViewToggleButtonDay"
+		view_button.pressed.connect(set_underworld_view.bind(to_underworld))
+		_add_to_group(_view_group, view_button)
+		_view_buttons[to_underworld] = view_button
+	_map.district_pressed.connect(_on_district_pressed)
+	_map.set_districts(_game.data.districts.get_all())
+	_map.set_underworld_view(underworld_view)
 
 	_toast = UiStyle.hud_panel()
 	_toast.name = "Toast"
@@ -259,12 +281,18 @@ func _layout() -> void:
 	_business_group.position = Vector2(right - _business_group.size.x, columns_top)
 	_life_group.reset_size()
 	_life_group.position = Vector2(_business_group.position.x - COLUMN_GAP - _life_group.size.x, columns_top)
+	# U.12: Schalter Tag/Unterwelt unten rechts (Bedienungsseite), unter der Spalte „Geschäft“.
+	_view_group.reset_size()
+	_view_group.size.x = _business_group.size.x
+	_view_group.position = Vector2(right - _view_group.size.x, bottom - _view_group.size.y)
 	# Links (Seite der Dynamic Island) nur „Hier“ unten.
 	_here_button.position = Vector2(left, bottom - UiStyle.TOUCH_SIZE)
 
 	# Der Hinweis liegt zwischen „Hier“ und den Button-Spalten.
 	var toast_left := left + UiStyle.TOUCH_SIZE + GAP
 	var toast_right := _life_group.position.x - GAP
+	if _view_group.visible:
+		toast_right = minf(toast_right, _view_group.position.x - GAP)
 	var toast_width := maxf(minf(900.0, toast_right - toast_left), 200.0)
 	# Umbrechende Labels berechnen ihre Mindesthöhe für die Breite, die sie gerade haben (anfangs ~1 px →
 	# riesig). Breite setzen, Umbruch erzwingen (get_line_count) und Mindestgröße neu berechnen lassen –
@@ -574,6 +602,28 @@ func on_site_acquire_pressed(site_id: String) -> void:
 	_guard(site.setup_minutes, "%s anmieten" % site.display_name, func() -> void:
 		_after_action(_game.sites.acquire(site_id), "%s angemietet (%s)" % [site.display_name,
 				ActivityText.signed_money(-site.start_cost_cents)]))
+
+
+## U.12: Kartenansicht wechseln – nur Optik, keine Spielzeit.
+func set_underworld_view(on: bool) -> void:
+	underworld_view = on
+	view_changed.emit(on)
+	_refresh()
+	_layout()
+	_open_due_tutorial()
+
+
+func is_underworld_view() -> bool:
+	return _map.is_underworld_view()
+
+
+## U.12: Gebietsname angetippt – Werte als Rückmeldung (zeigt nur an).
+func _on_district_pressed(district_id: String) -> void:
+	var district = _game.data.districts.get_definition(district_id)
+	if district == null:
+		return
+	_show_feedback("%s · Nachfrage %d · Polizei %d · Rivalen %d\n%s" % [district.display_name, district.demand,
+			district.police, district.rivals, district.description], UiStyle.TEXT)
 
 
 ## Fenster „Crew“ (U.10).
@@ -1006,6 +1056,17 @@ func _refresh() -> void:
 		if not _game.locations.is_known(id):
 			hidden.append(id)
 	_map.set_hidden_locations(hidden)
+	# U.12: Schalter erst, wenn die Unterwelt freigeschaltet ist (Organisation nach El Capitán); sonst Tag-Ansicht.
+	var unlocked: bool = _game.organisation.is_founded()
+	_map.set_underworld_view(underworld_view and unlocked)
+	_map.set_underworld_locations(_game.underworld_location_ids())
+	_view_group.visible = unlocked
+	_view_buttons[true].visible = unlocked and not underworld_view
+	_view_buttons[false].visible = unlocked and underworld_view
+	if unlocked:
+		_game.tutorials.report("first_view_toggle_shown")
+	if unlocked and underworld_view:
+		_game.tutorials.report("first_underworld_view")
 	_map.set_state(_game.locations.get_current(), _selected_location)
 
 	var pending_id := _game.events.get_next_pending_id()

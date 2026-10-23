@@ -6,8 +6,13 @@ extends Control
 ## Zeigt nur an; was ein Tipp bewirkt, entscheidet der GameScreen. Das Raster
 ## kommt aus `city_layout.gd`, die Grafiken aus Kenney-CC0-Paketen (assets/kenney/).
 ## Die Fahranimation ist rein optisch – die Spielzeit ist beim Start schon vorgestellt.
+## U.12: zwei Ansichten derselben Karte – „Tag“ (wie bisher) und „Unterwelt“ (nur Optik): nächtlich abgedunkelt,
+## Unterwelt-Orte hell mit Neon-Rand, Streamer-Orte abgedunkelt (weiter antippbar), Gebiete als farbige Flächen mit
+## antippbarem Namen. Gezeichnet wird mit Farbmodulation der vorhandenen Kenney-Grafiken (keine neuen Grafiken).
 
 signal location_pressed(location_id: String)
+## U.12: Name eines Gebiets angetippt (nur in der Unterwelt-Ansicht sichtbar)
+signal district_pressed(district_id: String)
 
 const LocationCatalogScript := preload("res://scripts/systems/location_catalog.gd")
 const CityLayoutScript := preload("res://scripts/ui/city_layout.gd")
@@ -34,6 +39,15 @@ const SAND_RIGHT := Color(0.74, 0.64, 0.43)
 const PIN := Color(0.13, 0.13, 0.16, 0.92)
 const PIN_CURRENT := Color(0.22, 0.45, 0.3)
 const ROUTE := Color(0.84, 0.27, 0.35, 0.85)
+## U.12: Unterwelt-Ansicht
+const NIGHT_SEA := Color(0.05, 0.07, 0.16)
+const NIGHT_WAVE := Color(0.25, 0.3, 0.55)
+const NIGHT_TINT := Color(0.36, 0.38, 0.58)
+const NIGHT_STREAMER_TINT := Color(0.28, 0.28, 0.4)
+const NIGHT_UNDERWORLD_TINT := Color(1.0, 0.86, 0.96)
+const NEON := Color(1.0, 0.24, 0.62)
+const DISTRICT_ALPHA := 0.34
+const STREAMER_PIN_ALPHA := 0.55
 
 ## Kachelmaße (Kenney „Isometric Tiles“): Unterkante einer Bodenkachel liegt 68 px
 ## unter der Mitte ihrer Oberseite; Etagen sind 35 px hoch, Dächer sitzen 12 px höher.
@@ -130,6 +144,14 @@ var _selected := ""
 var _pins := {}
 ## U.8: Orte, die (noch) nicht gezeigt werden
 var _hidden := PackedStringArray()
+## U.12: Ansicht und was sie hervorhebt
+var _underworld_view := false
+var _underworld_ids := PackedStringArray()
+## Gebiete (DistrictCatalog.District) und ihre Namensschilder (id -> Button)
+var _districts: Array = []
+var _district_labels := {}
+## Farbmodulation für das gerade gezeichnete Teil
+var _tint := Color.WHITE
 var _marker: Marker
 ## name -> Texture2D (null, wenn die Datei fehlt – dann wird das Teil ausgelassen)
 var _textures := {}
@@ -436,13 +458,80 @@ func is_location_hidden(location_id: String) -> bool:
 	return location_id in _hidden
 
 
+## U.12: Tag- oder Unterwelt-Ansicht (nur Optik).
+func set_underworld_view(on: bool) -> void:
+	if on == _underworld_view:
+		return
+	_underworld_view = on
+	if is_node_ready():
+		_update_pins()
+		_layout_overlays()
+	queue_redraw()
+
+
+func is_underworld_view() -> bool:
+	return _underworld_view
+
+
+## U.12: Orte, die die Unterwelt-Ansicht hervorhebt (vom GameState).
+func set_underworld_locations(ids: PackedStringArray) -> void:
+	if ids == _underworld_ids:
+		return
+	_underworld_ids = ids
+	if is_node_ready():
+		_update_pins()
+	queue_redraw()
+
+
+## U.12: Gebiete für die Unterwelt-Ansicht (Flächen und Namensschilder). Einmal beim Aufbau.
+func set_districts(districts: Array) -> void:
+	_districts = districts
+	for id in _district_labels:
+		(_district_labels[id] as Node).queue_free()
+	_district_labels.clear()
+	for district in districts:
+		var label := Button.new()
+		label.name = "DistrictLabel_%s" % district.id
+		label.text = district.display_name
+		label.custom_minimum_size.y = PIN_HEIGHT
+		label.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+		label.add_theme_color_override("font_color", Color.WHITE)
+		var box := UiStyle.flat_box(Color(district.color, 0.82))
+		for state in ["normal", "hover", "pressed", "hover_pressed"]:
+			label.add_theme_stylebox_override(state, box)
+		UiStyle.grow_touch_area(label, PIN_HEIGHT)
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
+		label.button_down.connect(_on_sign_down)
+		label.pressed.connect(_on_district_label_pressed.bind(district.id))
+		add_child(label)
+		_district_labels[district.id] = label
+	if is_node_ready():
+		_update_pins()
+		_layout_overlays()
+	queue_redraw()
+
+
+func _on_district_label_pressed(district_id: String) -> void:
+	if not _dragging:
+		district_pressed.emit(district_id)
+
+
 func _update_pins() -> void:
 	for id in _pins:
 		var color := PIN_CURRENT if id == _current else (UiStyle.ACCENT if id == _selected else PIN)
 		var pin: Button = _pins[id]
+		var neon: bool = _underworld_view and id in _underworld_ids
 		for state in ["normal", "hover", "pressed", "hover_pressed"]:
-			pin.add_theme_stylebox_override(state, UiStyle.flat_box(color))
+			var box := UiStyle.flat_box(color)
+			if neon:
+				box.border_color = NEON
+				box.set_border_width_all(3)
+			pin.add_theme_stylebox_override(state, box)
 		UiStyle.grow_touch_area(pin, PIN_HEIGHT)  # Tippfläche 84 px, sichtbar wie bisher (G4.7)
+		# U.12: Streamer-Orte in der Unterwelt-Ansicht abgedunkelt, aber weiter antippbar
+		pin.modulate = Color(1, 1, 1, STREAMER_PIN_ALPHA) if _underworld_view and not neon else Color.WHITE
+	for id in _district_labels:
+		(_district_labels[id] as Control).visible = _underworld_view
 
 
 func _layout_overlays() -> void:
@@ -455,6 +544,13 @@ func _layout_overlays() -> void:
 		var top := _to_screen(anchor + Vector2(0, _building_top(id) - 8.0))
 		# Unterkante des SICHTBAREN Schilds bleibt über dem Gebäude (die Tippfläche ragt unsichtbar darüber hinaus).
 		pin.position = top - Vector2(pin.size.x / 2.0, pin.size.y - (pin.size.y - PIN_HEIGHT) / 2.0)
+	for district in _districts:
+		var label: Button = _district_labels.get(district.id)
+		if label == null:
+			continue
+		label.reset_size()
+		var at := _to_screen(CityLayoutScript.cell_to_world(Vector2(district.label_cell)))
+		label.position = at - label.size / 2.0
 	if _marker != null:
 		_marker.visible = _pins.has(_current) and not is_traveling()
 		if _marker.visible:
@@ -571,7 +667,7 @@ func _pack_atlas() -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), SEA)
+	draw_rect(Rect2(Vector2.ZERO, size), NIGHT_SEA if _underworld_view else SEA)
 	if _layout == null:
 		return
 	draw_set_transform(_offset, 0.0, Vector2(_zoom, _zoom))
@@ -594,18 +690,22 @@ func _draw() -> void:
 
 
 func _draw_cell(cell: Vector2i, anchor: Vector2) -> void:
+	_tint = NIGHT_TINT if _underworld_view else Color.WHITE
 	match _layout.kind_at(cell):
 		CityLayoutScript.Kind.SEA:
 			if CityLayoutScript.variant(cell) % 6 == 0:
-				draw_line(anchor + Vector2(-18, 0), anchor + Vector2(18, 9), WAVE, 3.0)
+				draw_line(anchor + Vector2(-18, 0), anchor + Vector2(18, 9), NIGHT_WAVE if _underworld_view else WAVE, 3.0)
 		CityLayoutScript.Kind.BEACH:
 			_draw_sand(anchor)
 		CityLayoutScript.Kind.ROAD:
 			_draw_tile(_textures[_road_tile(cell)], anchor)
+			_draw_district(cell, anchor)
 		CityLayoutScript.Kind.PARK:
 			_draw_tile(_textures["park"], anchor)
+			_draw_district(cell, anchor)
 		CityLayoutScript.Kind.TREES:
 			_draw_tile(_textures["ground"], anchor)
+			_draw_district(cell, anchor)
 			_draw_tree(anchor + Vector2(-26, -2))
 			_draw_tree(anchor + Vector2(22, -10))
 			_draw_tree(anchor + Vector2(0, 12))
@@ -616,6 +716,25 @@ func _draw_cell(cell: Vector2i, anchor: Vector2) -> void:
 			_draw_building(_layout.get_location_at(cell), anchor)
 		_:
 			_draw_tile(_textures["ground"], anchor)
+			_draw_district(cell, anchor)
+	_tint = Color.WHITE
+
+
+## U.12: Gebietsfläche auf der Kachel-Oberseite (nur in der Unterwelt-Ansicht).
+func _draw_district(cell: Vector2i, anchor: Vector2) -> void:
+	if not _underworld_view:
+		return
+	for district in _districts:
+		if district.has_cell(cell):
+			draw_colored_polygon(_diamond(anchor), Color(district.color, DISTRICT_ALPHA))
+			return
+
+
+## Oberseite einer Kachel als Raute.
+func _diamond(anchor: Vector2) -> PackedVector2Array:
+	var half := CityLayoutScript.HALF
+	return PackedVector2Array([anchor + Vector2(0, -half.y), anchor + Vector2(half.x, 0), anchor + Vector2(0, half.y),
+			anchor + Vector2(-half.x, 0)])
 
 
 func _road_tile(cell: Vector2i) -> String:
@@ -635,13 +754,13 @@ func _road_tile(cell: Vector2i) -> String:
 ## Bodenteile sitzen mit ihrer Unterkante auf der Kachel.
 func _draw_tile(texture: Texture2D, anchor: Vector2) -> void:
 	if texture != null:
-		draw_texture(texture, anchor + Vector2(-texture.get_width() / 2.0, TILE_BOTTOM - texture.get_height()))
+		draw_texture(texture, anchor + Vector2(-texture.get_width() / 2.0, TILE_BOTTOM - texture.get_height()), _tint)
 
 
 func _draw_tree(position_on_tile: Vector2) -> void:
 	var texture: Texture2D = _textures["tree"]
 	if texture != null:
-		draw_texture(texture, position_on_tile - Vector2(texture.get_width() / 2.0, texture.get_height()))
+		draw_texture(texture, position_on_tile - Vector2(texture.get_width() / 2.0, texture.get_height()), _tint)
 
 
 func _draw_building(location_id: String, anchor: Vector2) -> void:
@@ -650,6 +769,15 @@ func _draw_building(location_id: String, anchor: Vector2) -> void:
 				anchor)
 		return
 	var style: Dictionary = BUILDINGS.get(location_id, DEFAULT_BUILDING)
+	if _underworld_view:
+		var neon: bool = location_id in _underworld_ids
+		_tint = NIGHT_UNDERWORLD_TINT if neon else NIGHT_STREAMER_TINT
+		if neon:
+			# Neon-Rand um den Bauplatz, unter dem Gebäude
+			var ring := _diamond(anchor + Vector2(0, 4))
+			ring.append(ring[0])
+			draw_polyline(ring, Color(NEON, 0.35), 14.0, true)
+			draw_polyline(ring, NEON, 4.0, true)
 	_draw_tile(_textures[style["base"]], anchor)
 	var y := anchor.y + BASE_TOP
 	for floor_name in style["floors"]:
@@ -661,7 +789,7 @@ func _draw_building(location_id: String, anchor: Vector2) -> void:
 
 func _draw_part(texture: Texture2D, center_x: float, top_y: float) -> void:
 	if texture != null:
-		draw_texture(texture, Vector2(center_x - texture.get_width() / 2.0, top_y))
+		draw_texture(texture, Vector2(center_x - texture.get_width() / 2.0, top_y), _tint)
 
 
 ## Oberkante des Gebäudes relativ zur Kachelmitte (negativ = darüber).
@@ -682,9 +810,9 @@ func _draw_sand(anchor: Vector2) -> void:
 	var right := top + Vector2(half.x, 0)
 	var front := top + Vector2(0, half.y)
 	var down := Vector2(0, thickness)
-	draw_colored_polygon(PackedVector2Array([left, front, front + down, left + down]), SAND_LEFT)
-	draw_colored_polygon(PackedVector2Array([front, right, right + down, front + down]), SAND_RIGHT)
-	draw_colored_polygon(PackedVector2Array([top + Vector2(0, -half.y), right, front, left]), SAND_TOP)
+	draw_colored_polygon(PackedVector2Array([left, front, front + down, left + down]), SAND_LEFT * _tint)
+	draw_colored_polygon(PackedVector2Array([front, right, right + down, front + down]), SAND_RIGHT * _tint)
+	draw_colored_polygon(PackedVector2Array([top + Vector2(0, -half.y), right, front, left]), SAND_TOP * _tint)
 
 
 func _draw_route() -> void:

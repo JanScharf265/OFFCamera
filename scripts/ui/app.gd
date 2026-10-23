@@ -147,6 +147,8 @@ func show_game(message: String = "") -> void:
 	haptics.quiet = true
 	screen.auto_calendar = settings == null or settings.get_flag(SettingsScript.CALENDAR_AUTO_OPEN)
 	screen.show_tutorials = settings == null or settings.get_flag(SettingsScript.TUTORIALS)
+	screen.underworld_view = settings != null and settings.get_flag(SettingsScript.UNDERWORLD_VIEW)
+	screen.view_changed.connect(_on_view_changed)
 	screen.menu_pressed.connect(show_main_menu)
 	screen.state_changed.connect(_save_game)
 	_set_screen(screen)
@@ -291,3 +293,10 @@ static func save_info_text(meta: Dictionary) -> String:
 		text += " · gespeichert %02d.%02d., %02d:%02d" % [date["day"], date["month"], date["hour"], date["minute"]]
 	return text
 
+
+## U.12: gewählte Kartenansicht in den Geräte-Einstellungen merken.
+func _on_view_changed(underworld: bool) -> void:
+	if settings != null:
+		var error: String = settings.set_flag(SettingsScript.UNDERWORLD_VIEW, underworld)
+		if not error.is_empty():
+			push_warning(error)

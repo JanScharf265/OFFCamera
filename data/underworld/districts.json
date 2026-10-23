@@ -1,0 +1,46 @@
+[
+	{
+		"id": "san_pedro",
+		"display_name": "San Pedro",
+		"description": "Ruhige Straßen im Westen. Wenig Streife, aber andere haben hier schon Fuß gefasst.",
+		"area": [0, 0, 2, 13],
+		"label_cell": [1, 11],
+		"color": "#7c5cff",
+		"demand": 40,
+		"police": 20,
+		"rivals": 40
+	},
+	{
+		"id": "altstadt",
+		"display_name": "Altstadt",
+		"description": "Enge Gassen, viele Touristen, eine Wache an der Plaza.",
+		"area": [3, 0, 7, 8],
+		"label_cell": [5, 2],
+		"color": "#ff9f43",
+		"demand": 50,
+		"police": 50,
+		"rivals": 20
+	},
+	{
+		"id": "nueva_andalucia",
+		"display_name": "Nueva Andalucía",
+		"description": "Villen, Golfplätze, Partys hinter hohen Mauern. Kunden mit Geld.",
+		"area": [8, 0, 14, 8],
+		"label_cell": [11, 4],
+		"color": "#2ed3c6",
+		"demand": 60,
+		"police": 30,
+		"rivals": 30
+	},
+	{
+		"id": "puerto_banus",
+		"display_name": "Puerto Banús",
+		"description": "Yachten, Clubs und Kameras an jeder Ecke. Das meiste Geld – und die meisten Augen.",
+		"area": [3, 9, 14, 13],
+		"label_cell": [5, 12],
+		"color": "#ff3d8b",
+		"demand": 80,
+		"police": 60,
+		"rivals": 50
+	}
+]

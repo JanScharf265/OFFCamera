@@ -181,6 +181,14 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Gebiete und Unterwelt-Ansicht (U.12): `scripts/systems/district_catalog.gd` (in `GameData.districts`,
+  `data/underworld/districts.json`: Fläche `area` und Schildzelle `label_cell` auf dem Kartenraster, Farbe,
+  Nachfrage/Polizei/Rivalen 0–100, keine Überschneidungen). Noch kein Spielzustand (Übernehmen mit U.13).
+  `CityMap.set_underworld_view()` färbt beim Zeichnen um (`draw_texture(…, modulate)`, dunkles Meer, Neon-Rand um
+  Orte aus `GameState.underworld_location_ids()`, Gebietsflächen auf Boden-Kacheln, Schilder `DistrictLabel_*`);
+  Streamer-Schilder halbtransparent, aber antippbar. `GameScreen`: Gruppe „ANSICHT“ unten rechts mit
+  `ViewToggleButton`/`ViewToggleButtonDay` (nur nach Gründung der Organisation), Signal `view_changed` → App speichert
+  `Settings.UNDERWORLD_VIEW` (Geräte-Einstellung, kein Spielstand: reine Optik).
 - Crew (U.10, `scripts/systems/crew_system.gd`, im GameState als `crew`): Katalog `CrewSystem.Catalog`
   (`data/underworld/crew.json`: Freischalt-Auftrag, `max_members`, `applicants_per_day`, Namenslisten, Rollen mit
   Lohnspanne). Bewerber werden nicht gespeichert, sondern aus `fnv1a(Seed:crew:Tag:Platz)` berechnet (gleich nach dem
