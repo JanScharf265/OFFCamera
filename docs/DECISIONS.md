@@ -978,3 +978,14 @@ Selbstprüfung: Die Finca lag zuerst am rechten Stadtrand – dort begrenzt die 
 immer unter den Seitenbuttons. Sie liegt jetzt oben am Stadtrand; neuer Layout-Test „jedes Ortsschild erreichbar“ (mit
 der alten Position schlug er an). Namen gekürzt („Hinterzimmer“, „Gewächshäuser“), weil sie in der Kachel abgeschnitten
 waren. Vorläufige Werte, Phase 8.
+
+## 090 – Polizei 1 (U.19)
+Die Polizei reagiert auf anhaltende Hitze, nicht auf einzelne Spitzen: Beobachtung nach 3 Tagen in Folge mit Hitze
+≥ 40, Ermittlung nach weiteren 3 Tagen ≥ 70; nach 5 ruhigen Tagen (< 30) geht es eine Stufe zurück (die Akte bleibt
+und ruht). In der Ermittlung wächst eine Akte (erfundenes Aktenzeichen „MB-…“ aus dem Seed) täglich um Hitze/10 %;
+was bei 100 % passiert, kommt mit U.20 (Razzia) und U.21 (Festnahme). Gegenmittel nur als Spielwert: ein Anwalt
+(1.000 €, Akte −20 %, alle 3 Tage) und „einen Gang zurückschalten“ (Hitze −5, Respekt −3) – keine Tricks gegen
+Ermittlungen (Inhaltsgrenze). Jeder Stufenwechsel ist ein Ereignis (Regel 4).
+Verbindung zu Phase 5: Ereignisse können `min_/max_police_level` als Bedingung haben; neues Behördenereignis
+„Gemeinsame Kontrolle“ (Stadt und Polizei prüfen die Firma) nur unter Beobachtung; Festnahme-Risiko der Crew +2
+Prozentpunkte je Stufe. Behörden sind Institutionen, Beamte und Fälle erfunden. Vorläufige Werte, Phase 8.

@@ -1,0 +1,12 @@
+{
+	"observation_heat": 40,
+	"investigation_heat": 70,
+	"days_to_escalate": 3,
+	"calm_heat": 30,
+	"days_to_calm": 5,
+	"progress_per_10_heat": 1,
+	"lawyer_cost_cents": 100000,
+	"lawyer_progress": 20,
+	"lawyer_cooldown_days": 3,
+	"arrest_bonus_per_level": 2
+}

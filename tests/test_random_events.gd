@@ -46,7 +46,7 @@ func test_real_events_load() -> void:
 		if definition.is_random:
 			random_ids.append(definition.id)
 	assert_eq(random_ids, PackedStringArray(["brand_deal", "shitstorm", "raid", "tech_failure", "viral_short",
-			"enforcement_notice", "trade_inspection", "back_claim", "audit_appointment", "noise_complaint", "funding_notice"]))
+			"enforcement_notice", "trade_inspection", "back_claim", "audit_appointment", "noise_complaint", "funding_notice", "joint_inspection"]))
 
 
 func test_catalog_rejects_invalid_random_triggers() -> void:

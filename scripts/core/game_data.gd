@@ -28,6 +28,7 @@ const TerritorySystemScript := preload("res://scripts/systems/territory_system.g
 const RivalSystemScript := preload("res://scripts/systems/rival_system.gd")
 const LaunderingSystemScript := preload("res://scripts/systems/laundering_system.gd")
 const BlackSpendingSystemScript := preload("res://scripts/systems/black_spending_system.gd")
+const PoliceSystemScript := preload("res://scripts/systems/police_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -66,6 +67,8 @@ var rivals := RivalSystemScript.Catalog.new()
 var laundering := LaunderingSystemScript.Rules.new()
 ## Regeln fürs Schwarzgeld-Ausgeben (U.17)
 var black_spending := BlackSpendingSystemScript.Rules.new()
+## Polizeiregeln (U.19)
+var police := PoliceSystemScript.Rules.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -78,7 +81,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering, black_spending]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering, black_spending, police]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.
@@ -87,7 +90,8 @@ func load_all() -> bool:
 				else TerritorySystemScript.DEFAULT_PATH if catalog == territory \
 				else RivalSystemScript.DEFAULT_PATH if catalog == rivals \
 				else LaunderingSystemScript.DEFAULT_PATH if catalog == laundering \
-				else BlackSpendingSystemScript.DEFAULT_PATH if catalog == black_spending else catalog.DEFAULT_PATH
+				else BlackSpendingSystemScript.DEFAULT_PATH if catalog == black_spending \
+				else PoliceSystemScript.DEFAULT_PATH if catalog == police else catalog.DEFAULT_PATH
 		contents += FileAccess.get_file_as_string(path)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():
@@ -156,6 +160,11 @@ func check_references() -> PackedStringArray:
 		var incident = events.get_definition(event_id)
 		if incident == null or not incident.is_scripted:
 			problems.append("Crew: Ereignis '%s' fehlt oder ist nicht „scripted“." % event_id)
+	# U.19: Polizei-Ereignisse („scripted“).
+	for event_id in PoliceSystemScript.EVENTS.values():
+		var police_event = events.get_definition(event_id)
+		if police_event == null or not police_event.is_scripted:
+			problems.append("Polizei: Ereignis '%s' fehlt oder ist nicht „scripted“." % event_id)
 	# U.18: Produktion verweist auf ein Produkt.
 	for site in sites.get_all():
 		if not site.product.is_empty() and products.get_definition(site.product) == null:

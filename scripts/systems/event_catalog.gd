@@ -9,7 +9,7 @@ extends RefCounted
 ##     oder Zufall (Phase 3): trigger {"random": {chance_percent 1–100, from_day ≥ 2 (optional, Standard 2),
 ##       cooldown_days ≥ 0 (optional), max_times ≥ 0 (optional, 0 = unbegrenzt),
 ##       conditions (optional) {min_/max_ followers|community|reputation, min_/max_open_obligations,
-##         company_founded (1/0), min_last_week_profit_cents}}},
+##         company_founded (1/0), min_last_week_profit_cents, min_/max_police_level (U.19, 0–2)}}},
 ##     oder vom Spiel ausgelöst (U.3): trigger {"scripted": true} – kommt nur, wenn ein System es auslöst
 ##       (EventSystem.trigger_scripted, z. B. der Einstieg in die Unterwelt).
 ##   options [ {id, label, note? (Hinweis auf eine Folge ohne Zahl, U.3), organisation? {respect|heat|stability} (U.7),
@@ -28,7 +28,7 @@ const DEFAULT_PATH := "res://data/events/events.json"
 ## Gewinn der Vorwoche auf dem Firmenkonto.
 const CONDITION_KEYS := ["min_open_obligations", "max_open_obligations", "company_founded",
 		"min_last_week_profit_cents", "min_followers", "max_followers", "min_community", "max_community",
-		"min_reputation", "max_reputation"]
+		"min_reputation", "max_reputation", "min_police_level", "max_police_level"]
 const OPTION_CHANNEL_KEYS := ["followers", "followers_percent", "community", "reputation"]
 const OPTION_COMPANY_KEYS := ["utilization", "reputation"]
 ## U.7: Folgen für die Organisation (wirken nur, wenn sie gegründet ist)

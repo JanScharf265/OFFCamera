@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 31
+const SAVE_VERSION := 32
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -292,6 +292,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		28: return _migrate_28_to_29(game)
 		29: return _migrate_29_to_30(game)
 		30: return _migrate_30_to_31(game)
+		31: return _migrate_31_to_32(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -579,6 +580,16 @@ static func _migrate_30_to_31(game: Dictionary) -> String:
 	if typeof(sites) != TYPE_DICTIONARY:
 		return "Standorte fehlen."
 	sites["levels"] = {}
+	return ""
+
+
+## 31 → 32 (U.19): Polizei – keine Auffälligkeit, gespeicherter Tag gilt als verarbeitet.
+static func _migrate_31_to_32(game: Dictionary) -> String:
+	var minutes: Variant = _saved_minutes(game)
+	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
+		return "Zeit fehlt."
+	game["police"] = {"level": 0, "hot_days": 0, "calm_days": 0, "progress": 0, "case": "", "since_day": 0,
+			"lawyer_day": -100, "last_processed_day": TimeSystemScript.day_of(int(minutes))}
 	return ""
 
 

@@ -669,5 +669,114 @@
 				"note": "Wechselt die Seite"
 			}
 		]
+	},
+	{
+		"id": "police_observation",
+		"title": "Beobachtet",
+		"text": "Ein Zivilwagen steht in letzter Zeit auffällig oft in deiner Straße. Niemand steigt aus. Niemand muss aussteigen, um zu sehen, wer kommt und geht.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "carry_on",
+				"label": "Weitermachen wie bisher",
+				"note": "Die Polizei schaut weiter hin"
+			},
+			{
+				"id": "slow_down",
+				"label": "Einen Gang zurückschalten",
+				"organisation": {
+					"heat": -5,
+					"respect": -3
+				},
+				"note": "Weniger Aufsehen – die Szene merkt es"
+			}
+		]
+	},
+	{
+		"id": "police_investigation",
+		"title": "Ermittlung",
+		"text": "Über einen Bekannten erfährst du: Es gibt eine Akte. Aktenzeichen {case}. Wessen Name darin steht, sagt er nicht – aber er schaut dich dabei an.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "stay_calm",
+				"label": "Ruhe bewahren",
+				"effects": {
+					"mood": -5
+				},
+				"note": "Die Akte wächst mit der Hitze"
+			},
+			{
+				"id": "tell_crew",
+				"label": "Die Crew warnen",
+				"organisation": {
+					"stability": 5,
+					"heat": -3
+				},
+				"note": "Alle sind vorsichtiger"
+			}
+		]
+	},
+	{
+		"id": "police_calm",
+		"title": "Ruhe",
+		"text": "Der Zivilwagen ist seit Tagen nicht mehr aufgetaucht. Vielleicht haben sie das Interesse verloren. Vielleicht warten sie nur.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "ok",
+				"label": "Durchatmen",
+				"effects": {
+					"mood": 5
+				}
+			}
+		]
+	},
+	{
+		"id": "joint_inspection",
+		"title": "Gemeinsame Kontrolle",
+		"text": "Diesmal kommt nicht nur die Stadtverwaltung: Zwei Polizisten begleiten die Kontrolle deiner Firma und schauen sich lange um.",
+		"priority": 6,
+		"trigger": {
+			"random": {
+				"chance_percent": 15,
+				"from_day": 8,
+				"cooldown_days": 7,
+				"conditions": {
+					"company_founded": 1,
+					"min_police_level": 1
+				}
+			}
+		},
+		"options": [
+			{
+				"id": "show_documents",
+				"label": "Unterlagen zeigen (1 h)",
+				"minutes": 60,
+				"company": {
+					"reputation": 1
+				},
+				"organisation": {
+					"heat": -2
+				}
+			},
+			{
+				"id": "refuse",
+				"label": "Auf einen Termin bestehen",
+				"company": {
+					"reputation": -3
+				},
+				"organisation": {
+					"heat": 5
+				},
+				"note": "Das macht sie neugieriger"
+			}
+		]
 	}
 ]

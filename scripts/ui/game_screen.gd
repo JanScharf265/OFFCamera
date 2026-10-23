@@ -652,6 +652,15 @@ func _on_district_pressed(district_id: String) -> void:
 	_open_due_tutorial()
 
 
+## U.19: Anwalt gegen die Ermittlung über das PoliceSystem.
+func on_police_lawyer() -> void:
+	if _was_scroll():
+		return
+	var cost: int = _game.police.get_rules().get_value("lawyer_cost_cents")
+	_after_action(_game.police.hire_lawyer(), "Der Anwalt arbeitet an Akte %s (%s, jetzt %d %%)" % [_game.police.get_case(),
+			ActivityText.signed_money(-cost), _game.police.get_progress()])
+
+
 ## U.17: Schalter „Alltag mit Schwarzgeld bezahlen“ (keine Spielzeit, keine Buchung – nur die Wahl).
 func on_black_spending_toggle(on: bool) -> void:
 	if _was_scroll():
@@ -1068,6 +1077,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 		for notice in _game.rivals.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.black_spending.take_notices():
+			text += "\n%s" % notice
+		for notice in _game.police.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice

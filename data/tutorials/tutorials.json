@@ -450,5 +450,15 @@
 		"ui_target": "SiteButton_*",
 		"order": 490,
 		"requires": []
+	},
+	{
+		"id": "tut_police",
+		"mechanic": "police",
+		"trigger": "first_police_attention",
+		"title": "Die Polizei schaut hin",
+		"text": "Bleibt die Hitze tagelang hoch, wirst du beobachtet – und irgendwann wird ermittelt. Dann wächst eine Akte. Sinkt die Hitze, lässt das Interesse wieder nach.",
+		"ui_target": "PoliceStatus",
+		"order": 500,
+		"requires": []
 	}
 ]

@@ -34,6 +34,7 @@ const TerritorySystemScript := preload("res://scripts/systems/territory_system.g
 const RivalSystemScript := preload("res://scripts/systems/rival_system.gd")
 const LaunderingSystemScript := preload("res://scripts/systems/laundering_system.gd")
 const BlackSpendingSystemScript := preload("res://scripts/systems/black_spending_system.gd")
+const PoliceSystemScript := preload("res://scripts/systems/police_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -86,6 +87,8 @@ var rivals: RivalSystemScript
 var laundering: LaunderingSystemScript
 ## Schwarzgeld ausgeben (U.17)
 var black_spending: BlackSpendingSystemScript
+## Polizei (U.19)
+var police: PoliceSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -139,9 +142,13 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	black_spending = BlackSpendingSystemScript.new(time, ledger, data.black_spending, organisation)
 	activities.set_black_spending(black_spending.account_for, black_spending.record)
 	equipment.set_black_spending(black_spending.account_for, black_spending.record)
+	police = PoliceSystemScript.new(time, ledger, data.police, organisation, events.get_seed, events.trigger_scripted)
+	events.add_condition_values(police.condition_values)
+	events.add_text_context(police.text_context)
+	crew.set_arrest_bonus(police.arrest_bonus)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
-	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, obligations, events])
+	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, police, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)
@@ -189,6 +196,7 @@ func to_dict() -> Dictionary:
 		"rivals": rivals.to_dict(),
 		"laundering": laundering.to_dict(),
 		"black_spending": black_spending.to_dict(),
+		"police": police.to_dict(),
 	}
 
 
@@ -197,7 +205,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales", "crew", "territory", "rivals", "laundering", "black_spending"]:
+			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites", "sales", "crew", "territory", "rivals", "laundering", "black_spending", "police"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -243,6 +251,8 @@ func restore(saved: Dictionary) -> String:
 		error = laundering.restore(saved["laundering"])
 	if error.is_empty():
 		error = black_spending.restore(saved["black_spending"])
+	if error.is_empty():
+		error = police.restore(saved["police"])
 	if error.is_empty():
 		error = missions.restore(saved["missions"])
 	if error.is_empty():

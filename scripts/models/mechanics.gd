@@ -54,6 +54,7 @@ const NAMES := {
 	"black_spending": "Schwarzgeld im Alltag ausgeben (eingeschränkt, Hitze)",
 	"site_types": "Weitere Standorte (Lager, Verkaufspunkt, Club, Produktion, Liegeplatz)",
 	"site_upgrade": "Standorte ausbauen (Stufen)",
+	"police": "Polizei: Beobachtung und Ermittlung nach Hitze, Akte, Anwalt",
 }
 
 

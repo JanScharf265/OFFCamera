@@ -66,6 +66,7 @@ const TRIGGERS := [
 	"first_black_spending_offered",
 	"first_site_types_offered",
 	"first_site_upgrade_offered",
+	"first_police_attention",
 ]
 const MAX_TEXT_LENGTH := 240
 

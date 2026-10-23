@@ -61,6 +61,8 @@ var _rival_action: Callable
 ## U.15: CrewSystem.apply_event_action(action, instance_id) und Text-Kontext je Instanz ({name}, {gang} …)
 var _crew_action: Callable
 var _text_context: Array[Callable] = []
+## U.19: weitere Werte für Bedingungen (z. B. PoliceSystem.condition_values → police_level)
+var _condition_providers: Array[Callable] = []
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
@@ -92,6 +94,11 @@ func add_text_context(provider: Callable) -> void:
 	_text_context.append(provider)
 
 
+## Vom GameState (U.19): liefert zusätzliche Bedingungswerte (Dictionary).
+func add_condition_values(provider: Callable) -> void:
+	_condition_providers.append(provider)
+
+
 ## Text eines Ereignisses mit eingesetzten Platzhaltern (U.15).
 func get_text(instance_id: String) -> String:
 	var definition := get_definition_for(instance_id)
@@ -121,12 +128,16 @@ func condition_values() -> Dictionary:
 	if founded and week > 1:  # in Woche 1 gibt es keine Vorwoche
 		profit = _ledger.summarize(LedgerSystemScript.COMPANY, TimeSystemScript.week_start(week - 1),
 				TimeSystemScript.week_start(week))["net_cents"]
-	return {
+	var values := {
 		"followers": _channel.followers, "community": _channel.community, "reputation": _channel.reputation,
 		"open_obligations": _obligations.count_open() if _obligations != null else 0,
 		"company_founded": 1 if founded else 0,
 		"last_week_profit_cents": profit,
+		"police_level": 0,
 	}
+	for provider in _condition_providers:
+		values.merge(provider.call(), true)
+	return values
 
 
 func get_seed() -> int:

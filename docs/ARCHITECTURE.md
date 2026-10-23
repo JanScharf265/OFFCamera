@@ -181,6 +181,12 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Polizei (U.19, `scripts/systems/police_system.gd`, im GameState als `police`; Regeln aus
+  `data/underworld/police.json` in `GameData.police`): Stufe 0–2, Tage in Folge (heiß/ruhig), Akte (Nummer aus dem
+  Seed, Fortschritt 0–100), Anwalt (Buchung `underworld_lawyer`, Wartezeit). DayCycle: … Rivalen → Polizei → Fristen
+  → Ereignisse (nach allen Hitze-Änderungen des Tages). Stufenwechsel per `trigger_scripted` (`police_observation`,
+  `police_investigation` mit `{case}`, `police_calm`). EventSystem: `add_condition_values` (Bedingung
+  `min_/max_police_level`), `add_text_context`; CrewSystem: `set_arrest_bonus`.
 - Weitere Standorte (U.18): `sites.json` mit `product`, `sale_units_per_day`, `laundering_limit_cents`,
   `supplier_discount_percent`, `max_level`, `upgrade_cost_cents`, `upgrade_percent`. SiteSystem: Stufen (`levels`,
   gespeichert), `effects()` (Werte auf der Stufe), `check_upgrade`/`upgrade`; DayCycle-Schritt der Standorte: erst
@@ -382,6 +388,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 31 → 32 (U.19): `police` = Stufe 0, Tag verarbeitet.
 - Migration 30 → 31 (U.18): `sites.levels` = {} (eigene Standorte auf Stufe 1).
 - Migration 29 → 30 (U.17): `black_spending` = Schalter aus.
 - Migration 28 → 29 (U.16): `laundering` = nichts gewaschen.

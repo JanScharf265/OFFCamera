@@ -231,6 +231,8 @@ var _trigger_scripted: Callable
 var _gang_for_district: Callable
 ## Ereignis-Instanz -> {member, kind, name, gang_name}
 var _incidents := {}
+## U.19: zusätzliches Festnahme-Risiko durch die Polizei (PoliceSystem.arrest_bonus)
+var _arrest_bonus: Callable
 ## Mitglieder in Einstellungsreihenfolge: {id, name, role, skill, loyalty, greed, wage_cents, hired_day}
 var _members: Array = []
 ## Heute gefeuerte Bewerber-IDs (sonst stünden sie gleich wieder unter „Bewerber“)
@@ -571,6 +573,11 @@ func set_incident_hooks(trigger_scripted: Callable, gang_for_district: Callable)
 	_gang_for_district = gang_for_district
 
 
+## Vom GameState (U.19).
+func set_arrest_bonus(bonus: Callable) -> void:
+	_arrest_bonus = bonus
+
+
 ## Für das EventSystem: Platzhalter eines Crew-Vorfalls ({name}, {gang}); {} für fremde Ereignisse.
 func text_context(instance_id: String) -> Dictionary:
 	var incident: Dictionary = _incidents.get(instance_id, {})
@@ -603,7 +610,8 @@ func _risk_chances(member: Dictionary, heat: int) -> Dictionary:
 			if district != null:
 				police = district.police
 		chances["arrest"] = maxi(0, heat / risks["arrest_heat_divisor"] + police / risks["arrest_police_divisor"]
-				- int(member["skill"]) / risks["arrest_skill_divisor"])
+				- int(member["skill"]) / risks["arrest_skill_divisor"]
+				+ (int(_arrest_bonus.call()) if _arrest_bonus.is_valid() else 0))
 	var gap: int = int(member["greed"]) - int(member["loyalty"])
 	if gap >= risks["betrayal_min_gap"]:
 		chances["betrayal"] = gap / risks["betrayal_divisor"]

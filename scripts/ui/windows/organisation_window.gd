@@ -111,6 +111,7 @@ func _refresh_supply() -> void:
 		var crew_button: Button = _screen.scroll_button("Crew (%d)" % _game.crew.get_members().size(), "CrewButton")
 		crew_button.pressed.connect(_screen.open_crew)
 		_supply_box.add_child(crew_button)
+	_add_police()
 	if _game.black_spending.is_available():
 		_add_black_spending()
 	if _game.laundering.is_available():
@@ -241,3 +242,40 @@ func _add_black_spending() -> void:
 	toggle.pressed.connect(_screen.on_black_spending_toggle.bind(not on))
 	_supply_box.add_child(toggle)
 	_game.tutorials.report("first_black_spending_offered")
+
+
+## U.19: Polizei – Stufe, seit wann, Akte mit Fortschritt, „Anwalt einschalten“. Werte aus dem PoliceSystem.
+func _add_police() -> void:
+	var police = _game.police
+	_supply_box.add_child(UiStyle.section_label("Polizei"))
+	var level: int = police.get_level()
+	var status := UiStyle.label(police.level_label() if level > 0 else "Keine Auffälligkeit",
+			UiStyle.FONT_SIZE, UiStyle.NEGATIVE if level == 2 else UiStyle.WARNING if level == 1 else UiStyle.TEXT)
+	status.name = "PoliceStatus"
+	status.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_supply_box.add_child(status)
+	var rules = police.get_rules()
+	var detail_text := "Ab Hitze %d an %d Tagen in Folge wird die Polizei aufmerksam." % [rules.get_value("observation_heat"),
+			rules.get_value("days_to_escalate")]
+	if level == 1:
+		detail_text = "Seit Tag %d. Ab Hitze %d an %d Tagen in Folge wird ermittelt; unter %d an %d Tagen lässt es nach." % [
+				police.get_since_day(), rules.get_value("investigation_heat"), rules.get_value("days_to_escalate"),
+				rules.get_value("calm_heat"), rules.get_value("days_to_calm")]
+	elif level == 2:
+		detail_text = "Akte %s · seit Tag %d · Stand der Ermittlung %d %% (wächst mit der Hitze)" % [police.get_case(),
+				police.get_since_day(), police.get_progress()]
+	var detail := UiStyle.wrapping_label(detail_text, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+	detail.name = "PoliceDetail"
+	_supply_box.add_child(detail)
+	if level == 2:
+		var reason: String = police.check_lawyer()
+		var lawyer: Button = _screen.scroll_button("Anwalt einschalten · %s (Akte −%d %%)" % [
+				LedgerSystemScript.format_cents(rules.get_value("lawyer_cost_cents")), rules.get_value("lawyer_progress")]
+				if reason.is_empty() else reason, "PoliceLawyerButton")
+		lawyer.disabled = not reason.is_empty()
+		lawyer.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+		lawyer.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+		lawyer.pressed.connect(_screen.on_police_lawyer)
+		_supply_box.add_child(lawyer)
+	if level > 0:
+		_game.tutorials.report("first_police_attention")
