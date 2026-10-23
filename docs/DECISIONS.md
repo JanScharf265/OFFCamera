@@ -1036,3 +1036,15 @@ Daten: Paparazzi (ab 2.000 Follower, Hitze ≥ 15), Leak (Hitze ≥ 40), Gerüch
 Follower und nur in der Ermittlung), „Wo bist du?“ (nur in Haft – Antwort auf die offene Frage aus U.21). Folgen nur
 für Kanal und Hitze. Die Zeile steht am Ende des Organisations-Fensters (weiter oben schob sie „Waschen“ aus dem
 Bereich, den das Tutorial erreicht – Reiter kommen mit U.25). Vorläufige Werte, Phase 8.
+
+## 095 – Beziehungen (U.23)
+Drei erfundene Kontakte als Daten, je mit Vertrauen und Wissen (0–100) und genau einer Aktion: El Capitán (Kontakt am
+Hafen, „Auf einen Kaffee“: 1 h, Vertrauen +5, Respekt +2), Alex (Partnerschaft, „Ein Abend zu zweit“: 3 h, 60 €,
+Stimmung +12, Vertrauen +8; geschlechtsneutraler Name, Texte ohne er/sie), Inspektor Ruiz (käuflicher Beamter,
+„Einen Umschlag übergeben“: 1.000 €, Hitze −5, Akte −10 %, Wissen +10 – Bestechung nur als Zahl). Vertrauen sinkt
+ohne Kontakt alle 3 Tage um 1. Ereignisse, wenn Werte kippen: Capitán bietet bei hohem Vertrauen und Wissen einen
+Gefallen an, Alex stellt Fragen (Wissen ≥ 40, Vertrauen ≤ 60), Ruiz will mehr (Wissen ≥ 50, Vertrauen ≤ 50; ohne Geld
+Hitze +15). Höchstens eins je Tag, Abstand 5 Tage.
+Nebenbei: Tutorial-Ziele weit unten in einem Fenster wurden nicht gefunden, weil die Lage vor dem Scrollen gemessen
+wurde – das Overlay ordnet den Scrollbereich jetzt sofort neu an. Crew, Kontakte, Rivalen stehen im
+Organisations-Fenster nebeneinander (bis zu den Reitern in U.25). Vorläufige Werte, Phase 8.

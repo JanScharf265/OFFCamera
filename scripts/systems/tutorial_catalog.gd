@@ -70,6 +70,7 @@ const TRIGGERS := [
 	"first_raid_warning",
 	"first_justice_open",
 	"first_double_life_shown",
+	"first_contacts_open",
 ]
 const MAX_TEXT_LENGTH := 240
 

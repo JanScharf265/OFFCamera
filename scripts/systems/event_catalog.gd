@@ -192,6 +192,16 @@ func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> E
 	option.rival = reader.string_field(entry, "rival", where, false)
 	if not option.rival.is_empty() and option.rival not in OPTION_RIVAL_ACTIONS:
 		reader.errors.append("%s: 'rival' muss fight, negotiate oder retreat sein." % where)
+	option.contact = {}
+	var contact: Variant = entry.get("contact", {})
+	if typeof(contact) != TYPE_DICTIONARY:
+		reader.errors.append("%s: 'contact' muss ein Objekt sein." % where)
+	else:
+		for key in contact:
+			if key not in ["trust", "knowledge", "cost_cents"] or not DataReaderScript.is_whole_number(contact[key]):
+				reader.errors.append("%s: 'contact' enthält ungültigen Wert '%s'." % [where, key])
+			elif int(contact[key]) != 0:
+				option.contact[key] = int(contact[key])
 	option.justice = reader.string_field(entry, "justice", where, false)
 	if not option.justice.is_empty() and option.justice not in OPTION_JUSTICE_ACTIONS:
 		reader.errors.append("%s: 'justice' ist keine bekannte Aktion." % where)

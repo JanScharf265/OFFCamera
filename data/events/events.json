@@ -1056,5 +1056,96 @@
 				}
 			}
 		]
+	},
+	{
+		"id": "capitan_favor",
+		"title": "Ein Gefallen",
+		"text": "El Capitán winkt dich an den Liegeplatz. „Du hast dich gut gemacht. Ich kenne Leute, die dir zuhören werden – wenn ich es ihnen sage.“",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "accept",
+				"label": "Gern annehmen",
+				"organisation": {
+					"respect": 10
+				},
+				"contact": {
+					"knowledge": 10
+				},
+				"note": "Er weiß danach noch mehr über dich"
+			},
+			{
+				"id": "decline",
+				"label": "Höflich ablehnen",
+				"contact": {
+					"trust": -5
+				}
+			}
+		]
+	},
+	{
+		"id": "partner_questions",
+		"title": "Fragen",
+		"text": "Alex liegt wach, als du nach Hause kommst. „Wo warst du? Und woher kommt das Geld? Ich will keine Ausrede, ich will die Wahrheit.“",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "truth",
+				"label": "Die Wahrheit sagen",
+				"contact": {
+					"knowledge": 30,
+					"trust": 10
+				},
+				"effects": {
+					"mood": -5
+				},
+				"note": "Alex weiß dann Bescheid"
+			},
+			{
+				"id": "lie",
+				"label": "Ausweichen",
+				"contact": {
+					"trust": -15
+				},
+				"effects": {
+					"mood": -10
+				},
+				"note": "Das Vertrauen bröckelt"
+			}
+		]
+	},
+	{
+		"id": "officer_demands",
+		"title": "Ruiz will mehr",
+		"text": "Inspektor Ruiz ruft an, ungewohnt direkt: Er wisse inzwischen genug, um dir Ärger zu machen. Der nächste Umschlag müsse dicker sein.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "pay",
+				"label": "Zahlen (2.000 €)",
+				"contact": {
+					"cost_cents": 200000,
+					"trust": 15
+				},
+				"note": "Er bleibt ruhig"
+			},
+			{
+				"id": "refuse",
+				"label": "Ablehnen",
+				"contact": {
+					"trust": -20
+				},
+				"organisation": {
+					"heat": 15
+				},
+				"note": "Er wird es nicht vergessen"
+			}
+		]
 	}
 ]

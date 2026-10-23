@@ -42,6 +42,7 @@ const CrewWindowScript := preload("res://scripts/ui/windows/crew_window.gd")
 const DistrictWindowScript := preload("res://scripts/ui/windows/district_window.gd")
 const RivalsWindowScript := preload("res://scripts/ui/windows/rivals_window.gd")
 const JusticeWindowScript := preload("res://scripts/ui/windows/justice_window.gd")
+const ContactsWindowScript := preload("res://scripts/ui/windows/contacts_window.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
@@ -653,6 +654,26 @@ func _on_district_pressed(district_id: String) -> void:
 	_open_due_tutorial()
 
 
+## Fenster „Kontakte“ (U.23).
+func open_contacts() -> void:
+	if _was_scroll():
+		return
+	var content := ContactsWindowScript.new()
+	content.setup(self, _game)
+	_open_window("contacts", content)
+	_open_due_tutorial()
+
+
+## U.23: Aktion mit einem Kontakt – kostet Spielzeit, daher mit Konflikt-Popup.
+func on_contact_action(contact_id: String) -> void:
+	if _was_scroll():
+		return
+	var contact = _game.relationships.get_catalog().get_definition(contact_id)
+	_guard(int(contact.action["minutes"]), "%s: %s" % [contact.display_name, contact.action["label"]], func() -> void:
+		_after_action(_game.relationships.act(contact_id), "%s: %s (Vertrauen jetzt %d)" % [contact.display_name,
+				contact.action["label"], _game.relationships.get_trust(contact_id)]))
+
+
 ## Fenster „Verfahren“ (U.21).
 func open_justice() -> void:
 	if _was_scroll():
@@ -1108,6 +1129,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 		for notice in _game.police.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.justice.take_notices():
+			text += "\n%s" % notice
+		for notice in _game.relationships.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice

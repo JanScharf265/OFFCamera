@@ -31,3 +31,5 @@ var rival := ""
 var crew := ""
 ## U.21: Aktion im Verfahren (lawyer, bribe, silent, sacrifice, cooperate, await); "" = keine.
 var justice := ""
+## U.23: Änderung am Kontakt der Ereignis-Instanz {trust?, knowledge?, cost_cents?}; {} = keine.
+var contact: Dictionary = {}

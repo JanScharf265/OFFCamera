@@ -159,6 +159,9 @@ func _scroll_into_view(node: Control) -> void:
 			if in_content < scroll.scroll_vertical or in_content + node.size.y > scroll.scroll_vertical + scroll.size.y:
 				# Ziel oben ins Bild, damit darunter Platz für die Sprechblase bleibt.
 				scroll.scroll_vertical = maxi(int(in_content) - 8, 0)
+				# U.23: sofort neu anordnen – sonst misst _find_target die Lage von vor dem Scrollen und die Aussparung
+				# liegt daneben (fiel auf, als Ziele weit unten im Organisations-Fenster lagen).
+				scroll.notification(Container.NOTIFICATION_SORT_CHILDREN)
 			return
 		parent = parent.get_parent()
 

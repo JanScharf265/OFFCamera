@@ -181,6 +181,12 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Beziehungen (U.23, `scripts/systems/relationship_system.gd`, im GameState als `relationships`; Katalog
+  `RelationshipSystem.Catalog` aus `data/underworld/relationships.json`): Vertrauen/Wissen je Kontakt (Startwerte aus
+  den Daten, erst bei Bedarf im Zustand), Aktion (`check_action`/`act`: Buchung `underworld_contacts`, Werte,
+  Stimmung, Organisation, `police.reduce_file`, dann Spielzeit), DayCycle (Vertrauensverlust, Ereignis per
+  `trigger_scripted`, höchstens eins je Tag). Ereignis-Optionsfeld `contact` → `set_contact_handler`.
+  TutorialOverlay sortiert den Scrollbereich nach dem Scrollen sofort (`NOTIFICATION_SORT_CHILDREN`).
 - Doppelleben (U.22, `scripts/systems/double_life_system.gd`, im GameState als `double_life`; Regeln aus
   `data/underworld/double_life.json`): `heat_gain_percent()` = 100 − Tarnung (Ruf) + Bekanntheit (Follower);
   `OrganisationSystem.set_heat_modifier` wendet den Faktor auf jede positive Hitze-Änderung an (mindestens +1).
@@ -405,6 +411,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 34 → 35 (U.23): `relationships` leer (Startwerte aus den Daten), Tag verarbeitet.
 - Migration 33 → 34 (U.21): `justice` = frei, Tag verarbeitet.
 - Migration 32 → 33 (U.20): `police.raids` = 0, `police.last_raid` = {}.
 - Migration 31 → 32 (U.19): `police` = Stufe 0, Tag verarbeitet.

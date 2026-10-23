@@ -108,10 +108,16 @@ func _refresh_supply() -> void:
 				UiStyle.SMALL_FONT_SIZE, UiStyle.NEGATIVE if debt["overdue"] else UiStyle.WARNING)
 		line.name = "Debt_%s" % debt["order_id"]
 		_supply_box.add_child(line)
+	# Crew, Kontakte, Rivalen nebeneinander (U.23: das Fenster wurde zu lang; Reiter folgen mit U.25).
+	var people := HBoxContainer.new()
+	people.name = "PeopleButtons"
+	people.add_theme_constant_override("separation", 10)
+	_supply_box.add_child(people)
 	if _game.crew.is_available():
 		var crew_button: Button = _screen.scroll_button("Crew (%d)" % _game.crew.get_members().size(), "CrewButton")
 		crew_button.pressed.connect(_screen.open_crew)
-		_supply_box.add_child(crew_button)
+		crew_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		people.add_child(crew_button)
 	_add_police()
 	if _game.justice.has_case():
 		var justice_button: Button = _screen.scroll_button("Verfahren: %s" % _game.justice.state_label(), "JusticeButton")
@@ -122,10 +128,18 @@ func _refresh_supply() -> void:
 		_add_black_spending()
 	if _game.laundering.is_available():
 		_add_laundering()
+	if _game.relationships.is_available():
+		var contacts_button: Button = _screen.scroll_button("Kontakte", "ContactsButton")
+		contacts_button.pressed.connect(_screen.open_contacts)
+		contacts_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		people.add_child(contacts_button)
 	if _game.rivals.is_available():
 		var rivals_button: Button = _screen.scroll_button("Rivalen", "RivalsButton")
 		rivals_button.pressed.connect(_screen.open_rivals)
-		_supply_box.add_child(rivals_button)
+		rivals_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		people.add_child(rivals_button)
+	if people.get_child_count() == 0:
+		people.queue_free()
 	for supplier in supply.get_unlocked():
 		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)
 		button.pressed.connect(func() -> void: _screen.open_supplier(supplier.id))

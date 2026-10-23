@@ -31,6 +31,7 @@ const BlackSpendingSystemScript := preload("res://scripts/systems/black_spending
 const PoliceSystemScript := preload("res://scripts/systems/police_system.gd")
 const JusticeSystemScript := preload("res://scripts/systems/justice_system.gd")
 const DoubleLifeSystemScript := preload("res://scripts/systems/double_life_system.gd")
+const RelationshipSystemScript := preload("res://scripts/systems/relationship_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -75,6 +76,8 @@ var police := PoliceSystemScript.Rules.new()
 var justice := JusticeSystemScript.Rules.new()
 ## Doppelleben (U.22)
 var double_life := DoubleLifeSystemScript.Rules.new()
+## Beziehungen (U.23)
+var relationships := RelationshipSystemScript.Catalog.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -87,7 +90,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering, black_spending, police, justice, double_life]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory, rivals, laundering, black_spending, police, justice, double_life, relationships]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.
@@ -99,7 +102,8 @@ func load_all() -> bool:
 				else BlackSpendingSystemScript.DEFAULT_PATH if catalog == black_spending \
 				else PoliceSystemScript.DEFAULT_PATH if catalog == police \
 				else JusticeSystemScript.DEFAULT_PATH if catalog == justice \
-				else DoubleLifeSystemScript.DEFAULT_PATH if catalog == double_life else catalog.DEFAULT_PATH
+				else DoubleLifeSystemScript.DEFAULT_PATH if catalog == double_life \
+				else RelationshipSystemScript.DEFAULT_PATH if catalog == relationships else catalog.DEFAULT_PATH
 		contents += FileAccess.get_file_as_string(path)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():
@@ -177,6 +181,13 @@ func check_references() -> PackedStringArray:
 			if placed.has(location_id):
 				problems.append("Ort '%s' steht in zwei Gebieten." % location_id)
 			placed[location_id] = true
+	# U.23: Kontakte – Freischalt-Auftrag und Ereignis.
+	for contact in relationships.get_all():
+		if not contact.unlocked_by_mission.is_empty() and not missions.has(contact.unlocked_by_mission):
+			problems.append("Kontakt '%s': unbekannter Auftrag '%s'." % [contact.id, contact.unlocked_by_mission])
+		var contact_event = events.get_definition(contact.event.get("id", ""))
+		if contact_event == null or not contact_event.is_scripted:
+			problems.append("Kontakt '%s': Ereignis fehlt oder ist nicht „scripted“." % contact.id)
 	# U.21: Justiz-Ereignisse („scripted“) und die Haftanstalt.
 	for event_id in JusticeSystemScript.EVENTS.values():
 		var justice_event = events.get_definition(event_id)

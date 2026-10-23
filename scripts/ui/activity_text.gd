@@ -70,6 +70,10 @@ static func event_option_summary(option, channel: Dictionary) -> String:
 	for key in option.organisation:
 		var labels := {"respect": "Respekt", "heat": "Hitze", "stability": "Stabilität"}
 		parts.append("%s %+d" % [labels[key], int(option.organisation[key])])
+	var contact_labels := {"trust": "Vertrauen", "knowledge": "Wissen"}
+	for key in contact_labels:
+		if option.contact.has(key):
+			parts.append("%s %+d" % [contact_labels[key], int(option.contact[key])])
 	if not option.note.is_empty():
 		parts.append(option.note)
 	return " · ".join(parts) if not parts.is_empty() else "Keine Folgen"

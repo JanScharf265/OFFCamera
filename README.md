@@ -5,7 +5,7 @@ Kein App Store, kein Android, offline spielbar.
 
 ## Stand
 
-**Phase 0–7 sowie G1 und G2 abgeschlossen; der gebündelte iPhone-Test von Build 0.7.0 ist bestanden (13.10.2026, 338/338 Tests + 3/3 lange Tests grün). Neue Ausrichtung: Die Unterwelt wird das Hauptspiel (`docs/VISION.md`). Pakete G3 (Icon/Logo), G4 (UI-Layout), G5 (Komfort) und T (Tutorials, 23 Erklärungen mit Abdeckungstest) sind fertig (23.10.2026); U (Unterwelt) läuft – U.1–U.22 fertig (Schwarzgeld, Organisation/Hitze, Einstieg am Hafen, Story-Aufträge, Produkte, Lieferant, Kredit, Versteck, Verkaufen, Crew, Dealer-Abrechnung, Gebiete und Unterwelt-Ansicht, Gebiete übernehmen, Rivalen, Crew-Folgen, Waschen, Schwarzgeld ausgeben, weitere Standorte, Polizei 1 und 2, Justiz, Doppelleben; 693/693 Tests grün, Spielstand Version 34), als Nächstes U.23, dann Phase 8.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Phase 0–7 sowie G1 und G2 abgeschlossen; der gebündelte iPhone-Test von Build 0.7.0 ist bestanden (13.10.2026, 338/338 Tests + 3/3 lange Tests grün). Neue Ausrichtung: Die Unterwelt wird das Hauptspiel (`docs/VISION.md`). Pakete G3 (Icon/Logo), G4 (UI-Layout), G5 (Komfort) und T (Tutorials, 23 Erklärungen mit Abdeckungstest) sind fertig (23.10.2026); U (Unterwelt) läuft – U.1–U.23 fertig (Schwarzgeld, Organisation/Hitze, Einstieg am Hafen, Story-Aufträge, Produkte, Lieferant, Kredit, Versteck, Verkaufen, Crew, Dealer-Abrechnung, Gebiete und Unterwelt-Ansicht, Gebiete übernehmen, Rivalen, Crew-Folgen, Waschen, Schwarzgeld ausgeben, weitere Standorte, Polizei 1 und 2, Justiz, Doppelleben, Beziehungen; 702/702 Tests grün, Spielstand Version 35), als Nächstes U.24, dann Phase 8.** Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Was | Status |
 | --- | --- |

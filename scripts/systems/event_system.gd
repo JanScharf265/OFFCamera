@@ -62,6 +62,8 @@ var _rival_action: Callable
 var _crew_action: Callable
 ## U.21: JusticeSystem.apply_event_action(action, instance_id)
 var _justice_action: Callable
+## U.23: RelationshipSystem.apply_event_change(change, instance_id)
+var _contact_change: Callable
 var _text_context: Array[Callable] = []
 ## U.19: weitere Werte für Bedingungen (z. B. PoliceSystem.condition_values → police_level)
 var _condition_providers: Array[Callable] = []
@@ -84,6 +86,11 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStat
 ## EventSystem verweist (sonst Kreisverweis).
 func set_organisation_changer(change: Callable) -> void:
 	_change_organisation = change
+
+
+## Vom GameState (U.23): Änderungen an Kontakten.
+func set_contact_handler(handler: Callable) -> void:
+	_contact_change = handler
 
 
 ## Vom GameState (U.21): Aktionen im Verfahren.
@@ -239,6 +246,8 @@ func resolve(instance_id: String, option_id: String) -> String:
 		_rival_action.call(option.rival, instance_id)
 	if not option.crew.is_empty() and _crew_action.is_valid():
 		_crew_action.call(option.crew, instance_id)
+	if not option.contact.is_empty() and _contact_change.is_valid():
+		_contact_change.call(option.contact, instance_id)
 	if not option.justice.is_empty() and _justice_action.is_valid():
 		_justice_action.call(option.justice, instance_id)
 

@@ -490,5 +490,15 @@
 		"ui_target": "DoubleLifeStatus",
 		"order": 530,
 		"requires": []
+	},
+	{
+		"id": "tut_relationships",
+		"mechanic": "relationships",
+		"trigger": "first_contacts_open",
+		"title": "Menschen",
+		"text": "Wer dir vertraut, hilft dir. Wer viel über dich weiß, kann dir schaden. Pflege deine Kontakte – sonst sinkt das Vertrauen, und irgendwann stellt jemand unbequeme Fragen.",
+		"ui_target": "ContactAction_*",
+		"order": 540,
+		"requires": []
 	}
 ]

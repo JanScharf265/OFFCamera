@@ -1,0 +1,42 @@
+{
+	"trust_decay_every_days": 3,
+	"event_cooldown_days": 5,
+	"contacts": [
+		{
+			"id": "capitan",
+			"display_name": "El Capitán",
+			"role": "Kontakt am Hafen",
+			"description": "Kennt jeden Liegeplatz und jeden, der dort etwas zu verbergen hat. Hilft gern – und merkt sich, wem.",
+			"unlocked_by_mission": "first_deal_meeting",
+			"start_trust": 40,
+			"start_knowledge": 20,
+			"action": {"label": "Auf einen Kaffee treffen", "minutes": 60, "cost_cents": 0, "trust": 5, "knowledge": 3, "mood": 0, "heat": 0, "respect": 2, "police_progress": 0, "cooldown_days": 2},
+			"event": {"id": "capitan_favor", "min_knowledge": 60, "max_trust": 100, "min_trust": 70},
+			"order": 10
+		},
+		{
+			"id": "partner",
+			"display_name": "Alex",
+			"role": "Partnerschaft",
+			"description": "Seit zwei Jahren an deiner Seite, kennt deine Streams auswendig – und spürt, dass da noch mehr ist.",
+			"unlocked_by_mission": "",
+			"start_trust": 70,
+			"start_knowledge": 0,
+			"action": {"label": "Einen Abend zu zweit", "minutes": 180, "cost_cents": 6000, "trust": 8, "knowledge": 0, "mood": 12, "heat": 0, "respect": 0, "police_progress": 0, "cooldown_days": 1},
+			"event": {"id": "partner_questions", "min_knowledge": 40, "max_trust": 60, "min_trust": 0},
+			"order": 20
+		},
+		{
+			"id": "officer",
+			"display_name": "Inspektor Ruiz",
+			"role": "Beamter, käuflich",
+			"description": "Ein Inspektor kurz vor der Pension, mit teuren Hobbys. Für einen Umschlag sieht er manches nicht.",
+			"unlocked_by_mission": "territory_first",
+			"start_trust": 30,
+			"start_knowledge": 10,
+			"action": {"label": "Einen Umschlag übergeben", "minutes": 30, "cost_cents": 100000, "trust": 10, "knowledge": 10, "mood": 0, "heat": -5, "respect": 0, "police_progress": -10, "cooldown_days": 3},
+			"event": {"id": "officer_demands", "min_knowledge": 50, "max_trust": 50, "min_trust": 0},
+			"order": 30
+		}
+	]
+}

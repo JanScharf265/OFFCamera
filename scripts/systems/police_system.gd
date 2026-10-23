@@ -190,6 +190,12 @@ func payment_account(cost_cents: int) -> String:
 			else LedgerSystemScript.PRIVATE
 
 
+## U.23: Akte zurückwerfen (z. B. ein Kontakt bei der Polizei), nur während einer Ermittlung.
+func reduce_file(amount: int) -> void:
+	if _level == 2 and amount > 0:
+		_progress = maxi(0, _progress - amount)
+
+
 ## Anwalt: Buchung → Akte zurück. "" = erledigt.
 func hire_lawyer() -> String:
 	var reason := check_lawyer()

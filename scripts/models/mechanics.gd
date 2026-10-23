@@ -57,6 +57,7 @@ const NAMES := {
 	"police": "Polizei: Beobachtung und Ermittlung nach Hitze, Akte, Anwalt",
 	"raid": "Razzia: Standort versiegelt, Ware und Schwarzgeld beschlagnahmt",
 	"justice": "Justiz: Festnahme, Optionen, Kaution, Prozess, Haft (kein Game Over)",
+	"relationships": "Beziehungen: Kontakte mit Vertrauen und Wissen, Aktionen, Ereignisse",
 	"double_life": "Doppelleben: Kanal tarnt, Bekanntheit fällt auf; Paparazzi, Leak, Gerüchte, Skandal",
 }
 
