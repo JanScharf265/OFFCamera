@@ -25,8 +25,14 @@ Personen (Behörden nur als Institutionen, Beamte und Fälle erfunden). Gewalt n
   als gelaufen melden, der nicht gelaufen ist. (In der Cloud-Umgebung gibt es kein Godot und kein Xcode.)
 - Diffs statt ganzer Dateien, kurze Zusammenfassungen (Budget: max. 100 $ KI-Nutzung).
 - Niemals Geheimnisse, Zertifikate oder Provisioning-Profile committen.
-- **Tutorials (ab Paket T):** Jede neue Mechanik bekommt im selben Ticket ihr Tutorial (Daten in
-  `data/tutorials/`), der Abdeckungstest muss grün bleiben.
+- **Tutorials (ab Paket T, Pflicht für jedes Ticket mit neuer Mechanik – besonders Paket U):** Im selben Ticket
+  (1) die Mechanik-ID in `scripts/models/mechanics.gd` eintragen, (2) ihr Tutorial in `data/tutorials/tutorials.json`
+  liefern (kurz, ≤ 240 Zeichen, mit Auslöser aus der festen Liste und `ui_target`), (3) einen neuen Auslöser nur bei
+  Bedarf in `TutorialCatalog.TRIGGERS` aufnehmen und im Spielcode melden, (4) das Szenario in
+  `tests/test_tutorial_texts.gd` ergänzen. Sonst ist der Abdeckungstest (`tests/test_tutorial_coverage.gd`) rot.
+- Tests berühren nie den echten Spielstand oder die echten Einstellungen des Nutzers: eigene Testpfade
+  (`user://test_…`); der Test-Runner lenkt Apps ohne eigenen Pfad um und meldet einen Fehler, wenn sich
+  `user://savegame.json*` oder `user://settings.cfg` während des Laufs ändern.
 - Jede neue Spielstand-Version bekommt eine Migration und eine echte Testdatei (`tests/fixtures/saves/`).
 
 ## Vier Architekturregeln (nie umgehen)

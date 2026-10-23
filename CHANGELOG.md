@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Paket T abgeschlossen: feste Liste der Spielmechaniken mit Abdeckungstest (jede Mechanik hat ihr Tutorial, jeder Auslöser wird wirklich gemeldet); die Tests können den echten Spielstand und die Einstellungen am Mac nicht mehr verändern (Ticket T.7)
 - Tutorial-Texte für Karriere und Firma: Kanal, Content und Qualität, Ausrüstung, die Symbole auf den Kacheln, Firma gründen, Privat und Firma, Ladenlokal, Tagesabschluss, Fristen, Buchungen – nie mehr als drei hintereinander, und eine Erklärung kommt erst, wenn das Erklärte zu sehen ist. Tipp auf den Ortsnamen im Ortsfenster zeigt die Beschreibung des Orts (Tickets T.6, T.6b)
 - Tutorial-Texte für die Grundlagen: 13 kurze Erklärungen (Marbella, Karte bewegen, Orte antippen, Kacheln, Hinfahren, Hinfahren und starten, Energie und Stimmung, Kalender, Erinnerung, Konflikt, Warten, Ereignisse, Speichern) – zum Start nur zwei, der Rest beim ersten Benutzen; Tutorials liegen jetzt auch über dem Fenster, das sie erklären (z. B. Kalender). Lexikon mit festem Schließen-Button und in Spielreihenfolge; in den Einstellungen ist „Spielstand löschen“ nur rot umrandet, „Zurück“ grau (Ticket T.5)
 - Einstellungen: Schalter „Tutorials anzeigen“ und „Tutorials zurücksetzen“ (mit Rückfrage); neuer Bildschirm „Hilfe / Lexikon“ mit allen schon gesehenen Erklärungen (Antippen zeigt den Text). Die Einstellungsseite ist kompakter (Buttons paarweise nebeneinander), damit sie ohne Scrollen passt (Ticket T.4)

@@ -701,3 +701,14 @@ Sprechblase seitlich schmaler werden (ab 280 px), wenn sie in voller Breite nirg
 Wirkungs-Symbole bekommen feste Namen (`TileChip_singleplayer` usw.). T.6b: Die Ortsbeschreibung war seit G4.5b nur
 im Tooltip (auf dem iPhone unerreichbar); jetzt öffnet ein Tipp auf den Ortsnamen eine Info-Blase unter dem Titel,
 ein Tipp irgendwo schließt sie wieder; das Tutorial „Aktivitäten“ weist darauf hin.
+
+## 067 – Mechanik-Liste und Abdeckungstest (T.7)
+Die Mechanik-IDs stehen als Konstante in `scripts/models/mechanics.gd` (nicht als Daten-Datei): Sie sind Teil des
+Codes – eine neue Mechanik entsteht mit Code, und der Name dient nur den Fehlermeldungen. Der Abdeckungstest prüft beide
+Richtungen (Mechanik ohne Tutorial, Tutorial ohne bekannte Mechanik) und, ob jeder Auslöser der festen Liste im
+Spielcode gemeldet wird – als Textsuche nach `report("…")` bzw. `report.bind("…")` in `scripts/`; dass die Meldung im
+richtigen Moment kommt, prüfen die Szenarien in `test_tutorial_texts.gd` (jedes Tutorial erscheint wirklich, auf
+4 Geräteklassen). Absicherung der Nutzerdaten: In T.6 hatte ein Test den echten Schalter „Tutorials anzeigen“
+ausgeschaltet. Jetzt hat die App umlenkbare Standardpfade (`App.default_save_path`/`default_settings_path`); der
+Test-Runner setzt sie vor allen Tests auf `user://test_default_…` und vergleicht `user://settings.cfg` und
+`user://savegame.json` (+ .tmp, Backups) vor und nach dem Lauf – jede Änderung ist ein roter Test.

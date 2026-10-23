@@ -130,6 +130,9 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Ortsbeschreibung (T.6b): `ui_window.gd` macht den Titel antippbar, wenn der Inhalt `get_description()` hat
   (`WindowTitleButton`, ≥ 84 × 84 px, Signal `title_pressed`); die Spielansicht zeigt `LocationInfo` (fängt jeden Tipp
   und schließt) mit `LocationInfoBubble` unter dem Titel, in die Safe Area geschoben. Kein Tooltip mehr.
+- Abdeckung (T.7): `scripts/models/mechanics.gd` (`NAMES`: Mechanik-ID → Name) ist die feste Liste;
+  `tests/test_tutorial_coverage.gd` prüft Mechanik ↔ Tutorial in beide Richtungen und dass jeder Auslöser im Spielcode
+  gemeldet (`report("…")` / `report.bind("…")`) und von einem Tutorial genutzt wird.
 - Einstellungen und Lexikon (T.4): Geräte-Schalter `tutorials` (settings.cfg, Standard an) → `GameScreen.show_tutorials`;
   aus = `_open_due_tutorial()` zeigt nichts, das TutorialSystem merkt weiter. „Tutorials zurücksetzen“ →
   `App._reset_tutorials()` → `TutorialSystem.reset_seen()` (gesehen und `seen_triggers` leer, `first_game_start` gilt als

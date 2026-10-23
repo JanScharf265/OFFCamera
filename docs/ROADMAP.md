@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4 und G5 fertig, T läuft – als Nächstes T.7)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig – als Nächstes U.1)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -286,7 +286,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] G5.8 Rote Zählerpunkte mit Zahl (Kalender: Termine heute, die noch kommen – `DayPlan.count_upcoming_today`; Fristen: offene – `ObligationSystem.count_open`; „9+“ ab 10; Ereignisse ohne Punkt, sie öffnen sofort ihr Fenster); Balken für Energie und Stimmung unter 40 gelb, unter 20 rot (`PlayerStats.level_of`), Stimmung normal blau (427/427 Tests grün)
 - [x] G5.9 Vibration (`Input.vibrate_handheld`, 60 ms) bei Konflikt-Popup, Erinnerung, Termin verpasst, neuer fälliger Frist/Mahnung, Ereignis und Geldänderungen ab ±100 € (ohne Umbuchungen), nur mit Schalter, höchstens einmal je 1,5 s, nicht beim Laden (`scripts/core/haptics.gd`, liest Geld über `LedgerSystem.entry_posted`); am Mac nichts spürbar – Wirkung nur auf dem iPhone prüfbar (435/435 Tests grün)
 
-### T – Tutorial-System
+### T – Tutorial-System ✅ (23.10.2026)
 - [x] T.1 Datenformat `data/tutorials/tutorials.json` (id, mechanic, trigger, title, text, ui_target, order, requires) + Modell `scripts/models/tutorial_definition.gd` + Katalog `scripts/systems/tutorial_catalog.gd` mit Prüfung (fehlende/unbekannte Felder, doppelte IDs, unbekannter Auslöser aus fester Liste, unbekannte/eigene/doppelte `requires`, Zyklen, Text ≤ 240 Zeichen) – alles oder nichts; 3 Platzhalter (Karte, Gebäude antippen, Hinfahren) (441/441 Tests grün)
 - [x] T.2 TutorialSystem (`scripts/systems/tutorial_system.gd`): Auslöser melden (Spielansicht: Spielstart, Ort öffnen, Ort aus der Ferne, Kalender, Erinnerung; Systeme: Ereignis, fällige Frist), fällig = Auslöser gemeldet + nicht gesehen + `requires` gesehen, nach `order`; gesehen erst mit `mark_seen`, bis dahin fällig auch nach Laden; kostet keine Spielzeit; Spielstand Version 15 + Migration (Spielstart-Tutorials gelten als gesehen) + Testdatei v15; noch keine Anzeige (451/451 Tests + 3/3 lange Tests grün)
 - [x] T.3 Anzeige (`scripts/ui/tutorial_overlay.gd`): abdunkeln, Ziel (`ui_target` = Knotenname) ausgespart mit pulsierendem Rahmen und Pfeil, Sprechblase (Titel, Text, „Verstanden“) in der Safe Area ohne das Ziel zu verdecken; ohne/fehlendes Ziel mittig (Warnung im Log); „Verstanden“ → `mark_seen`, dann das nächste; Reihenfolge Ereignis → Kalender → Erinnerung → Tutorial, über dem Ortsfenster erlaubt; darunter nichts tippbar; fester Starthinweis „Tippe auf ein Gebäude …“ entfällt (459/459 Tests grün)
@@ -294,7 +294,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] T.5 Texte Grundlagen: 13 Tutorials (Karte, Karte bewegen, Orte antippen, Kacheln, Hinfahren, Hinfahren und starten, Energie/Stimmung, Kalender, Erinnerung, Konflikt, Warten, Ereignisse, Speichern), zum Start höchstens 2; 6 neue Auslöser; `ui_target` mit „*“; Test jedes Tutorials auf 4 Geräteklassen. Korrekturen: Tutorial darf über dem Fenster liegen, das es erklärt (DECISIONS 063); Lexikon mit festem Schließen-Button und in Spielreihenfolge; Einstellungs-Buttons: Löschen mit rotem Rahmen, Zurück/Zurücksetzen grau (474/474 Tests grün)
 - [x] T.6 Texte Karriere und Firma: 10 Tutorials (Kanal, Content und Qualität, Ausrüstung, Wirkungs-Symbole, Firma gründen, Privat und Firma, Ladenlokal, Tagesabschluss, Fristen, Buchungen), 9 neue Auslöser; höchstens 3 Tutorials hintereinander; ein Tutorial wartet, bis sein Ziel sichtbar ist; Test jedes Tutorials auf 4 Geräteklassen (476/476 Tests grün)
 - [x] T.6b Ortsbeschreibung: Tipp auf den Ortsnamen im Ortsfenster öffnet eine Info-Blase (Tippfläche ≥ 84 px, 24 px Schrift, Safe Area, Tipp irgendwo schließt); Tooltip entfernt; Hinweis im Tutorial „Aktivitäten“
-- [ ] T.7 Abdeckungstest (jede Mechanik-ID hat ein Tutorial) + Layout-Test der Texte auf den 4 Geräteklassen; Regel in `CLAUDE.md`
+- [x] T.7 Feste Mechanik-Liste `scripts/models/mechanics.gd` (23 IDs); Abdeckungstest `tests/test_tutorial_coverage.gd` (jede Mechanik hat ein Tutorial, jedes Tutorial eine bekannte Mechanik, jeder Auslöser wird im Spielcode gemeldet und genutzt); Layout jedes Tutorials auf 4 Geräteklassen (seit T.5/T.6 in `test_tutorial_texts.gd`); Regel in `CLAUDE.md`; Test-Runner schützt echten Spielstand und Einstellungen (481/481 Tests grün)
 
 ### U – Unterwelt (Hauptspiel; jedes Ticket mit Tutorial, Daten unter `data/underworld/`)
 - [ ] U.1 Schwarzgeld als drittes Konto im einen Ledger (`ledger_system.gd`, `consistency_check.gd`, Buchungen-Fenster); Spielstand-Version + Testdatei

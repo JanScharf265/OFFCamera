@@ -13,6 +13,12 @@ extends SceneTree
 ## gilt der Test als fehlgeschlagen. Gewollte push_error-Meldungen (ERROR_TYPE_ERROR) zählen nicht.
 
 const TEST_DIR := "res://tests/"
+## T.7: Echte Dateien des Nutzers – kein Test darf sie ändern (Vergleich vor/nach dem Lauf).
+const PROTECTED_FILES := ["user://settings.cfg", "user://settings.cfg.tmp", "user://savegame.json",
+		"user://savegame.json.tmp", "user://savegame.json.bak", "user://savegame.json.bak2", "user://savegame.json.bak3"]
+## Pfade, auf die eine App ohne eigenen Pfad während der Tests zeigt.
+const TEST_DEFAULT_SAVE := "user://test_default_savegame.json"
+const TEST_DEFAULT_SETTINGS := "user://test_default_settings.cfg"
 const LONG_TEST_DIR := "res://tests/long/"
 
 
@@ -50,6 +56,10 @@ func _initialize() -> void:
 func _run_all() -> void:
 	var passed := 0
 	var failed := 0
+	var app_script = load("res://scripts/ui/app.gd")
+	app_script.default_save_path = TEST_DEFAULT_SAVE
+	app_script.default_settings_path = TEST_DEFAULT_SETTINGS
+	var protected_before := _fingerprints()
 
 	for file in _test_files():
 		print("\n%s" % file)
@@ -76,6 +86,14 @@ func _run_all() -> void:
 				for failure in test_case.failures:
 					print("          - %s" % failure)
 
+	var protected_after := _fingerprints()
+	for path in PROTECTED_FILES:
+		if protected_before[path] != protected_after[path]:
+			failed += 1
+			print("\n  FEHLER  Ein Test hat die echte Datei %s verändert (eigenen Testpfad verwenden)." % path)
+	load("res://scripts/systems/save_system.gd").delete_save(TEST_DEFAULT_SAVE)
+	_remove(TEST_DEFAULT_SETTINGS)
+
 	print("\n%d bestanden, %d fehlgeschlagen" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 
@@ -97,3 +115,17 @@ func _test_methods(script: GDScript) -> PackedStringArray:
 			names.append(method_name)
 	names.sort()
 	return names
+
+
+## Inhalt (MD5) bzw. „fehlt“ je geschützter Datei.
+func _fingerprints() -> Dictionary:
+	var result := {}
+	for path in PROTECTED_FILES:
+		result[path] = FileAccess.get_md5(path) if FileAccess.file_exists(path) else "fehlt"
+	return result
+
+
+func _remove(path: String) -> void:
+	for candidate in [path, path + ".tmp"]:
+		if FileAccess.file_exists(candidate):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(candidate))

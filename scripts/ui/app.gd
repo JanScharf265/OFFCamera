@@ -26,9 +26,13 @@ const SafeAreaScript := preload("res://scripts/ui/safe_area.gd")
 const StartLog := preload("res://scripts/ui/start_log.gd")
 
 ## Speicherort; Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
-var save_path := SaveSystemScript.DEFAULT_PATH
+## Standardpfade (T.7): Der Test-Runner biegt sie vor allen Tests auf Testdateien um – so berührt kein Test, der eine
+## App ohne eigenen Pfad baut, den echten Spielstand oder die echten Einstellungen.
+static var default_save_path := SaveSystemScript.DEFAULT_PATH
+static var default_settings_path := SettingsScript.DEFAULT_PATH
+var save_path: String = default_save_path
 ## Ort der Geräte-Einstellungen (G5.1); Tests setzen einen eigenen Pfad vor dem Einfügen in den Baum.
-var settings_path := SettingsScript.DEFAULT_PATH
+var settings_path: String = default_settings_path
 ## Geräte-Einstellungen, beim Start geladen (gelten fürs Gerät, nicht pro Spielstand).
 var settings
 ## Seed für neue Spiele; -1 = zufällig (Tests setzen einen festen Wert).
