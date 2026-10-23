@@ -64,6 +64,8 @@ var _day := 0
 var _today_cents := 0
 var _total_cents := 0
 var _count := 0
+## U.18: mehr Limit durch eigene Clubs (SiteSystem.laundering_bonus)
+var _limit_bonus: Callable
 
 
 func _init(time, ledger: LedgerSystemScript, rules: Rules, organisation, company) -> void:
@@ -84,9 +86,19 @@ func is_available() -> bool:
 
 
 ## Heute noch möglich (Cent).
+## Vom GameState (U.18).
+func set_limit_bonus(bonus: Callable) -> void:
+	_limit_bonus = bonus
+
+
+## Tageslimit inklusive Clubs (Cent).
+func daily_limit() -> int:
+	return _rules.get_value("daily_limit_cents") + (int(_limit_bonus.call()) if _limit_bonus.is_valid() else 0)
+
+
 func remaining_today() -> int:
 	var used := _today_cents if _day == _time.get_day() else 0
-	return maxi(0, _rules.get_value("daily_limit_cents") - used)
+	return maxi(0, daily_limit() - used)
 
 
 func get_total() -> int:

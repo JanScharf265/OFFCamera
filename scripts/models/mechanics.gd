@@ -52,6 +52,8 @@ const NAMES := {
 	"crew_risks": "Crew-Folgen (Verhaftung, Verrat, Spitzel, Abwerbung, Feuern)",
 	"laundering": "Waschen über die Tarnfirma (Gebühr, Tageslimit, Hitze)",
 	"black_spending": "Schwarzgeld im Alltag ausgeben (eingeschränkt, Hitze)",
+	"site_types": "Weitere Standorte (Lager, Verkaufspunkt, Club, Produktion, Liegeplatz)",
+	"site_upgrade": "Standorte ausbauen (Stufen)",
 }
 
 

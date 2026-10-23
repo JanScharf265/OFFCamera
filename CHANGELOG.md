@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Weitere Standorte: Lager (mehr Platz), Hinterzimmer im Ladenlokal (verkauft jeden Tag), Club Medusa in Puerto Banús (verkauft und erhöht das Waschlimit), Gewächshäuser auf einer Finca (produzieren jeden Tag Gras) und Liegeplatz 14 (billigerer Einkauf). Club und Finca sind neue Orte auf der Karte, sichtbar nach „Ein Stück Stadt“. Eigene Standorte lassen sich ausbauen (mehr Wirkung, höhere Miete). Erklärungen „Mehr als ein Versteck“ und „Ausbauen“; Spielstand Version 31 (Ticket U.18)
 - Schwarzgeld im Alltag: Im Fenster „Organisation“ lässt sich „Mit Schwarzgeld bezahlen“ einschalten. Dann zahlen Aktivitäten und Ausrüstung aus Schwarzgeld (bis 300 € am Tag), Miete, Fristen und Firma nie. Jede Zahlung macht Hitze und wird in der Rückmeldung genannt. Erklärung „Bar bezahlen“; Spielstand Version 30 (Ticket U.17)
 - Waschen: Mit Organisation und Firma gibt es im Fenster „Organisation“ den Abschnitt „Waschen über die Firma“ – Betrag wählen, ein Tipp: Aus Schwarzgeld wird Geld auf dem Firmenkonto, abzüglich 15 % Gebühr, höchstens 1.000 € am Tag, jeder Betrag macht etwas Hitze. Reine Spielmechanik. Der Schalter „Unterwelt/Tag“ hat keine Überschrift mehr (mehr Platz neben „Geschäft“). Erklärung „Waschen“; Spielstand Version 29 (Ticket U.16)
 - Hitze sinkt jetzt jeden Tag um 3, auch an Tagen mit Verkäufen. Im Ereignisfenster stehen die Antworten als Zeilen (Folgen links, Button rechts) – auch drei Antworten passen ohne Scrollen (Nachtrag GD 086)

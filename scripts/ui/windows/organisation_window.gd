@@ -94,8 +94,8 @@ func _refresh_supply() -> void:
 	capacity_line.name = "StockCapacity"
 	_supply_box.add_child(capacity_line)
 	for site in _game.sites.get_owned():
-		var site_line := UiStyle.wrapping_label("%s · %s/Tag" % [site.display_name,
-				LedgerSystemScript.format_cents(site.running_cost_per_day_cents)], UiStyle.MIN_READ_FONT_SIZE, UiStyle.TEXT)
+		var site_line := UiStyle.wrapping_label("%s · Stufe %d · %s/Tag" % [site.display_name, _game.sites.get_level(site.id),
+				LedgerSystemScript.format_cents(_game.sites.effects(site.id)["running"])], UiStyle.MIN_READ_FONT_SIZE, UiStyle.TEXT)
 		site_line.name = "OwnedSite_%s" % site.id
 		_supply_box.add_child(site_line)
 	for debt in supply.get_debts():

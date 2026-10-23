@@ -44,7 +44,8 @@ func test_bad_sites_are_rejected() -> void:
 	var good := {"id": "s_a", "display_name": "S", "type": "stash", "location": "garage", "description": "D.",
 			"unlocked_by_mission": "first_deal_goods", "start_cost_cents": 1, "running_cost_per_day_cents": 1,
 			"setup_minutes": 0, "capacity_units": 1, "staff_slots": 0, "productivity_per_day": 0, "risk": 5,
-			"activities": [], "requires": []}
+			"activities": [], "requires": [], "product": "", "sale_units_per_day": 0, "laundering_limit_cents": 0,
+			"supplier_discount_percent": 0, "max_level": 1, "upgrade_cost_cents": 0, "upgrade_percent": 0}
 	var catalog := SiteCatalogScript.new()
 	assert_true(catalog.load_data([good]), "; ".join(catalog.errors))
 	for change in [{"type": "castle"}, {"risk": 101}, {"capacity_units": -1}, {"extra": 1}, {"requires": "x"}]:
@@ -177,8 +178,10 @@ func test_ui_map_hides_garage_then_card_rents() -> void:
 	assert_eq([button.disabled, button.text], [false, "Anmieten"])
 	button.pressed.emit()
 	assert_eq(app.game.sites.is_owned(GARAGE), true)
-	assert_eq(button.visible, false)
-	assert_eq((app.find_child("SiteInfo_%s" % GARAGE, true, false) as Label).text, "Versteck · Platz für Ware: 5/120")
+	# Seit U.18: eigener Standort zeigt „Ausbauen“ (Stufe 1 von 3) und seine Wirkung.
+	assert_eq(button.visible, true)
+	assert_true(button.text.begins_with("Ausbauen · 250,00 €") or button.disabled, button.text)
+	assert_eq((app.find_child("SiteInfo_%s" % GARAGE, true, false) as Label).text, "Versteck · Platz +100")
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 

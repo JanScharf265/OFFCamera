@@ -528,7 +528,7 @@ func _refresh_branch_card(type_id: String, now: int) -> void:
 func _build_site_card(site_id: String) -> Control:
 	var site = _game.sites.get_catalog().get_definition(site_id)
 	var tile := _tile("site_%s" % site_id, site.display_name, "SiteButton_%s" % site_id, "Anmieten", false,
-			func() -> void: _screen.on_site_acquire_pressed(site_id), "unterwelt")
+			_screen.on_site_pressed.bind(site_id), "unterwelt")
 	tile.tooltip_text = site.description
 	tile.info_label("SiteInfo_%s" % site_id)
 	_site_cards[site_id] = tile
@@ -540,20 +540,49 @@ func _refresh_site_card(site_id: String, now: int) -> void:
 	var tile: ActivityTileScript = _site_cards[site_id]
 	var owned: bool = _game.sites.is_owned(site_id)
 	var type_label: String = SiteCatalogScript.TYPE_LABELS.get(site.type, site.type)
+	var level: int = _game.sites.get_level(site_id)
+	var effects: Dictionary = _game.sites.effects(site_id)
 	if owned:
-		tile.set_time("Gehört dir")
-		tile.set_effects([ActivityText.chip("-%s/Tag" % LedgerSystemScript.format_cents(site.running_cost_per_day_cents),
-				-1, ActivityText.MONEY_ICON)])
-		tile.set_info("%s · Platz für Ware: %d/%d" % [type_label, _game.supply.total_stock(), _game.sites.capacity()])
-		tile.set_hint("")
+		var can_grow: bool = level < site.max_level
+		tile.set_time("Gehört dir · Stufe %d/%d" % [level, site.max_level])
+		tile.set_effects([ActivityText.chip("-%s/Tag" % LedgerSystemScript.format_cents(effects["running"]), -1,
+				ActivityText.MONEY_ICON)])
+		tile.set_info("%s · %s" % [type_label, _site_effect_text(site, effects)])
+		tile.set_hint(_conflict_hint(site.setup_minutes) if can_grow else "")
+		tile.button.visible = can_grow
+		if can_grow:
+			tile.set_action_text("Ausbauen · %s" % LedgerSystemScript.format_cents(_game.sites.upgrade_cost(site_id)))
+			tile.set_reason(_game.sites.check_upgrade(site_id))
+			if _game.sites.check_upgrade(site_id).is_empty():
+				_game.tutorials.report("first_site_upgrade_offered")
 	else:
 		tile.set_time(ActivityText.duration_with_end(now, site.setup_minutes))
 		tile.set_effects([ActivityText.chip(ActivityText.signed_money(-site.start_cost_cents), -1, ActivityText.MONEY_ICON),
 				ActivityText.chip("-%s/Tag" % LedgerSystemScript.format_cents(site.running_cost_per_day_cents), -1)])
-		tile.set_info("%s · fasst %d Einheiten" % [type_label, site.capacity_units])
+		tile.set_info("%s · %s" % [type_label, _site_effect_text(site, effects)])
 		tile.set_hint(_conflict_hint(site.setup_minutes))
-	tile.set_reason(_game.sites.check_acquire(site_id) if not owned else "")
-	tile.button.visible = not owned
+		tile.set_action_text("Anmieten")
+		tile.set_reason(_game.sites.check_acquire(site_id))
+		tile.button.visible = true
+	if site.type != "stash" and _game.sites.is_unlocked(site_id):
+		_game.tutorials.report("first_site_types_offered")
+
+
+## U.18: Wirkung eines Standorts in einem Satz (Werte aus SiteSystem.effects).
+func _site_effect_text(site, effects: Dictionary) -> String:
+	var parts := PackedStringArray()
+	if int(effects["capacity"]) > 0:
+		parts.append("Platz +%d" % effects["capacity"])
+	if int(effects["production"]) > 0:
+		var product = _game.supply.get_products().get_definition(site.product)
+		parts.append("%d × %s am Tag" % [effects["production"], product.display_name if product != null else site.product])
+	if int(effects["sales"]) > 0:
+		parts.append("verkauft %d am Tag" % effects["sales"])
+	if int(effects["laundering"]) > 0:
+		parts.append("Waschlimit +%s" % LedgerSystemScript.format_cents(effects["laundering"]))
+	if int(effects["discount"]) > 0:
+		parts.append("Einkauf −%d %%" % effects["discount"])
+	return " · ".join(parts)
 
 
 

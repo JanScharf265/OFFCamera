@@ -156,6 +156,10 @@ func check_references() -> PackedStringArray:
 		var incident = events.get_definition(event_id)
 		if incident == null or not incident.is_scripted:
 			problems.append("Crew: Ereignis '%s' fehlt oder ist nicht „scripted“." % event_id)
+	# U.18: Produktion verweist auf ein Produkt.
+	for site in sites.get_all():
+		if not site.product.is_empty() and products.get_definition(site.product) == null:
+			problems.append("Standort '%s': unbekanntes Produkt '%s'." % [site.id, site.product])
 	# U.10: Crew-Freischaltung und Rollen in Auftragszielen.
 	if not missions.has(crew.unlocked_by_mission):
 		problems.append("Crew: unbekannter Auftrag '%s'." % crew.unlocked_by_mission)

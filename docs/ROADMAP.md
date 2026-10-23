@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.18)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.19)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -314,14 +314,14 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] U.15 Crew-Folgen: Verhaftung, Verrat, Spitzel, Abwerbung (Ereignisse): Regeln `risks` in `crew.json`; täglich höchstens ein Vorfall (Seed) aus Hitze, Polizei im Gebiet, Können, Gier/Loyalität, Bande im Revier; „scripted“-Ereignisse mit Namen im Text (`EventSystem.get_text`, Platzhalter) und Optionsfeld `crew` (Anwalt, fallen lassen, suchen lassen, abschreiben, rauswerfen, behalten, mehr Lohn, gehen lassen); Risiko-Zeile je Mitglied im Crew-Fenster; Feuern kostet Stabilität, wenig Loyale reden (Hitze); Tutorial „Deine Leute sind ein Risiko“; Spielstand Version 28 + Migration + Testdatei (630/630 Tests + 3/3 lange Tests grün)
 - [x] U.16 Waschen über Tarnfirmen als reine Spielmechanik (Gebühr %, Tageslimit, Risiko) – Merch-Label: Regeln `data/underworld/laundering.json` (15 %, 1.000 €/Tag, Schritte 100 €, Hitze +5 je 1.000 €), `LaunderingSystem` (zwei Buchungen Schwarzgeld → Firmenkonto, keine Spielzeit); Abschnitt „Waschen über die Firma“ im Organisations-Fenster (Betrag −/+, ein Button), nur mit Organisation und Unternehmen; Tutorial „Waschen“; Gruppe „Ansicht“ ohne Überschrift (überlappte mit Firma auf iPhone 13/14, Test erweitert); Spielstand Version 29 + Migration + Testdatei (639/639 Tests + 3/3 lange Tests grün)
 - [x] U.17 Schwarzgeld ausgeben: eingeschränkt bzw. erhöht Hitze: Schalter „Mit Schwarzgeld bezahlen“ im Organisations-Fenster (im Spielstand); an = Aktivitäten und Ausrüstung zahlen aus Schwarzgeld, wenn es reicht und das Tageslimit (300 €) es erlaubt, sonst privat; Miete, Fristen, Firma, Termine, Ereignisse nie; Hitze +2 je 100 €, mindestens +1 je Zahlung; Regeln `data/underworld/black_spending.json`, `BlackSpendingSystem`; Tutorial „Bar bezahlen“; Spielstand Version 30 + Migration + Testdatei (647/647 Tests + 3/3 lange Tests grün)
-- [ ] U.18 Weitere Standorte: Verkaufspunkt, Lager, Club (auch Tarnfirma), Produktion („X Einheiten/Tag“), Liegeplatz am Hafen; ausbauen
+- [x] U.18 Weitere Standorte: Verkaufspunkt, Lager, Club (auch Tarnfirma), Produktion („X Einheiten/Tag“), Liegeplatz am Hafen; ausbauen: Lager „Hinterhof“ (Garage, +300 Platz), „Hinterzimmer“ (Ladenlokal, verkauft 4/Tag), „Club Medusa“ (neuer Ort, verkauft 3/Tag, Waschlimit +1.000 €), „Gewächshäuser“ (neuer Ort Finca, 5 Gras/Tag), „Liegeplatz 14“ (Café am Hafen, Einkauf −10 %); Stufen je Standort (Wirkung und Miete +50 % bzw. +100 % je Stufe, Kosten × Stufe), „Ausbauen“ in der Kachel; Club/Finca erst nach „Ein Stück Stadt“; Layout-Test „jedes Ortsschild erreichbar“; Tutorials „Mehr als ein Versteck“ und „Ausbauen“; Spielstand Version 31 + Migration + Testdatei (657/657 Tests + 3/3 lange Tests grün)
 - [ ] U.19 Polizei 1: Beobachtung → Ermittlung nach Hitze, verbunden mit den Behördenereignissen aus Phase 5
 - [ ] U.20 Polizei 2: Razzia (Folgen für Standorte, Bestand, Schwarzgeld – als Buchung)
 - [ ] U.21 Justiz: Festnahme, Optionen (Anwalt, Bestechung, stillhalten, Crew opfern, kooperieren), Kaution, Prozess, Haft als Spieltage mit Weiterspielen (kein Game Over)
 - [ ] U.22 Doppelleben: Kanal senkt Hitze-Anstieg leicht, Bekanntheit erhöht Aufmerksamkeit, Ereignisse Paparazzi/Leak/Gerüchte/Skandal
 - [ ] U.23 Beziehungen: Kontakt am Hafen, Partner/in, bestechlicher Beamter als Daten mit Vertrauen/Wissen und Ereignissen
 - [ ] U.24 Tageswechsel komplett (Abrechnung → Hitze → Fristen → Ereignisse → Kalender), Bot und lange Tests um die Unterwelt erweitern
-- [ ] U.25 HUD und Seitenbuttons final, Abnahme Paket U
+- [ ] U.25 HUD und Seitenbuttons final, Abnahme Paket U; dazu (GD nach U.17): Kosten-Chip in Kacheln zeigt bei eingeschaltetem „Mit Schwarzgeld bezahlen“ „· bar“
 
 ## Spätere Phasen
 8. Balancing und mehr Inhalte: Verhältnis Kanal-/Unterwelt-Einnahmen, evtl. „harter Modus“ mit Game Over, weitere Figuren (bester Freund, Manager)

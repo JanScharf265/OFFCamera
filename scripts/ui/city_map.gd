@@ -84,6 +84,9 @@ const BUILDINGS := {
 	"office": {"base": "buildingTiles_001", "floors": ["buildingTiles_016", "buildingTiles_016", "buildingTiles_016"]},
 	"label_store": {"base": "buildingTiles_020", "floors": []},
 	"garage": {"base": "buildingTiles_030", "floors": []},
+	# U.18
+	"club": {"base": "buildingTiles_022", "floors": ["buildingTiles_052", "buildingTiles_052"], "roof": "buildingTiles_065"},
+	"finca": {"base": "buildingTiles_026", "floors": []},
 }
 const DEFAULT_BUILDING := {"base": "buildingTiles_019", "floors": ["buildingTiles_016"]}
 const FILLER_BUILDINGS: Array[String] = ["buildingTiles_019", "buildingTiles_022", "buildingTiles_030"]

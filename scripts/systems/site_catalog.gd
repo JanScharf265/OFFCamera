@@ -7,6 +7,10 @@ extends RefCounted
 ##   id, display_name, type (einer aus TYPES), location (Orts-ID), description (≤ 200 Zeichen),
 ##   unlocked_by_mission (Auftrags-ID), start_cost_cents ≥ 0, running_cost_per_day_cents ≥ 0, setup_minutes ≥ 0,
 ##   capacity_units ≥ 0, staff_slots ≥ 0, productivity_per_day ≥ 0, risk 0–100, activities [IDs], requires [Standort-IDs]
+##   U.18: product (Produkt-ID der Produktion, sonst ""), sale_units_per_day ≥ 0 (Verkaufspunkt/Club),
+##   laundering_limit_cents ≥ 0 (Club als Tarnfirma: mehr Waschlimit), supplier_discount_percent 0–100 (Liegeplatz),
+##   max_level ≥ 1, upgrade_cost_cents ≥ 0 (je Stufe × aktuelle Stufe), upgrade_percent ≥ 0 (Wirkung und laufende
+##   Kosten je weiterer Stufe)
 ## Verweise (Ort, Auftrag, requires) prüft GameData.check_references().
 
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -17,9 +21,10 @@ const TYPES := ["stash", "storage", "sales_point", "club", "production", "berth"
 const TYPE_LABELS := {"stash": "Versteck", "storage": "Lager", "sales_point": "Verkaufspunkt", "club": "Club",
 		"production": "Produktion", "berth": "Liegeplatz"}
 const INT_FIELDS := ["start_cost_cents", "running_cost_per_day_cents", "setup_minutes", "capacity_units", "staff_slots",
-		"productivity_per_day", "risk"]
+		"productivity_per_day", "risk", "sale_units_per_day", "laundering_limit_cents", "supplier_discount_percent",
+		"max_level", "upgrade_cost_cents", "upgrade_percent"]
 const FIELDS := ["id", "display_name", "type", "location", "description", "unlocked_by_mission", "activities",
-		"requires"] + INT_FIELDS
+		"requires", "product"] + INT_FIELDS
 
 
 ## Ein Standort (nur Daten).
@@ -39,6 +44,13 @@ class Site extends RefCounted:
 	var risk: int
 	var activities: PackedStringArray
 	var requires: PackedStringArray
+	var product: String
+	var sale_units_per_day: int
+	var laundering_limit_cents: int
+	var supplier_discount_percent: int
+	var max_level: int
+	var upgrade_cost_cents: int
+	var upgrade_percent: int
 
 
 var errors: PackedStringArray = []
@@ -126,8 +138,16 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int):
 		if value < 0:
 			reader.errors.append("%s: '%s' darf nicht negativ sein." % [where, field])
 		site.set(field, value)
-	if site.risk > 100:
-		reader.errors.append("%s: 'risk' muss zwischen 0 und 100 liegen." % where)
+	if site.risk > 100 or site.supplier_discount_percent > 100:
+		reader.errors.append("%s: 'risk' und 'supplier_discount_percent' müssen zwischen 0 und 100 liegen." % where)
+	if site.max_level < 1:
+		reader.errors.append("%s: 'max_level' muss ≥ 1 sein." % where)
+	if typeof(entry.get("product")) != TYPE_STRING:
+		reader.errors.append("%s: 'product' fehlt (\"\" ohne Produktion)." % where)
+	else:
+		site.product = entry["product"]
+	if site.productivity_per_day > 0 and site.product.is_empty():
+		reader.errors.append("%s: Produktion ohne 'product'." % where)
 	for field in ["activities", "requires"]:
 		var raw: Variant = entry.get(field)
 		if typeof(raw) != TYPE_ARRAY:

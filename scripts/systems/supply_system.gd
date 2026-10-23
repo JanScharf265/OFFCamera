@@ -44,10 +44,30 @@ var _products: ProductCatalogScript
 var _is_mission_completed: Callable
 ## U.8: Lager-Kapazität (SiteSystem.capacity) – Bestand + unterwegs darf sie nicht übersteigen. Ohne: unbegrenzt.
 var _capacity: Callable
+var _discount: Callable
 
 
 func set_capacity_check(capacity: Callable) -> void:
 	_capacity = capacity
+
+
+## U.18: Rabatt beim Einkauf (SiteSystem.supplier_discount_percent, Liegeplatz).
+func set_discount(discount_percent: Callable) -> void:
+	_discount = discount_percent
+
+
+## U.18: Ware in den Bestand (Produktion), höchstens so viel, wie Platz ist. Rückgabe: aufgenommen.
+func add_stock(product_id: String, units: int) -> int:
+	if units <= 0 or _products.get_definition(product_id) == null:
+		return 0
+	var room := units
+	if _capacity.is_valid():
+		room = mini(units, int(_capacity.call()) - total_stock() - incoming_units())
+	if room <= 0:
+		return 0
+	_stock[product_id] = get_stock(product_id) + room
+	stock_changed.emit()
+	return room
 
 
 ## Einheiten, die noch unterwegs sind.
@@ -144,10 +164,15 @@ func get_pending_orders() -> Array:
 			func(order) -> Dictionary: return order.duplicate())
 
 
-## Gesamtpreis einer Bestellung (Cent).
+## Gesamtpreis einer Bestellung (Cent) – U.18: abzüglich Rabatt eines eigenen Liegeplatzes.
+@warning_ignore("integer_division")
 func order_cost(product_id: String, units: int) -> int:
 	var product = _products.get_definition(product_id)
-	return product.buy_price_cents * units if product != null else 0
+	if product == null:
+		return 0
+	var cost: int = product.buy_price_cents * units
+	var discount: int = int(_discount.call()) if _discount.is_valid() else 0
+	return cost - cost * discount / 100
 
 
 ## Konto, von dem eine Bestellung bezahlt würde: Schwarzgeld, wenn es reicht, sonst Privatkonto.

@@ -430,5 +430,25 @@
 		"ui_target": "BlackSpendingToggle",
 		"order": 470,
 		"requires": []
+	},
+	{
+		"id": "tut_site_types",
+		"mechanic": "site_types",
+		"trigger": "first_site_types_offered",
+		"title": "Mehr als ein Versteck",
+		"text": "Jeder Standort hat seinen Zweck: Lager schaffen Platz, Verkaufspunkte und Clubs verkaufen jeden Tag, eine Finca produziert, ein Liegeplatz macht den Einkauf billiger. Alle kosten jeden Tag Miete.",
+		"ui_target": "SiteInfo_*",
+		"order": 480,
+		"requires": []
+	},
+	{
+		"id": "tut_site_upgrade",
+		"mechanic": "site_upgrade",
+		"trigger": "first_site_upgrade_offered",
+		"title": "Ausbauen",
+		"text": "Eigene Standorte lassen sich ausbauen: Jede Stufe bringt mehr Wirkung – aber auch höhere laufende Kosten.",
+		"ui_target": "SiteButton_*",
+		"order": 490,
+		"requires": []
 	}
 ]

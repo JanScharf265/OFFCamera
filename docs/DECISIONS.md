@@ -961,3 +961,20 @@ Ereignisse zahlen nie aus Schwarzgeld (Firmengeld nur über das Waschen, U.16). 
 +2 je 100 €, mindestens +1; die Rückmeldung nennt sie („Bezahlt mit Schwarzgeld: … (Hitze +1)“). Der Schalter ist ein
 Spielzustand (bestimmt Geldflüsse) und steht deshalb im Spielstand, nicht in den Geräte-Einstellungen. Unterwelt-
 Ausgaben (Lieferant, Versteck, Löhne, Rivalen) zahlten schon vorher Schwarzgeld zuerst. Vorläufige Werte, Phase 8.
+GD nach U.17 („mach deine Empfehlung“): Kosten-Chip „· bar“ in den Kacheln kommt mit U.25 (in der ROADMAP vermerkt).
+Zu U.16 (offene Frage): Gewaschenes Geld zählt weiter als Firmenumsatz (Empfehlung angenommen).
+
+## 089 – Weitere Standorte und Ausbau (U.18)
+Fünf neue Standorte, je mit einer klaren Wirkung als Datenfeld: Lager „Hinterhof“ (Garage, braucht das Versteck,
++300 Platz), „Hinterzimmer“ (Ladenlokal, verkauft 4 Einheiten am Tag), „Club Medusa“ (neuer Ort in Puerto Banús,
+verkauft 3 am Tag und erhöht als Tarnfirma das Waschlimit um 1.000 €), „Gewächshäuser“ (neuer Ort Finca, 5 Einheiten
+Gras am Tag – nur eine Zahl, keine Herstellungsschritte) und „Liegeplatz 14“ (Café am Hafen, 10 % billiger beim
+Lieferanten). Club und Finca sind erst nach „Ein Stück Stadt“ bekannt (wie die Garage in U.8). Verkaufspunkte verkaufen
+ohne Crew zum Verkaufspreis, ohne Abzweigen, mit voller Hitze. Produktion füllt nur bis zur Kapazität.
+Ausbauen: jede Stufe + `upgrade_percent` Wirkung **und** Miete (Liegeplatz +100 %, sonst +50 %), Kosten
+`upgrade_cost_cents` × aktuelle Stufe, dauert wie das Anmieten (Konflikt-Popup). Die Kachel zeigt „Gehört dir · Stufe
+1/3“ und „Ausbauen · …“.
+Selbstprüfung: Die Finca lag zuerst am rechten Stadtrand – dort begrenzt die Karte das Verschieben, das Schild blieb
+immer unter den Seitenbuttons. Sie liegt jetzt oben am Stadtrand; neuer Layout-Test „jedes Ortsschild erreichbar“ (mit
+der alten Position schlug er an). Namen gekürzt („Hinterzimmer“, „Gewächshäuser“), weil sie in der Kachel abgeschnitten
+waren. Vorläufige Werte, Phase 8.

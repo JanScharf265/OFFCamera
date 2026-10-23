@@ -160,6 +160,13 @@ func set_hint(text: String, is_warning: bool = true) -> void:
 	_hint.add_theme_color_override("font_color", UiStyle.WARNING if is_warning else UiStyle.MUTED)
 
 
+## U.18: Aktionstext ändern (z. B. „Anmieten“ → „Ausbauen · 250,00 €“). Danach set_reason() aufrufen.
+func set_action_text(text: String) -> void:
+	_action_text = text
+	if not _trip:
+		_shown_action_text = text
+
+
 ## "" = frei (Button zeigt seinen Aktionstext), sonst steht der Sperrgrund im Button.
 func set_reason(reason: String) -> void:
 	button.disabled = not reason.is_empty()

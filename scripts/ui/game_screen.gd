@@ -599,6 +599,25 @@ func on_supply_order(supplier_id: String, product_id: String, units: int) -> voi
 			ActivityText.signed_money(-cost)])
 
 
+## U.18: Kachel eines Standorts – eigener Standort wird ausgebaut, sonst angemietet.
+func on_site_pressed(site_id: String) -> void:
+	if _game.sites.is_owned(site_id):
+		on_site_upgrade_pressed(site_id)
+	else:
+		on_site_acquire_pressed(site_id)
+
+
+## U.18: Standort ausbauen – kostet Spielzeit, daher mit Konflikt-Popup.
+func on_site_upgrade_pressed(site_id: String) -> void:
+	if _was_scroll():
+		return
+	var site = _game.sites.get_catalog().get_definition(site_id)
+	var cost: int = _game.sites.upgrade_cost(site_id)
+	_guard(site.setup_minutes, "%s ausbauen" % site.display_name, func() -> void:
+		_after_action(_game.sites.upgrade(site_id), "%s ausgebaut: Stufe %d (%s)" % [site.display_name,
+				_game.sites.get_level(site_id), ActivityText.signed_money(-cost)]))
+
+
 ## Standort anmieten (U.8) über das SiteSystem – kostet Spielzeit, daher mit Konflikt-Popup.
 func on_site_acquire_pressed(site_id: String) -> void:
 	if _was_scroll():

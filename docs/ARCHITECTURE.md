@@ -181,6 +181,13 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Weitere Standorte (U.18): `sites.json` mit `product`, `sale_units_per_day`, `laundering_limit_cents`,
+  `supplier_discount_percent`, `max_level`, `upgrade_cost_cents`, `upgrade_percent`. SiteSystem: Stufen (`levels`,
+  gespeichert), `effects()` (Werte auf der Stufe), `check_upgrade`/`upgrade`; DayCycle-Schritt der Standorte: erst
+  Produktion (`SupplySystem.add_stock`, nur so viel Platz ist) und Verkauf (Buchung `underworld_site_sales`, Hitze),
+  dann Mieten (auf der Stufe). Callables: `supply.set_discount(sites.supplier_discount_percent)`,
+  `laundering.set_limit_bonus(sites.laundering_bonus)`; `sites.set_underworld(supply, organisation)` (einseitig).
+  Neue Orte `club` und `finca` (mit `unlocked_by_mission`). Kachel: `GameScreen.on_site_pressed` (anmieten/ausbauen).
 - Schwarzgeld ausgeben (U.17, `scripts/systems/black_spending_system.gd`, im GameState als `black_spending`; Regeln
   aus `data/underworld/black_spending.json` in `GameData.black_spending`): Schalter `enabled` (gespeichert),
   `account_for(cost)` (Schwarzgeld nur bei an, genug Geld und Tageslimit) und `record(cost, label)` (Tagesbetrag,
@@ -375,6 +382,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 30 → 31 (U.18): `sites.levels` = {} (eigene Standorte auf Stufe 1).
 - Migration 29 → 30 (U.17): `black_spending` = Schalter aus.
 - Migration 28 → 29 (U.16): `laundering` = nichts gewaschen.
 - Migration 27 → 28 (U.15): `crew.incidents` = {}.

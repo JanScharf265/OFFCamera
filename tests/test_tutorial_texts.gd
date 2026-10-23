@@ -223,6 +223,24 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 			assert_eq(app.game.organisation.found("Los Lobos"), "")
 			_screen(app).call("_refresh")
 			_press(app, "OrganisationButton")
+		"first_site_types_offered", "first_site_upgrade_offered":
+			assert_eq(app.game.organisation.found("Los Lobos"), "")
+			var data: Dictionary = app.game.missions.to_dict()
+			for id in ["first_deal_meeting", "first_deal_goods", "first_deal_stash", "first_deal_sale", "crew_first_dealer"]:
+				data["completed"][id] = 0
+			data["active"] = []
+			assert_eq(app.game.missions.restore(data), "")
+			app.game.ledger.post(500000, "test", "Start", "test", "t", "", false, "black")
+			_jump(app, TimeSystemScript.at(1, 10))
+			_resolve_events(app)
+			app.game.locations.travel("cafe_harbor")
+			if trigger == "first_site_upgrade_offered":
+				var sites: Dictionary = app.game.sites.to_dict()
+				sites["owned"]["berth_14"] = 0
+				assert_eq(app.game.sites.restore(sites), "")
+			_screen(app).call("_refresh")
+			_press(app, "MapPin_cafe_harbor")
+			_press(app, "LocationTab_unterwelt")
 		"first_obligation_due":
 			_jump(app, TimeSystemScript.at(8, 9))
 			_resolve_events(app)
@@ -330,7 +348,7 @@ func test_data_rules() -> void:
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
 			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
-			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion", "underworld_view", "districts", "district_control", "rivals", "crew_risks", "laundering", "black_spending"]:
+			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion", "underworld_view", "districts", "district_control", "rivals", "crew_risks", "laundering", "black_spending", "site_types", "site_upgrade"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 
@@ -419,7 +437,8 @@ func test_new_triggers_are_reported() -> void:
 			["first_district_window", "tut_district_control"],
 			["first_rivals_open", "tut_rivals"], ["first_crew_risk_shown", "tut_crew_risks"],
 			["first_laundering_offered", "tut_laundering"],
-			["first_black_spending_offered", "tut_black_spending"]]:
+			["first_black_spending_offered", "tut_black_spending"], ["first_site_types_offered", "tut_site_types"],
+			["first_site_upgrade_offered", "tut_site_upgrade"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

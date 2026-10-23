@@ -171,3 +171,35 @@ func test_toggle_fits_every_device() -> void:
 		var toast := Layout.screen_rect(app.find_child("Toast", true, false) as Control, screen)
 		assert_true(not toast.intersects(toggle), "%s: Rückmeldung überdeckt den Schalter" % device)
 		_cleanup(app)
+
+
+## U.18: Jeder Ort lässt sich so auf die Karte holen, dass sein Schild frei antippbar ist (nicht unter den
+## Button-Spalten, in der Safe Area) – auch Orte am Stadtrand (Finca, Club).
+func test_every_location_pin_reachable() -> void:
+	for device in Layout.DEVICES:
+		var app := _app()
+		var screen := _screen(app)
+		var missions: Dictionary = app.game.missions.to_dict()
+		screen.call("on_organisation_name_submitted", "Los Lobos")
+		missions = app.game.missions.to_dict()
+		for id in ["first_deal_meeting", "first_deal_goods", "first_deal_stash", "first_deal_sale", "crew_first_dealer",
+				"territory_first"]:
+			missions["completed"][id] = 0
+		missions["active"] = []
+		app.game.missions.restore(missions)
+		screen.call("_refresh")
+		Layout.apply(app, device)
+		Layout.sort_containers(screen)
+		var map := app.find_child("CityMap", true, false)
+		var safe := Layout.safe_rect(device)
+		var blocked: Array[Rect2] = []
+		for group in ["LifeGroup", "BusinessGroup", "ViewGroup"]:
+			blocked.append(Layout.screen_rect(app.find_child(group, true, false) as Control, screen))
+		for id in app.game.locations.get_catalog().get_ids():
+			map.call("center_on", id)
+			map.call("_layout_overlays")
+			var pin := Layout.screen_rect(app.find_child("MapPin_%s" % id, true, false) as Control, screen)
+			assert_true(safe.grow(-1.0).intersects(pin), "%s: Schild %s außerhalb" % [device, id])
+			for rect in blocked:
+				assert_true(not rect.intersects(pin), "%s: Schild %s unter den Buttons (%s)" % [device, id, pin])
+		_cleanup(app)

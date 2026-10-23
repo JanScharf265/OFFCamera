@@ -64,6 +64,8 @@ const TRIGGERS := [
 	"first_crew_risk_shown",
 	"first_laundering_offered",
 	"first_black_spending_offered",
+	"first_site_types_offered",
+	"first_site_upgrade_offered",
 ]
 const MAX_TEXT_LENGTH := 240
 
