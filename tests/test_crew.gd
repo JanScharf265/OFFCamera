@@ -133,7 +133,7 @@ func test_crew_limit() -> void:
 	var data := game.crew.to_dict()
 	for i in 6:
 		data["members"].append({"id": "m%d" % i, "name": "N", "role": "runner", "skill": 50, "loyalty": 50, "greed": 50,
-				"wage_cents": 100, "hired_day": 1, "rank": 1})
+				"wage_cents": 100, "hired_day": 1, "rank": 1, "district": ""})
 	assert_eq(game.crew.restore(data), "")
 	assert_eq(game.crew.check_hire(game.crew.get_applicants()[0]["id"]), "Crew ist voll (6).")
 
@@ -158,7 +158,7 @@ func test_unpaid_wages_become_obligation() -> void:
 	var game := _ready_game()
 	var data := game.crew.to_dict()
 	data["members"].append({"id": "m", "name": "N", "role": "guard", "skill": 50, "loyalty": 50, "greed": 50,
-			"wage_cents": 10000000, "hired_day": 1, "rank": 1})
+			"wage_cents": 10000000, "hired_day": 1, "rank": 1, "district": ""})
 	assert_eq(game.crew.restore(data), "")
 	game.time.advance(TimeSystemScript.at(2, 10) - game.time.get_minutes())
 	assert_eq(game.ledger.get_entries_by_category(CrewSystemScript.CATEGORY).size(), 0)

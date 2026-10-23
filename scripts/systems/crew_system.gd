@@ -207,6 +207,11 @@ var _supply
 var _obligations
 var _is_mission_completed: Callable
 var _get_seed: Callable
+## U.13: Gebiete (Callables auf das TerritorySystem – keine gegenseitige Referenz)
+var _add_influence: Callable
+var _unit_bonus: Callable
+var _influence_for_skill: Callable
+var _district_definition: Callable
 ## Mitglieder in Einstellungsreihenfolge: {id, name, role, skill, loyalty, greed, wage_cents, hired_day}
 var _members: Array = []
 ## Heute gefeuerte Bewerber-IDs (sonst stünden sie gleich wieder unter „Bewerber“)
@@ -230,6 +235,33 @@ func _init(time, ledger: LedgerSystemScript, catalog: Catalog, organisation, sup
 
 func get_catalog() -> Catalog:
 	return _catalog
+
+
+## Vom GameState (U.13): Anbindung an die Gebiete.
+func set_territory(add_influence: Callable, unit_bonus: Callable, influence_for_skill: Callable,
+		district_definition: Callable) -> void:
+	_add_influence = add_influence
+	_unit_bonus = unit_bonus
+	_influence_for_skill = influence_for_skill
+	_district_definition = district_definition
+
+
+## U.13: Teilt ein Mitglied (Dealer) einem Gebiet zu ("" = keinem). "" = zugeteilt.
+func assign(member_id: String, district_id: String) -> String:
+	if not district_id.is_empty() and (not _district_definition.is_valid() or _district_definition.call(district_id) == null):
+		return "Unbekanntes Gebiet: %s" % district_id
+	for member in _members:
+		if member["id"] == member_id:
+			if not is_dealer(member):
+				return "Nur Dealer arbeiten in einem Gebiet."
+			member["district"] = district_id
+			return ""
+	return "Dieses Mitglied gibt es nicht."
+
+
+## Dealer in einem Gebiet.
+func count_in_district(district_id: String) -> int:
+	return _members.filter(func(member) -> bool: return is_dealer(member) and member.get("district", "") == district_id).size()
 
 
 ## Crew verfügbar (Organisation steht, Freischalt-Auftrag erledigt).
@@ -323,6 +355,7 @@ func hire(applicant_id: String) -> String:
 	var member := _find_applicant(applicant_id)
 	member["hired_day"] = _time.get_day()
 	member["rank"] = 1
+	member["district"] = ""
 	_members.append(member)
 	hired.emit(member["id"], member["role"])
 	return ""
@@ -438,7 +471,11 @@ func _settle_dealers(day: int) -> void:
 		if not is_dealer(member) or int(member["hired_day"]) >= day:
 			continue
 		dealers += 1
+		var district_id: String = member.get("district", "")
 		var wanted := dealer_units(member, day)
+		if not district_id.is_empty() and _unit_bonus.is_valid():
+			wanted += int(_unit_bonus.call(district_id))
+		var sold_before := units_total
 		for product in _supply.get_products().get_all():
 			if wanted <= 0:
 				break
@@ -452,6 +489,8 @@ func _settle_dealers(day: int) -> void:
 			income += gross - skim
 			skimmed += skim
 			heat += product.heat_per_unit * units * heat_percent(member) / 100
+		if units_total > sold_before and not district_id.is_empty() and _add_influence.is_valid():
+			_add_influence.call(district_id, int(_influence_for_skill.call(int(member["skill"]))))
 	if dealers == 0:
 		return
 	if units_total == 0:
@@ -515,6 +554,9 @@ func restore(data: Dictionary) -> String:
 			if typeof(entry.get(key)) != TYPE_STRING or String(entry[key]).is_empty():
 				return "Crew: Mitglied ohne gültiges '%s'." % key
 		var member := {"id": entry["id"], "name": entry["name"], "role": entry["role"]}
+		if typeof(entry.get("district")) != TYPE_STRING:
+			return "Crew: Mitglied '%s' ohne gültiges 'district'." % entry["id"]
+		member["district"] = entry["district"]
 		for key in VALUE_KEYS + ["wage_cents", "hired_day", "rank"]:
 			var value: Variant = entry.get(key)
 			if not DataReaderScript.is_whole_number(value) or int(value) < 0 or (key in VALUE_KEYS and int(value) > 100) \

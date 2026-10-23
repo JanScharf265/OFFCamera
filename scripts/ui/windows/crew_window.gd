@@ -117,7 +117,21 @@ func _card(person: Dictionary, is_member: bool) -> Control:
 	right.add_child(button)
 	if is_member:
 		right.add_child(_promote_button(person))
+		if _game.crew.is_dealer(person):
+			right.add_child(_district_button(person))
 	return card
+
+
+## U.13: Gebiet des Dealers – Tipp wechselt zum nächsten Gebiet (danach „keins“).
+func _district_button(member: Dictionary) -> Button:
+	var district = _game.data.districts.get_definition(member.get("district", ""))
+	var button: Button = _screen.scroll_button("Gebiet: %s" % (district.display_name if district != null else "keins"),
+			"CrewDistrictButton_%s" % member["id"])
+	UiStyle.style_neutral_button(button)
+	button.pressed.connect(_screen.on_crew_assign_next.bind(member["id"]))
+	button.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+	button.add_theme_font_size_override("font_size", UiStyle.MIN_READ_FONT_SIZE)
+	return button
 
 
 ## U.11: „Befördern · 195,00 €“ – gesperrt mit Grund (z. B. „Erst nach 3 Tagen (noch 2).“).

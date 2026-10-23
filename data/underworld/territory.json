@@ -1,0 +1,13 @@
+{
+	"claim_min_influence": 60,
+	"claim_cost_cents": 50000,
+	"claim_respect": 5,
+	"lose_below": 30,
+	"loss_respect": 5,
+	"loss_stability": 5,
+	"influence_base": 2,
+	"influence_skill_per_point": 20,
+	"rival_divisor": 20,
+	"controlled_pressure_percent": 50,
+	"controlled_unit_bonus": 1
+}

@@ -380,5 +380,15 @@
 		"ui_target": "DistrictLabel_*",
 		"order": 420,
 		"requires": []
+	},
+	{
+		"id": "tut_district_control",
+		"mechanic": "district_control",
+		"trigger": "first_district_window",
+		"title": "Ein Gebiet gewinnen",
+		"text": "Schick Dealer unter „Crew“ in ein Gebiet: Jeder Verkaufstag bringt Einfluss, die Rivalen nehmen dir täglich etwas weg. Mit genug Einfluss beanspruchst du das Gebiet – und musst es halten.",
+		"ui_target": "DistrictClaimButton",
+		"order": 430,
+		"requires": []
 	}
 ]

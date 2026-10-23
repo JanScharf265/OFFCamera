@@ -21,6 +21,7 @@ var _supply
 var _sites
 var _sales
 var _crew
+var _territory
 ## mission_id -> true
 var _active := {}
 ## mission_id -> Zeitpunkt des Abschlusses (Minuten)
@@ -63,6 +64,21 @@ func set_sales(sales) -> void:
 func set_crew(crew) -> void:
 	_crew = crew
 	crew.hired.connect(_check_crew_goals.unbind(2))
+
+
+## Vom GameState (U.13): Gebiete für Ziele vom Typ „control_district“.
+func set_territory(territory) -> void:
+	_territory = territory
+	territory.claimed.connect(_check_territory_goals.unbind(1))
+
+
+func _check_territory_goals() -> void:
+	if _territory == null:
+		return
+	for definition in get_active():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_CONTROL_DISTRICT \
+				and _territory.count_controlled() >= int(definition.goal["min_count"]):
+			_complete(definition)
 
 
 func _check_crew_goals() -> void:
@@ -158,6 +174,7 @@ func update_availability() -> void:
 	_check_site_goals()
 	_check_sale_goals()
 	_check_crew_goals()
+	_check_territory_goals()
 
 
 func _on_founded(_name: String) -> void:

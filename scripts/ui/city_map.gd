@@ -47,6 +47,7 @@ const NIGHT_STREAMER_TINT := Color(0.28, 0.28, 0.4)
 const NIGHT_UNDERWORLD_TINT := Color(1.0, 0.86, 0.96)
 const NEON := Color(1.0, 0.24, 0.62)
 const DISTRICT_ALPHA := 0.34
+const DISTRICT_ALPHA_CONTROLLED := 0.6
 const STREAMER_PIN_ALPHA := 0.55
 
 ## Kachelmaße (Kenney „Isometric Tiles“): Unterkante einer Bodenkachel liegt 68 px
@@ -150,6 +151,8 @@ var _underworld_ids := PackedStringArray()
 ## Gebiete (DistrictCatalog.District) und ihre Namensschilder (id -> Button)
 var _districts: Array = []
 var _district_labels := {}
+## U.13: eigene Gebiete (kräftigere Fläche, Schild „· deins“)
+var _controlled := PackedStringArray()
 ## Farbmodulation für das gerade gezeichnete Teil
 var _tint := Color.WHITE
 var _marker: Marker
@@ -511,6 +514,20 @@ func set_districts(districts: Array) -> void:
 	queue_redraw()
 
 
+## U.13: eigene Gebiete hervorheben.
+func set_controlled_districts(ids: PackedStringArray) -> void:
+	if ids == _controlled:
+		return
+	_controlled = ids
+	for district in _districts:
+		var label: Button = _district_labels.get(district.id)
+		if label != null:
+			label.text = district.display_name + (" · deins" if district.id in _controlled else "")
+	if is_node_ready():
+		_layout_overlays()
+	queue_redraw()
+
+
 func _on_district_label_pressed(district_id: String) -> void:
 	if not _dragging:
 		district_pressed.emit(district_id)
@@ -726,7 +743,8 @@ func _draw_district(cell: Vector2i, anchor: Vector2) -> void:
 		return
 	for district in _districts:
 		if district.has_cell(cell):
-			draw_colored_polygon(_diamond(anchor), Color(district.color, DISTRICT_ALPHA))
+			draw_colored_polygon(_diamond(anchor), Color(district.color,
+					DISTRICT_ALPHA_CONTROLLED if district.id in _controlled else DISTRICT_ALPHA))
 			return
 
 

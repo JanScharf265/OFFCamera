@@ -59,6 +59,7 @@ const TRIGGERS := [
 	"first_promotion_possible",
 	"first_view_toggle_shown",
 	"first_underworld_view",
+	"first_district_window",
 ]
 const MAX_TEXT_LENGTH := 240
 

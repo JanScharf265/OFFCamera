@@ -10,7 +10,8 @@ extends RefCounted
 ##            "have_stock" {min_units ≥ 1} – erfüllt, sobald so viele Einheiten Ware im Bestand sind (U.6);
 ##            "own_site" {site_type} – erfüllt, sobald ein eigener Standort dieses Typs da ist (U.8);
 ##            "sold_units" {min_units ≥ 1} – erfüllt, sobald insgesamt so viele Einheiten verkauft sind (U.9);
-##            "crew_role" {role} – erfüllt, sobald jemand mit dieser Rolle zur Crew gehört (U.10).
+##            "crew_role" {role} – erfüllt, sobald jemand mit dieser Rolle zur Crew gehört (U.10);
+##            "control_district" {min_count ≥ 1} – erfüllt, sobald so viele Gebiete dir gehören (U.13).
 
 const MissionDefinitionScript := preload("res://scripts/models/mission_definition.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -24,10 +25,11 @@ const GOAL_HAVE_STOCK := "have_stock"
 const GOAL_OWN_SITE := "own_site"
 const GOAL_SOLD_UNITS := "sold_units"
 const GOAL_CREW_ROLE := "crew_role"
+const GOAL_CONTROL_DISTRICT := "control_district"
 ## Zieltyp -> {Feld: Typ} ("string" = nicht-leerer Text, "count" = ganze Zahl ≥ 1)
 const GOAL_TYPES := {GOAL_VISIT_LOCATION: {"location": "string"}, GOAL_HAVE_STOCK: {"min_units": "count"},
 		GOAL_OWN_SITE: {"site_type": "string"}, GOAL_SOLD_UNITS: {"min_units": "count"},
-		GOAL_CREW_ROLE: {"role": "string"}}
+		GOAL_CREW_ROLE: {"role": "string"}, GOAL_CONTROL_DISTRICT: {"min_count": "count"}}
 const REWARD_KEYS := ["respect", "heat", "stability"]
 const MAX_TEXT_LENGTH := 320
 

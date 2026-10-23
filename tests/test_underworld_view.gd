@@ -119,14 +119,15 @@ func test_view_restored_from_settings() -> void:
 	_cleanup(app)
 
 
+## Seit U.13 öffnet der Tipp das Fenster des Gebiets.
 func test_district_tap_shows_values() -> void:
 	var app := _app()
 	var screen := _screen(app)
 	screen.call("on_organisation_name_submitted", "Los Lobos")
 	screen.call("set_underworld_view", true)
 	(app.find_child("DistrictLabel_puerto_banus", true, false) as Button).pressed.emit()
-	assert_true((app.find_child("FeedbackLabel", true, false) as Label).text.begins_with(
-			"Puerto Banús · Nachfrage 80 · Polizei 60 · Rivalen 50"))
+	assert_eq(screen.get("_window_kind"), "district")
+	assert_eq((app.find_child("DistrictValues", true, false) as Label).text, "Nachfrage 80 · Polizei 60 · Rivalen 50")
 	_cleanup(app)
 
 

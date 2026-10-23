@@ -96,5 +96,25 @@
 		"requires": [
 			"first_deal_sale"
 		]
+	},
+	{
+		"id": "territory_first",
+		"chapter": "Das erste Gebiet",
+		"title": "Ein Stück Stadt",
+		"giver": "El Capitán",
+		"briefing": "„Ein Dealer ist ein Anfang“, sagt El Capitán. „Aber wer nirgends zu Hause ist, wird überall verdrängt. Schick deine Leute in ein Viertel und mach es zu deinem.“",
+		"goal": {
+			"type": "control_district",
+			"min_count": 1
+		},
+		"goal_text": "Teile unter „Crew“ einen Dealer einem Gebiet zu, sammle Einfluss und beanspruche das Gebiet (Unterwelt-Ansicht, Tipp auf den Gebietsnamen).",
+		"debrief": "Die Straßen dort kennen jetzt deinen Namen. El Capitán schreibt nur: „Halten ist schwerer als nehmen.“",
+		"reward": {
+			"respect": 10
+		},
+		"order": 60,
+		"requires": [
+			"crew_first_dealer"
+		]
 	}
 ]

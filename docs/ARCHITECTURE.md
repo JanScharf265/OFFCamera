@@ -181,6 +181,14 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Gebiete übernehmen (U.13, `scripts/systems/territory_system.gd`, im GameState als `territory`; Regeln
+  `TerritorySystem.Rules` aus `data/underworld/territory.json` in `GameData.territory`): Einfluss und eigene Gebiete
+  je District-ID. Das CrewSystem bekommt Callables (`add_influence`, `unit_bonus`, `influence_for_skill`,
+  Gebietsdefinition) – keine gegenseitige Referenz; Crew-Mitglieder haben `district`. DayCycle: … Standortkosten →
+  Crew (Abrechnung bringt Einfluss, eigene Gebiete +Einheiten) → Gebiete (Druck der Rivalen, Verlust) → Fristen …
+  `check_claim`/`claim` (Buchung, Respekt, Signal `claimed` → Aufträge mit Ziel `control_district`). UI:
+  `DistrictWindow` (Tipp auf `DistrictLabel_*`), `CrewDistrictButton_*` wechselt das Gebiet, Karte
+  `set_controlled_districts`.
 - Gebiete und Unterwelt-Ansicht (U.12): `scripts/systems/district_catalog.gd` (in `GameData.districts`,
   `data/underworld/districts.json`: Fläche `area` und Schildzelle `label_cell` auf dem Kartenraster, Farbe,
   Nachfrage/Polizei/Rivalen 0–100, keine Überschneidungen). Noch kein Spielzustand (Übernehmen mit U.13).
@@ -345,6 +353,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 25 → 26 (U.13): `territory` leer (Tag verarbeitet), Crew-Mitglieder `district` = "".
 - Migration 24 → 25 (U.11): Crew-Mitglieder bekommen `rank` = 1.
 - Migration 23 → 24 (U.10): `crew` = keine Mitglieder, gespeicherter Tag gilt als verarbeitet.
 - Migration 22 → 23 (U.9): `sales` = {`sold_units`: 0}.

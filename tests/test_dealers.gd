@@ -39,7 +39,7 @@ func _ready_game(stock: int = 40) -> GameStateScript:
 func _add(game: GameStateScript, id: String, skill: int, greed: int, loyalty: int = 50, wage: int = 4000) -> void:
 	var data := game.crew.to_dict()
 	data["members"].append({"id": id, "name": "N %s" % id, "role": "dealer", "skill": skill, "loyalty": loyalty,
-			"greed": greed, "wage_cents": wage, "hired_day": game.time.get_day(), "rank": 1})
+			"greed": greed, "wage_cents": wage, "hired_day": game.time.get_day(), "rank": 1, "district": ""})
 	assert_eq(game.crew.restore(data), "")
 
 

@@ -39,6 +39,7 @@ const MissionsWindowScript := preload("res://scripts/ui/windows/missions_window.
 const SupplierWindowScript := preload("res://scripts/ui/windows/supplier_window.gd")
 const SaleWindowScript := preload("res://scripts/ui/windows/sale_window.gd")
 const CrewWindowScript := preload("res://scripts/ui/windows/crew_window.gd")
+const DistrictWindowScript := preload("res://scripts/ui/windows/district_window.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
@@ -617,13 +618,41 @@ func is_underworld_view() -> bool:
 	return _map.is_underworld_view()
 
 
-## U.12: Gebietsname angetippt – Werte als Rückmeldung (zeigt nur an).
+## U.12/U.13: Gebietsname angetippt – Fenster des Gebiets (Werte, Einfluss, „Beanspruchen“).
 func _on_district_pressed(district_id: String) -> void:
-	var district = _game.data.districts.get_definition(district_id)
-	if district == null:
+	if _game.data.districts.get_definition(district_id) == null:
 		return
-	_show_feedback("%s · Nachfrage %d · Polizei %d · Rivalen %d\n%s" % [district.display_name, district.demand,
-			district.police, district.rivals, district.description], UiStyle.TEXT)
+	_game.tutorials.report("first_district_window")
+	var content := DistrictWindowScript.new()
+	content.setup(self, _game, district_id)
+	_open_window("district", content)
+	_open_due_tutorial()
+
+
+## U.13: Gebiet beanspruchen über das TerritorySystem.
+func on_district_claim(district_id: String) -> void:
+	if _was_scroll():
+		return
+	var district = _game.data.districts.get_definition(district_id)
+	var cost: int = _game.territory.get_rules().get_value("claim_cost_cents")
+	_after_action(_game.territory.claim(district_id), "%s gehört jetzt dir (%s, Respekt +%d)" % [
+			district.display_name if district != null else district_id, ActivityText.signed_money(-cost),
+			_game.territory.get_rules().get_value("claim_respect")])
+
+
+## U.13: Dealer dem nächsten Gebiet zuteilen (Reihenfolge der Daten, danach „keins“).
+func on_crew_assign_next(member_id: String) -> void:
+	if _was_scroll():
+		return
+	var member: Dictionary = _game.crew.get_member(member_id)
+	var ids: Array = [""]
+	for district in _game.data.districts.get_all():
+		ids.append(district.id)
+	var next: String = ids[(ids.find(member.get("district", "")) + 1) % ids.size()]
+	var reason: String = _game.crew.assign(member_id, next)
+	var district = _game.data.districts.get_definition(next)
+	_after_action(reason, "%s arbeitet jetzt %s" % [member.get("name", member_id),
+			"in %s" % district.display_name if district != null else "ohne festes Gebiet"])
 
 
 ## Fenster „Crew“ (U.10).
@@ -970,6 +999,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 			text += "\n%s" % notice
 		for notice in _game.crew.take_notices():
 			text += "\n%s" % notice
+		for notice in _game.territory.take_notices():
+			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice
 		_show_feedback(text, UiStyle.TEXT if reason.is_empty() else UiStyle.NEGATIVE)
@@ -1060,6 +1091,11 @@ func _refresh() -> void:
 	var unlocked: bool = _game.organisation.is_founded()
 	_map.set_underworld_view(underworld_view and unlocked)
 	_map.set_underworld_locations(_game.underworld_location_ids())
+	var controlled := PackedStringArray()
+	for district in _game.data.districts.get_all():
+		if _game.territory.is_controlled(district.id):
+			controlled.append(district.id)
+	_map.set_controlled_districts(controlled)
 	_view_group.visible = unlocked
 	_view_buttons[true].visible = unlocked and not underworld_view
 	_view_buttons[false].visible = unlocked and underworld_view

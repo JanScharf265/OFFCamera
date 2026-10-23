@@ -887,3 +887,15 @@ Gebiete: vier Viertel als Rechtecke auf dem Kartenraster (San Pedro, Altstadt, N
 Ortsnamen, Werte erfunden), mit eigener Schildzelle, damit Gebietsnamen keine Ortsschilder verdecken (beim ersten
 Versuch mittig – San Pedro lag auf „Fitnessstudio“, Puerto Banús auf „Ladenlokal“). Tipp auf den Namen zeigt die
 Werte als Rückmeldung. Vorläufige Werte, Bestätigung durch den Game Director offen.
+
+## 083 – Gebiete übernehmen, halten, verlieren (U.13)
+Einfluss entsteht nur durch Arbeit vor Ort: Dealer werden einem Gebiet zugeteilt (im Crew-Fenster, Tipp wechselt
+reihum, „keins“ bleibt möglich – dann verkaufen sie wie in U.11 ohne Einfluss). Wer am Tag verkauft hat, bringt
+2 + Können/20 Einfluss. Die Rivalen drücken jeden Tag um Rivalen/20 (San Pedro −2, Puerto Banús −2,5 → −2); im
+eigenen Gebiet nur halb. Beanspruchen ist eine bewusste Entscheidung (Gebietsfenster, ab 60 Einfluss, 500 €, Respekt
++5), kein Automatismus. Eigene Gebiete lohnen sich (+1 Einheit je Dealer) und müssen gehalten werden: unter 30
+Einfluss sind sie weg (Respekt −5, Stabilität −5, Hinweis). Bis die Rivalen in U.14 handeln, ist ihr Druck ein fester
+Wert aus den Gebietsdaten. Nachfrage und Polizei wirken noch nicht auf den Verkauf (Polizei mit U.19). Keine Gewalt –
+nur Zahlen und Folgen. Vorläufige Werte, Bestätigung durch den Game Director offen.
+Das Gebietsfenster ersetzt die Rückmeldung beim Tipp auf den Gebietsnamen (U.12). Das Tutorial zeigt auf
+„Beanspruchen“ (die Einfluss-Zeile ist fensterbreit, die Sprechblase hätte sie verdeckt).

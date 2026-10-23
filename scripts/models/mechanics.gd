@@ -47,6 +47,7 @@ const NAMES := {
 	"promotion": "Crew befördern (Rang, Kosten, Lohn)",
 	"underworld_view": "Unterwelt-Ansicht der Karte (Schalter Tag/Unterwelt)",
 	"districts": "Gebiete (Nachfrage, Polizei, Rivalen)",
+	"district_control": "Gebiete übernehmen, halten, verlieren (Einfluss, Dealer zuteilen)",
 }
 
 

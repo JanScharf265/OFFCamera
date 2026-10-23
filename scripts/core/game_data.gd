@@ -24,6 +24,7 @@ const SiteCatalogScript := preload("res://scripts/systems/site_catalog.gd")
 const SaleSystemScript := preload("res://scripts/systems/sale_system.gd")
 const CrewSystemScript := preload("res://scripts/systems/crew_system.gd")
 const DistrictCatalogScript := preload("res://scripts/systems/district_catalog.gd")
+const TerritorySystemScript := preload("res://scripts/systems/territory_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -54,6 +55,8 @@ var sale_spots := SaleSystemScript.Catalog.new()
 var crew := CrewSystemScript.Catalog.new()
 ## Gebiete (U.12)
 var districts := DistrictCatalogScript.new()
+## Gebietsregeln (U.13)
+var territory := TerritorySystemScript.Rules.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -66,12 +69,13 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots, crew, districts, territory]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		# Kataloge als innere Klasse (Verkaufsorte, Crew) haben ihren Pfad im äußeren Skript.
 		var path: String = SaleSystemScript.DEFAULT_PATH if catalog == sale_spots \
-				else CrewSystemScript.DEFAULT_PATH if catalog == crew else catalog.DEFAULT_PATH
+				else CrewSystemScript.DEFAULT_PATH if catalog == crew \
+				else TerritorySystemScript.DEFAULT_PATH if catalog == territory else catalog.DEFAULT_PATH
 		contents += FileAccess.get_file_as_string(path)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():
