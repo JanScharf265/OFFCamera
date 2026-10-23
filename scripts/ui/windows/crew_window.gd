@@ -86,6 +86,8 @@ func _card(person: Dictionary, is_member: bool) -> Control:
 		left.add_child(info)
 		if is_member:
 			_game.tutorials.report("first_dealer_in_crew")
+	if is_member:
+		left.add_child(_risk_line(person))
 	if role != null and not is_member:
 		left.add_child(UiStyle.wrapping_label(role.description, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED))
 	var right := VBoxContainer.new()
@@ -120,6 +122,21 @@ func _card(person: Dictionary, is_member: bool) -> Control:
 		if _game.crew.is_dealer(person):
 			right.add_child(_district_button(person))
 	return card
+
+
+## U.15: Risiken am Tag (Festnahme, Verrat, Spitzel, Abwerbung) – Werte aus dem CrewSystem.
+func _risk_line(member: Dictionary) -> Label:
+	var labels := {"arrest": "Festnahme", "betrayal": "Verrat", "informant": "Spitzel", "poached": "Abwerbung"}
+	var chances: Dictionary = _game.crew.risk_chances(member["id"])
+	var parts := PackedStringArray()
+	for kind in labels:
+		if int(chances.get(kind, 0)) > 0:
+			parts.append("%s %d %%" % [labels[kind], chances[kind]])
+	var line := UiStyle.wrapping_label("Risiko am Tag: " + (" · ".join(parts) if not parts.is_empty() else "gering"),
+			UiStyle.MIN_READ_FONT_SIZE, UiStyle.WARNING if not parts.is_empty() else UiStyle.MUTED)
+	line.name = "CrewRisk_%s" % member["id"]
+	_game.tutorials.report("first_crew_risk_shown")
+	return line
 
 
 ## U.13: Gebiet des Dealers – Tipp wechselt zum nächsten Gebiet (danach „keins“).

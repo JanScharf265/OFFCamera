@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 27
+const SAVE_VERSION := 28
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -288,6 +288,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		24: return _migrate_24_to_25(game)
 		25: return _migrate_25_to_26(game)
 		26: return _migrate_26_to_27(game)
+		27: return _migrate_27_to_28(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -545,6 +546,15 @@ static func _migrate_26_to_27(game: Dictionary) -> String:
 	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
 		return "Zeit fehlt."
 	game["rivals"] = {"gangs": {}, "clashes": {}, "last_processed_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 27 → 28 (U.15): Crew-Vorfälle – noch keine.
+static func _migrate_27_to_28(game: Dictionary) -> String:
+	var crew: Variant = game.get("crew")
+	if typeof(crew) != TYPE_DICTIONARY:
+		return "Crew fehlt."
+	crew["incidents"] = {}
 	return ""
 
 

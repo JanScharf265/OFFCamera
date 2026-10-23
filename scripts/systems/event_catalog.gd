@@ -13,7 +13,8 @@ extends RefCounted
 ##     oder vom Spiel ausgelöst (U.3): trigger {"scripted": true} – kommt nur, wenn ein System es auslöst
 ##       (EventSystem.trigger_scripted, z. B. der Einstieg in die Unterwelt).
 ##   options [ {id, label, note? (Hinweis auf eine Folge ohne Zahl, U.3), organisation? {respect|heat|stability} (U.7),
-##     rival? ("fight" | "negotiate" | "retreat", U.14 – nur bei Ereignissen, die das RivalSystem auslöst), money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
+##     rival? ("fight" | "negotiate" | "retreat", U.14 – nur bei Ereignissen, die das RivalSystem auslöst),
+##     crew? (Aktion zu einem Crew-Vorfall, U.15 – nur bei Ereignissen, die das CrewSystem auslöst), money_cents?, category?, effects?, channel?, account?, minutes?, company?}, … ]
 ##     (mindestens eine, davon mindestens eine ohne Kosten)
 ##     channel {followers?, followers_percent?, community?, reputation?} – ganze Zahlen
 
@@ -34,6 +35,9 @@ const OPTION_COMPANY_KEYS := ["utilization", "reputation"]
 const OPTION_ORGANISATION_KEYS := ["respect", "heat", "stability"]
 ## U.14: Aktionen gegenüber Rivalen (Feld „rival“ einer Option)
 const OPTION_RIVAL_ACTIONS := ["fight", "negotiate", "retreat"]
+## U.15: Aktionen zu Crew-Vorfällen (Feld „crew“ einer Option)
+const OPTION_CREW_ACTIONS := ["lawyer", "drop", "betray_hunt", "betray_let_go", "inform_fire", "inform_keep", "raise",
+		"release"]
 const ACCOUNTS := ["private", "company"]
 
 var errors: PackedStringArray = []
@@ -184,6 +188,9 @@ func _parse_option(reader: DataReaderScript, entry: Variant, where: String) -> E
 	option.rival = reader.string_field(entry, "rival", where, false)
 	if not option.rival.is_empty() and option.rival not in OPTION_RIVAL_ACTIONS:
 		reader.errors.append("%s: 'rival' muss fight, negotiate oder retreat sein." % where)
+	option.crew = reader.string_field(entry, "crew", where, false)
+	if not option.crew.is_empty() and option.crew not in OPTION_CREW_ACTIONS:
+		reader.errors.append("%s: 'crew' ist keine bekannte Crew-Aktion." % where)
 	option.company = {}
 	var company: Variant = entry.get("company", {})
 	if typeof(company) != TYPE_DICTIONARY:

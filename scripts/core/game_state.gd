@@ -123,6 +123,9 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 			events.get_seed, events.trigger_scripted)
 	territory.set_pressure_modifier(rivals.pressure_percent)
 	events.set_rival_handler(rivals.apply_event_action)
+	crew.set_incident_hooks(events.trigger_scripted, data.rivals.get_for_district)
+	events.set_crew_handler(crew.apply_event_action)
+	events.add_text_context(crew.text_context)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.
 	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, crew, territory, rivals, obligations, events])

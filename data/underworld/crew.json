@@ -19,6 +19,28 @@
 		"loyalty_bonus": 10,
 		"wage_percent": 125
 	},
+	"risks": {
+		"min_days": 2,
+		"default_police": 30,
+		"arrest_heat_divisor": 20,
+		"arrest_police_divisor": 20,
+		"arrest_skill_divisor": 40,
+		"lawyer_cost_cents": 30000,
+		"drop_loyalty": 5,
+		"betrayal_min_gap": 20,
+		"betrayal_divisor": 10,
+		"betrayal_stock_units": 10,
+		"informant_max_loyalty": 30,
+		"informant_min_heat": 40,
+		"informant_chance": 5,
+		"poach_max_loyalty": 50,
+		"poach_divisor": 10,
+		"raise_percent": 125,
+		"raise_loyalty": 10,
+		"fire_angry_loyalty": 30,
+		"fire_heat": 5,
+		"fire_stability": 2
+	},
 	"first_names": [
 		"Dani",
 		"Toni",

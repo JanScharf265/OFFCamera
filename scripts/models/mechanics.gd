@@ -49,6 +49,7 @@ const NAMES := {
 	"districts": "Gebiete (Nachfrage, Polizei, Rivalen)",
 	"district_control": "Gebiete übernehmen, halten, verlieren (Einfluss, Dealer zuteilen)",
 	"rivals": "Rivalen-Banden (Stärke, Aggression, Konflikt, Verhandlung, Waffenstillstand)",
+	"crew_risks": "Crew-Folgen (Verhaftung, Verrat, Spitzel, Abwerbung, Feuern)",
 }
 
 

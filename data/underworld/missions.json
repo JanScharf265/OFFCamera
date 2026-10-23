@@ -88,7 +88,7 @@
 			"role": "dealer"
 		},
 		"goal_text": "Stell unter „Organisation“ → „Crew“ einen Dealer ein.",
-		"debrief": "Dein erster Dealer nickt nur, als du ihm die Regeln erklärst. „Gut“, schreibt El Capitán. „Jetzt musst du ihm nur noch trauen können.“",
+		"debrief": "Dein erster Dealer nickt nur, als du die Regeln erklärst. „Gut“, schreibt El Capitán. „Jetzt musst du nur noch vertrauen können.“",
 		"reward": {
 			"respect": 5
 		},

@@ -539,7 +539,7 @@
 	{
 		"id": "rival_clash_grises",
 		"title": "Ärger mit Los Grises",
-		"text": "Los Grises haben einem deiner Dealer den Weg versperrt und ihn wieder nach Hause geschickt – mit einer Botschaft: „Hier gehört alles schon jemandem.“",
+		"text": "Los Grises haben einer Person aus deiner Crew den Weg versperrt und sie wieder nach Hause geschickt – mit einer Botschaft: „Hier gehört alles schon jemandem.“",
 		"trigger": {
 			"scripted": true
 		},
@@ -566,6 +566,107 @@
 				"label": "Sich zurückziehen",
 				"rival": "retreat",
 				"note": "Einfluss −20, Respekt −5"
+			}
+		]
+	},
+	{
+		"id": "crew_arrest",
+		"title": "Festnahme",
+		"text": "Ein Anruf aus der Wache: {name} wurde bei einer Kontrolle festgenommen. Bisher kein Wort zur Polizei – noch. Ein Anwalt könnte das schnell beenden.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "lawyer",
+				"label": "Anwalt bezahlen",
+				"crew": "lawyer",
+				"note": "300 € – morgen wieder draußen"
+			},
+			{
+				"id": "drop",
+				"label": "Fallen lassen",
+				"crew": "drop",
+				"organisation": {
+					"stability": -5
+				},
+				"note": "Raus aus der Crew – und alle merken es sich"
+			}
+		]
+	},
+	{
+		"id": "crew_betrayal",
+		"title": "Verrat",
+		"text": "{name} ist nicht zur Abrechnung gekommen. Das Handy ist aus, ein Teil der Ware aus dem Versteck fehlt.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "hunt",
+				"label": "Suchen lassen",
+				"crew": "betray_hunt",
+				"organisation": {
+					"respect": 5,
+					"heat": 5
+				},
+				"note": "Die Ware ist weg – aber alle sehen, dass du nicht wegschaust"
+			},
+			{
+				"id": "let_go",
+				"label": "Abschreiben",
+				"crew": "betray_let_go",
+				"organisation": {
+					"respect": -5
+				},
+				"note": "Die Ware ist weg"
+			}
+		]
+	},
+	{
+		"id": "crew_informant",
+		"title": "Gerüchte",
+		"text": "Auf der Straße heißt es, {name} sei zuletzt öfter in der Nähe der Wache gesehen worden. Vielleicht Zufall. Vielleicht nicht.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "fire",
+				"label": "Rauswerfen",
+				"crew": "inform_fire",
+				"note": "Raus aus der Crew"
+			},
+			{
+				"id": "keep",
+				"label": "Behalten",
+				"crew": "inform_keep",
+				"organisation": {
+					"heat": 10
+				},
+				"note": "Wenn es stimmt, wird es heiß"
+			}
+		]
+	},
+	{
+		"id": "crew_poached",
+		"title": "Abwerbung",
+		"text": "{gang} haben {name} ein Angebot gemacht: mehr Geld, weniger Risiko. Jetzt liegt die Frage bei dir.",
+		"trigger": {
+			"scripted": true
+		},
+		"options": [
+			{
+				"id": "raise",
+				"label": "Mehr Lohn bieten",
+				"crew": "raise",
+				"note": "Lohn +25 %, Loyalität +10"
+			},
+			{
+				"id": "release",
+				"label": "Gehen lassen",
+				"crew": "release",
+				"note": "Wechselt die Seite"
 			}
 		]
 	}

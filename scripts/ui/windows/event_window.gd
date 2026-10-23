@@ -22,7 +22,7 @@ func _ready() -> void:
 	name = "EventPanel"
 	add_theme_constant_override("separation", 12)
 	var definition = _game.events.get_definition_for(instance_id)
-	add_child(UiStyle.wrapping_label(definition.text, UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
+	add_child(UiStyle.wrapping_label(_game.events.get_text(instance_id), UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 	for option in definition.options:
 		var channel: Dictionary = _game.events.option_channel_deltas(instance_id, option.id)
 		add_child(UiStyle.wrapping_label(ActivityText.event_option_summary(option, channel), UiStyle.SMALL_FONT_SIZE))

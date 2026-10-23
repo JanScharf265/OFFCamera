@@ -400,5 +400,15 @@
 		"ui_target": "RivalTruceButton_*",
 		"order": 440,
 		"requires": []
+	},
+	{
+		"id": "tut_crew_risks",
+		"mechanic": "crew_risks",
+		"trigger": "first_crew_risk_shown",
+		"title": "Deine Leute sind ein Risiko",
+		"text": "Wer auf der Straße arbeitet, kann festgenommen werden. Wer gierig und wenig loyal ist, haut ab, redet oder wechselt die Seite. Hohe Hitze macht alles wahrscheinlicher – hier siehst du das Risiko.",
+		"ui_target": "CrewRisk_*",
+		"order": 450,
+		"requires": []
 	}
 ]

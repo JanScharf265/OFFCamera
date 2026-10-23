@@ -58,6 +58,9 @@ var restore_notices := PackedStringArray()
 var _change_organisation: Callable
 ## U.14: RivalSystem.apply_event_action(action, instance_id)
 var _rival_action: Callable
+## U.15: CrewSystem.apply_event_action(action, instance_id) und Text-Kontext je Instanz ({name}, {gang} …)
+var _crew_action: Callable
+var _text_context: Array[Callable] = []
 
 
 func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStatsScript,
@@ -77,6 +80,27 @@ func _init(time: TimeSystemScript, ledger: LedgerSystemScript, stats: PlayerStat
 ## EventSystem verweist (sonst Kreisverweis).
 func set_organisation_changer(change: Callable) -> void:
 	_change_organisation = change
+
+
+## Vom GameState (U.15): Crew-Aktionen aus Ereignis-Optionen.
+func set_crew_handler(handler: Callable) -> void:
+	_crew_action = handler
+
+
+## Vom GameState (U.15): liefert für eine Instanz Platzhalter-Werte (z. B. {"name": "Chema L."}) oder {}.
+func add_text_context(provider: Callable) -> void:
+	_text_context.append(provider)
+
+
+## Text eines Ereignisses mit eingesetzten Platzhaltern (U.15).
+func get_text(instance_id: String) -> String:
+	var definition := get_definition_for(instance_id)
+	if definition == null:
+		return ""
+	var values := {}
+	for provider in _text_context:
+		values.merge(provider.call(instance_id))
+	return definition.text.format(values) if not values.is_empty() else definition.text
 
 
 ## Vom GameState (U.14): Rivalen-Aktionen aus Ereignis-Optionen.
@@ -193,6 +217,8 @@ func resolve(instance_id: String, option_id: String) -> String:
 		_change_organisation.call(option.organisation)
 	if not option.rival.is_empty() and _rival_action.is_valid():
 		_rival_action.call(option.rival, instance_id)
+	if not option.crew.is_empty() and _crew_action.is_valid():
+		_crew_action.call(option.crew, instance_id)
 
 	_pending.remove_at(_pending.find(instance_id))
 	_resolved[instance_id] = option_id

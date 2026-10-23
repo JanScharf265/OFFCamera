@@ -57,7 +57,8 @@ func test_bad_crew_data_is_rejected() -> void:
 			"dealing": {"role": "r", "base_units": 1, "skill_per_extra_unit": 1, "skim_percent_per_10_greed": 0,
 			"heat_skill_percent": 0, "loyalty_paid": 0, "loyalty_unpaid": 0},
 			"promotion": {"max_rank": 1, "min_days": 0, "cost_wage_days": 0, "skill_bonus": 0, "loyalty_bonus": 0,
-			"wage_percent": 100}, "roles": [{"id": "r", "display_name": "R",
+			"wage_percent": 100}, "risks": JSON.parse_string(FileAccess.get_file_as_string(CrewSystemScript.DEFAULT_PATH))["risks"],
+			"roles": [{"id": "r", "display_name": "R",
 			"description": "D.", "wage_min_cents": 1, "wage_max_cents": 2, "order": 1, "offered": true}]}
 	var catalog := CrewSystemScript.Catalog.new()
 	assert_true(catalog.load_data(good), "; ".join(catalog.errors))

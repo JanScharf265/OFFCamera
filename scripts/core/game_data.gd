@@ -143,6 +143,11 @@ func check_references() -> PackedStringArray:
 		var clash = events.get_definition(gang.clash_event)
 		if clash == null or not clash.is_scripted:
 			problems.append("Bande '%s': Ereignis '%s' fehlt oder ist nicht „scripted“." % [gang.id, gang.clash_event])
+	# U.15: Crew-Vorfälle brauchen ihre Ereignisse („scripted“).
+	for event_id in CrewSystemScript.INCIDENT_EVENTS.values():
+		var incident = events.get_definition(event_id)
+		if incident == null or not incident.is_scripted:
+			problems.append("Crew: Ereignis '%s' fehlt oder ist nicht „scripted“." % event_id)
 	# U.10: Crew-Freischaltung und Rollen in Auftragszielen.
 	if not missions.has(crew.unlocked_by_mission):
 		problems.append("Crew: unbekannter Auftrag '%s'." % crew.unlocked_by_mission)

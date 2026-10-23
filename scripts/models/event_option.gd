@@ -27,3 +27,5 @@ var organisation: Dictionary = {}
 ## U.14: Aktion gegenüber einer Rivalen-Bande ("fight", "negotiate", "retreat"); die Bande und das Gebiet kennt das
 ## RivalSystem zur Ereignis-Instanz. "" = keine.
 var rival := ""
+## U.15: Aktion zu einem Crew-Vorfall (z. B. "lawyer", "drop"); das Mitglied kennt das CrewSystem zur Instanz. "" = keine.
+var crew := ""

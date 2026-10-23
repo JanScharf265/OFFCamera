@@ -181,6 +181,12 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Crew-Folgen (U.15, im CrewSystem): Regeln `risks` in `crew.json`; nach den Löhnen `_check_risks` (je Mitglied ab
+  `min_days`, Chancen aus Hitze, Polizei des Gebiets, Können, Gier − Loyalität, Bande im Revier; Seed, höchstens ein
+  Vorfall je Tag) → `trigger_scripted` (`crew_arrest`, `crew_betrayal`, `crew_informant`, `crew_poached`), Kontext
+  `_incidents[instance]` (gespeichert). EventSystem: Optionsfeld `crew` → `set_crew_handler`, Ereignistexte mit
+  Platzhaltern über `add_text_context`/`get_text` (das Ereignisfenster nutzt `get_text`). `fire` ändert Stabilität,
+  bei geringer Loyalität auch Hitze.
 - Rivalen (U.14, `scripts/systems/rival_system.gd`, im GameState als `rivals`; Katalog `RivalSystem.Catalog` aus
   `data/underworld/rivals.json` in `GameData.rivals`): Zustand je Bande (Stärke, Beziehung neutral/conflict/truce,
   bis Tag) und Kontext der „Ärger“-Ereignisse (Instanz → Bande, Gebiet). `TerritorySystem.set_pressure_modifier`
@@ -359,6 +365,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 27 → 28 (U.15): `crew.incidents` = {}.
 - Migration 26 → 27 (U.14): `rivals` = alle neutral in Ausgangsstärke, Tag verarbeitet.
 - Migration 25 → 26 (U.13): `territory` leer (Tag verarbeitet), Crew-Mitglieder `district` = "".
 - Migration 24 → 25 (U.11): Crew-Mitglieder bekommen `rank` = 1.

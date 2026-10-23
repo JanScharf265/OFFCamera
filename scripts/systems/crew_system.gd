@@ -21,8 +21,16 @@ signal dealers_sold(units: int)
 const DEFAULT_PATH := "res://data/underworld/crew.json"
 const CATEGORY := "underworld_wages"
 const SOURCE := "crew"
-const FIELDS := ["unlocked_by_mission", "max_members", "applicants_per_day", "dealing", "promotion", "first_names",
-		"last_initials", "roles"]
+const FIELDS := ["unlocked_by_mission", "max_members", "applicants_per_day", "dealing", "promotion", "risks",
+		"first_names", "last_initials", "roles"]
+## U.15: Regeln für Crew-Folgen (Verhaftung, Verrat, Spitzel, Abwerbung, Feuern) – ganze Zahlen ≥ 0
+const RISK_FIELDS := ["min_days", "default_police", "arrest_heat_divisor", "arrest_police_divisor", "arrest_skill_divisor",
+		"lawyer_cost_cents", "drop_loyalty", "betrayal_min_gap", "betrayal_divisor", "betrayal_stock_units",
+		"informant_max_loyalty", "informant_min_heat", "informant_chance", "poach_max_loyalty", "poach_divisor",
+		"raise_percent", "raise_loyalty", "fire_angry_loyalty", "fire_heat", "fire_stability"]
+## Vorfall -> Ereignis (vom Spiel ausgelöst, Texte mit {name}/{gang})
+const INCIDENT_EVENTS := {"arrest": "crew_arrest", "betrayal": "crew_betrayal", "informant": "crew_informant",
+		"poached": "crew_poached"}
 ## U.11: Regeln für den täglichen Straßenverkauf und das Befördern (alles ganze Zahlen ≥ 0, `role` eine Rollen-ID).
 const DEALING_FIELDS := ["base_units", "skill_per_extra_unit", "skim_percent_per_10_greed", "heat_skill_percent",
 		"loyalty_paid", "loyalty_unpaid"]
@@ -59,6 +67,7 @@ class Catalog extends RefCounted:
 	## U.11: {role, base_units, …} und {max_rank, …}
 	var dealing := {}
 	var promotion := {}
+	var risks := {}
 	var _roles: Array = []
 
 	func load_file(path: String = "res://data/underworld/crew.json") -> bool:
@@ -87,6 +96,10 @@ class Catalog extends RefCounted:
 			reader.errors.append("%s: max_members und applicants_per_day müssen ≥ 1 sein." % where)
 		var dealing_rules := _rules(data, "dealing", DEALING_FIELDS, ["role"], reader)
 		var promotion_rules := _rules(data, "promotion", PROMOTION_FIELDS, [], reader)
+		var risk_rules := _rules(data, "risks", RISK_FIELDS, [], reader)
+		for key in ["arrest_heat_divisor", "arrest_police_divisor", "arrest_skill_divisor", "betrayal_divisor", "poach_divisor"]:
+			if risk_rules.get(key, 1) < 1:
+				reader.errors.append("Crew: 'risks.%s' muss ≥ 1 sein." % key)
 		if dealing_rules.get("skill_per_extra_unit", 1) < 1 or promotion_rules.get("max_rank", 1) < 1 \
 				or promotion_rules.get("wage_percent", 100) < 100:
 			reader.errors.append("Crew: skill_per_extra_unit und max_rank ≥ 1, wage_percent ≥ 100.")
@@ -145,6 +158,7 @@ class Catalog extends RefCounted:
 		last_initials = initials
 		dealing = dealing_rules
 		promotion = promotion_rules
+		risks = risk_rules
 		_roles = roles
 		return true
 
@@ -212,6 +226,11 @@ var _add_influence: Callable
 var _unit_bonus: Callable
 var _influence_for_skill: Callable
 var _district_definition: Callable
+## U.15: EventSystem.trigger_scripted, RivalSystem-Katalog get_for_district; offene/entschiedene Vorfälle
+var _trigger_scripted: Callable
+var _gang_for_district: Callable
+## Ereignis-Instanz -> {member, kind, name, gang_name}
+var _incidents := {}
 ## Mitglieder in Einstellungsreihenfolge: {id, name, role, skill, loyalty, greed, wage_cents, hired_day}
 var _members: Array = []
 ## Heute gefeuerte Bewerber-IDs (sonst stünden sie gleich wieder unter „Bewerber“)
@@ -361,11 +380,18 @@ func hire(applicant_id: String) -> String:
 	return ""
 
 
-## Feuert (sofort). "" = gefeuert.
+## Feuert (sofort). "" = gefeuert. U.15: Feuern drückt die Stabilität; wer wenig loyal ist, redet danach (Hitze).
 func fire(member_id: String) -> String:
 	for i in _members.size():
 		if _members[i]["id"] == member_id:
+			var member: Dictionary = _members[i]
 			_members.remove_at(i)
+			var deltas := {"stability": -int(_catalog.risks.get("fire_stability", 0))}
+			if int(member["loyalty"]) < int(_catalog.risks.get("fire_angry_loyalty", 0)):
+				deltas["heat"] = int(_catalog.risks.get("fire_heat", 0))
+				_notices.append("%s ist sauer und redet (Hitze +%d)." % [member["name"], deltas["heat"]])
+			if _organisation.is_founded():
+				_organisation.change(deltas)
 			if String(member_id).begins_with("a%d_" % _time.get_day()):
 				_gone_today.append(member_id)
 			return ""
@@ -519,6 +545,7 @@ func on_day_changed(day: int) -> void:
 	_settle_dealers(day)
 	var total := wages_per_day()
 	if total <= 0:
+		_check_risks(day)
 		return
 	var account := payment_account(total)
 	var label := "Löhne Crew (Tag %d, %s)" % [day, "1 Person" if _members.size() == 1 else "%d Leute" % _members.size()]
@@ -533,11 +560,157 @@ func on_day_changed(day: int) -> void:
 	var delta: int = _catalog.dealing["loyalty_paid"] if paid else -_catalog.dealing["loyalty_unpaid"]
 	for member in _members:
 		member["loyalty"] = clampi(int(member["loyalty"]) + delta, 0, 100)
+	_check_risks(day)
+
+
+# --- U.15: Crew-Folgen (Verhaftung, Verrat, Spitzel, Abwerbung) und Feuern -------------------
+
+## Vom GameState (U.15): Ereignisse auslösen und die Bande eines Gebiets nachschlagen (gebundene Methoden).
+func set_incident_hooks(trigger_scripted: Callable, gang_for_district: Callable) -> void:
+	_trigger_scripted = trigger_scripted
+	_gang_for_district = gang_for_district
+
+
+## Für das EventSystem: Platzhalter eines Crew-Vorfalls ({name}, {gang}); {} für fremde Ereignisse.
+func text_context(instance_id: String) -> Dictionary:
+	var incident: Dictionary = _incidents.get(instance_id, {})
+	if incident.is_empty():
+		return {}
+	return {"name": incident["name"], "gang": incident.get("gang_name", "")}
+
+
+func get_incident(instance_id: String) -> Dictionary:
+	return _incidents.get(instance_id, {}).duplicate()
+
+
+## Risiken eines Mitglieds heute (Prozent je Art) – für die Anzeige im Crew-Fenster.
+func risk_chances(member_id: String) -> Dictionary:
+	var member := get_member(member_id)
+	if member.is_empty() or _catalog.risks.is_empty():
+		return {}
+	return _risk_chances(member, _organisation.get_value("heat"))
+
+
+@warning_ignore("integer_division")
+func _risk_chances(member: Dictionary, heat: int) -> Dictionary:
+	var risks: Dictionary = _catalog.risks
+	var chances := {}
+	var district_id: String = member.get("district", "")
+	if is_dealer(member):
+		var police: int = risks["default_police"]
+		if not district_id.is_empty() and _district_definition.is_valid():
+			var district = _district_definition.call(district_id)
+			if district != null:
+				police = district.police
+		chances["arrest"] = maxi(0, heat / risks["arrest_heat_divisor"] + police / risks["arrest_police_divisor"]
+				- int(member["skill"]) / risks["arrest_skill_divisor"])
+	var gap: int = int(member["greed"]) - int(member["loyalty"])
+	if gap >= risks["betrayal_min_gap"]:
+		chances["betrayal"] = gap / risks["betrayal_divisor"]
+	if int(member["loyalty"]) <= risks["informant_max_loyalty"] and heat >= risks["informant_min_heat"]:
+		chances["informant"] = risks["informant_chance"]
+	if not district_id.is_empty() and int(member["loyalty"]) < risks["poach_max_loyalty"] and _gang_for_district.is_valid():
+		var gang = _gang_for_district.call(district_id)
+		if gang != null:
+			chances["poached"] = gang.aggression / risks["poach_divisor"]
+	return chances
+
+
+## Nach den Löhnen: höchstens ein Crew-Vorfall je Tag (Seed). Neue Leute erst nach `min_days`.
+func _check_risks(day: int) -> void:
+	if not _trigger_scripted.is_valid() or not is_available():
+		return
+	var heat: int = _organisation.get_value("heat")
+	for member in _members:
+		if int(member["hired_day"]) + _catalog.risks["min_days"] > day:
+			continue
+		var chances := _risk_chances(member, heat)
+		for kind in ["arrest", "betrayal", "informant", "poached"]:
+			if not chances.has(kind):
+				continue
+			var roll := _roll("%d:crew_risk:%d:%s" % [_get_seed.call(), day, member["id"]], kind) % 100
+			if roll >= int(chances[kind]):
+				continue
+			var instance: String = _trigger_scripted.call(INCIDENT_EVENTS[kind], day)
+			if instance.is_empty():
+				continue
+			var incident := {"member": member["id"], "kind": kind, "name": member["name"], "gang_name": ""}
+			if kind == "poached":
+				incident["gang_name"] = _gang_for_district.call(member["district"]).display_name
+			_incidents[instance] = incident
+			return
+
+
+## Vom EventSystem: Antwort auf einen Crew-Vorfall.
+@warning_ignore("integer_division")
+func apply_event_action(action: String, instance_id: String) -> void:
+	var incident: Dictionary = _incidents.get(instance_id, {})
+	if incident.is_empty():
+		push_error("CrewSystem: Ereignis '%s' ohne Crew-Vorfall." % instance_id)
+		return
+	var risks: Dictionary = _catalog.risks
+	var member_id: String = incident["member"]
+	var name: String = incident["name"]
+	match action:
+		"lawyer":
+			var cost: int = risks["lawyer_cost_cents"]
+			var account := payment_account(cost)
+			if _ledger.can_afford(cost, account) and _ledger.post(-cost, CATEGORY, "Anwalt für %s" % name, SOURCE, member_id,
+					"crew:lawyer:%s" % instance_id, false, account) != null:
+				_notices.append("Der Anwalt holt %s raus (%s)." % [name, LedgerSystemScript.format_cents(-cost)])
+			else:
+				_remove(member_id)
+				_change_loyalty_all(-risks["drop_loyalty"])
+				_notices.append("Kein Geld für den Anwalt – %s bleibt drin und ist raus aus der Crew." % name)
+		"drop":
+			_remove(member_id)
+			_change_loyalty_all(-risks["drop_loyalty"])
+			_notices.append("%s ist raus. Die Crew hat es gesehen (Loyalität −%d)." % [name, risks["drop_loyalty"]])
+		"betray_hunt", "betray_let_go":
+			_remove(member_id)
+			var lost := _take_stock(risks["betrayal_stock_units"])
+			_notices.append("%s ist weg – und %d Einheiten Ware auch." % [name, lost])
+		"inform_fire":
+			_remove(member_id)
+			_notices.append("%s ist raus." % name)
+		"inform_keep":
+			_notices.append("%s bleibt. Hoffentlich war es nur Gerede." % name)
+		"raise":
+			for member in _members:
+				if member["id"] == member_id:
+					member["wage_cents"] = int(member["wage_cents"]) * risks["raise_percent"] / 100 / 100 * 100
+					member["loyalty"] = mini(100, int(member["loyalty"]) + risks["raise_loyalty"])
+					_notices.append("%s bleibt – für %s am Tag." % [name, LedgerSystemScript.format_cents(member["wage_cents"])])
+		"release":
+			_remove(member_id)
+			_notices.append("%s arbeitet jetzt für %s." % [name, incident.get("gang_name", "die Konkurrenz")])
+
+
+func _remove(member_id: String) -> void:
+	for i in _members.size():
+		if _members[i]["id"] == member_id:
+			_members.remove_at(i)
+			return
+
+
+func _change_loyalty_all(delta: int) -> void:
+	for member in _members:
+		member["loyalty"] = clampi(int(member["loyalty"]) + delta, 0, 100)
+
+
+## Nimmt bis zu `units` Einheiten aus dem Bestand (Produkte in Katalogreihenfolge). Rückgabe: genommen.
+func _take_stock(units: int) -> int:
+	var taken := 0
+	for product in _supply.get_products().get_all():
+		var amount := mini(units - taken, _supply.get_stock(product.id))
+		if amount > 0 and _supply.remove_stock(product.id, amount):
+			taken += amount
+	return taken
 
 
 func to_dict() -> Dictionary:
 	return {"members": _members.duplicate(true), "gone_today": Array(_gone_today),
-			"last_processed_day": _last_processed_day}
+			"incidents": _incidents.duplicate(true), "last_processed_day": _last_processed_day}
 
 
 ## Unbekannte Rollen (aus den Daten entfernt) bleiben erhalten. "" = ok, sonst Fehlertext (nichts geändert).
@@ -567,12 +740,24 @@ func restore(data: Dictionary) -> String:
 			return "Crew: Mitglied '%s' doppelt." % member["id"]
 		ids[member["id"]] = true
 		members.append(member)
+	var raw_incidents: Variant = data.get("incidents")
+	if typeof(raw_incidents) != TYPE_DICTIONARY:
+		return "Crew: 'incidents' fehlt oder ist kein Objekt."
+	var incidents := {}
+	for id in raw_incidents:
+		var entry: Variant = raw_incidents[id]
+		if typeof(entry) != TYPE_DICTIONARY or entry.get("kind") not in INCIDENT_EVENTS \
+				or ["member", "name", "gang_name"].any(func(key) -> bool: return typeof(entry.get(key)) != TYPE_STRING):
+			return "Crew: ungültiger Vorfall '%s'." % id
+		incidents[id] = {"member": entry["member"], "kind": entry["kind"], "name": entry["name"],
+				"gang_name": entry["gang_name"]}
 	var gone: Variant = data.get("gone_today")
 	if typeof(gone) != TYPE_ARRAY or gone.any(func(value) -> bool: return typeof(value) != TYPE_STRING):
 		return "Crew: 'gone_today' fehlt oder ist ungültig."
 	if not DataReaderScript.is_whole_number(data.get("last_processed_day")) or int(data["last_processed_day"]) < 0:
 		return "Crew: 'last_processed_day' fehlt oder ist ungültig."
 	_members = members
+	_incidents = incidents
 	_gone_today = PackedStringArray(gone)
 	_last_processed_day = int(data["last_processed_day"])
 	_notices.clear()

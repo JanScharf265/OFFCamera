@@ -911,3 +911,17 @@ Waffenstillstand gibt es auch ohne Ärger im Fenster „Rivalen“ (7 Tage, kein
 1 je Tag. Die Rivalen handeln noch nicht selbst (keine eigenen Übernahmen) – das wäre ein späteres Ticket. Gewalt
 nur angedeutet (umgeworfener Tisch, versperrter Weg) mit Zahlen als Folge. Vorläufige Werte, Bestätigung durch den
 Game Director offen.
+
+## 085 – Crew-Folgen (U.15)
+Vier Vorfälle als Ereignisse (Regel 4), je mit zwei Antworten: Festnahme (Dealer; Chance = Hitze/20 + Polizei des
+Gebiets/20 − Können/40 %; Anwalt 300 € oder fallen lassen – dann sinkt die Loyalität aller um 5), Verrat (Gier −
+Loyalität ≥ 20; die Person verschwindet mit 10 Einheiten Ware – suchen lassen bringt Respekt und Hitze, abschreiben
+kostet Respekt), Spitzel-Verdacht (Loyalität ≤ 30 bei Hitze ≥ 40; rauswerfen oder behalten mit Hitze +10 – keine
+„Gegenmaßnahmen“ gegen Ermittlungen, Inhaltsgrenze), Abwerbung (Bande im Gebiet der Person, Loyalität < 50; mehr
+Lohn +25 % oder gehen lassen). Höchstens ein Vorfall je Tag, neue Leute erst nach 2 Tagen, deterministisch (Seed).
+Das Crew-Fenster zeigt das Risiko je Person; das Tutorial erklärt diese Zeile (auf die Ereignis-Buttons zu zeigen,
+ging nicht – sie sind fensterbreit). Feuern (GD: „Folgen beim Feuern in U.15“): Stabilität −2, bei Loyalität < 30
+zusätzlich Hitze +5 („redet“).
+Texte nennen die Person beim Namen (Platzhalter `{name}`) und kommen ohne „er/sie“ aus, weil die Crew Frauen- und
+Männernamen hat; dabei auch den Abschlusstext von „Der erste Dealer“ und einen Ärger-Text der Grises angepasst.
+Vorläufige Werte, Bestätigung durch den Game Director offen.
