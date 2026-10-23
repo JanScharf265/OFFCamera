@@ -410,5 +410,15 @@
 		"ui_target": "CrewRisk_*",
 		"order": 450,
 		"requires": []
+	},
+	{
+		"id": "tut_laundering",
+		"mechanic": "laundering",
+		"trigger": "first_laundering_offered",
+		"title": "Waschen",
+		"text": "Über deine Firma wird aus Schwarzgeld sauberes Geld auf dem Firmenkonto – gegen eine Gebühr und nur bis zu einem Limit am Tag. Jeder Betrag macht etwas Hitze.",
+		"ui_target": "LaunderButton",
+		"order": 460,
+		"requires": []
 	}
 ]

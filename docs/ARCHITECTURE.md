@@ -181,6 +181,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Waschen (U.16, `scripts/systems/laundering_system.gd`, im GameState als `laundering`; Regeln
+  `LaunderingSystem.Rules` aus `data/underworld/laundering.json` in `GameData.laundering`): `check`/`launder` –
+  Buchung `underworld_laundering` (Schwarzgeld −) und `laundered_revenue` (Firmenkonto + Betrag − Gebühr), Schlüssel
+  `launder:<Tag>:<n>|out/in`, dann Hitze; Tageslimit über gespeicherten Tag und Tagesbetrag; keine Spielzeit.
+  UI: Abschnitt im `OrganisationWindow` (`LaunderLess/More/Amount/Button`), `GameScreen.on_launder`.
 - Crew-Folgen (U.15, im CrewSystem): Regeln `risks` in `crew.json`; nach den Löhnen `_check_risks` (je Mitglied ab
   `min_days`, Chancen aus Hitze, Polizei des Gebiets, Können, Gier − Loyalität, Bande im Revier; Seed, höchstens ein
   Vorfall je Tag) → `trigger_scripted` (`crew_arrest`, `crew_betrayal`, `crew_informant`, `crew_poached`), Kontext
@@ -365,6 +370,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 28 → 29 (U.16): `laundering` = nichts gewaschen.
 - Migration 27 → 28 (U.15): `crew.incidents` = {}.
 - Migration 26 → 27 (U.14): `rivals` = alle neutral in Ausgangsstärke, Tag verarbeitet.
 - Migration 25 → 26 (U.13): `territory` leer (Tag verarbeitet), Crew-Mitglieder `district` = "".

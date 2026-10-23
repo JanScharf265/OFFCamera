@@ -940,3 +940,15 @@ Vorläufige Werte, Bestätigung durch den Game Director offen.
   Schalter „Ansicht“ bleibt unten rechts, Rivalen übernehmen selbst erst nach Paket U.
 - Sicherheit: Vor jedem Commit `git diff --stat` prüfen; schrumpft eine Datei unerwartet stark, steht es im Bericht.
 - U.16 Waschen: nur Spielwert (Gebühr %, Tageslimit, Risiko), ein Button und Zahlen – keine realen Abläufe.
+
+## 087 – Waschen über die Tarnfirma (U.16)
+Reine Spielmechanik (GD 086): ein Betrag in Schritten von 100 €, ein Button, Zahlen. Gebühr 15 %, höchstens 1.000 €
+am Tag (gespeichert je Tag), Risiko als Hitze (+5 je 1.000 €, abgerundet). Zwei Buchungen im einen Ledger
+(Schwarzgeld − Betrag, Firmenkonto + Betrag − Gebühr) – kein Ablauf, keine Konstruktion, keine Spielzeit. Nur mit
+Organisation und gegründetem Unternehmen (Merch-Label); der Abschnitt steht im Fenster „Organisation“ (Unterwelt-Seite),
+nicht im Firmenfenster. Das Gewaschene zählt als Umsatz auf dem Firmenkonto (damit auch in Abgaben, die sich am
+Firmengewinn bemessen). Waschen ohne genug Schwarzgeld oder über dem Limit ist mit Grund gesperrt.
+Nebenbei: Die Gruppe „Ansicht“ (U.12) hat keine Überschrift mehr – mit gegründeter Firma ist „Geschäft“ einen Button
+länger, und auf dem iPhone 13/14 lagen die Gruppen 1 px übereinander (Layout-Test jetzt mit Firma). Die Erklärung der
+Hitze im Organisations-Fenster folgt der neuen Regel („Jeder Tag kühlt ein wenig ab.“).
+Vorläufige Werte, Balancing in Phase 8.

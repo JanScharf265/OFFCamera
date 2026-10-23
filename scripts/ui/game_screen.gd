@@ -187,7 +187,9 @@ func _ready() -> void:
 	add_child(_here_button)
 	# U.12: zwei Buttons an derselben Stelle – je nach Ansicht ist einer sichtbar (eigene Beschriftung und Symbol);
 	# auf dunklem Grund wie die anderen Gruppen, damit die Beschriftung auch auf der hellen Tag-Karte lesbar ist.
-	_view_group = _button_group("ViewGroup", "ANSICHT")
+	# Ohne Überschrift (der Schalter ist beschriftet): mit Firma ist „Geschäft“ so lang, dass die Gruppe mit Überschrift
+	# auf dem iPhone 13/14 knapp darüber lag (Layout-Test seit U.16).
+	_view_group = _button_group("ViewGroup", "")
 	for to_underworld in [true, false]:
 		var view_button := RoundButtonScript.new("Unterwelt" if to_underworld else "Tag",
 				ICONS["ViewToggleButton" if to_underworld else "ViewToggleButtonDay"])
@@ -243,9 +245,10 @@ func _button_group(node_name: String, title: String) -> PanelContainer:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_theme_constant_override("separation", int(COLUMN_GAP))
 	panel.add_child(column)
-	var header := UiStyle.mini_label(title, UiStyle.MUTED)
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(header)
+	if not title.is_empty():
+		var header := UiStyle.mini_label(title, UiStyle.MUTED)
+		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		column.add_child(header)
 	add_child(panel)
 	return panel
 
@@ -628,6 +631,17 @@ func _on_district_pressed(district_id: String) -> void:
 	content.setup(self, _game, district_id)
 	_open_window("district", content)
 	_open_due_tutorial()
+
+
+## U.16: Waschen über das LaunderingSystem – ohne Spielzeit.
+func on_launder(amount_cents: int) -> void:
+	if _was_scroll():
+		return
+	var fee: int = _game.laundering.fee_for(amount_cents)
+	var heat: int = _game.laundering.heat_for(amount_cents)
+	_after_action(_game.laundering.launder(amount_cents), "Gewaschen: %s Schwarzgeld → %s aufs Firmenkonto (Gebühr %s, Hitze +%d)" % [
+			LedgerSystemScript.format_cents(amount_cents), LedgerSystemScript.format_cents(amount_cents - fee),
+			LedgerSystemScript.format_cents(fee), heat])
 
 
 ## Fenster „Rivalen“ (U.14).

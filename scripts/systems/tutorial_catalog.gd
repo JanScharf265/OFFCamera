@@ -62,6 +62,7 @@ const TRIGGERS := [
 	"first_district_window",
 	"first_rivals_open",
 	"first_crew_risk_shown",
+	"first_laundering_offered",
 ]
 const MAX_TEXT_LENGTH := 240
 

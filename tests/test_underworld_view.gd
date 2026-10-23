@@ -148,6 +148,11 @@ func test_toggle_fits_every_device() -> void:
 		var app := _app()
 		var screen := _screen(app)
 		screen.call("on_organisation_name_submitted", "Los Lobos")
+		# Mit Firma ist die Spalte „Geschäft“ am längsten (Organisation, Aufträge, Firma, Buchungen).
+		app.game.locations.travel("office")
+		app.game.time.advance(60)
+		assert_eq(app.game.company.found("merch_label"), "")
+		screen.call("_refresh")
 		Layout.apply(app, device)
 		Layout.sort_containers(screen)
 		var safe := Layout.safe_rect(device)
@@ -156,9 +161,11 @@ func test_toggle_fits_every_device() -> void:
 				"%s: Tippfläche %s" % [device, toggle.size])
 		assert_true(safe.grow(0.5).encloses(toggle), "%s: Schalter außerhalb der Safe Area" % device)
 		assert_true(toggle.position.x > safe.position.x + safe.size.x / 2.0, "%s: Schalter nicht rechts" % device)
+		var view_group := Layout.screen_rect(app.find_child("ViewGroup", true, false) as Control, screen)
 		for group in ["LifeGroup", "BusinessGroup"]:
 			var rect := Layout.screen_rect(app.find_child(group, true, false) as Control, screen)
-			assert_true(not rect.intersects(toggle), "%s: Schalter überdeckt %s" % [device, group])
+			assert_true(not rect.intersects(view_group), "%s: Gruppe „Ansicht“ überdeckt %s (%s / %s)" % [device, group,
+					view_group, rect])
 		screen.call("show_message", "Eine lange Rückmeldung, die über mehrere Zeilen geht und nicht unter dem Schalter liegen darf, damit man ihn immer antippen kann.")
 		screen.call("_layout")
 		var toast := Layout.screen_rect(app.find_child("Toast", true, false) as Control, screen)

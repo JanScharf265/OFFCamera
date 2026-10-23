@@ -11,13 +11,15 @@ const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 
 const EXPLANATIONS := {
 	"respect": "Wie ernst dich die Szene nimmt. Wer Respekt hat, bekommt bessere Deals.",
-	"heat": "Wie genau die Polizei hinschaut. Ruhige Tage kühlen ab.",
+	"heat": "Wie genau die Polizei hinschaut. Jeder Tag kühlt ein wenig ab.",
 	"stability": "Wie fest deine Leute zusammenhalten. Wackelt sie, wird es teuer.",
 }
 
 var _game
 var _screen
 var _rows := {}
+## U.16: gewählter Betrag zum Waschen (Cent), nur solange das Fenster offen ist
+var _launder_cents := 0
 ## U.6: Ware, Lieferungen, Lieferanten – wird bei jedem refresh() neu aufgebaut
 var _supply_box: VBoxContainer
 
@@ -109,6 +111,8 @@ func _refresh_supply() -> void:
 		var crew_button: Button = _screen.scroll_button("Crew (%d)" % _game.crew.get_members().size(), "CrewButton")
 		crew_button.pressed.connect(_screen.open_crew)
 		_supply_box.add_child(crew_button)
+	if _game.laundering.is_available():
+		_add_laundering()
 	if _game.rivals.is_available():
 		var rivals_button: Button = _screen.scroll_button("Rivalen", "RivalsButton")
 		rivals_button.pressed.connect(_screen.open_rivals)
@@ -156,3 +160,60 @@ func _row(key: String) -> Control:
 	box.add_child(UiStyle.wrapping_label(EXPLANATIONS[key], UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED))
 	_rows[key] = {"bar": bar, "value": value}
 	return card
+
+
+## U.16: Waschen über die Tarnfirma – Betrag (−/+ in Schritten), ein Button, Zahlen aus dem LaunderingSystem.
+func _add_laundering() -> void:
+	var laundering = _game.laundering
+	var rules = laundering.get_rules()
+	var step: int = rules.get_value("step_cents")
+	var remaining: int = laundering.remaining_today()
+	var black: int = _game.ledger.get_balance(LedgerSystemScript.BLACK)
+	var most := maxi(step, mini(remaining, black) / step * step)
+	_launder_cents = clampi(_launder_cents if _launder_cents > 0 else step * 5, step, most)
+	_supply_box.add_child(UiStyle.section_label("Waschen über die Firma"))
+	var terms := UiStyle.wrapping_label("Gebühr %d %% · heute noch %s möglich · Hitze +%d je 1.000 €" % [
+			rules.get_value("fee_percent"), LedgerSystemScript.format_cents(remaining), rules.get_value("heat_per_1000_euro")],
+			UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+	terms.name = "LaunderTerms"
+	_supply_box.add_child(terms)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	_supply_box.add_child(row)
+	var less: Button = _screen.scroll_button("−", "LaunderLess")
+	less.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE, UiStyle.TOUCH_SIZE)
+	less.disabled = _launder_cents <= step
+	less.pressed.connect(_change_launder.bind(-step))
+	row.add_child(less)
+	var amount := UiStyle.label(LedgerSystemScript.format_cents(_launder_cents), UiStyle.FONT_SIZE, UiStyle.TEXT)
+	amount.name = "LaunderAmount"
+	amount.custom_minimum_size.x = 150
+	amount.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	amount.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(amount)
+	var more: Button = _screen.scroll_button("+", "LaunderMore")
+	more.custom_minimum_size = Vector2(UiStyle.TOUCH_SIZE, UiStyle.TOUCH_SIZE)
+	more.disabled = _launder_cents >= most
+	more.pressed.connect(_change_launder.bind(step))
+	row.add_child(more)
+	var reason: String = laundering.check(_launder_cents)
+	var net: int = _launder_cents - laundering.fee_for(_launder_cents)
+	var button: Button = _screen.scroll_button("Waschen · %s aufs Firmenkonto" % LedgerSystemScript.format_cents(net)
+			if reason.is_empty() else reason, "LaunderButton")
+	button.disabled = not reason.is_empty()
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
+	button.pressed.connect(_launder)
+	row.add_child(button)
+	_game.tutorials.report("first_laundering_offered")
+
+
+func _change_launder(delta: int) -> void:
+	_launder_cents += delta
+	refresh()
+
+
+func _launder() -> void:
+	_screen.on_launder(_launder_cents)

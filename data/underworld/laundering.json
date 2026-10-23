@@ -1,0 +1,6 @@
+{
+	"fee_percent": 15,
+	"daily_limit_cents": 100000,
+	"step_cents": 10000,
+	"heat_per_1000_euro": 5
+}
