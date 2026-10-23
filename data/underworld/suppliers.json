@@ -1,0 +1,13 @@
+[
+	{
+		"id": "el_rubio",
+		"name": "El Rubio",
+		"description": "Die Nummer von der Serviette. Spricht wenig, liefert auf Vorkasse – meistens pünktlich.",
+		"products": ["weed", "hash", "pills", "coke"],
+		"min_units": 1,
+		"max_units": 20,
+		"delivery_days": 1,
+		"failure_percent": 15,
+		"unlocked_by_mission": "first_deal_meeting"
+	}
+]

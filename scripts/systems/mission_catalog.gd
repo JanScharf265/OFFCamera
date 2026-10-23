@@ -6,7 +6,8 @@ extends RefCounted
 ##   id, chapter, title, giver, briefing, goal_text, debrief (Texte; Briefing/Debrief ≤ MAX_TEXT_LENGTH),
 ##   goal {type: einer aus GOAL_TYPES, + Felder des Typs}, reward {respect|heat|stability: ganze Zahl},
 ##   order ≥ 0, requires [Auftrags-IDs, ohne Zyklen].
-## Zieltypen: "visit_location" {location: Orts-ID} – erfüllt bei der Ankunft dort. Weitere kommen mit ihren Tickets.
+## Zieltypen: "visit_location" {location: Orts-ID} – erfüllt bei der Ankunft dort (geöffnet);
+##            "have_stock" {min_units ≥ 1} – erfüllt, sobald so viele Einheiten Ware im Bestand sind (U.6).
 
 const MissionDefinitionScript := preload("res://scripts/models/mission_definition.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -16,7 +17,9 @@ const FIELDS := ["id", "chapter", "title", "giver", "briefing", "goal", "goal_te
 		"requires"]
 const GOAL_VISIT_LOCATION := "visit_location"
 ## Zieltyp -> Pflichtfelder (außer "type")
-const GOAL_TYPES := {GOAL_VISIT_LOCATION: ["location"]}
+const GOAL_HAVE_STOCK := "have_stock"
+## Zieltyp -> {Feld: Typ} ("string" = nicht-leerer Text, "count" = ganze Zahl ≥ 1)
+const GOAL_TYPES := {GOAL_VISIT_LOCATION: {"location": "string"}, GOAL_HAVE_STOCK: {"min_units": "count"}}
 const REWARD_KEYS := ["respect", "heat", "stability"]
 const MAX_TEXT_LENGTH := 320
 
@@ -107,10 +110,19 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int):
 	if typeof(goal) != TYPE_DICTIONARY or typeof(goal.get("type")) != TYPE_STRING or goal["type"] not in GOAL_TYPES:
 		reader.errors.append("%s: 'goal' braucht einen 'type' aus %s." % [where, ", ".join(GOAL_TYPES.keys())])
 	else:
-		for field in GOAL_TYPES[goal["type"]]:
-			if typeof(goal.get(field)) != TYPE_STRING or String(goal[field]).is_empty():
-				reader.errors.append("%s: Ziel '%s' braucht '%s'." % [where, goal["type"], field])
+		var fields: Dictionary = GOAL_TYPES[goal["type"]]
 		definition.goal = goal.duplicate()
+		for field in fields:
+			var value: Variant = goal.get(field)
+			var ok: bool = typeof(value) == TYPE_STRING and not String(value).is_empty() if fields[field] == "string" \
+					else DataReaderScript.is_whole_number(value) and int(value) >= 1
+			if not ok:
+				reader.errors.append("%s: Ziel '%s' braucht '%s'." % [where, goal["type"], field])
+			elif fields[field] == "count":
+				definition.goal[field] = int(value)
+		for key in goal:
+			if key != "type" and not fields.has(key):
+				reader.errors.append("%s: Ziel '%s' hat unbekanntes Feld '%s'." % [where, goal["type"], key])
 	var reward: Variant = entry.get("reward")
 	if typeof(reward) != TYPE_DICTIONARY:
 		reader.errors.append("%s: 'reward' fehlt oder ist kein Objekt." % where)

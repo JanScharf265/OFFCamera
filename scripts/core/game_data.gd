@@ -19,6 +19,7 @@ const TutorialCatalogScript := preload("res://scripts/systems/tutorial_catalog.g
 const OrganisationRulesScript := preload("res://scripts/systems/organisation_rules.gd")
 const MissionCatalogScript := preload("res://scripts/systems/mission_catalog.gd")
 const ProductCatalogScript := preload("res://scripts/systems/product_catalog.gd")
+const SupplierCatalogScript := preload("res://scripts/systems/supplier_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -39,6 +40,8 @@ var organisation := OrganisationRulesScript.new()
 var missions := MissionCatalogScript.new()
 ## Produkte der Unterwelt (U.5) – reine Spielwerte je Einheit
 var products := ProductCatalogScript.new()
+## Erfundene Lieferanten (U.6)
+var suppliers := SupplierCatalogScript.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -51,7 +54,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products]:
+			tutorials, organisation, missions, products, suppliers]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		contents += FileAccess.get_file_as_string(catalog.DEFAULT_PATH)
@@ -95,6 +98,13 @@ func check_references() -> PackedStringArray:
 		if definition.goal.get("type") == MissionCatalogScript.GOAL_VISIT_LOCATION \
 				and not locations.has(definition.goal["location"]):
 			problems.append("Auftrag '%s': unbekannter Ort '%s'." % [definition.id, definition.goal["location"]])
+	# U.6: Lieferanten verweisen auf Produkte und den Auftrag, der sie freischaltet.
+	for supplier in suppliers.get_all():
+		for product_id in supplier.products:
+			if not products.has(product_id):
+				problems.append("Lieferant '%s': unbekanntes Produkt '%s'." % [supplier.id, product_id])
+		if not missions.has(supplier.unlocked_by_mission):
+			problems.append("Lieferant '%s': unbekannter Auftrag '%s'." % [supplier.id, supplier.unlocked_by_mission])
 	# U.3: Der Einstieg in die Unterwelt braucht ein vom Spiel ausgelöstes Ereignis mit der Annehmen-Option.
 	var intro = events.get_definition(organisation.intro_event)
 	if intro == null or not intro.is_scripted:

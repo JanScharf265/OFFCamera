@@ -37,6 +37,8 @@ const NAMES := {
 	"heat": "Hitze (Aufmerksamkeit der Polizei)",
 	"organisation": "Organisation (Respekt, Stabilität, Fenster)",
 	"missions": "Story-Aufträge",
+	"products": "Ware (Produkte und ihre Werte)",
+	"supplier": "Lieferant, Vorkasse und Bestand",
 }
 
 

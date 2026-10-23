@@ -69,7 +69,8 @@ func test_meeting_completes_on_arrival_once() -> void:
 	game.locations.travel("cafe_harbor")
 	assert_eq(game.missions.is_completed(FIRST), true)
 	assert_eq(game.organisation.get_value("respect"), respect + 5)
-	assert_eq(Array(game.missions.take_notices()), ["Auftrag erledigt: „Treffen am Hafen“ (Respekt +5)"])
+	assert_eq(Array(game.missions.take_notices()), ["Auftrag erledigt: „Treffen am Hafen“ (Respekt +5)",
+			"Neuer Auftrag: „Die erste Ware“ (Erster Deal)"])
 	game.locations.travel("home")
 	game.locations.travel("cafe_harbor")
 	assert_eq(game.organisation.get_value("respect"), respect + 5, "Belohnung genau einmal")
@@ -164,9 +165,9 @@ func test_ui_button_badge_window_and_notice() -> void:
 	(app.find_child("TravelButton", true, false) as Button).pressed.emit()
 	assert_true((app.find_child("FeedbackLabel", true, false) as Label).text.contains(
 			"Auftrag erledigt: „Treffen am Hafen“ (Respekt +5)"))
-	assert_eq(button.call("get_badge"), 1, "Erledigtes ist neu")
+	assert_eq(button.call("get_badge"), 2, "Erledigtes und der nächste Auftrag sind neu")
 	(button as Button).pressed.emit()
-	assert_true(app.find_child("MissionsEmpty", true, false) != null)
+	assert_true(app.find_child("Mission_first_deal_goods", true, false) != null, "nächster Auftrag fehlt")
 	assert_true(app.find_child("Mission_%s" % FIRST, true, false) != null, "erledigt fehlt")
 	app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)

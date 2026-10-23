@@ -784,3 +784,14 @@ Mechanik im Sinne des Abdeckungstests.
   geschlossenem Ort an, gibt es einen Hinweis, und wer dort bleibt, bis geöffnet ist, erfüllt den Auftrag dann.
 - Roter Punkt an „Aufträge“ nach einem erledigten Auftrag: gewollt (072) – Abschlusstext und Belohnung sollen gesehen
   werden; der Punkt verschwindet beim Öffnen des Fensters.
+
+## 075 – Lieferant auf Vorkasse (U.6)
+Der erste Lieferant „El Rubio“ (erfunden) ist erreichbar, sobald „Treffen am Hafen“ erledigt ist (die Nummer auf der
+Serviette) – über einen Button im Fenster „Organisation“, ohne eigenen Ort, weil man ihn anruft. Vorkasse ist eine
+Buchung im Moment der Bestellung: aus dem Schwarzgeld, wenn es den ganzen Betrag deckt, sonst vom Privatkonto (vor dem
+ersten Verkauf gibt es kein Schwarzgeld; geteilte Zahlungen gibt es nicht). Das Firmenkonto bleibt sauber. Die
+Lieferung kommt nach `delivery_days` am Morgen (Schritt im DayCycle nach der Hitze, vor den Fristen) und platzt mit
+`failure_percent` (15 %) – entschieden über FNV-1a aus Spiel-Seed und Bestell-ID, also gleich bei gleichem Seed und nach
+dem Laden. Geplatzt heißt: Geld weg, keine Ware. Ware ist eine abstrakte Zahl von Einheiten je Produkt (073), noch ohne
+Ort – das Versteck kommt mit U.8. Ein bisher übersehener Fehler fiel dabei auf: Die Rückmeldung unten lag hinter jedem
+offenen Fenster; sie liegt jetzt darüber (Popup, Info-Blase und Tutorial bleiben darüber).

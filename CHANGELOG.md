@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Erster Lieferant „El Rubio“: nach „Treffen am Hafen“ über „Organisation“ anrufen, Ware (Gras, Haschisch, Pillen, Koks) auf Vorkasse bestellen – bezahlt aus Schwarzgeld, wenn genug da ist, sonst vom Privatkonto –, Lieferung am nächsten Morgen, die auch platzen kann (dann ist das Geld weg); Bestand und Lieferungen unterwegs im Fenster „Organisation“; neuer Auftrag „Die erste Ware“; Erklärungen „Die Ware“ und „Vorkasse“. Außerdem: Die Rückmeldung nach einer Aktion ist jetzt auch über offenen Fenstern sichtbar. Spielstand Version 20 (Ticket U.6)
 - „Treffen am Hafen“ zählt nur noch, wenn das Café offen ist; nachts gibt es einen Hinweis, wer bis zur Öffnung bleibt, erfüllt den Auftrag dann (Nachtrag U.4)
 - Produkte der Unterwelt als Daten (Gras, Haschisch, Pillen, Koks – Preise, Qualität und Hitze je Einheit, reine Spielwerte); im Spiel noch nicht sichtbar, sie kommen mit dem Lieferanten (U.6) (Ticket U.5)
 - Story-Aufträge: Nach der Gründung gibt El Capitán den ersten Auftrag („Erster Deal: Treffen am Hafen“ – ab ins Café am Hafen, Respekt +5). Neuer Button „Aufträge“ mit rotem Punkt für Neues und Erledigtes, Fenster mit Auftragstext, Ziel und Belohnung, Hinweise bei neuem und erledigtem Auftrag; Erklärung „Aufträge“; Spielstand Version 19 (Ticket U.4)

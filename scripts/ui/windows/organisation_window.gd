@@ -1,7 +1,8 @@
 extends VBoxContainer
 
 ## Fenster „Organisation“ (U.3): Name, Respekt in der Szene, Hitze und Stabilität – je als Balken mit Zahl und einem
-## Satz, was der Wert bedeutet. Werte aus dem OrganisationSystem; zeigt nur an.
+## Satz, was der Wert bedeutet. Seit U.6 darunter: Ware im Bestand, Lieferungen unterwegs und die erreichbaren
+## Lieferanten („El Rubio anrufen“). Werte aus OrganisationSystem und SupplySystem; zeigt nur an.
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
@@ -14,16 +15,26 @@ const EXPLANATIONS := {
 }
 
 var _game
+var _screen
 var _rows := {}
+## U.6: Ware, Lieferungen, Lieferanten – wird bei jedem refresh() neu aufgebaut
+var _supply_box: VBoxContainer
 
 
-func setup(_screen, game) -> void:
+func setup(screen, game) -> void:
+	_screen = screen
 	_game = game
 
 
 func _ready() -> void:
 	name = "OrganisationContent"
 	add_theme_constant_override("separation", 12)
+	# Ware und Lieferant zuerst – das ist, was man hier tut; die Werte darunter (U.6).
+	_supply_box = VBoxContainer.new()
+	_supply_box.name = "OrganisationSupply"
+	_supply_box.add_theme_constant_override("separation", 8)
+	add_child(_supply_box)
+	add_child(UiStyle.section_label("Werte"))
 	for key in OrganisationSystemScript.KEYS:
 		add_child(_row(key))
 	refresh()
@@ -41,6 +52,41 @@ func refresh() -> void:
 		(_rows[key]["value"] as Label).text = str(value)
 		if key == "heat":
 			(bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = HudBarScript.heat_color(value)
+	_refresh_supply()
+
+
+func _refresh_supply() -> void:
+	for child in _supply_box.get_children():
+		_supply_box.remove_child(child)
+		child.queue_free()
+	var supply = _game.supply
+	_supply_box.add_child(UiStyle.section_label("Ware"))
+	var any := false
+	for product in supply.get_products().get_all():
+		var units: int = supply.get_stock(product.id)
+		if units > 0:
+			any = true
+			var line := UiStyle.label("%s: %d Einheit%s" % [product.display_name, units, "" if units == 1 else "en"],
+					UiStyle.SMALL_FONT_SIZE, UiStyle.TEXT)
+			line.name = "StockLine_%s" % product.id
+			_supply_box.add_child(line)
+	if not any:
+		var empty := UiStyle.label("Noch keine Ware.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED)
+		empty.name = "StockEmpty"
+		_supply_box.add_child(empty)
+	for order in supply.get_pending_orders():
+		var product = supply.get_products().get_definition(order["product"])
+		var supplier = supply.get_suppliers().get_definition(order["supplier"])
+		var line := UiStyle.wrapping_label("Unterwegs: %d × %s von %s – kommt Tag %d" % [order["units"],
+				product.display_name if product != null else order["product"],
+				supplier.name if supplier != null else order["supplier"], order["due_day"]],
+				UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+		line.name = "PendingOrder_%s" % order["id"]
+		_supply_box.add_child(line)
+	for supplier in supply.get_unlocked():
+		var button: Button = _screen.scroll_button("%s anrufen" % supplier.name, "SupplierButton_%s" % supplier.id)
+		button.pressed.connect(func() -> void: _screen.open_supplier(supplier.id))
+		_supply_box.add_child(button)
 
 
 func _row(key: String) -> Control:

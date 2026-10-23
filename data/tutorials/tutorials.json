@@ -278,5 +278,27 @@
 		"ui_target": "MissionsButton",
 		"order": 320,
 		"requires": []
+	},
+	{
+		"id": "tut_products",
+		"mechanic": "products",
+		"trigger": "first_supplier_open",
+		"title": "Die Ware",
+		"text": "Vier Sorten, jede mit eigener Rechnung: Einkauf, Verkauf, Qualität – und wie viel Hitze jede verkaufte Einheit bringt. Mehr Marge heißt mehr Aufsehen.",
+		"ui_target": "SupplierValues_*",
+		"order": 330,
+		"requires": []
+	},
+	{
+		"id": "tut_supplier",
+		"mechanic": "supplier",
+		"trigger": "first_supplier_open",
+		"title": "Vorkasse",
+		"text": "El Rubio will das Geld vorher. Die Ware kommt am nächsten Morgen – meistens. Platzt eine Lieferung, ist das Geld weg. Was ankommt, steht unter „Organisation“.",
+		"ui_target": "SupplierOrderButton_*",
+		"order": 340,
+		"requires": [
+			"tut_products"
+		]
 	}
 ]

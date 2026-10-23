@@ -5,11 +5,36 @@
 		"title": "Treffen am Hafen",
 		"giver": "El Capitán",
 		"briefing": "El Capitán will dich noch einmal sehen – nicht zwischen den Yachten, sondern im Café am Hafen, unter Leuten. „Wer sich in der Öffentlichkeit trifft, hat nichts zu verbergen.“",
-		"goal": { "type": "visit_location", "location": "cafe_harbor" },
+		"goal": {
+			"type": "visit_location",
+			"location": "cafe_harbor"
+		},
 		"goal_text": "Fahr ins Café am Hafen.",
 		"debrief": "Er bestellt zwei Cortados und schiebt dir eine Serviette mit einer Nummer zu. „Ein Lieferant. Er meldet sich, wenn du so weit bist.“",
-		"reward": { "respect": 5 },
+		"reward": {
+			"respect": 5
+		},
 		"order": 10,
 		"requires": []
+	},
+	{
+		"id": "first_deal_goods",
+		"chapter": "Erster Deal",
+		"title": "Die erste Ware",
+		"giver": "El Capitán",
+		"briefing": "Der Mann von der Serviette heißt El Rubio. Er will das Geld vorher, stellt keine Fragen – und manchmal kommt gar nichts. „So ist das Geschäft“, sagt El Capitán. „Fang klein an.“",
+		"goal": {
+			"type": "have_stock",
+			"min_units": 1
+		},
+		"goal_text": "Bestell Ware bei El Rubio (unter „Organisation“) und warte auf die Lieferung.",
+		"debrief": "Die Ware ist da. „Jetzt brauchst du einen Ort, an dem sie keiner findet“, schreibt El Capitán.",
+		"reward": {
+			"respect": 5
+		},
+		"order": 20,
+		"requires": [
+			"first_deal_meeting"
+		]
 	}
 ]

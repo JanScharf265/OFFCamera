@@ -17,6 +17,7 @@ var _time
 var _catalog: MissionCatalogScript
 var _organisation
 var _locations
+var _supply
 ## mission_id -> true
 var _active := {}
 ## mission_id -> Zeitpunkt des Abschlusses (Minuten)
@@ -35,6 +36,12 @@ func _init(time, catalog: MissionCatalogScript, locations, organisation) -> void
 	locations.traveled.connect(_on_traveled)
 	time.time_advanced.connect(_on_time_advanced)
 	organisation.founded.connect(_on_founded)
+
+
+## Vom GameState (U.6): Bestand für Ziele vom Typ „have_stock“.
+func set_supply(supply) -> void:
+	_supply = supply
+	supply.stock_changed.connect(_check_stock_goals)
 
 
 func get_catalog() -> MissionCatalogScript:
@@ -99,6 +106,7 @@ func update_availability() -> void:
 			_unseen[definition.id] = true
 			_notices.append("Neuer Auftrag: „%s“ (%s)" % [definition.title, definition.chapter])
 			mission_started.emit(definition.id)
+	_check_stock_goals()
 
 
 func _on_founded(_name: String) -> void:
@@ -124,6 +132,15 @@ func _on_time_advanced(_from: int, to_minutes: int) -> void:
 		if definition.goal.get("type") == MissionCatalogScript.GOAL_VISIT_LOCATION \
 				and definition.goal["location"] == _locations.get_current() \
 				and _locations.is_open_at(definition.goal["location"], to_minutes):
+			_complete(definition)
+
+
+func _check_stock_goals() -> void:
+	if _supply == null:
+		return
+	for definition in get_active():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_HAVE_STOCK \
+				and _supply.total_stock() >= int(definition.goal["min_units"]):
 			_complete(definition)
 
 

@@ -34,6 +34,7 @@ const ReminderWindowScript := preload("res://scripts/ui/windows/reminder_window.
 const OrganisationWindowScript := preload("res://scripts/ui/windows/organisation_window.gd")
 const OrganisationNameWindowScript := preload("res://scripts/ui/windows/organisation_name_window.gd")
 const MissionsWindowScript := preload("res://scripts/ui/windows/missions_window.gd")
+const SupplierWindowScript := preload("res://scripts/ui/windows/supplier_window.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
@@ -295,6 +296,9 @@ func _layout() -> void:
 		_window.custom_minimum_size = Vector2(width, bottom - top)
 		_window.size = _window.custom_minimum_size
 		_window.position = Vector2((left + right - width) / 2.0, top)
+	# Die Rückmeldung unten liegt über einem offenen Fenster (U.6, vorher verdeckt: Ergebnis einer Aktion im Fenster
+	# war nicht zu sehen); Popup, Info-Blase und Tutorial liegen darüber.
+	move_child(_toast, get_child_count() - 1)
 	if _popup != null:
 		# Konflikt-Popup immer ganz oben, Panel mittig in der Safe Area (G5.4).
 		move_child(_popup, get_child_count() - 1)
@@ -527,6 +531,28 @@ func _open_channel() -> void:
 	content.setup(self, _game)
 	_open_window("channel", content)
 	_open_due_tutorial()
+
+
+## Lieferant (U.6, aus dem Fenster „Organisation“).
+func open_supplier(supplier_id: String) -> void:
+	if _was_scroll():
+		return
+	_game.tutorials.report("first_supplier_open")
+	var content := SupplierWindowScript.new()
+	content.setup(self, _game, supplier_id)
+	_open_window("supplier", content)
+	_open_due_tutorial()
+
+
+## Bestellung auf Vorkasse über das SupplySystem.
+func on_supply_order(supplier_id: String, product_id: String, units: int) -> void:
+	if _was_scroll():
+		return
+	var product = _game.supply.get_products().get_definition(product_id)
+	var cost: int = _game.supply.order_cost(product_id, units)
+	var reason: String = _game.supply.order(supplier_id, product_id, units)
+	_after_action(reason, "Bestellt: %d × %s (%s, Vorkasse)" % [units, product.display_name if product != null else product_id,
+			ActivityText.signed_money(-cost)])
 
 
 ## Fenster „Aufträge“ (U.4); Öffnen gilt als gesehen.
@@ -787,6 +813,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 		for settlement in _game.company.take_settlement_notices():
 			text += "\nTagesabschluss %s" % settlement
 		for notice in _game.obligations.take_notices():
+			text += "\n%s" % notice
+		for notice in _game.supply.take_notices():
 			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice

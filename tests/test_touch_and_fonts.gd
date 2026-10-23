@@ -460,3 +460,30 @@ func test_missions_window_touch_and_fonts() -> void:
 		app.free()
 	SaveSystemScript.delete_save(SAVE_PATH)
 	_report(problems)
+
+
+## U.6: Lieferanten-Fenster und Organisation mit Ware – Tippflächen (−/+/Bestellen), Schrift, nichts abgeschnitten.
+func test_supplier_window_touch_and_fonts() -> void:
+	var problems := PackedStringArray()
+	for device in Layout.DEVICES:
+		var app := _app()
+		_press(app, "NewGameButton")
+		var screen := app.find_child("CityMap", true, false).get_parent() as Control
+		screen.set("show_tutorials", false)
+		screen.call("on_organisation_name_submitted", "Los Lobos")
+		app.game.time.advance(TimeSystemScript.at(1, 10) - app.game.time.get_minutes())
+		app.game.locations.travel("cafe_harbor")
+		app.game.supply.order("el_rubio", "weed", 5)
+		screen.call("_refresh")
+		for opener in ["OrganisationButton", "SupplierButton_el_rubio"]:
+			_press(app, opener)
+			Layout.apply(app, device)
+			var window: Control = null
+			for child in screen.get_children():
+				if String(child.name).begins_with("Window_"):
+					window = child
+			Layout.settle_in_place(window)
+			_audit(window, screen, "%s / %s" % [device, window.name], problems)
+		app.free()
+	SaveSystemScript.delete_save(SAVE_PATH)
+	_report(problems)
