@@ -27,6 +27,7 @@ const TutorialSystemScript := preload("res://scripts/systems/tutorial_system.gd"
 const OrganisationSystemScript := preload("res://scripts/systems/organisation_system.gd")
 const MissionSystemScript := preload("res://scripts/systems/mission_system.gd")
 const SupplySystemScript := preload("res://scripts/systems/supply_system.gd")
+const SiteSystemScript := preload("res://scripts/systems/site_system.gd")
 
 const START_DAY := 1
 const START_HOUR := 8
@@ -65,6 +66,8 @@ var organisation: OrganisationSystemScript
 var missions: MissionSystemScript
 ## Lieferant und Bestand (U.6)
 var supply: SupplySystemScript
+## Standorte der Unterwelt (U.8)
+var sites: SiteSystemScript
 
 
 ## Neues Spiel mit Startwerten. Die Daten müssen bereits geladen sein.
@@ -89,11 +92,16 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	organisation.set_events(events)
 	events.set_organisation_changer(organisation.change)
 	missions = MissionSystemScript.new(time, data.missions, locations, organisation)
+	locations.set_mission_check(missions.is_completed)
 	supply = SupplySystemScript.new(time, ledger, data.suppliers, data.products, missions, events.get_seed, obligations,
 			events)
 	missions.set_supply(supply)
-	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Fristen → Ereignisse.
-	day_cycle = DayCycleScript.new(time, [company, organisation, supply, obligations, events])
+	sites = SiteSystemScript.new(time, ledger, locations, data.sites, obligations, missions.is_completed)
+	supply.set_capacity_check(sites.capacity)
+	missions.set_sites(sites)
+	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
+	# → Fristen → Ereignisse.
+	day_cycle = DayCycleScript.new(time, [company, organisation, supply, sites, obligations, events])
 	# Neues Spiel: Der erste Tag gilt als begonnen – der Kalender öffnet sich ab dem ersten Tageswechsel.
 	day_start = DayStartSystemScript.new(time, START_DAY)
 	reminders = ReminderSystemScript.new(time, appointments, locations)
@@ -134,6 +142,7 @@ func to_dict() -> Dictionary:
 		"organisation": organisation.to_dict(),
 		"missions": missions.to_dict(),
 		"supply": supply.to_dict(),
+		"sites": sites.to_dict(),
 	}
 
 
@@ -142,7 +151,7 @@ func to_dict() -> Dictionary:
 ## der Aufrufer verwirft ihn dann (SaveSystem erzeugt dafür immer einen frischen GameState).
 func restore(saved: Dictionary) -> String:
 	for section in ["time", "ledger", "stats", "location", "events", "appointments", "channel", "equipment", "company",
-			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply"]:
+			"obligations", "day_start", "reminders", "tutorials", "organisation", "missions", "supply", "sites"]:
 		if typeof(saved.get(section)) != TYPE_DICTIONARY:
 			return "Abschnitt '%s' fehlt oder ist ungültig." % section
 	var error := time.restore(saved["time"])
@@ -174,6 +183,8 @@ func restore(saved: Dictionary) -> String:
 		error = organisation.restore(saved["organisation"])
 	if error.is_empty():
 		error = supply.restore(saved["supply"])
+	if error.is_empty():
+		error = sites.restore(saved["sites"])
 	if error.is_empty():
 		error = missions.restore(saved["missions"])
 	if error.is_empty():

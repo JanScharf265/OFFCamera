@@ -42,6 +42,33 @@ var _products: ProductCatalogScript
 ## Fragt, ob ein Auftrag erledigt ist (MissionSystem.is_completed) – als Callable statt Verweis, sonst hielten sich
 ## Lieferant und Aufträge gegenseitig fest (Speicherleck, test_memory).
 var _is_mission_completed: Callable
+## U.8: Lager-Kapazität (SiteSystem.capacity) – Bestand + unterwegs darf sie nicht übersteigen. Ohne: unbegrenzt.
+var _capacity: Callable
+
+
+func set_capacity_check(capacity: Callable) -> void:
+	_capacity = capacity
+
+
+## Einheiten, die noch unterwegs sind.
+func incoming_units() -> int:
+	var total := 0
+	for order in _orders:
+		if order["status"] == STATUS_PENDING:
+			total += int(order["units"])
+	return total
+
+
+## Grund, wenn `units` mehr Einheiten nicht mehr ins Lager passen, sonst "".
+func check_space(units: int) -> String:
+	if not _capacity.is_valid():
+		return ""
+	var room: int = _capacity.call() - total_stock() - incoming_units()
+	if units > room:
+		return "Kein Platz: noch %d Einheit%s frei (Bestand + unterwegs)." % [maxi(room, 0), "" if room == 1 else "en"]
+	return ""
+
+
 ## Liefert den Spiel-Seed (EventSystem.get_seed) – bei jedem Wurf neu gelesen, damit er nach dem Laden stimmt.
 var _get_seed: Callable
 ## product_id -> Einheiten
@@ -132,6 +159,9 @@ func check_order(supplier_id: String, product_id: String, units: int) -> String:
 		return "Menge %d–%d Einheiten." % [supplier.min_units, supplier.max_units]
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
+	var space := check_space(units)
+	if not space.is_empty():
+		return space
 	var cost := order_cost(product_id, units)
 	if not _ledger.can_afford(cost, payment_account(cost)):
 		return "Nicht genug Geld (Vorkasse %s)." % LedgerSystemScript.format_cents(cost)
@@ -221,7 +251,7 @@ func check_credit_order(supplier_id: String, product_id: String, units: int) -> 
 		return "Auf Kredit %d–%d Einheiten." % [supplier.min_units, int(terms["max_units"])]
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
-	return ""
+	return check_space(units)
 
 
 ## Bestellt auf Kredit (keine Buchung jetzt). "" = bestellt.

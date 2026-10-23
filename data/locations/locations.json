@@ -3,41 +3,84 @@
 		"id": "home",
 		"display_name": "Wohnung",
 		"description": "Deine kleine Wohnung in der Altstadt.",
-		"map_position": [0.25, 0.35]
+		"map_position": [
+			0.25,
+			0.35
+		]
 	},
 	{
 		"id": "studio",
 		"display_name": "Studio",
 		"description": "Ein gemieteter Raum mit Licht, Kamera und schnellem Internet.",
-		"map_position": [0.7, 0.3],
-		"opening_hours": { "open": 7, "close": 24 }
+		"map_position": [
+			0.7,
+			0.3
+		],
+		"opening_hours": {
+			"open": 7,
+			"close": 24
+		}
 	},
 	{
 		"id": "cafe_harbor",
 		"display_name": "Café am Hafen",
 		"description": "Kaffee, Tapas und Blick auf die Boote.",
-		"map_position": [0.55, 0.78],
-		"opening_hours": { "open": 7, "close": 20 }
+		"map_position": [
+			0.55,
+			0.78
+		],
+		"opening_hours": {
+			"open": 7,
+			"close": 20
+		}
 	},
 	{
 		"id": "gym",
 		"display_name": "Fitnessstudio",
 		"description": "Geräte, Kurse und ein Spiegel für jedes Selfie.",
-		"map_position": [0.15, 0.7],
-		"opening_hours": { "open": 6, "close": 22 }
+		"map_position": [
+			0.15,
+			0.7
+		],
+		"opening_hours": {
+			"open": 6,
+			"close": 22
+		}
 	},
 	{
 		"id": "office",
 		"display_name": "Büro",
 		"description": "Ein Schreibtisch in einem Coworking-Space.",
-		"map_position": [0.8, 0.6],
-		"opening_hours": { "open": 8, "close": 18 }
+		"map_position": [
+			0.8,
+			0.6
+		],
+		"opening_hours": {
+			"open": 8,
+			"close": 18
+		}
 	},
 	{
 		"id": "label_store",
 		"display_name": "Ladenlokal",
 		"description": "Ein freies Ladenlokal an der Promenade – perfekt für einen eigenen Merch-Laden.",
-		"map_position": [0.9, 0.9],
-		"opening_hours": { "open": 10, "close": 20 }
+		"map_position": [
+			0.9,
+			0.9
+		],
+		"opening_hours": {
+			"open": 10,
+			"close": 20
+		}
+	},
+	{
+		"id": "garage",
+		"display_name": "Garage in San Pedro",
+		"description": "Ein Rolltor in einer Seitenstraße von San Pedro. Niemand fragt, was dahinter steht.",
+		"map_position": [
+			0.05,
+			0.45
+		],
+		"unlocked_by_mission": "first_deal_goods"
 	}
 ]

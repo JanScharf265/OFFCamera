@@ -810,3 +810,13 @@ Selbstprüfung: Fälligkeitsdatum bei Sprüngen über mehrere Tage, falscher Sat
 Laden beschädigter Fristen (langer Störungstest), und Tutorial-Ziele unterhalb des sichtbaren Fensterbereichs (werden
 jetzt ins Bild gescrollt). Nachtrag (GD bestätigt die Empfehlung): Über einem offenen Fenster zeigt die Rückmeldung höchstens 3 Zeilen und
 „… alle anzeigen (+N)“; ein Tipp zeigt alles, ein weiterer schließt sie. Ohne offenes Fenster bleibt sie vollständig.
+
+## 077 – Standorte und erstes Versteck (U.8)
+Standorte der Unterwelt sind Daten mit den Feldern aus Leitfaden 9.3; Personal, Produktivität und Aktivitäten sind
+schon da, wirken aber erst mit Crew (U.10/U.11) und weiteren Standorten (U.18). Das erste Versteck ist ein neuer Ort
+auf der Karte („Garage in San Pedro“), damit man hinfährt und es vor Ort anmietet – wie die Firmengründung im Büro.
+Bis zum Freischalt-Auftrag („Die erste Ware“) ist der Ort unbekannt: kein Schild, an seiner Stelle ein gewöhnliches
+Haus, nicht anfahrbar (`unlocked_by_mission` in den Ortsdaten). Platz: Ohne Versteck passen 20 Einheiten (Kofferraum,
+Wohnung), die Garage fasst 100 dazu; Bestellungen über den Platz hinaus werden mit Grund gesperrt (Bestand +
+unterwegs). Kosten: 300 € beim Anmieten, 20 € je Tag – bezahlt aus Schwarzgeld, ersatzweise vom Privatkonto; reicht
+beides nicht, wird der Tag eine einmalige Frist. Vorläufige Werte, Bestätigung durch den Game Director offen.

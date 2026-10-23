@@ -1,0 +1,19 @@
+[
+	{
+		"id": "garage_san_pedro",
+		"display_name": "Versteck: Garage",
+		"type": "stash",
+		"location": "garage",
+		"description": "Hinter dem Rolltor ist Platz für Ware, die keiner sehen soll. Der Vermieter will Bargeld und keine Fragen.",
+		"unlocked_by_mission": "first_deal_goods",
+		"start_cost_cents": 30000,
+		"running_cost_per_day_cents": 2000,
+		"setup_minutes": 30,
+		"capacity_units": 100,
+		"staff_slots": 0,
+		"productivity_per_day": 0,
+		"risk": 10,
+		"activities": [],
+		"requires": []
+	}
+]

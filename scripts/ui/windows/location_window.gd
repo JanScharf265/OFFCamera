@@ -17,6 +17,7 @@ const LocationTabScript := preload("res://scripts/models/location_tab.gd")
 
 const CONFLICT_PREFIX := "⚠ Verpasst: "
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
+const SiteCatalogScript := preload("res://scripts/systems/site_catalog.gd")
 ## G5.7: Button-Text der Kombi (das Auto-Symbol steht davor)
 const TRIP_TEXT := "Hinfahren und starten"
 ## Wirkungs-Symbole, die das Symbole-Tutorial erklärt (T.6): Follower, Community, Ruf, Auslastung
@@ -49,6 +50,8 @@ var _content_cards := {}
 var _equipment_cards := {}
 var _company_cards := {}
 var _branch_cards := {}
+## U.8: Standorte der Unterwelt an diesem Ort (site_id -> Kachel)
+var _site_cards := {}
 
 
 ## screen = GameScreen (Handler und Buttons), game = GameState.
@@ -87,6 +90,8 @@ func _ready() -> void:
 		_grid.add_child(_build_company_card(id))
 	for id in catalog.get_ids_with_branch_at(location_id):
 		_grid.add_child(_build_branch_card(id))
+	for site in _game.sites.get_catalog().get_at(location_id):
+		_grid.add_child(_build_site_card(site.id))
 	if _grid.get_child_count() == 0:
 		add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 	_build_tabs()
@@ -220,6 +225,8 @@ func refresh() -> void:
 		_refresh_company_card(type_id, now)
 	for type_id in _branch_cards:
 		_refresh_branch_card(type_id, now)
+	for site_id in _site_cards:
+		_refresh_site_card(site_id, now)
 	_report_tutorial_triggers()
 
 
@@ -235,6 +242,9 @@ func _report_tutorial_triggers() -> void:
 		tutorials.report("first_company_offered")
 	if not _branch_cards.is_empty():
 		tutorials.report("first_branch_offered")
+	for site_id in _site_cards:
+		if not _game.sites.is_owned(site_id) and _game.sites.is_unlocked(site_id):
+			tutorials.report("first_site_offered")
 	for chip in _grid.find_children("TileChip_*", "", true, false):
 		if String(chip.name).get_slice("_", 1) in SYMBOL_CHIPS:
 			tutorials.report("first_effect_symbols")
@@ -504,3 +514,37 @@ func _refresh_branch_card(type_id: String, now: int) -> void:
 	tile.set_info("")
 	tile.set_reason(_trip_or(tile, TripSystemScript.KIND_BRANCH, type_id, now, _game.company.check_open_branch()))
 	tile.button.visible = not is_open
+
+
+# --- Standorte der Unterwelt (U.8) ------------------------------------------------------------
+
+func _build_site_card(site_id: String) -> Control:
+	var site = _game.sites.get_catalog().get_definition(site_id)
+	var tile := _tile("site_%s" % site_id, site.display_name, "SiteButton_%s" % site_id, "Anmieten", false,
+			func() -> void: _screen.on_site_acquire_pressed(site_id), "unterwelt")
+	tile.tooltip_text = site.description
+	tile.info_label("SiteInfo_%s" % site_id)
+	_site_cards[site_id] = tile
+	return tile
+
+
+func _refresh_site_card(site_id: String, now: int) -> void:
+	var site = _game.sites.get_catalog().get_definition(site_id)
+	var tile: ActivityTileScript = _site_cards[site_id]
+	var owned: bool = _game.sites.is_owned(site_id)
+	var type_label: String = SiteCatalogScript.TYPE_LABELS.get(site.type, site.type)
+	if owned:
+		tile.set_time("Gehört dir")
+		tile.set_effects([ActivityText.chip("-%s/Tag" % LedgerSystemScript.format_cents(site.running_cost_per_day_cents),
+				-1, ActivityText.MONEY_ICON)])
+		tile.set_info("%s · Platz für Ware: %d/%d" % [type_label, _game.supply.total_stock(), _game.sites.capacity()])
+		tile.set_hint("")
+	else:
+		tile.set_time(ActivityText.duration_with_end(now, site.setup_minutes))
+		tile.set_effects([ActivityText.chip(ActivityText.signed_money(-site.start_cost_cents), -1, ActivityText.MONEY_ICON),
+				ActivityText.chip("-%s/Tag" % LedgerSystemScript.format_cents(site.running_cost_per_day_cents), -1)])
+		tile.set_info("%s · fasst %d Einheiten" % [type_label, site.capacity_units])
+		tile.set_hint(_conflict_hint(site.setup_minutes))
+	tile.set_reason(_game.sites.check_acquire(site_id) if not owned else "")
+	tile.button.visible = not owned
+

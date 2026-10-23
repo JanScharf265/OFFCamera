@@ -7,7 +7,8 @@ extends RefCounted
 ##   goal {type: einer aus GOAL_TYPES, + Felder des Typs}, reward {respect|heat|stability: ganze Zahl},
 ##   order ≥ 0, requires [Auftrags-IDs, ohne Zyklen].
 ## Zieltypen: "visit_location" {location: Orts-ID} – erfüllt bei der Ankunft dort (geöffnet);
-##            "have_stock" {min_units ≥ 1} – erfüllt, sobald so viele Einheiten Ware im Bestand sind (U.6).
+##            "have_stock" {min_units ≥ 1} – erfüllt, sobald so viele Einheiten Ware im Bestand sind (U.6);
+##            "own_site" {site_type} – erfüllt, sobald ein eigener Standort dieses Typs da ist (U.8).
 
 const MissionDefinitionScript := preload("res://scripts/models/mission_definition.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -18,8 +19,10 @@ const FIELDS := ["id", "chapter", "title", "giver", "briefing", "goal", "goal_te
 const GOAL_VISIT_LOCATION := "visit_location"
 ## Zieltyp -> Pflichtfelder (außer "type")
 const GOAL_HAVE_STOCK := "have_stock"
+const GOAL_OWN_SITE := "own_site"
 ## Zieltyp -> {Feld: Typ} ("string" = nicht-leerer Text, "count" = ganze Zahl ≥ 1)
-const GOAL_TYPES := {GOAL_VISIT_LOCATION: {"location": "string"}, GOAL_HAVE_STOCK: {"min_units": "count"}}
+const GOAL_TYPES := {GOAL_VISIT_LOCATION: {"location": "string"}, GOAL_HAVE_STOCK: {"min_units": "count"},
+		GOAL_OWN_SITE: {"site_type": "string"}}
 const REWARD_KEYS := ["respect", "heat", "stability"]
 const MAX_TEXT_LENGTH := 320
 

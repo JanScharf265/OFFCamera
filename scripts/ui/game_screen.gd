@@ -563,6 +563,16 @@ func on_supply_order(supplier_id: String, product_id: String, units: int) -> voi
 			ActivityText.signed_money(-cost)])
 
 
+## Standort anmieten (U.8) über das SiteSystem – kostet Spielzeit, daher mit Konflikt-Popup.
+func on_site_acquire_pressed(site_id: String) -> void:
+	if _was_scroll():
+		return
+	var site = _game.sites.get_catalog().get_definition(site_id)
+	_guard(site.setup_minutes, "%s anmieten" % site.display_name, func() -> void:
+		_after_action(_game.sites.acquire(site_id), "%s angemietet (%s)" % [site.display_name,
+				ActivityText.signed_money(-site.start_cost_cents)]))
+
+
 ## Bestellung auf Kredit (U.7) über das SupplySystem.
 func on_supply_credit_order(supplier_id: String, product_id: String, units: int) -> void:
 	if _was_scroll():
@@ -835,6 +845,8 @@ func _after_action(reason: String, success_text: String, changed_anyway: bool = 
 			text += "\n%s" % notice
 		for notice in _game.supply.take_notices():
 			text += "\n%s" % notice
+		for notice in _game.sites.take_notices():
+			text += "\n%s" % notice
 		for notice in _game.missions.take_notices():
 			text += "\n%s" % notice
 		_show_feedback(text, UiStyle.TEXT if reason.is_empty() else UiStyle.NEGATIVE)
@@ -915,6 +927,12 @@ func _refresh() -> void:
 
 	if not _game.locations.get_catalog().has(_selected_location):
 		_selected_location = _game.locations.get_current()
+	# U.8: unbekannte Orte (Freischalt-Auftrag offen) zeigt die Karte nicht.
+	var hidden := PackedStringArray()
+	for id in _game.locations.get_catalog().get_ids():
+		if not _game.locations.is_known(id):
+			hidden.append(id)
+	_map.set_hidden_locations(hidden)
 	_map.set_state(_game.locations.get_current(), _selected_location)
 
 	var pending_id := _game.events.get_next_pending_id()

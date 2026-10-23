@@ -18,6 +18,7 @@ var _catalog: MissionCatalogScript
 var _organisation
 var _locations
 var _supply
+var _sites
 ## mission_id -> true
 var _active := {}
 ## mission_id -> Zeitpunkt des Abschlusses (Minuten)
@@ -42,6 +43,21 @@ func _init(time, catalog: MissionCatalogScript, locations, organisation) -> void
 func set_supply(supply) -> void:
 	_supply = supply
 	supply.stock_changed.connect(_check_stock_goals)
+
+
+## Vom GameState (U.8): Standorte für Ziele vom Typ „own_site“.
+func set_sites(sites) -> void:
+	_sites = sites
+	sites.site_acquired.connect(_check_site_goals.unbind(1))
+
+
+func _check_site_goals() -> void:
+	if _sites == null:
+		return
+	for definition in get_active():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_OWN_SITE \
+				and _sites.owns_type(definition.goal["site_type"]):
+			_complete(definition)
 
 
 func get_catalog() -> MissionCatalogScript:
@@ -107,6 +123,7 @@ func update_availability() -> void:
 			_notices.append("Neuer Auftrag: „%s“ (%s)" % [definition.title, definition.chapter])
 			mission_started.emit(definition.id)
 	_check_stock_goals()
+	_check_site_goals()
 
 
 func _on_founded(_name: String) -> void:

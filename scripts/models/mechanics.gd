@@ -40,6 +40,7 @@ const NAMES := {
 	"products": "Ware (Produkte und ihre Werte)",
 	"supplier": "Lieferant, Vorkasse und Bestand",
 	"credit": "Kredit beim Lieferanten, Schulden und Druck",
+	"sites": "Standorte der Unterwelt (Versteck, Kosten, Platz)",
 }
 
 

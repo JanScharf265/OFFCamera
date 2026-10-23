@@ -20,6 +20,7 @@ const OrganisationRulesScript := preload("res://scripts/systems/organisation_rul
 const MissionCatalogScript := preload("res://scripts/systems/mission_catalog.gd")
 const ProductCatalogScript := preload("res://scripts/systems/product_catalog.gd")
 const SupplierCatalogScript := preload("res://scripts/systems/supplier_catalog.gd")
+const SiteCatalogScript := preload("res://scripts/systems/site_catalog.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -42,6 +43,8 @@ var missions := MissionCatalogScript.new()
 var products := ProductCatalogScript.new()
 ## Erfundene Lieferanten (U.6)
 var suppliers := SupplierCatalogScript.new()
+## Standorte der Unterwelt (U.8)
+var sites := SiteCatalogScript.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -54,7 +57,7 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers]:
+			tutorials, organisation, missions, products, suppliers, sites]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
 		contents += FileAccess.get_file_as_string(catalog.DEFAULT_PATH)
@@ -95,9 +98,26 @@ func check_references() -> PackedStringArray:
 			problems.append("Termin '%s': unbekannter Ort '%s'." % [appointment.id, appointment.location])
 	# U.4: Ziele der Aufträge verweisen auf bestehende Orte.
 	for definition in missions.get_all():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_OWN_SITE \
+				and definition.goal["site_type"] not in SiteCatalogScript.TYPES:
+			problems.append("Auftrag '%s': unbekannter Standorttyp '%s'." % [definition.id, definition.goal["site_type"]])
 		if definition.goal.get("type") == MissionCatalogScript.GOAL_VISIT_LOCATION \
 				and not locations.has(definition.goal["location"]):
 			problems.append("Auftrag '%s': unbekannter Ort '%s'." % [definition.id, definition.goal["location"]])
+	# U.8: Standorte verweisen auf Orte, Aufträge und andere Standorte.
+	for site in sites.get_all():
+		if not locations.has(site.location):
+			problems.append("Standort '%s': unbekannter Ort '%s'." % [site.id, site.location])
+		if not missions.has(site.unlocked_by_mission):
+			problems.append("Standort '%s': unbekannter Auftrag '%s'." % [site.id, site.unlocked_by_mission])
+		for required in site.requires:
+			if not sites.has(required):
+				problems.append("Standort '%s': unbekannter Standort '%s' in 'requires'." % [site.id, required])
+	# U.8: Orte, die erst ein Auftrag bekannt macht.
+	for id in locations.get_ids():
+		var mission_id: String = locations.get_definition(id).unlocked_by_mission
+		if not mission_id.is_empty() and not missions.has(mission_id):
+			problems.append("Ort '%s': unbekannter Auftrag '%s'." % [id, mission_id])
 	# U.6: Lieferanten verweisen auf Produkte und den Auftrag, der sie freischaltet.
 	for supplier in suppliers.get_all():
 		for product_id in supplier.products:

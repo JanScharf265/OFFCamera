@@ -38,6 +38,33 @@ func _init(time: TimeSystemScript, catalog: LocationCatalogScript, start_id: Str
 	_current = start_id
 
 
+## U.8: Fragt, ob ein Auftrag erledigt ist (MissionSystem.is_completed) – als Callable, kein Verweis.
+var _is_mission_completed: Callable
+
+
+func set_mission_check(check: Callable) -> void:
+	_is_mission_completed = check
+
+
+## U.8: bekannt = ohne Freischalt-Auftrag oder Auftrag erledigt (sonst nicht auf der Karte, nicht anfahrbar).
+func is_known(location_id: String) -> bool:
+	var definition := _catalog.get_definition(location_id)
+	if definition == null:
+		return false
+	if definition.unlocked_by_mission.is_empty() or location_id == _current:
+		return true
+	return _is_mission_completed.is_valid() and _is_mission_completed.call(definition.unlocked_by_mission)
+
+
+## Bekannte Orte (für die Karte).
+func get_known_ids() -> PackedStringArray:
+	var result := PackedStringArray()
+	for id in _catalog.get_ids():
+		if is_known(id):
+			result.append(id)
+	return result
+
+
 func get_catalog() -> LocationCatalogScript:
 	return _catalog
 
@@ -81,6 +108,8 @@ func check_travel(location_id: String) -> String:
 		return "Unbekannter Ort: %s" % location_id
 	if location_id == _current:
 		return "Du bist schon hier."
+	if not is_known(location_id):
+		return "Diesen Ort kennst du noch nicht."
 	if _time.is_advancing():
 		return "Gerade läuft bereits ein Zeitfortschritt."
 	return ""

@@ -84,6 +84,18 @@ func _refresh_supply() -> void:
 				UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
 		line.name = "PendingOrder_%s" % order["id"]
 		_supply_box.add_child(line)
+	var incoming: int = supply.incoming_units()
+	var capacity_text := "Platz für Ware: %d von %d belegt" % [supply.total_stock() + incoming, _game.sites.capacity()]
+	if incoming > 0:
+		capacity_text += " (davon unterwegs %d)" % incoming
+	var capacity_line := UiStyle.label(capacity_text, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED)
+	capacity_line.name = "StockCapacity"
+	_supply_box.add_child(capacity_line)
+	for site in _game.sites.get_owned():
+		var site_line := UiStyle.wrapping_label("%s · %s/Tag" % [site.display_name,
+				LedgerSystemScript.format_cents(site.running_cost_per_day_cents)], UiStyle.MIN_READ_FONT_SIZE, UiStyle.TEXT)
+		site_line.name = "OwnedSite_%s" % site.id
+		_supply_box.add_child(site_line)
 	for debt in supply.get_debts():
 		var supplier_def = supply.get_suppliers().get_definition(debt["supplier"])
 		var line := UiStyle.wrapping_label("Schulden bei %s: %s · %s" % [

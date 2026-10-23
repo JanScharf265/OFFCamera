@@ -5,7 +5,8 @@ extends RefCounted
 ##
 ## Format je Ort:
 ##   id, display_name, description (optional), map_position [x, y] mit 0–1,
-##   opening_hours {open, close} in vollen Stunden (optional, sonst immer offen)
+##   opening_hours {open, close} in vollen Stunden (optional, sonst immer offen),
+##   unlocked_by_mission (optional, U.8): Auftrags-ID – bis dahin ist der Ort unbekannt (nicht auf der Karte, nicht anfahrbar)
 
 const LocationDefinitionScript := preload("res://scripts/models/location_definition.gd")
 const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
@@ -108,5 +109,7 @@ func _parse(reader: DataReaderScript, entry: Variant, index: int) -> LocationDef
 			definition.has_hours = true
 			definition.open_hour = open_hour
 			definition.close_hour = close_hour
+
+	definition.unlocked_by_mission = reader.string_field(entry, "unlocked_by_mission", where, false)
 
 	return definition if reader.errors.size() == error_count else null

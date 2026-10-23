@@ -310,5 +310,15 @@
 		"ui_target": "SupplierCreditButton_*",
 		"order": 350,
 		"requires": []
+	},
+	{
+		"id": "tut_sites",
+		"mechanic": "sites",
+		"trigger": "first_site_offered",
+		"title": "Ein Versteck",
+		"text": "Hier ist deine Ware sicherer als im Kofferraum – und es passt mehr hinein. Das Versteck kostet jeden Tag Miete, bezahlt aus Schwarzgeld oder vom Privatkonto.",
+		"ui_target": "SiteButton_*",
+		"order": 360,
+		"requires": []
 	}
 ]

@@ -68,6 +68,7 @@ const BUILDINGS := {
 	"gym": {"base": "buildingTiles_026", "floors": ["buildingTiles_052"]},
 	"office": {"base": "buildingTiles_001", "floors": ["buildingTiles_016", "buildingTiles_016", "buildingTiles_016"]},
 	"label_store": {"base": "buildingTiles_020", "floors": []},
+	"garage": {"base": "buildingTiles_030", "floors": []},
 }
 const DEFAULT_BUILDING := {"base": "buildingTiles_019", "floors": ["buildingTiles_016"]}
 const FILLER_BUILDINGS: Array[String] = ["buildingTiles_019", "buildingTiles_022", "buildingTiles_030"]
@@ -127,6 +128,8 @@ var _current := ""
 var _selected := ""
 ## location_id -> Button (Namensschild)
 var _pins := {}
+## U.8: Orte, die (noch) nicht gezeigt werden
+var _hidden := PackedStringArray()
 var _marker: Marker
 ## name -> Texture2D (null, wenn die Datei fehlt – dann wird das Teil ausgelassen)
 var _textures := {}
@@ -418,6 +421,21 @@ func _to_screen(world: Vector2) -> Vector2:
 
 # --- Schilder, Markierung, Auto -------------------------------------------------
 
+## U.8: Unbekannte Orte (Freischalt-Auftrag noch offen) zeigt die Karte nicht – kein Schild, an ihrer Stelle ein
+## gewöhnliches Haus.
+func set_hidden_locations(ids: PackedStringArray) -> void:
+	if ids == _hidden:
+		return
+	_hidden = ids
+	for id in _pins:
+		(_pins[id] as Control).visible = id not in _hidden
+	queue_redraw()
+
+
+func is_location_hidden(location_id: String) -> bool:
+	return location_id in _hidden
+
+
 func _update_pins() -> void:
 	for id in _pins:
 		var color := PIN_CURRENT if id == _current else (UiStyle.ACCENT if id == _selected else PIN)
@@ -627,6 +645,10 @@ func _draw_tree(position_on_tile: Vector2) -> void:
 
 
 func _draw_building(location_id: String, anchor: Vector2) -> void:
+	if location_id in _hidden:
+		_draw_tile(_textures[FILLER_BUILDINGS[CityLayoutScript.variant(_layout.get_location_cell(location_id)) % FILLER_BUILDINGS.size()]],
+				anchor)
+		return
 	var style: Dictionary = BUILDINGS.get(location_id, DEFAULT_BUILDING)
 	_draw_tile(_textures[style["base"]], anchor)
 	var y := anchor.y + BASE_TOP

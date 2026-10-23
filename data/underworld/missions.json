@@ -36,5 +36,25 @@
 		"requires": [
 			"first_deal_meeting"
 		]
+	},
+	{
+		"id": "first_deal_stash",
+		"chapter": "Erster Deal",
+		"title": "Ein sicherer Ort",
+		"giver": "El Capitán",
+		"briefing": "El Capitán schickt dir eine Adresse in San Pedro: eine Garage hinter einem Rolltor. „Ware im Kofferraum ist ein Geschenk für jede Streife. Miete sie, bevor es ein anderer tut.“",
+		"goal": {
+			"type": "own_site",
+			"site_type": "stash"
+		},
+		"goal_text": "Fahr zur Garage in San Pedro und miete das Versteck an.",
+		"debrief": "Das Rolltor rasselt herunter. Zum ersten Mal hast du einen Ort, der dir gehört – und keinem, wenn jemand fragt.",
+		"reward": {
+			"respect": 5
+		},
+		"order": 30,
+		"requires": [
+			"first_deal_goods"
+		]
 	}
 ]
