@@ -320,5 +320,15 @@
 		"ui_target": "SiteButton_*",
 		"order": 360,
 		"requires": []
+	},
+	{
+		"id": "tut_selling",
+		"mechanic": "selling",
+		"trigger": "first_sale_offered",
+		"title": "Verkaufen",
+		"text": "Hier wird aus Ware Geld – als Schwarzgeld, nicht aufs Privatkonto. Jeder Verkauf kostet Zeit, und jede Einheit bringt Hitze. Je mehr du verkaufst, desto mehr Aufsehen.",
+		"ui_target": "SaleButton_*",
+		"order": 370,
+		"requires": []
 	}
 ]

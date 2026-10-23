@@ -56,5 +56,25 @@
 		"requires": [
 			"first_deal_goods"
 		]
+	},
+	{
+		"id": "first_deal_sale",
+		"chapter": "Erster Deal",
+		"title": "Der erste Verkauf",
+		"giver": "El Capitán",
+		"briefing": "„Ware, die rumliegt, verdient nichts“, sagt El Capitán. „Am Hafen, wenn die Ausflugsboote fest sind, kommen Kunden an die Kaimauer. Fang an – aber nicht zu laut.“",
+		"goal": {
+			"type": "sold_units",
+			"min_units": 5
+		},
+		"goal_text": "Verkauf an der Kaimauer am Abend insgesamt 5 Einheiten (Café am Hafen, Reiter „Unterwelt“).",
+		"debrief": "Das erste Bündel Scheine liegt auf dem Tisch. El Capitán zählt nicht nach. „Jetzt bist du im Geschäft. Mal sehen, wie lange.“",
+		"reward": {
+			"respect": 10
+		},
+		"order": 40,
+		"requires": [
+			"first_deal_stash"
+		]
 	}
 ]

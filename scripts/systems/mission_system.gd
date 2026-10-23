@@ -19,6 +19,7 @@ var _organisation
 var _locations
 var _supply
 var _sites
+var _sales
 ## mission_id -> true
 var _active := {}
 ## mission_id -> Zeitpunkt des Abschlusses (Minuten)
@@ -49,6 +50,21 @@ func set_supply(supply) -> void:
 func set_sites(sites) -> void:
 	_sites = sites
 	sites.site_acquired.connect(_check_site_goals.unbind(1))
+
+
+## Vom GameState (U.9): Verkäufe für Ziele vom Typ „sold_units“.
+func set_sales(sales) -> void:
+	_sales = sales
+	sales.sold.connect(_check_sale_goals.unbind(3))
+
+
+func _check_sale_goals() -> void:
+	if _sales == null:
+		return
+	for definition in get_active():
+		if definition.goal.get("type") == MissionCatalogScript.GOAL_SOLD_UNITS \
+				and _sales.get_sold_units() >= int(definition.goal["min_units"]):
+			_complete(definition)
 
 
 func _check_site_goals() -> void:
@@ -124,6 +140,7 @@ func update_availability() -> void:
 			mission_started.emit(definition.id)
 	_check_stock_goals()
 	_check_site_goals()
+	_check_sale_goals()
 
 
 func _on_founded(_name: String) -> void:

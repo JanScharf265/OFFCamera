@@ -181,6 +181,13 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   pressure_event)` höchstens alle `pressure_every_days`. Ereignis-Optionen können `organisation` {respect, heat,
   stability} haben (über `set_organisation_changer`, Callable). Tutorial-Overlay scrollt ein Ziel in einem
   ScrollContainer ins Bild (Lage relativ zum Inhalt, stabil).
+- Verkaufen (U.9, `scripts/systems/sale_system.gd`, im GameState als `sales`): Katalog `SaleSystem.Catalog`
+  (`data/underworld/sale_spots.json`: Ort, Freischalt-Auftrag, Minuten, höchstens Einheiten je Verkauf, Preis- und
+  Hitze-Prozent). `check_open` (Kachel), `check_sale`/`sell`: vor Ort, Organisation gegründet, Auftrag erledigt,
+  Bestand reicht → `SupplySystem.remove_stock` → Buchung `underworld_sale` aufs Schwarzgeld → `organisation.change`
+  (Hitze = Einheiten × `heat_per_unit` × Prozent) → `time.advance`. Signal `sold` → Aufträge mit Ziel `sold_units`
+  (Gesamtzahl verkaufter Einheiten, gespeichert als `sales.sold_units`). Ortsfenster: Kachel nur, wenn verfügbar;
+  `SaleWindow` (Ware, Menge, „Verkaufen“) ruft `GameScreen.on_sale` (mit Konflikt-Popup).
 - Standorte (U.8, `scripts/systems/site_system.gd`, im GameState als `sites`): Katalog `SiteCatalog`
   (`data/underworld/sites.json`, Felder nach Leitfaden 9.3: Typ, Ort, Freischalt-Auftrag, Start- und laufende Kosten,
   Aufbauzeit, Kapazität, Personalplätze, Produktivität, Risiko, Aktivitäten, Voraussetzungen). `check_acquire`/`acquire`
@@ -318,6 +325,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 22 → 23 (U.9): `sales` = {`sold_units`: 0}.
 - Migration 21 → 22 (U.8): `sites` = keiner angemietet, gespeicherter Tag gilt als verarbeitet.
 - Migration 20 → 21 (U.7): Bestellungen bekommen `credit` = false und leere Schuldfelder; `last_pressure_day` = 0,
   `delivered_before_trim` = {}.

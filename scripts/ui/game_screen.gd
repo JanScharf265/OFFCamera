@@ -35,6 +35,7 @@ const OrganisationWindowScript := preload("res://scripts/ui/windows/organisation
 const OrganisationNameWindowScript := preload("res://scripts/ui/windows/organisation_name_window.gd")
 const MissionsWindowScript := preload("res://scripts/ui/windows/missions_window.gd")
 const SupplierWindowScript := preload("res://scripts/ui/windows/supplier_window.gd")
+const SaleWindowScript := preload("res://scripts/ui/windows/sale_window.gd")
 ## Fenster, die vor Erinnerung und Tutorial stehen (Ereignis → Name der Organisation → Kalender → Erinnerung)
 const PRIORITY_WINDOWS := ["event", "organisation_name", "calendar", "reminder"]
 const TripSystemScript := preload("res://scripts/systems/trip_system.gd")
@@ -571,6 +572,29 @@ func on_site_acquire_pressed(site_id: String) -> void:
 	_guard(site.setup_minutes, "%s anmieten" % site.display_name, func() -> void:
 		_after_action(_game.sites.acquire(site_id), "%s angemietet (%s)" % [site.display_name,
 				ActivityText.signed_money(-site.start_cost_cents)]))
+
+
+## Verkaufsfenster (U.9).
+func open_sale(spot_id: String) -> void:
+	if _was_scroll():
+		return
+	var content := SaleWindowScript.new()
+	content.setup(self, _game, spot_id)
+	_open_window("sale", content)
+	_open_due_tutorial()
+
+
+## Verkauf (U.9) über das SaleSystem – kostet Spielzeit, daher mit Konflikt-Popup.
+func on_sale(spot_id: String, product_id: String, units: int) -> void:
+	if _was_scroll():
+		return
+	var spot = _game.sales.get_catalog().get_definition(spot_id)
+	var product = _game.supply.get_products().get_definition(product_id)
+	var income: int = _game.sales.income_cents(spot_id, product_id, units)
+	var heat: int = _game.sales.heat_for(spot_id, product_id, units)
+	_guard(spot.minutes, "Verkaufen", func() -> void:
+		_after_action(_game.sales.sell(spot_id, product_id, units), "Verkauft: %d × %s (%s Schwarzgeld, Hitze +%d)" % [
+				units, product.display_name if product != null else product_id, ActivityText.signed_money(income), heat]))
 
 
 ## Bestellung auf Kredit (U.7) über das SupplySystem.

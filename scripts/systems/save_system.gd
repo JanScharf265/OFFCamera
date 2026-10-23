@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 22
+const SAVE_VERSION := 23
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -283,6 +283,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		19: return _migrate_19_to_20(game)
 		20: return _migrate_20_to_21(game)
 		21: return _migrate_21_to_22(game)
+		22: return _migrate_22_to_23(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -490,6 +491,12 @@ static func _migrate_21_to_22(game: Dictionary) -> String:
 	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
 		return "Zeit fehlt."
 	game["sites"] = {"owned": {}, "last_processed_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 22 → 23 (U.9): Verkäufe – noch nichts verkauft.
+static func _migrate_22_to_23(game: Dictionary) -> String:
+	game["sales"] = {"sold_units": 0}
 	return ""
 
 

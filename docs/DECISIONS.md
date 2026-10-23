@@ -820,3 +820,13 @@ Haus, nicht anfahrbar (`unlocked_by_mission` in den Ortsdaten). Platz: Ohne Vers
 Wohnung), die Garage fasst 100 dazu; Bestellungen über den Platz hinaus werden mit Grund gesperrt (Bestand +
 unterwegs). Kosten: 300 € beim Anmieten, 20 € je Tag – bezahlt aus Schwarzgeld, ersatzweise vom Privatkonto; reicht
 beides nicht, wird der Tag eine einmalige Frist. Vorläufige Werte, Bestätigung durch den Game Director offen.
+
+## 078 – Verkaufen als Aktion (U.9)
+Verkaufen ist eine Aktion an einem Verkaufsort (Daten), nicht ein Knopf im Organisations-Fenster: man fährt hin,
+verkauft vor Ort, es kostet Spielzeit (1 h) und zeigt das Konflikt-Popup wie Aktivitäten. Der erste Ort „Kaimauer am
+Abend“ liegt beim Café am Hafen (Reiter „Unterwelt“), erscheint aber erst nach „Ein sicherer Ort“ – vorher soll das
+Café nichts über die Unterwelt verraten. Der Verkaufsort hat keine eigenen Öffnungszeiten (auch nachts möglich).
+Einnahme = Einheiten × Verkaufspreis des Produkts (U.5) × Prozent des Orts, immer als Buchung aufs Schwarzgeld;
+Hitze = Einheiten × Hitze je Einheit × Prozent. Höchstens 10 Einheiten je Verkauf. Auftrag „Der erste Verkauf“ zählt
+alle verkauften Einheiten (5) und schließt das Kapitel „Erster Deal“. Der Ort hieß zuerst „Am Hafen nach Feierabend“;
+der Name war in der Kachel abgeschnitten. Vorläufige Werte, Bestätigung durch den Game Director offen.

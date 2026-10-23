@@ -239,7 +239,7 @@ Gebündelter iPhone-Test (Build 0.7.0, ersetzt die einzelnen iPhone-Abnahmen von
 - [x] 8. Flugmodus: einschalten – alles funktioniert gleich.
 - [x] 9. Gefühl: Ruckelt etwas? Wird das iPhone nach 5 Minuten spürbar warm?
 
-## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.9)
+## Neue Ausrichtung – Pakete G3, G4, G5, T, U ← in Arbeit (G3, G4, G5 und T fertig, U läuft – als Nächstes U.10)
 Freigegeben vom Game Director am 13.10.2026, Entscheidungen in `docs/DECISIONS.md` 036–038.
 Grundlage: `docs/VISION.md` und `docs/LEITFADEN.md`. Die Unterwelt wird das Hauptspiel, die Streamer-Karriere das Nebenspiel,
 das Merch-Label wird Tarnfirma. Reihenfolge: G3 → G4 → G5 → T → U → Phase 8.
@@ -305,7 +305,7 @@ Für den nächsten iPhone-Build (sammeln, kein eigener Test-Termin):
 - [x] U.6 Erfundener Lieferant „El Rubio“ (`data/underworld/suppliers.json`, `SupplySystem`): erreichbar nach „Treffen am Hafen“ über „Organisation“; Einkauf auf Vorkasse als Buchung (Schwarzgeld, wenn es reicht, sonst Privatkonto); Lieferung am nächsten Morgen (Schritt im DayCycle), platzt mit 15 % (Seed, deterministisch); Bestand; Auftrag „Die erste Ware“; Tutorials „Die Ware“ und „Vorkasse“; Rückmeldung liegt jetzt über offenen Fenstern; Spielstand Version 20 + Migration + Testdatei (537/537 Tests + 3/3 lange Tests grün)
 - [x] U.7 Lieferant auf Kredit (nach einer angekommenen Lieferung, +25 %, fällig nach 3 Tagen, eine laufende Schuld je Lieferant): Schulden werden am Fälligkeitstag einmalige Fristen im ObligationSystem (Schwarzgeld, ersatzweise Privatkonto; Mahnaufschlag 10 % nach 1 Tag); platzt die Lieferung, entfällt die Schuld; überfällig → Druck-Ereignis „Besuch“ alle 2 Tage (Folgen für Stimmung/Organisation); Ereignis-Optionen mit Organisations-Folgen; Tutorial-Ziele werden ins Bild gescrollt; Tutorial „Auf Kredit“; Spielstand Version 21 + Migration + Testdatei (547/547 Tests + 3/3 lange Tests grün)
 - [x] U.8 Standorte als Daten (`data/underworld/sites.json`, `SiteCatalog`, `SiteSystem`; Felder nach Leitfaden 9.3); erstes Versteck „Garage in San Pedro“ als neuer Ort (unbekannt bis „Die erste Ware“, dann auf der Karte, Kenney-Gebäude); vor Ort anmieten (300 €, 30 min), laufende Kosten 20 €/Tag (Schwarzgeld, ersatzweise privat, sonst Frist); Kapazität (20 ohne Versteck, +100) begrenzt Bestellungen; Auftrag „Ein sicherer Ort“; Tutorial „Ein Versteck“; Spielstand Version 22 + Migration + Testdatei (559/559 Tests + 3/3 lange Tests grün)
-- [ ] U.9 Verkaufen als Aktion (Zeit, Schwarzgeld, Hitze) – erster Deal abgeschlossen
+- [x] U.9 Verkaufen als Aktion (Zeit, Schwarzgeld, Hitze) – erster Deal abgeschlossen: Verkaufsorte als Daten (`data/underworld/sale_spots.json`, `SaleSystem`); erster Ort „Kaimauer am Abend“ beim Café am Hafen (ab „Ein sicherer Ort“); Kachel „Ware verkaufen“ (Reiter „Unterwelt“) öffnet das Verkaufsfenster (Ware, Menge 1–10, 1 h Spielzeit, Konflikt-Popup); Einnahme als Schwarzgeld-Buchung, Hitze je Einheit; Auftrag „Der erste Verkauf“ (5 Einheiten, Respekt +10) schließt das Kapitel „Erster Deal“; Tutorial „Verkaufen“; Spielstand Version 23 + Migration + Testdatei (569/569 Tests + 3/3 lange Tests grün)
 - [ ] U.10 Crew 1: Rollen als Daten, Bewerber (Seed), einstellen/feuern, Löhne im Tageswechsel
 - [ ] U.11 Crew 2: Dealer verkaufen täglich (Unterwelt-Abrechnung im DayCycle), Können/Loyalität/Gier, befördern
 - [ ] U.12 Gebiete als Daten (Viertel mit Nachfrage, Polizeipräsenz, Rivaleneinfluss) + Karten-Overlay, ein- und ausschaltbar per Schalter auf der Karte

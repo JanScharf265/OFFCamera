@@ -1,0 +1,13 @@
+[
+	{
+		"id": "harbor_after_hours",
+		"display_name": "Kaimauer am Abend",
+		"location": "cafe_harbor",
+		"description": "Wenn die Ausflugsboote fest sind, kommen andere Kunden an die Kaimauer. Schnell, leise, bar.",
+		"unlocked_by_mission": "first_deal_stash",
+		"minutes": 60,
+		"max_units": 10,
+		"price_percent": 100,
+		"heat_percent": 100
+	}
+]

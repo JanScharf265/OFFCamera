@@ -120,6 +120,17 @@ func get_stock(product_id: String) -> int:
 	return int(_stock.get(product_id, 0))
 
 
+## U.9: nimmt Ware aus dem Bestand (Verkauf). false, wenn nicht genug da ist (dann unverändert).
+func remove_stock(product_id: String, units: int) -> bool:
+	if units < 1 or get_stock(product_id) < units:
+		return false
+	_stock[product_id] = get_stock(product_id) - units
+	if _stock[product_id] == 0:
+		_stock.erase(product_id)
+	stock_changed.emit()
+	return true
+
+
 func total_stock() -> int:
 	var total := 0
 	for product_id in _stock:

@@ -41,6 +41,7 @@ const NAMES := {
 	"supplier": "Lieferant, Vorkasse und Bestand",
 	"credit": "Kredit beim Lieferanten, Schulden und Druck",
 	"sites": "Standorte der Unterwelt (Versteck, Kosten, Platz)",
+	"selling": "Verkaufen (Zeit, Schwarzgeld, Hitze)",
 }
 
 

@@ -21,6 +21,7 @@ const MissionCatalogScript := preload("res://scripts/systems/mission_catalog.gd"
 const ProductCatalogScript := preload("res://scripts/systems/product_catalog.gd")
 const SupplierCatalogScript := preload("res://scripts/systems/supplier_catalog.gd")
 const SiteCatalogScript := preload("res://scripts/systems/site_catalog.gd")
+const SaleSystemScript := preload("res://scripts/systems/sale_system.gd")
 
 ## Ort, an dem ein neues Spiel beginnt.
 const START_LOCATION := "home"
@@ -45,6 +46,8 @@ var products := ProductCatalogScript.new()
 var suppliers := SupplierCatalogScript.new()
 ## Standorte der Unterwelt (U.8)
 var sites := SiteCatalogScript.new()
+## Verkaufsorte (U.9)
+var sale_spots := SaleSystemScript.Catalog.new()
 
 var errors: PackedStringArray = []
 ## Kennung der geladenen Datendateien (MD5 über alle Inhalte, Phase 6) – steht im Spielstand-Kopf,
@@ -57,10 +60,11 @@ func load_all() -> bool:
 	errors.clear()
 	var contents := ""
 	for catalog in [activities, events, locations, appointments, formats, equipment, company_types, obligations,
-			tutorials, organisation, missions, products, suppliers, sites]:
+			tutorials, organisation, missions, products, suppliers, sites, sale_spots]:
 		if not catalog.load_file():
 			errors.append_array(catalog.errors)
-		contents += FileAccess.get_file_as_string(catalog.DEFAULT_PATH)
+		contents += FileAccess.get_file_as_string(SaleSystemScript.DEFAULT_PATH if catalog == sale_spots
+				else catalog.DEFAULT_PATH)
 	fingerprint = contents.md5_text()
 	if errors.is_empty():
 		errors.append_array(check_references())
@@ -113,6 +117,12 @@ func check_references() -> PackedStringArray:
 		for required in site.requires:
 			if not sites.has(required):
 				problems.append("Standort '%s': unbekannter Standort '%s' in 'requires'." % [site.id, required])
+	# U.9: Verkaufsorte verweisen auf Orte und Aufträge.
+	for spot in sale_spots.get_all():
+		if not locations.has(spot.location):
+			problems.append("Verkaufsort '%s': unbekannter Ort '%s'." % [spot.id, spot.location])
+		if not missions.has(spot.unlocked_by_mission):
+			problems.append("Verkaufsort '%s': unbekannter Auftrag '%s'." % [spot.id, spot.unlocked_by_mission])
 	# U.8: Orte, die erst ein Auftrag bekannt macht.
 	for id in locations.get_ids():
 		var mission_id: String = locations.get_definition(id).unlocked_by_mission

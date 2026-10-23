@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unveröffentlicht – Neue Ausrichtung (13.10.2026)
+- Verkaufen: Nach „Ein sicherer Ort“ gibt es im Café am Hafen (Reiter „Unterwelt“) die Kachel „Kaimauer am Abend“ mit „Ware verkaufen“. Im Verkaufsfenster Ware und Menge wählen (bis 10 je Verkauf, 1 Stunde); die Einnahme kommt aufs Schwarzgeld, jede Einheit bringt Hitze. Neuer Auftrag „Der erste Verkauf“ schließt das Kapitel „Erster Deal“; Erklärung „Verkaufen“; Spielstand Version 23 (Ticket U.9)
 - Erstes Versteck: Nach „Die erste Ware“ taucht die „Garage in San Pedro“ auf der Karte auf. Vor Ort anmieten (300 €, 30 Minuten), danach 20 € am Tag; sie fasst 100 Einheiten Ware – ohne Versteck passen nur 20. Neuer Auftrag „Ein sicherer Ort“, Erklärung „Ein Versteck“; Platz und Standorte im Fenster „Organisation“; Spielstand Version 22 (Ticket U.8)
 - Lange Rückmeldungen über einem offenen Fenster zeigen nur 3 Zeilen und „… alle anzeigen“ – ein Tipp zeigt alles (Nachtrag U.7)
 - Kredit bei El Rubio: Nach der ersten angekommenen Lieferung gibt es Ware auch auf Kredit (25 % Aufschlag, fällig nach 3 Tagen). Am Fälligkeitstag werden die Schulden eine Frist – bezahlt aus Schwarzgeld oder vom Privatkonto, sonst offen mit Mahnaufschlag; wer nicht zahlt, bekommt alle zwei Tage „Besuch“ (kostet Stimmung, Respekt oder Stabilität). Platzt die Lieferung, entfallen die Schulden. Erklärung „Auf Kredit“; Erklärungen scrollen ihr Ziel jetzt ins Bild; Spielstand Version 21 (Ticket U.7)

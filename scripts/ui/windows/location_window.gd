@@ -52,6 +52,8 @@ var _company_cards := {}
 var _branch_cards := {}
 ## U.8: Standorte der Unterwelt an diesem Ort (site_id -> Kachel)
 var _site_cards := {}
+## U.9: Verkaufsorte an diesem Ort (spot_id -> Kachel); nur verfügbare, beim Öffnen gebaut
+var _sale_cards := {}
 
 
 ## screen = GameScreen (Handler und Buttons), game = GameState.
@@ -92,6 +94,9 @@ func _ready() -> void:
 		_grid.add_child(_build_branch_card(id))
 	for site in _game.sites.get_catalog().get_at(location_id):
 		_grid.add_child(_build_site_card(site.id))
+	for spot in _game.sales.get_catalog().get_at(location_id):
+		if _game.sales.is_available(spot.id):
+			_grid.add_child(_build_sale_card(spot.id))
 	if _grid.get_child_count() == 0:
 		add_child(UiStyle.label("Hier gibt es nichts zu tun.", UiStyle.SMALL_FONT_SIZE, UiStyle.MUTED))
 	_build_tabs()
@@ -227,6 +232,8 @@ func refresh() -> void:
 		_refresh_branch_card(type_id, now)
 	for site_id in _site_cards:
 		_refresh_site_card(site_id, now)
+	for spot_id in _sale_cards:
+		_refresh_sale_card(spot_id, now)
 	_report_tutorial_triggers()
 
 
@@ -548,3 +555,24 @@ func _refresh_site_card(site_id: String, now: int) -> void:
 	tile.set_reason(_game.sites.check_acquire(site_id) if not owned else "")
 	tile.button.visible = not owned
 
+
+
+## U.9: Verkaufsort – „Ware verkaufen“ öffnet das Verkaufsfenster (Menge und Ware wählt man dort).
+func _build_sale_card(spot_id: String) -> Control:
+	var spot = _game.sales.get_catalog().get_definition(spot_id)
+	var tile := _tile("sale_%s" % spot_id, spot.display_name, "SaleSpotButton_%s" % spot_id, "Ware verkaufen", false,
+			func() -> void: _screen.open_sale(spot_id), "unterwelt")
+	tile.tooltip_text = spot.description
+	tile.info_label("SaleInfo_%s" % spot_id)
+	_sale_cards[spot_id] = tile
+	return tile
+
+
+func _refresh_sale_card(spot_id: String, now: int) -> void:
+	var spot = _game.sales.get_catalog().get_definition(spot_id)
+	var tile: ActivityTileScript = _sale_cards[spot_id]
+	tile.set_time(ActivityText.duration_with_end(now, spot.minutes))
+	tile.set_effects([ActivityText.chip("Schwarzgeld", 1, ActivityText.MONEY_ICON), ActivityText.chip("Hitze", -1)])
+	tile.set_info("Bestand: %d Einheiten · bis %d je Verkauf" % [_game.supply.total_stock(), spot.max_units])
+	tile.set_hint(_conflict_hint(spot.minutes))
+	tile.set_reason(_game.sales.check_open(spot_id))
