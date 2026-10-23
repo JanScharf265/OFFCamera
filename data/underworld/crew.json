@@ -2,8 +2,57 @@
 	"unlocked_by_mission": "first_deal_sale",
 	"max_members": 6,
 	"applicants_per_day": 3,
-	"first_names": ["Dani", "Toni", "Javi", "Rafa", "Kiko", "Nando", "Lucía", "Marta", "Iker", "Nerea", "Paco", "Sara", "Rubén", "Alba", "Chema", "Inés"],
-	"last_initials": ["A.", "B.", "C.", "D.", "F.", "G.", "L.", "M.", "N.", "P.", "R.", "S.", "T.", "V."],
+	"dealing": {
+		"role": "dealer",
+		"base_units": 2,
+		"skill_per_extra_unit": 20,
+		"skim_percent_per_10_greed": 2,
+		"heat_skill_percent": 50,
+		"loyalty_paid": 1,
+		"loyalty_unpaid": 10
+	},
+	"promotion": {
+		"max_rank": 3,
+		"min_days": 3,
+		"cost_wage_days": 5,
+		"skill_bonus": 10,
+		"loyalty_bonus": 10,
+		"wage_percent": 125
+	},
+	"first_names": [
+		"Dani",
+		"Toni",
+		"Javi",
+		"Rafa",
+		"Kiko",
+		"Nando",
+		"Lucía",
+		"Marta",
+		"Iker",
+		"Nerea",
+		"Paco",
+		"Sara",
+		"Rubén",
+		"Alba",
+		"Chema",
+		"Inés"
+	],
+	"last_initials": [
+		"A.",
+		"B.",
+		"C.",
+		"D.",
+		"F.",
+		"G.",
+		"L.",
+		"M.",
+		"N.",
+		"P.",
+		"R.",
+		"S.",
+		"T.",
+		"V."
+	],
 	"roles": [
 		{
 			"id": "dealer",
@@ -11,7 +60,8 @@
 			"description": "Verkauft auf der Straße. Bringt Geld – und Hitze.",
 			"wage_min_cents": 3000,
 			"wage_max_cents": 7000,
-			"order": 10
+			"order": 10,
+			"offered": true
 		},
 		{
 			"id": "runner",
@@ -19,7 +69,8 @@
 			"description": "Bringt Ware und Nachrichten von A nach B. Billig, aber redet gern.",
 			"wage_min_cents": 1500,
 			"wage_max_cents": 3500,
-			"order": 20
+			"order": 20,
+			"offered": false
 		},
 		{
 			"id": "driver",
@@ -27,7 +78,8 @@
 			"description": "Kennt jede Straße an der Küste und stellt keine Fragen.",
 			"wage_min_cents": 2500,
 			"wage_max_cents": 5500,
-			"order": 30
+			"order": 30,
+			"offered": false
 		},
 		{
 			"id": "guard",
@@ -35,7 +87,8 @@
 			"description": "Steht da, wo es ungemütlich werden kann. Teuer, aber beruhigend.",
 			"wage_min_cents": 4000,
 			"wage_max_cents": 9000,
-			"order": 40
+			"order": 40,
+			"offered": false
 		}
 	]
 }

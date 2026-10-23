@@ -1,0 +1,671 @@
+{
+	"game": {
+		"appointments": {
+			"attended": [],
+			"missed": [
+				"camera_meeting",
+				"gym_trial",
+				"week_meeting"
+			],
+			"since_minutes": 480
+		},
+		"channel": {
+			"community": 52,
+			"followers": 137,
+			"history": [
+				{
+					"applied": {
+						"community": 2,
+						"followers": 17
+					},
+					"id": "ch_000001",
+					"reason": "Livestream · Qualität 100 %",
+					"reference": "livestream",
+					"requested": {
+						"community": 2,
+						"followers": 17
+					},
+					"source": "content",
+					"time_minutes": 500
+				}
+			],
+			"next_number": 2,
+			"reputation": 50,
+			"used_keys": {
+				"content:livestream:500": "ch_000001"
+			}
+		},
+		"company": {
+			"branch_open": false,
+			"deposits": 1,
+			"founded": true,
+			"founded_minutes": 635,
+			"history": [
+				{
+					"applied": {},
+					"id": "co_000001",
+					"reason": "Gegründet: Merch-Label (Auslastung 50, Ruf 50)",
+					"reference": "merch_label",
+					"requested": {},
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"applied": {
+						"utilization": 6
+					},
+					"id": "co_000002",
+					"reason": "Ware nachbestellen",
+					"reference": "order_stock",
+					"requested": {
+						"utilization": 6
+					},
+					"source": "activity",
+					"time_minutes": 695
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000003",
+					"reason": "Tag 1: ohne Pflege sinkt die Auslastung",
+					"reference": "day:1",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000004",
+					"reason": "Tag 2: ohne Pflege sinkt die Auslastung",
+					"reference": "day:2",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000005",
+					"reason": "Tag 3: ohne Pflege sinkt die Auslastung",
+					"reference": "day:3",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000006",
+					"reason": "Tag 4: ohne Pflege sinkt die Auslastung",
+					"reference": "day:4",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000007",
+					"reason": "Tag 5: ohne Pflege sinkt die Auslastung",
+					"reference": "day:5",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000008",
+					"reason": "Tag 6: ohne Pflege sinkt die Auslastung",
+					"reference": "day:6",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000009",
+					"reason": "Tag 7: ohne Pflege sinkt die Auslastung",
+					"reference": "day:7",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"applied": {
+						"utilization": -3
+					},
+					"id": "co_000010",
+					"reason": "Tag 8: ohne Pflege sinkt die Auslastung",
+					"reference": "day:8",
+					"requested": {
+						"utilization": -3
+					},
+					"source": "company",
+					"time_minutes": 12000
+				}
+			],
+			"last_settled_day": 8,
+			"next_number": 11,
+			"reputation": 50,
+			"settlements": [
+				{
+					"costs_cents": 2000,
+					"day": 1,
+					"paid": true,
+					"revenue_cents": 1794,
+					"text": "Tag 1: Umsatz +17,94 € (30,00 € + 2,05 € Reichweite · Auslastung 56 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -2,06 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 2,
+					"paid": true,
+					"revenue_cents": 1698,
+					"text": "Tag 2: Umsatz +16,98 € (30,00 € + 2,05 € Reichweite · Auslastung 53 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -3,02 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 3,
+					"paid": true,
+					"revenue_cents": 1602,
+					"text": "Tag 3: Umsatz +16,02 € (30,00 € + 2,05 € Reichweite · Auslastung 50 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -3,98 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 4,
+					"paid": true,
+					"revenue_cents": 1506,
+					"text": "Tag 4: Umsatz +15,06 € (30,00 € + 2,05 € Reichweite · Auslastung 47 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -4,94 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 5,
+					"paid": true,
+					"revenue_cents": 1410,
+					"text": "Tag 5: Umsatz +14,10 € (30,00 € + 2,05 € Reichweite · Auslastung 44 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -5,90 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 6,
+					"paid": true,
+					"revenue_cents": 1314,
+					"text": "Tag 6: Umsatz +13,14 € (30,00 € + 2,05 € Reichweite · Auslastung 41 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -6,86 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 7,
+					"paid": true,
+					"revenue_cents": 1217,
+					"text": "Tag 7: Umsatz +12,17 € (30,00 € + 2,05 € Reichweite · Auslastung 38 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -7,83 €"
+				},
+				{
+					"costs_cents": 2000,
+					"day": 8,
+					"paid": true,
+					"revenue_cents": 1121,
+					"text": "Tag 8: Umsatz +11,21 € (30,00 € + 2,05 € Reichweite · Auslastung 35 % · Ruf ±0 %) · Fixkosten -20,00 € · Ergebnis -8,79 €"
+				}
+			],
+			"type": "merch_label",
+			"used_keys": {
+				"company:day:1:decay": "co_000003",
+				"company:day:2:decay": "co_000004",
+				"company:day:3:decay": "co_000005",
+				"company:day:4:decay": "co_000006",
+				"company:day:5:decay": "co_000007",
+				"company:day:6:decay": "co_000008",
+				"company:day:7:decay": "co_000009",
+				"company:day:8:decay": "co_000010"
+			},
+			"utilization": 32,
+			"withdrawals": 0
+		},
+		"crew": {
+			"gone_today": [],
+			"last_processed_day": 9,
+			"members": []
+		},
+		"day_start": {
+			"calendar_shown_day": 1
+		},
+		"equipment": {
+			"levels": {
+				"camera": 1
+			}
+		},
+		"events": {
+			"pending": [
+				"underworld_intro@2",
+				"trade_inspection@8"
+			],
+			"resolved": {
+				"first_brand_request": "accept"
+			},
+			"seed": 12345,
+			"triggered": [
+				"first_brand_request",
+				"underworld_intro@2",
+				"trade_inspection@8"
+			]
+		},
+		"ledger": {
+			"entries": [
+				{
+					"account": "private",
+					"amount_cents": 2500,
+					"category": "creator",
+					"description": "Livestream",
+					"effective_minutes": 500,
+					"id": "tx_000001",
+					"reference": "livestream",
+					"source": "content",
+					"time_minutes": 500
+				},
+				{
+					"account": "private",
+					"amount_cents": -12000,
+					"category": "equipment",
+					"description": "Kamera: Webcam HD",
+					"effective_minutes": 620,
+					"id": "tx_000002",
+					"reference": "camera:1",
+					"source": "equipment",
+					"time_minutes": 620
+				},
+				{
+					"account": "private",
+					"amount_cents": -15000,
+					"category": "company",
+					"description": "Gründung: Merch-Label",
+					"effective_minutes": 635,
+					"id": "tx_000003",
+					"reference": "merch_label",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "private",
+					"amount_cents": -20000,
+					"category": "transfer",
+					"description": "Einlage bei Gründung",
+					"effective_minutes": 635,
+					"id": "tx_000004",
+					"reference": "company:deposit:1",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "company",
+					"amount_cents": 20000,
+					"category": "transfer",
+					"description": "Einlage bei Gründung",
+					"effective_minutes": 635,
+					"id": "tx_000005",
+					"reference": "company:deposit:1",
+					"source": "company",
+					"time_minutes": 635
+				},
+				{
+					"account": "private",
+					"amount_cents": 3000,
+					"category": "creator",
+					"description": "Anfrage einer kleinen Marke: Zusagen",
+					"effective_minutes": 1200,
+					"id": "tx_000006",
+					"reference": "first_brand_request",
+					"source": "event",
+					"time_minutes": 1200
+				},
+				{
+					"account": "company",
+					"amount_cents": 1794,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 1",
+					"effective_minutes": 1439,
+					"id": "tx_000007",
+					"reference": "day:1",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 1",
+					"effective_minutes": 1439,
+					"id": "tx_000008",
+					"reference": "day:1",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": 1698,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 2",
+					"effective_minutes": 2879,
+					"id": "tx_000009",
+					"reference": "day:2",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 2",
+					"effective_minutes": 2879,
+					"id": "tx_000010",
+					"reference": "day:2",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": 1602,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 3",
+					"effective_minutes": 4319,
+					"id": "tx_000011",
+					"reference": "day:3",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 3",
+					"effective_minutes": 4319,
+					"id": "tx_000012",
+					"reference": "day:3",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": 1506,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 4",
+					"effective_minutes": 5759,
+					"id": "tx_000013",
+					"reference": "day:4",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 4",
+					"effective_minutes": 5759,
+					"id": "tx_000014",
+					"reference": "day:4",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": 1410,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 5",
+					"effective_minutes": 7199,
+					"id": "tx_000015",
+					"reference": "day:5",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 5",
+					"effective_minutes": 7199,
+					"id": "tx_000016",
+					"reference": "day:5",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": 1314,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 6",
+					"effective_minutes": 8639,
+					"id": "tx_000017",
+					"reference": "day:6",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 6",
+					"effective_minutes": 8639,
+					"id": "tx_000018",
+					"reference": "day:6",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": 1217,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 7",
+					"effective_minutes": 10079,
+					"id": "tx_000019",
+					"reference": "day:7",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 7",
+					"effective_minutes": 10079,
+					"id": "tx_000020",
+					"reference": "day:7",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "private",
+					"amount_cents": -8000,
+					"category": "rent",
+					"description": "Miete Wohnung (Woche 2)",
+					"effective_minutes": 10080,
+					"id": "tx_000021",
+					"reference": "rent_home@8",
+					"source": "obligation",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": 1121,
+					"category": "sales",
+					"description": "Tagesumsatz Tag 8",
+					"effective_minutes": 11519,
+					"id": "tx_000022",
+					"reference": "day:8",
+					"source": "company",
+					"time_minutes": 12000
+				},
+				{
+					"account": "company",
+					"amount_cents": -2000,
+					"category": "fixed_costs",
+					"description": "Fixkosten Tag 8",
+					"effective_minutes": 11519,
+					"id": "tx_000023",
+					"reference": "day:8",
+					"source": "company",
+					"time_minutes": 12000
+				}
+			],
+			"next_number": 24,
+			"opening_balances": {
+				"black": 0,
+				"company": 0,
+				"private": 50000
+			},
+			"used_keys": {
+				"company:day:1:costs": "tx_000008",
+				"company:day:1:revenue": "tx_000007",
+				"company:day:2:costs": "tx_000010",
+				"company:day:2:revenue": "tx_000009",
+				"company:day:3:costs": "tx_000012",
+				"company:day:3:revenue": "tx_000011",
+				"company:day:4:costs": "tx_000014",
+				"company:day:4:revenue": "tx_000013",
+				"company:day:5:costs": "tx_000016",
+				"company:day:5:revenue": "tx_000015",
+				"company:day:6:costs": "tx_000018",
+				"company:day:6:revenue": "tx_000017",
+				"company:day:7:costs": "tx_000020",
+				"company:day:7:revenue": "tx_000019",
+				"company:day:8:costs": "tx_000023",
+				"company:day:8:revenue": "tx_000022",
+				"company:deposit:1|in": "tx_000005",
+				"company:deposit:1|out": "tx_000004",
+				"company:found:fee": "tx_000003",
+				"content:livestream:500": "tx_000001",
+				"equipment:camera:1": "tx_000002",
+				"event:first_brand_request": "tx_000006",
+				"obligation:rent_home@8": "tx_000021"
+			}
+		},
+		"location": {
+			"current": "office"
+		},
+		"missions": {
+			"active": [],
+			"completed": {},
+			"unseen": []
+		},
+		"obligations": {
+			"instances": [
+				{
+					"account": "private",
+					"amount_cents": 8000,
+					"category": "rent",
+					"due_minutes": 10080,
+					"fee_cents": 0,
+					"id": "rent_home@8",
+					"label": "Miete Wohnung (Woche 2)",
+					"obligation": "rent_home",
+					"paid_minutes": 12000,
+					"reminded": false,
+					"status": "paid"
+				},
+				{
+					"account": "private",
+					"amount_cents": 4000,
+					"category": "rent",
+					"due_minutes": 10080,
+					"fee_cents": 0,
+					"id": "rent_studio@8",
+					"label": "Miete Studio (Woche 2)",
+					"obligation": "rent_studio",
+					"paid_minutes": -1,
+					"reminded": false,
+					"status": "open"
+				},
+				{
+					"account": "company",
+					"amount_cents": 0,
+					"category": "levy",
+					"due_minutes": 10080,
+					"fee_cents": 0,
+					"id": "city_levy@8",
+					"label": "Stadtabgabe (für Woche 1)",
+					"obligation": "city_levy",
+					"paid_minutes": -1,
+					"reminded": false,
+					"status": "waived"
+				}
+			],
+			"last_processed_day": 9
+		},
+		"organisation": {
+			"founded": false,
+			"heat": 0,
+			"heat_raised_day": 0,
+			"intro_state": "offered",
+			"last_processed_day": 9,
+			"name": "",
+			"next_offer_day": 2,
+			"respect": 0,
+			"stability": 50
+		},
+		"reminders": {
+			"reminded": [],
+			"reminded_until_minutes": 0
+		},
+		"sales": {
+			"sold_units": 0
+		},
+		"sites": {
+			"last_processed_day": 9,
+			"owned": {}
+		},
+		"stats": {
+			"energy": 55,
+			"mood": 42
+		},
+		"supply": {
+			"delivered_before_trim": {},
+			"last_pressure_day": 0,
+			"last_processed_day": 9,
+			"next_number": 1,
+			"orders": [],
+			"stock": {}
+		},
+		"time": {
+			"minutes": 12000
+		},
+		"tutorials": {
+			"fired": [
+				"first_event",
+				"first_obligation_due",
+				"first_settlement"
+			],
+			"seen": [],
+			"seen_triggers": []
+		}
+	},
+	"meta": {
+		"app_version": "0.7.0",
+		"clock": "08:00",
+		"data_id": "b1c45458f0fb17ae47bd2180df9af2d3",
+		"day_label": "Tag 9 · Di",
+		"game_minutes": 12000,
+		"private_balance_cents": 500,
+		"saved_at_unix": 1792738239
+	},
+	"version": 25
+}

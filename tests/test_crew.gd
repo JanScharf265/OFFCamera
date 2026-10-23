@@ -53,12 +53,20 @@ func test_real_crew_data_loads() -> void:
 
 func test_bad_crew_data_is_rejected() -> void:
 	var good := {"unlocked_by_mission": "first_deal_sale", "max_members": 1, "applicants_per_day": 1,
-			"first_names": ["A"], "last_initials": ["B."], "roles": [{"id": "r", "display_name": "R",
-			"description": "D.", "wage_min_cents": 1, "wage_max_cents": 2, "order": 1}]}
+			"first_names": ["A"], "last_initials": ["B."],
+			"dealing": {"role": "r", "base_units": 1, "skill_per_extra_unit": 1, "skim_percent_per_10_greed": 0,
+			"heat_skill_percent": 0, "loyalty_paid": 0, "loyalty_unpaid": 0},
+			"promotion": {"max_rank": 1, "min_days": 0, "cost_wage_days": 0, "skill_bonus": 0, "loyalty_bonus": 0,
+			"wage_percent": 100}, "roles": [{"id": "r", "display_name": "R",
+			"description": "D.", "wage_min_cents": 1, "wage_max_cents": 2, "order": 1, "offered": true}]}
 	var catalog := CrewSystemScript.Catalog.new()
 	assert_true(catalog.load_data(good), "; ".join(catalog.errors))
 	for change in [{"max_members": 0}, {"first_names": []}, {"roles": []}, {"extra": 1}, {"last_initials": [5]},
 			{"roles": [{"id": "r", "display_name": "R", "description": "D.", "wage_min_cents": 5, "wage_max_cents": 2,
+			"order": 1, "offered": true}]},
+			{"roles": [{"id": "r", "display_name": "R", "description": "D.", "wage_min_cents": 1, "wage_max_cents": 2,
+			"order": 1, "offered": false}]},
+			{"roles": [{"id": "r", "display_name": "R", "description": "D.", "wage_min_cents": 1, "wage_max_cents": 2,
 			"order": 1}]}]:
 		var bad := good.duplicate(true)
 		bad.merge(change, true)
@@ -94,6 +102,17 @@ func test_applicants_are_deterministic_and_change_daily() -> void:
 	assert_true(game.crew.get_applicants() != today, "neuer Tag, neue Bewerber")
 
 
+## GD nach U.10: vorerst nur Dealer als Bewerber; Läufer, Fahrer, Schutz bleiben in den Daten, kommen aber nicht.
+func test_only_dealers_are_offered() -> void:
+	var game := _ready_game()
+	assert_eq(game.crew.get_catalog().get_offered_roles().map(func(role) -> String: return role.id), ["dealer"])
+	assert_eq(game.crew.get_catalog().has_role("guard"), true, "Rolle bleibt in den Daten")
+	for i in 30:
+		for applicant in game.crew.get_applicants():
+			assert_eq(applicant["role"], "dealer", "Tag %d" % game.time.get_day())
+		game.time.advance(TimeSystemScript.MINUTES_PER_DAY)
+
+
 func test_hire_and_fire() -> void:
 	var game := _ready_game()
 	var applicant: Dictionary = game.crew.get_applicants()[0]
@@ -114,7 +133,7 @@ func test_crew_limit() -> void:
 	var data := game.crew.to_dict()
 	for i in 6:
 		data["members"].append({"id": "m%d" % i, "name": "N", "role": "runner", "skill": 50, "loyalty": 50, "greed": 50,
-				"wage_cents": 100, "hired_day": 1})
+				"wage_cents": 100, "hired_day": 1, "rank": 1})
 	assert_eq(game.crew.restore(data), "")
 	assert_eq(game.crew.check_hire(game.crew.get_applicants()[0]["id"]), "Crew ist voll (6).")
 
@@ -123,6 +142,9 @@ func test_wages_paid_at_day_change() -> void:
 	var game := _ready_game()
 	var applicant: Dictionary = game.crew.get_applicants()[0]
 	game.crew.hire(applicant["id"])
+	var stock := game.supply.to_dict()
+	stock["stock"] = {}
+	game.supply.restore(stock)  # ohne Ware keine Abrechnung (U.11) – nur der Lohn
 	var black := game.ledger.get_balance(LedgerSystemScript.BLACK)
 	game.time.advance(TimeSystemScript.at(2, 10) - game.time.get_minutes())
 	var entries := game.ledger.get_entries_by_category(CrewSystemScript.CATEGORY)
@@ -136,7 +158,7 @@ func test_unpaid_wages_become_obligation() -> void:
 	var game := _ready_game()
 	var data := game.crew.to_dict()
 	data["members"].append({"id": "m", "name": "N", "role": "guard", "skill": 50, "loyalty": 50, "greed": 50,
-			"wage_cents": 10000000, "hired_day": 1})
+			"wage_cents": 10000000, "hired_day": 1, "rank": 1})
 	assert_eq(game.crew.restore(data), "")
 	game.time.advance(TimeSystemScript.at(2, 10) - game.time.get_minutes())
 	assert_eq(game.ledger.get_entries_by_category(CrewSystemScript.CATEGORY).size(), 0)

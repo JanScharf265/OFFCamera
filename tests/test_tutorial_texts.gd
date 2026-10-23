@@ -160,6 +160,25 @@ func _scenario(only: String, trigger: String, device: String = "iPhone 15/16 Pro
 			app.game.missions.update_availability()
 			_screen(app).call("_refresh")
 			_screen(app).call("open_crew")
+		"first_dealer_in_crew", "first_promotion_possible":
+			assert_eq(app.game.organisation.found("Los Lobos"), "")
+			var data: Dictionary = app.game.missions.to_dict()
+			for id in ["first_deal_meeting", "first_deal_goods", "first_deal_stash", "first_deal_sale"]:
+				data["completed"][id] = 0
+			data["active"] = []
+			assert_eq(app.game.missions.restore(data), "")
+			app.game.missions.update_availability()
+			var crew: Dictionary = app.game.crew.to_dict()
+			crew["members"].append({"id": "d1", "name": "Chema L.", "role": "dealer", "skill": 40, "loyalty": 50,
+					"greed": 50, "wage_cents": 4000, "hired_day": 0, "rank": 1})
+			crew["last_processed_day"] = 99
+			assert_eq(app.game.crew.restore(crew), "")
+			if trigger == "first_promotion_possible":
+				app.game.ledger.post(100000, "test", "Start", "test", "t", "", false, "black")
+				_jump(app, TimeSystemScript.at(3, 10))
+				_resolve_events(app)
+			_screen(app).call("_refresh")
+			_screen(app).call("open_crew")
 		"first_obligation_due":
 			_jump(app, TimeSystemScript.at(8, 9))
 			_resolve_events(app)
@@ -267,7 +286,7 @@ func test_data_rules() -> void:
 	for mechanic in ["map", "map_navigation", "location_open", "travel", "activities", "player_stats", "calendar",
 			"reminder", "conflict", "wait", "trip", "events", "saving", "channel", "content_quality", "equipment",
 			"effect_symbols", "company_found", "company_money", "branch", "settlement", "obligations", "ledger",
-			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew"]:
+			"black_money", "heat", "organisation", "missions", "products", "supplier", "credit", "sites", "selling", "crew", "dealer_sales", "promotion"]:
 		assert_true(mechanics.has(mechanic), "Grundlagen-Mechanik '%s' ohne Tutorial" % mechanic)
 
 
@@ -350,7 +369,8 @@ func test_new_triggers_are_reported() -> void:
 			["first_black_money", "tut_black_money"], ["first_organisation_founded", "tut_heat"],
 			["first_mission_available", "tut_missions"], ["first_supplier_open", "tut_supplier"],
 			["first_credit_offered", "tut_credit"], ["first_site_offered", "tut_sites"],
-			["first_sale_offered", "tut_selling"], ["first_crew_open", "tut_crew"]]:
+			["first_sale_offered", "tut_selling"], ["first_crew_open", "tut_crew"],
+			["first_dealer_in_crew", "tut_dealer_sales"], ["first_promotion_possible", "tut_promotion"]]:
 		var app := _scenario(pair[1], pair[0])
 		assert_eq(app.game.tutorials.was_reported(pair[0]), true, pair[0])
 		app.free()

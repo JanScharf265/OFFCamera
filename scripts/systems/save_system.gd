@@ -22,7 +22,7 @@ const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
 const ConsistencyCheckScript := preload("res://scripts/core/consistency_check.gd")
 const ReminderSystemScript := preload("res://scripts/systems/reminder_system.gd")
 
-const SAVE_VERSION := 24
+const SAVE_VERSION := 25
 ## Seed für Spielstände, die vor den Zufallsereignissen entstanden sind.
 const MIGRATED_SEED := 1
 const DEFAULT_PATH := "user://savegame.json"
@@ -285,6 +285,7 @@ static func _run_migration(step: int, game: Dictionary) -> String:
 		21: return _migrate_21_to_22(game)
 		22: return _migrate_22_to_23(game)
 		23: return _migrate_23_to_24(game)
+		24: return _migrate_24_to_25(game)
 	return "Kein Migrationsschritt von Version %d." % step
 
 
@@ -507,6 +508,17 @@ static func _migrate_23_to_24(game: Dictionary) -> String:
 	if not DataReaderScript.is_whole_number(minutes) or int(minutes) < 0:
 		return "Zeit fehlt."
 	game["crew"] = {"members": [], "gone_today": [], "last_processed_day": TimeSystemScript.day_of(int(minutes))}
+	return ""
+
+
+## 24 → 25 (U.11): Crew-Mitglieder bekommen einen Rang (1).
+static func _migrate_24_to_25(game: Dictionary) -> String:
+	var crew: Variant = game.get("crew")
+	if typeof(crew) != TYPE_DICTIONARY or typeof(crew.get("members")) != TYPE_ARRAY:
+		return "Crew fehlt."
+	for member in crew["members"]:
+		if typeof(member) == TYPE_DICTIONARY:
+			member["rank"] = 1
 	return ""
 
 

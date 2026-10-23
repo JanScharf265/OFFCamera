@@ -842,3 +842,32 @@ ohne Kosten; der erste Lohn fällt am nächsten Morgen an. Feuern hat noch keine
 Löhne als eine Buchung je Tag (übersichtlicher als eine je Person), bezahlt wie die Versteck-Miete. Höchstens 6
 Leute. Fenster „Crew“ über einen Button im Organisations-Fenster; ein eigener Seitenbutton folgt mit U.25.
 Namen: erfundene Vornamen mit Initiale. Vorläufige Werte, Bestätigung durch den Game Director offen.
+
+## 080 – Antworten des Game Directors nach U.10 (23.10.2026)
+- U.6: Bezahlung erst aus Schwarzgeld, dann vom Privatkonto – bleibt so.
+- U.8: Werte des Verstecks (300 €, 20 €/Tag, Platz 20/120) – bleiben so.
+- U.10: Vorerst werden nur Dealer als Bewerber angeboten. Läufer, Fahrer und Schutz bleiben in `crew.json`
+  (Feld `offered` = false) und kommen erst, wenn sie eine echte Wirkung haben. Test: `test_only_dealers_are_offered`.
+- U.10: Löhne werden mit U.11 abgestimmt, sobald Dealer Geld bringen; Folgen beim Feuern erst mit U.15.
+- Korrektur U.7: Die Screenshots 3 (Ereignis „Besuch“) und 4 (Schulden als Frist) zeigten das Falsche. Ursache war
+  das Screenshot-Skript: Der Kalender legte sich nach dem Zeitsprung über das Ereignisfenster, das Skript schloss ihn
+  und damit das Ereignis. Neu aufgenommen, geprüft und in `~/Desktop/u7/` ersetzt; das Spiel selbst war korrekt.
+- U.12 wird die „Unterwelt-Ansicht“ (Variante B): gleiche Stadt und Karte, zwei Ansichten mit einem Schalter
+  „Tag / Unterwelt“ auf der Karte (Safe Area, rechts, ≥ 84 px), erst nach El Capitán. Unterwelt-Ansicht dunkler,
+  nächtlich, Neon-Akzente im Rot/Magenta der App; Unterwelt-Orte hervorgehoben, Streamer-Orte abgedunkelt, aber
+  antippbar; Gebiete aus U.12 nur in dieser Ansicht als farbige Fläche. Nur Optik: kein Spielzeit-Verbrauch, keine
+  zweite Uhr, keine Spielregel in der UI. Gewählte Ansicht wird gespeichert. Tutorial „Zwei Gesichter der Stadt“ mit
+  eigener Mechanik-ID. Vorher Ist-Zustand prüfen; bei großem Umbau anhalten und Optionen vorlegen.
+
+## 081 – Dealer-Abrechnung und Befördern (U.11)
+Dealer verkaufen ohne eigene Aktion des Spielers: Beim Tageswechsel wird der Vortag abgerechnet (Schritt im DayCycle
+im CrewSystem, vor den Löhnen, damit die Einnahme die Löhne decken kann). Einheiten je Dealer = 2 + Können/20 (+0/+1
+je Tag aus dem Seed), begrenzt durch den Bestand; verkauft wird zum Verkaufspreis des Produkts (wie an der Kaimauer),
+die Gier zweigt Gier/5 % ab (20 → 4 %, 80 → 16 %), Können senkt die Hitze (Können 80 → 60 %). Eine Buchung je Tag.
+Wer am Tag X eingestellt wird, arbeitet ab Tag X und wird am Morgen X+1 abgerechnet (wie der Lohn).
+Loyalität: +1 je bezahltem Lohntag, −10 bei unbezahltem (Folgen niedriger Loyalität mit U.15).
+Befördern: frühestens nach 3 Tagen, kostet 5 Tageslöhne (Schwarzgeld, sonst privat), Rang höchstens 3; +10 Können,
++10 Loyalität, Lohn +25 %. Löhne (Dealer 30–70 €/Tag) bleiben vorerst: Ein Dealer mit Können 50 bringt bei Gras
+etwa 4–5 Einheiten × 70 € abzüglich Abzweigung ≈ 300 € am Tag gegen ~50 € Lohn – plus Einkauf (40 €/Einheit).
+Bekannte Folge: Solange Dealer verkaufen, steigt die Hitze täglich, also sinkt sie an keinem Tag (ruhiger Tag = ohne
+Hitze-Anstieg). Vorläufige Werte, Bestätigung durch den Game Director offen.

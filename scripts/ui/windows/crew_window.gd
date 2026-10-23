@@ -1,7 +1,8 @@
 extends VBoxContainer
 
 ## Fenster „Crew“ (U.10): eigene Leute (Rolle, Können, Loyalität, Gier, Lohn, „Feuern“) und die Bewerber des Tages
-## („Einstellen“). Regeln und Sperrgründe liefert das CrewSystem; hier wird nur angezeigt.
+## („Einstellen“). U.11: Dealer zeigen, was sie am Tag verkaufen, abzweigen und an Hitze bringen; Mitglieder mit Rang
+## und „Befördern“. Regeln, Werte und Sperrgründe liefert das CrewSystem; hier wird nur angezeigt.
 
 const UiStyle := preload("res://scripts/ui/ui_style.gd")
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
@@ -66,14 +67,25 @@ func _card(person: Dictionary, is_member: bool) -> Control:
 	left.add_theme_constant_override("separation", 4)
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(left)
-	left.add_child(UiStyle.label("%s · %s" % [person["name"], role.display_name if role != null else person["role"]],
-			UiStyle.FONT_SIZE, UiStyle.TEXT))
+	var title_text := "%s · %s" % [person["name"], role.display_name if role != null else person["role"]]
+	if is_member:
+		title_text += " · Rang %d" % int(person.get("rank", 1))
+	left.add_child(UiStyle.label(title_text, UiStyle.FONT_SIZE, UiStyle.TEXT))
 	var parts := PackedStringArray()
 	for key in CrewSystemScript.VALUE_KEYS:
 		parts.append("%s %d" % [CrewSystemScript.VALUE_LABELS[key], person[key]])
 	var values := UiStyle.label(" · ".join(parts), UiStyle.MIN_READ_FONT_SIZE, UiStyle.TEXT)
 	values.name = "CrewValues_%s" % person["id"]
 	left.add_child(values)
+	if _game.crew.is_dealer(person):
+		var units: int = _game.crew.dealer_units(person)
+		var info := UiStyle.wrapping_label("Verkauft %d–%d Einheiten am Tag · zweigt %d %% ab · Hitze %d %%" % [units,
+				units + 1, _game.crew.skim_percent(person), _game.crew.heat_percent(person)], UiStyle.MIN_READ_FONT_SIZE,
+				UiStyle.ACCENT)
+		info.name = "CrewDealerInfo_%s" % person["id"]
+		left.add_child(info)
+		if is_member:
+			_game.tutorials.report("first_dealer_in_crew")
 	if role != null and not is_member:
 		left.add_child(UiStyle.wrapping_label(role.description, UiStyle.MIN_READ_FONT_SIZE, UiStyle.MUTED))
 	var right := VBoxContainer.new()
@@ -103,4 +115,21 @@ func _card(person: Dictionary, is_member: bool) -> Control:
 	button.custom_minimum_size.y = UiStyle.TOUCH_SIZE
 	button.add_theme_font_size_override("font_size", UiStyle.SMALL_FONT_SIZE)
 	right.add_child(button)
+	if is_member:
+		right.add_child(_promote_button(person))
 	return card
+
+
+## U.11: „Befördern · 195,00 €“ – gesperrt mit Grund (z. B. „Erst nach 3 Tagen (noch 2).“).
+func _promote_button(member: Dictionary) -> Button:
+	var reason: String = _game.crew.check_promote(member["id"])
+	var button: Button = _screen.scroll_button("Befördern · %s" % LedgerSystemScript.format_cents(
+			_game.crew.promotion_cost(member)) if reason.is_empty() else reason, "CrewPromoteButton_%s" % member["id"])
+	button.pressed.connect(_screen.on_crew_promote.bind(member["id"]))
+	button.disabled = not reason.is_empty()
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.custom_minimum_size.y = UiStyle.TOUCH_SIZE
+	button.add_theme_font_size_override("font_size", UiStyle.MIN_READ_FONT_SIZE)
+	if reason.is_empty():
+		_game.tutorials.report("first_promotion_possible")
+	return button

@@ -43,6 +43,8 @@ const NAMES := {
 	"sites": "Standorte der Unterwelt (Versteck, Kosten, Platz)",
 	"selling": "Verkaufen (Zeit, Schwarzgeld, Hitze)",
 	"crew": "Crew (Rollen, Bewerber, Löhne)",
+	"dealer_sales": "Dealer verkaufen täglich (Unterwelt-Abrechnung, Können, Gier, Loyalität)",
+	"promotion": "Crew befördern (Rang, Kosten, Lohn)",
 }
 
 

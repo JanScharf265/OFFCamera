@@ -107,7 +107,7 @@ func _init(game_data: GameDataScript, p_seed: int = -1) -> void:
 	missions.set_sites(sites)
 	sales = SaleSystemScript.new(time, ledger, locations, data.sale_spots, supply, organisation, missions.is_completed)
 	missions.set_sales(sales)
-	crew = CrewSystemScript.new(time, ledger, data.crew, organisation, obligations, missions.is_completed, events.get_seed)
+	crew = CrewSystemScript.new(time, ledger, data.crew, organisation, supply, obligations, missions.is_completed, events.get_seed)
 	missions.set_crew(crew)
 	# Feste Reihenfolge am Tageswechsel: Tagesabschluss → Hitze (U.2) → Lieferungen (U.6) → Standortkosten (U.8)
 	# → Fristen → Ereignisse.

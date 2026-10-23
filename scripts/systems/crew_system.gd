@@ -3,8 +3,11 @@ extends RefCounted
 ## Crew 1 (U.10): Rollen als Daten (data/underworld/crew.json). Jeden Tag gibt es einige Bewerber – bestimmt aus
 ## Spiel-Seed und Tag, also nach dem Laden gleich. Einstellen und Feuern sofort (ein Anruf, keine Spielzeit). Jedes
 ## Mitglied hat Rolle, Können, Loyalität, Gier (0–100) und einen Tageslohn; die Löhne zahlt der DayCycle beim
-## Tageswechsel als eine Buchung (Schwarzgeld, ersatzweise Privatkonto, sonst Frist). Was die Rollen tun, kommt mit
-## U.11 ff. Reine Spielwerte.
+## Tageswechsel als eine Buchung (Schwarzgeld, ersatzweise Privatkonto, sonst Frist).
+## U.11: Dealer verkaufen beim Tageswechsel für den vergangenen Tag aus dem Bestand (Unterwelt-Abrechnung, eine
+## Buchung aufs Schwarzgeld): Einheiten wachsen mit dem Können, Gier zweigt einen Teil der Einnahme ab, Können senkt
+## die Hitze. Bezahlte Löhne heben die Loyalität, unbezahlte senken sie. Befördern (Rang 1–3) kostet einmalig und
+## hebt Können, Loyalität und Lohn. Reine Spielwerte.
 
 const LedgerSystemScript := preload("res://scripts/systems/ledger_system.gd")
 const TimeSystemScript := preload("res://scripts/systems/time_system.gd")
@@ -12,12 +15,20 @@ const DataReaderScript := preload("res://scripts/systems/data_reader.gd")
 const EventSystemScript := preload("res://scripts/systems/event_system.gd")
 
 signal hired(member_id: String, role_id: String)
+## U.11: Unterwelt-Abrechnung (Einheiten der Dealer am vergangenen Tag)
+signal dealers_sold(units: int)
 
 const DEFAULT_PATH := "res://data/underworld/crew.json"
 const CATEGORY := "underworld_wages"
 const SOURCE := "crew"
-const FIELDS := ["unlocked_by_mission", "max_members", "applicants_per_day", "first_names", "last_initials", "roles"]
-const ROLE_FIELDS := ["id", "display_name", "description", "wage_min_cents", "wage_max_cents", "order"]
+const FIELDS := ["unlocked_by_mission", "max_members", "applicants_per_day", "dealing", "promotion", "first_names",
+		"last_initials", "roles"]
+## U.11: Regeln für den täglichen Straßenverkauf und das Befördern (alles ganze Zahlen ≥ 0, `role` eine Rollen-ID).
+const DEALING_FIELDS := ["base_units", "skill_per_extra_unit", "skim_percent_per_10_greed", "heat_skill_percent",
+		"loyalty_paid", "loyalty_unpaid"]
+const PROMOTION_FIELDS := ["max_rank", "min_days", "cost_wage_days", "skill_bonus", "loyalty_bonus", "wage_percent"]
+const SALES_CATEGORY := "underworld_street_sales"
+const ROLE_FIELDS := ["id", "display_name", "description", "wage_min_cents", "wage_max_cents", "order", "offered"]
 const VALUE_KEYS := ["skill", "loyalty", "greed"]
 const VALUE_LABELS := {"skill": "Können", "loyalty": "Loyalität", "greed": "Gier"}
 ## Bewerberwerte liegen in diesem Bereich (keine Extreme am Anfang).
@@ -33,6 +44,8 @@ class Role extends RefCounted:
 	var wage_min_cents: int
 	var wage_max_cents: int
 	var order: int
+	## Wird als Bewerber angeboten (GD nach U.10: nur Rollen mit echter Wirkung)
+	var offered: bool
 
 
 ## Katalog: Regeln und Rollen. Alles-oder-nichts.
@@ -43,6 +56,9 @@ class Catalog extends RefCounted:
 	var applicants_per_day := 0
 	var first_names: PackedStringArray = []
 	var last_initials: PackedStringArray = []
+	## U.11: {role, base_units, …} und {max_rank, …}
+	var dealing := {}
+	var promotion := {}
 	var _roles: Array = []
 
 	func load_file(path: String = "res://data/underworld/crew.json") -> bool:
@@ -69,6 +85,11 @@ class Catalog extends RefCounted:
 		var per_day := reader.int_field(data, "applicants_per_day", where, true)
 		if max_count < 1 or per_day < 1:
 			reader.errors.append("%s: max_members und applicants_per_day müssen ≥ 1 sein." % where)
+		var dealing_rules := _rules(data, "dealing", DEALING_FIELDS, ["role"], reader)
+		var promotion_rules := _rules(data, "promotion", PROMOTION_FIELDS, [], reader)
+		if dealing_rules.get("skill_per_extra_unit", 1) < 1 or promotion_rules.get("max_rank", 1) < 1 \
+				or promotion_rules.get("wage_percent", 100) < 100:
+			reader.errors.append("Crew: skill_per_extra_unit und max_rank ≥ 1, wage_percent ≥ 100.")
 		var names := _names(data, "first_names", reader)
 		var initials := _names(data, "last_initials", reader)
 		var roles: Array = []
@@ -98,6 +119,10 @@ class Catalog extends RefCounted:
 				role.wage_min_cents = reader.int_field(entry, "wage_min_cents", role_where, true)
 				role.wage_max_cents = reader.int_field(entry, "wage_max_cents", role_where, true)
 				role.order = reader.int_field(entry, "order", role_where, true)
+				if typeof(entry.get("offered")) != TYPE_BOOL:
+					reader.errors.append("%s: 'offered' muss true oder false sein." % role_where)
+				else:
+					role.offered = entry["offered"]
 				if role.wage_min_cents < 0 or role.wage_max_cents < role.wage_min_cents:
 					reader.errors.append("%s: Lohnspanne ungültig." % role_where)
 				if seen.has(id):
@@ -105,6 +130,10 @@ class Catalog extends RefCounted:
 				if reader.errors.size() == error_count:
 					seen[id] = true
 					roles.append(role)
+		if reader.errors.is_empty() and not roles.any(func(role) -> bool: return role.id == dealing_rules["role"]):
+			reader.errors.append("Crew: 'dealing.role' ist keine bekannte Rolle.")
+		if reader.errors.is_empty() and not roles.any(func(role) -> bool: return role.offered):
+			reader.errors.append("Crew: mindestens eine Rolle muss angeboten werden ('offered').")
 		errors = reader.errors
 		if not errors.is_empty():
 			return false
@@ -114,8 +143,31 @@ class Catalog extends RefCounted:
 		applicants_per_day = per_day
 		first_names = names
 		last_initials = initials
+		dealing = dealing_rules
+		promotion = promotion_rules
 		_roles = roles
 		return true
+
+	static func _rules(data: Dictionary, field: String, int_fields: Array, string_fields: Array, reader) -> Dictionary:
+		var raw: Variant = data.get(field)
+		if typeof(raw) != TYPE_DICTIONARY:
+			reader.errors.append("Crew: '%s' muss ein Objekt sein." % field)
+			return {}
+		var result := {}
+		for key in raw:
+			if String(key) not in int_fields + string_fields:
+				reader.errors.append("Crew: '%s' hat unbekanntes Feld '%s'." % [field, key])
+		for key in int_fields:
+			if not DataReaderScript.is_whole_number(raw.get(key)) or int(raw[key]) < 0:
+				reader.errors.append("Crew: '%s.%s' muss eine ganze Zahl ≥ 0 sein." % [field, key])
+			else:
+				result[key] = int(raw[key])
+		for key in string_fields:
+			if typeof(raw.get(key)) != TYPE_STRING or String(raw[key]).is_empty():
+				reader.errors.append("Crew: '%s.%s' fehlt." % [field, key])
+			else:
+				result[key] = raw[key]
+		return result
 
 	static func _names(data: Dictionary, field: String, reader) -> PackedStringArray:
 		var raw: Variant = data.get(field)
@@ -139,6 +191,10 @@ class Catalog extends RefCounted:
 				return role
 		return null
 
+	## Rollen, die als Bewerber kommen.
+	func get_offered_roles() -> Array:
+		return _roles.filter(func(role) -> bool: return role.offered)
+
 	func has_role(id: String) -> bool:
 		return get_role(id) != null
 
@@ -147,6 +203,7 @@ var _time
 var _ledger: LedgerSystemScript
 var _catalog: Catalog
 var _organisation
+var _supply
 var _obligations
 var _is_mission_completed: Callable
 var _get_seed: Callable
@@ -158,12 +215,13 @@ var _last_processed_day := 0
 var _notices := PackedStringArray()
 
 
-func _init(time, ledger: LedgerSystemScript, catalog: Catalog, organisation, obligations,
+func _init(time, ledger: LedgerSystemScript, catalog: Catalog, organisation, supply, obligations,
 		is_mission_completed: Callable, get_seed: Callable) -> void:
 	_time = time
 	_ledger = ledger
 	_catalog = catalog
 	_organisation = organisation
+	_supply = supply
 	_obligations = obligations
 	_is_mission_completed = is_mission_completed
 	_get_seed = get_seed
@@ -218,7 +276,7 @@ func get_applicants() -> Array:
 
 @warning_ignore("integer_division")
 func _applicant(day: int, slot: int) -> Dictionary:
-	var roles := _catalog.get_roles()
+	var roles := _catalog.get_offered_roles()
 	if roles.is_empty():
 		return {}
 	var base := "%d:crew:%d:%d" % [_get_seed.call(), day, slot]
@@ -264,6 +322,7 @@ func hire(applicant_id: String) -> String:
 		return reason
 	var member := _find_applicant(applicant_id)
 	member["hired_day"] = _time.get_day()
+	member["rank"] = 1
 	_members.append(member)
 	hired.emit(member["id"], member["role"])
 	return ""
@@ -293,24 +352,148 @@ func payment_account(cost_cents: int) -> String:
 			else LedgerSystemScript.PRIVATE
 
 
-## Vom DayCycle: Löhne für den neuen Tag – eine Buchung für alle.
+# --- U.11: Dealer und Befördern ---------------------------------------------------
+
+func is_dealer(member: Dictionary) -> bool:
+	return member.get("role", "") == _catalog.dealing.get("role", "")
+
+
+## Einheiten, die ein Dealer an einem Tag verkauft (ohne Bestandsgrenze); mit `day` je nach Tag +0 oder +1 (Seed).
+@warning_ignore("integer_division")
+func dealer_units(member: Dictionary, day: int = -1) -> int:
+	var rules: Dictionary = _catalog.dealing
+	var units: int = rules["base_units"] + int(member["skill"]) / rules["skill_per_extra_unit"]
+	if day >= 0:
+		units += _roll("%d:deal:%d:%s" % [_get_seed.call(), day, member["id"]], "extra") % 2
+	return units
+
+
+## Anteil der Einnahme, den der Dealer abzweigt (Prozent, aus der Gier).
+@warning_ignore("integer_division")
+func skim_percent(member: Dictionary) -> int:
+	return clampi(int(member["greed"]) * _catalog.dealing["skim_percent_per_10_greed"] / 10, 0, 100)
+
+
+## Hitze des Dealers in Prozent der Hitze je Einheit (Können senkt sie).
+@warning_ignore("integer_division")
+func heat_percent(member: Dictionary) -> int:
+	return clampi(100 - int(member["skill"]) * _catalog.dealing["heat_skill_percent"] / 100, 0, 100)
+
+
+## Einmalige Kosten fürs Befördern (Cent).
+func promotion_cost(member: Dictionary) -> int:
+	return int(member["wage_cents"]) * _catalog.promotion["cost_wage_days"]
+
+
+## "" wenn das Mitglied jetzt befördert werden kann, sonst ein Grund.
+func check_promote(member_id: String) -> String:
+	var member := get_member(member_id)
+	if member.is_empty():
+		return "Dieses Mitglied gibt es nicht."
+	var rules: Dictionary = _catalog.promotion
+	if int(member.get("rank", 1)) >= rules["max_rank"]:
+		return "Höchster Rang erreicht."
+	var days: int = _time.get_day() - int(member["hired_day"])
+	if days < rules["min_days"]:
+		return "Erst nach %d Tagen (noch %d)." % [rules["min_days"], rules["min_days"] - days]
+	var cost := promotion_cost(member)
+	if not _ledger.can_afford(cost, payment_account(cost)):
+		return "Nicht genug Geld (%s)." % LedgerSystemScript.format_cents(cost)
+	return ""
+
+
+## Befördert: Buchung (Schwarzgeld, sonst privat) → Rang, Können, Loyalität, Lohn. "" = befördert.
+@warning_ignore("integer_division")
+func promote(member_id: String) -> String:
+	var reason := check_promote(member_id)
+	if not reason.is_empty():
+		return reason
+	var rules: Dictionary = _catalog.promotion
+	for member in _members:
+		if member["id"] != member_id:
+			continue
+		var cost := promotion_cost(member)
+		var rank := int(member.get("rank", 1)) + 1
+		var entry := _ledger.post(-cost, CATEGORY, "Beförderung: %s (Rang %d)" % [member["name"], rank], SOURCE,
+				member_id, "crew:promote:%s:%d" % [member_id, rank], false, payment_account(cost))
+		if entry == null:
+			return "Die Buchung ist fehlgeschlagen."
+		member["rank"] = rank
+		member["skill"] = mini(100, int(member["skill"]) + rules["skill_bonus"])
+		member["loyalty"] = mini(100, int(member["loyalty"]) + rules["loyalty_bonus"])
+		member["wage_cents"] = int(member["wage_cents"]) * rules["wage_percent"] / 100 / 100 * 100
+		return ""
+	return "Dieses Mitglied gibt es nicht."
+
+
+## Unterwelt-Abrechnung für den Vortag: Dealer (vor dem neuen Tag eingestellt) verkaufen aus dem Bestand.
+@warning_ignore("integer_division")
+func _settle_dealers(day: int) -> void:
+	var units_total := 0
+	var income := 0
+	var skimmed := 0
+	var heat := 0
+	var dealers := 0
+	for member in _members:
+		if not is_dealer(member) or int(member["hired_day"]) >= day:
+			continue
+		dealers += 1
+		var wanted := dealer_units(member, day)
+		for product in _supply.get_products().get_all():
+			if wanted <= 0:
+				break
+			var units := mini(wanted, _supply.get_stock(product.id))
+			if units <= 0 or not _supply.remove_stock(product.id, units):
+				continue
+			wanted -= units
+			units_total += units
+			var gross: int = product.sell_price_cents * units
+			var skim := gross * skim_percent(member) / 100
+			income += gross - skim
+			skimmed += skim
+			heat += product.heat_per_unit * units * heat_percent(member) / 100
+	if dealers == 0:
+		return
+	if units_total == 0:
+		_notices.append("Abrechnung: Deine Dealer hatten keine Ware.")
+		return
+	if income > 0:
+		_ledger.post(income, SALES_CATEGORY, "Abrechnung Straße (Tag %d, %d Einheiten)" % [day - 1, units_total], SOURCE,
+				"dealers", "crew:sales:day:%d" % day, false, LedgerSystemScript.BLACK, TimeSystemScript.at(day, 0))
+	if heat > 0:
+		_organisation.change({"heat": heat})
+	var text := "Abrechnung: Deine Dealer haben %d Einheiten verkauft (+%s Schwarzgeld, Hitze +%d)" % [units_total,
+			LedgerSystemScript.format_cents(income), heat]
+	if skimmed > 0:
+		text += " – abgezweigt: %s" % LedgerSystemScript.format_cents(skimmed)
+	_notices.append(text + ".")
+	dealers_sold.emit(units_total)
+
+
+## Vom DayCycle: erst die Abrechnung der Dealer (Vortag), dann die Löhne für den neuen Tag – je eine Buchung.
+## Bezahlte Löhne heben die Loyalität aller, unbezahlte senken sie.
 func on_day_changed(day: int) -> void:
 	if day <= _last_processed_day:
 		return
 	_last_processed_day = day
 	_gone_today.clear()
+	_settle_dealers(day)
 	var total := wages_per_day()
 	if total <= 0:
 		return
 	var account := payment_account(total)
 	var label := "Löhne Crew (Tag %d, %s)" % [day, "1 Person" if _members.size() == 1 else "%d Leute" % _members.size()]
-	if _ledger.can_afford(total, account):
+	var paid := _ledger.can_afford(total, account)
+	if paid:
 		_ledger.post(-total, CATEGORY, label, SOURCE, "wages", "crew:wages:day:%d" % day, false, account,
 				TimeSystemScript.at(day, 0))
 	elif _obligations != null:
 		_obligations.add_one_off("crew_wages@%d" % day, label, total, LedgerSystemScript.BLACK, CATEGORY, 2, 0,
 				TimeSystemScript.at(day, 0))
-		_notices.append("%s: Das Geld reicht nicht – offen unter „Fristen“." % label)
+		_notices.append("%s: Das Geld reicht nicht – offen unter „Fristen“. Die Loyalität sinkt." % label)
+	var delta: int = _catalog.dealing["loyalty_paid"] if paid else -_catalog.dealing["loyalty_unpaid"]
+	for member in _members:
+		member["loyalty"] = clampi(int(member["loyalty"]) + delta, 0, 100)
 
 
 func to_dict() -> Dictionary:
@@ -332,9 +515,10 @@ func restore(data: Dictionary) -> String:
 			if typeof(entry.get(key)) != TYPE_STRING or String(entry[key]).is_empty():
 				return "Crew: Mitglied ohne gültiges '%s'." % key
 		var member := {"id": entry["id"], "name": entry["name"], "role": entry["role"]}
-		for key in VALUE_KEYS + ["wage_cents", "hired_day"]:
+		for key in VALUE_KEYS + ["wage_cents", "hired_day", "rank"]:
 			var value: Variant = entry.get(key)
-			if not DataReaderScript.is_whole_number(value) or int(value) < 0 or (key in VALUE_KEYS and int(value) > 100):
+			if not DataReaderScript.is_whole_number(value) or int(value) < 0 or (key in VALUE_KEYS and int(value) > 100) \
+					or (key == "rank" and int(value) < 1):
 				return "Crew: Mitglied '%s' mit ungültigem '%s'." % [entry["id"], key]
 			member[key] = int(value)
 		if ids.has(member["id"]):

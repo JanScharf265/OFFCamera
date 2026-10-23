@@ -340,5 +340,25 @@
 		"ui_target": "CrewHireButton_*",
 		"order": 380,
 		"requires": []
+	},
+	{
+		"id": "tut_dealer_sales",
+		"mechanic": "dealer_sales",
+		"trigger": "first_dealer_in_crew",
+		"title": "Die Abrechnung",
+		"text": "Deine Dealer verkaufen jeden Tag aus deinem Bestand – abgerechnet am nächsten Morgen als Schwarzgeld. Wer mehr kann, verkauft mehr und fällt weniger auf. Wer gierig ist, zweigt etwas ab.",
+		"ui_target": "CrewDealerInfo_*",
+		"order": 390,
+		"requires": []
+	},
+	{
+		"id": "tut_promotion",
+		"mechanic": "promotion",
+		"trigger": "first_promotion_possible",
+		"title": "Befördern",
+		"text": "Wer sich bewährt hat, kann aufsteigen: Das kostet einmalig und mehr Lohn, bringt aber mehr Können und Loyalität. Loyalität steigt auch, wenn der Lohn pünktlich kommt – und sinkt, wenn nicht.",
+		"ui_target": "CrewPromoteButton_*",
+		"order": 400,
+		"requires": []
 	}
 ]

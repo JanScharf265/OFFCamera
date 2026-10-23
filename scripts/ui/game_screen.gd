@@ -600,6 +600,19 @@ func on_crew_hire(applicant_id: String) -> void:
 			LedgerSystemScript.format_cents(applicant.get("wage_cents", 0))])
 
 
+## Befördern (U.11) über das CrewSystem.
+func on_crew_promote(member_id: String) -> void:
+	if _was_scroll():
+		return
+	var member: Dictionary = _game.crew.get_member(member_id)
+	var cost: int = _game.crew.promotion_cost(member) if not member.is_empty() else 0
+	var reason: String = _game.crew.promote(member_id)
+	var after: Dictionary = _game.crew.get_member(member_id)
+	_after_action(reason, "Befördert: %s ist jetzt Rang %d (%s, Lohn %s/Tag)" % [member.get("name", member_id),
+			int(after.get("rank", 1)), ActivityText.signed_money(-cost),
+			LedgerSystemScript.format_cents(after.get("wage_cents", 0))])
+
+
 ## Feuern (U.10) über das CrewSystem.
 func on_crew_fire(member_id: String) -> void:
 	if _was_scroll():

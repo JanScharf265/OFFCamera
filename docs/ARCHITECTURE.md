@@ -188,6 +188,11 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
   `hire`/`fire` sofort (keine Spielzeit); Signal `hired` → Aufträge mit Ziel `crew_role`. DayCycle: … Standortkosten →
   Löhne → Fristen …: eine Buchung `underworld_wages` für alle (Schwarzgeld, sonst privat), sonst `add_one_off`.
   Fenster `CrewWindow` (Button „Crew (N)“ im Organisations-Fenster).
+  U.11: Rollen haben `offered` (nur angebotene kommen als Bewerber); Regeln `dealing` und `promotion` in `crew.json`.
+  `on_day_changed`: erst `_settle_dealers` (Dealer, vor dem Tag eingestellt, verkaufen `dealer_units` aus dem Bestand,
+  Produkte in Katalogreihenfolge → eine Buchung `underworld_street_sales` aufs Schwarzgeld, Gier zweigt
+  `skim_percent` ab, Hitze × `heat_percent` → `organisation.change`), dann Löhne, dann Loyalität (+/−).
+  `check_promote`/`promote`: Buchung, dann Rang/Können/Loyalität/Lohn.
 - Verkaufen (U.9, `scripts/systems/sale_system.gd`, im GameState als `sales`): Katalog `SaleSystem.Catalog`
   (`data/underworld/sale_spots.json`: Ort, Freischalt-Auftrag, Minuten, höchstens Einheiten je Verkauf, Preis- und
   Hitze-Prozent). `check_open` (Kachel), `check_sale`/`sell`: vor Ort, Organisation gegründet, Auftrag erledigt,
@@ -332,6 +337,7 @@ Stand Phase 6 (robustes Speichern, Konsistenzprüfung, echte Altstände, lange T
 - Migration 10 → 11: Fristen leer, `last_processed_day` = gespeicherter Tag.
 - Migration 12 → 13 (G5.3): `day_start` = {`calendar_shown_day`: gespeicherter Tag} – der Kalender für den Tag des
   alten Stands gilt als gezeigt, ab dem nächsten Tageswechsel öffnet er sich wie gewohnt.
+- Migration 24 → 25 (U.11): Crew-Mitglieder bekommen `rank` = 1.
 - Migration 23 → 24 (U.10): `crew` = keine Mitglieder, gespeicherter Tag gilt als verarbeitet.
 - Migration 22 → 23 (U.9): `sales` = {`sold_units`: 0}.
 - Migration 21 → 22 (U.8): `sites` = keiner angemietet, gespeicherter Tag gilt als verarbeitet.
